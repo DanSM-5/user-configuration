@@ -1,0 +1,75 @@
+
+######################################
+#           GENERAL ALIAS            #
+######################################
+
+# Follow structure conf folders and files
+user_conf_path="$HOME/.uconfrc"
+user_scripts_path="/mnt/c/user-scripts"
+prj="$HOME/prj"
+
+# Git
+alias glg="git log --oneline --decorate --graph"
+alias glga="git log --oneline --all --decorate --graph"
+alias gcommit="git commit -m"
+alias gfetch="git fetch"
+alias gpull="git pull"
+alias gupdate="git fetch && git pull"
+alias gpush="git push"
+alias gadd="git add"
+alias gck="git checkout"
+alias grm="git checkout -- ."
+alias gstatus="git status"
+alias gs="git status"
+
+# General commands
+alias start="explorer.exe"
+alias mkdr="mkdir -pv"
+
+# Sys Alias
+alias aptup="sudo apt-get update && sudo apt-get upgrade" 
+alias aptupd="sudo apt-get update"
+alias aptupg="sudo apt-get upgrade"
+alias aptin="sudo apt-get install"
+alias aptrm="sudo apt-get remove"
+
+# Node & NPM
+alias npm-list="npm list -g --dept=0"
+
+# Navigation
+alias ..="cd .."
+alias ...="cd ../.."
+
+# Nav up n directories
+up () {
+  local d=""
+  local limit="$1"
+
+  # Default to limit of 1
+  if [ -z "$limit" ] || [ "$limit" -le 0 ]; then
+    limit=1
+  fi
+
+  for ((i=1;i<=limit;i++)); do
+    d="../$d"
+  done
+
+  # perdorm cd. Show error if cd fails
+  if ! cd "$d"; then
+    echo "Couldn't go up $limit dirs."
+  fi
+}
+
+# Sourcing
+alias spf=". $HOME/.profile"
+alias scfg=". $HOME/.uconfrc"
+alias sgcf=". $HOME/.uconfgrc"
+alias sals=". $HOME/.ualiasrc"
+alias sgal=". $HOME/.ualiasgrc"
+
+# If path issues, add VS Code path manually
+# export PATH="${WIN_HOME}/AppData/Local/Programs/Microsoft VS Code/bin:$PATH"
+
+# Dependencies
+# export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
