@@ -25,6 +25,7 @@ alias gs="git status"
 # General commands
 alias start="explorer.exe"
 alias mkdr="mkdir -pv"
+alias ll="ls -lah"
 
 # Sys Alias
 alias aptup="sudo apt-get update && sudo apt-get upgrade" 

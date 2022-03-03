@@ -94,6 +94,11 @@ function showAllPorts () {
   netstat -aon
 }
 
+# Node & NPM
+function npm-list () {
+  npm list -g --dept=0
+}
+
 function getAppPid ([String] $port, [Switch] $help = $false) {
   if ($help) {
     echo ""
