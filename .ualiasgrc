@@ -13,11 +13,13 @@ alias gpr="cd $prj"
 alias gus="cd $user_scripts_path"
 alias guc="cd $HOME/.usr_conf"
 
+export uprf="$HOME/.profile"
 uconf="$HOME/.usr_conf/.uconfrc"
 uconfg="$HOME/.usr_conf/.uconfgrc"
 ualias="$HOME/.usr_conf/.ualiasrc"
 ualiasg="$HOME/.usr_conf/.ualiasgrc"
 
+alias epf="vim $HOME/.profile"
 alias ecf="vim $uconf"
 alias egc="vim $uconfg"
 alias eal="vim $ualias"
