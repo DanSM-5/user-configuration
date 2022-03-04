@@ -4,24 +4,34 @@
 ############################################
 
 # Follow structure conf folders and files
-$user_conf_path = "$HOME/.uconfrc"
-$user_scripts_path = "C:/user-scripts"
-$prj = "$HOME/prj"
+$user_conf_path = "$HOME\.usr_conf\.uconfrc.ps1"
+$user_scripts_path = "C:\user-scripts"
+$prj = "$HOME\prj"
+
+function gpr { cd $prj }
+function gus { cd $user_scripts_path }
+
+function ecf { gvim "$HOME\.usr_conf\.uconfrc.ps1" }
+function egc { gvim "$HOME\.usr_conf\.uconfgrc.ps1" }
+function eal { gvim "$HOME\.usr_conf\.ualiasrc.ps1" }
+function ega { gvim "$HOME\.usr_conf\.ualiasgrc.ps1" }
+
+function guc { cd "$HOME\.usr_conf" }
 
 function spf {
-  . $profile
+  . $global:profile
 }
 function scfg {
-  . "$HOME/.uconfrc.ps1"
+  . "$HOME\.usr_conf\.uconfrc.ps1"
 }
 function sgcf {
-  . "$HOME/.uconfgrc.ps1"
+  . "$HOME\.usr_conf\.uconfgrc.ps1"
 }
 function sals {
-  . "$HOME/.ualiasrc.ps1"
+  . "$HOME\.usr_conf\.ualiasrc.ps1"
 }
 function sgal {
-  . "$HOME/.ualiasgrc.ps1"
+  . "$HOME\.usr_conf\.ualiasgrc.ps1"
 }
 
 # GIT
@@ -44,8 +54,13 @@ function grm {
   git checkout -- .
 }
 
-function gck ([String] $cmmd) {
-  git checkout ${cmmd}
+function gck ([String[]] $cmmds) {
+  $gcommand = ""
+  foreach ($cmmd in $cmmds) {
+    $gcommand = "$gcommand $cmmd"
+  }
+
+  Invoke-Expression "git checkout $gcommand"
 }
 
 function gcommit ([String] $cmmd) {
@@ -60,8 +75,13 @@ function glga {
   git log --all --oneline --decorate --graph
 }
 
-function gadd ([String] $cmmd) {
-  git add $cmmd
+function gadd ([String[]] $cmmds) {
+  $gcommand = ""
+  foreach ($cmmd in $cmmds) {
+    $gcommand = "$gcommand $cmmd"
+  }
+
+  Invoke-Expression "git add $gcommand"
 }
 
 function gpush ([String] $cmmd) {

@@ -1,12 +1,27 @@
+#!/usr/bin/env bash
 
 ######################################
 #           GENERAL ALIAS            #
 ######################################
 
 # Follow structure conf folders and files
-user_conf_path="$HOME/.uconfrc"
-user_scripts_path="/mnt/c/user-scripts"
-prj="$HOME/prj"
+export user_conf_path="$HOME/.usr_conf/.uconfrc"
+export user_scripts_path="/mnt/c/user-scripts"
+export prj="$HOME/prj"
+
+alias gpr="cd $prj"
+alias gus="cd $user_scripts_path"
+alias guc="cd $HOME/.usr_conf"
+
+uconf="$HOME/.usr_conf/.uconfrc"
+uconfg="$HOME/.usr_conf/.uconfgrc"
+ualias="$HOME/.usr_conf/.ualiasrc"
+ualiasg="$HOME/.usr_conf/.ualiasgrc"
+
+alias ecf="vim $uconf"
+alias egc="vim $uconfg"
+alias eal="vim $ualias"
+alias ega="vim $ualiasg"
 
 # Git
 alias glg="git log --oneline --decorate --graph"
@@ -51,7 +66,7 @@ up () {
     limit=1
   fi
 
-  for ((i=1;i<=limit;i++)); do
+  for (( i=1; i<=limit; i++ )); do
     d="../$d"
   done
 
@@ -62,11 +77,11 @@ up () {
 }
 
 # Sourcing
-alias spf=". $HOME/.profile"
-alias scfg=". $HOME/.uconfrc"
-alias sgcf=". $HOME/.uconfgrc"
-alias sals=". $HOME/.ualiasrc"
-alias sgal=". $HOME/.ualiasgrc"
+alias spf="source $HOME/.profile"
+alias scfg=". $HOME/.usr_conf/.uconfrc"
+alias sgcf="source $HOME/.usr_conf/.uconfgrc"
+alias sals="source $HOME/.usr_conf/.ualiasrc"
+alias sgal="source $HOME/.usr_conf/.ualiasgrc"
 
 # If path issues, add VS Code path manually
 # export PATH="${WIN_HOME}/AppData/Local/Programs/Microsoft VS Code/bin:$PATH"
