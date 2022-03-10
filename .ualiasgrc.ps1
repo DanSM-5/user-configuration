@@ -47,7 +47,7 @@ function gpull {
 }
 
 function gupdate {
-  git fetch && git pull
+  git fetch -and git pull
 }
 
 function grm {
