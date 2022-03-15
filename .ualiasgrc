@@ -85,6 +85,9 @@ alias sgcf="source $HOME/.usr_conf/.uconfgrc"
 alias sals="source $HOME/.usr_conf/.ualiasrc"
 alias sgal="source $HOME/.usr_conf/.ualiasgrc"
 
+alias psh="powershell.exe"
+alias pwsh="pwsh.exe"
+
 # If path issues, add VS Code path manually
 # export PATH="${WIN_HOME}/AppData/Local/Programs/Microsoft VS Code/bin:$PATH"
 
