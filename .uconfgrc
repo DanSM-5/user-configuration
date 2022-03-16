@@ -8,3 +8,18 @@ user_conf_path="$HOME/.usr_conf/.uconfrc"
 user_scripts_path="/mnt/c/user-scripts"
 prj="$HOME/prj"
 
+# NVM configuration
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+# set PATH so it includes user's provate bin if it exists
+if [ -d "$HOME/bin" ]; then
+  PATH="$HOME/bin:$PATH"
+fi
+
+# set PATH so it includes user's provate bin if it exists
+if [ -d "$HOME/.locale/bin" ]; then
+  PATH="$HOME/.locale/bin:$PATH"
+fi
+
