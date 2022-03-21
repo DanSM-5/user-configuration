@@ -54,18 +54,9 @@ function grm {
   git checkout -- .
 }
 
-function gck ([String[]] $cmmds) {
-  $gcommand = ""
-  foreach ($cmmd in $cmmds) {
-    $gcommand = "$gcommand $cmmd"
-  }
+function gck { git checkout $args }
 
-  Invoke-Expression "git checkout $gcommand"
-}
-
-function gcommit ([String] $cmmd) {
-  git commit -m ${cmmd}
-}
+function gcommit { git commit -m $args }
 
 function glg {
   git log --oneline --decorate --graph
@@ -75,18 +66,9 @@ function glga {
   git log --all --oneline --decorate --graph
 }
 
-function gadd ([String[]] $cmmds) {
-  $gcommand = ""
-  foreach ($cmmd in $cmmds) {
-    $gcommand = "$gcommand $cmmd"
-  }
+function gadd { git add $args }
 
-  Invoke-Expression "git add $gcommand"
-}
-
-function gpush ([String] $cmmd) {
-  git push $cmmd
-}
+function gpush { git push $args }
 
 # NAVIGATION
 function .. {
@@ -110,12 +92,12 @@ function up ([String] $num = "1") {
   cd "${dirup}${cmmd}"
 }
 
-function showAllPorts () {
+function showAllPorts {
   netstat -aon
 }
 
 # Node & NPM
-function npm-list () {
+function npm-list {
   npm list -g --dept=0
 }
 
