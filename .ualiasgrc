@@ -88,6 +88,22 @@ alias sgal="source $HOME/.usr_conf/.ualiasgrc"
 alias psh="powershell.exe"
 alias pwsh="pwsh.exe"
 
+nospace () {
+  tr -d "[:space:]"
+}
+
+ltrim () {
+  sed -E 's/^[[:space:]]*//'
+}
+
+rtrim () {
+  sed -E 's/[[:space:]]*$//'
+}
+
+trim () {
+  ltrim | rtrim
+}
+
 # If path issues, add VS Code path manually
 # export PATH="${WIN_HOME}/AppData/Local/Programs/Microsoft VS Code/bin:$PATH"
 
