@@ -24,6 +24,7 @@ alias ecf="vim $uconf"
 alias egc="vim $uconfg"
 alias eal="vim $ualias"
 alias ega="vim $ualiasg"
+alias evc="vim $HOME/.SpaceVim.d/init.toml"
 
 # Git
 alias glg="git log --oneline --decorate --graph"
@@ -80,7 +81,7 @@ up () {
 
 # Sourcing
 alias spf="source $HOME/.profile"
-alias scfg=". $HOME/.usr_conf/.uconfrc"
+alias scfg="source $HOME/.usr_conf/.uconfrc"
 alias sgcf="source $HOME/.usr_conf/.uconfgrc"
 alias sals="source $HOME/.usr_conf/.ualiasrc"
 alias sgal="source $HOME/.usr_conf/.ualiasgrc"

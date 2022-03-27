@@ -11,10 +11,12 @@ $prj = "$HOME\prj"
 function gpr { cd $prj }
 function gus { cd $user_scripts_path }
 
+function epf { gvim $PROFILE }
 function ecf { gvim "$HOME\.usr_conf\.uconfrc.ps1" }
 function egc { gvim "$HOME\.usr_conf\.uconfgrc.ps1" }
 function eal { gvim "$HOME\.usr_conf\.ualiasrc.ps1" }
 function ega { gvim "$HOME\.usr_conf\.ualiasgrc.ps1" }
+function evc { gvim "$HOME\.SpaceVim.d\init.toml" }
 
 function guc { cd "$HOME\.usr_conf" }
 
