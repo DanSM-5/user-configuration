@@ -12,6 +12,8 @@ $prj = "$HOME/prj"
 # Set-PSReadLineOption -EditMode Emacs
 
 # Set Prediction
-Set-PSReadLineOption -PredictionSource History
-Set-PSReadLineOption -Colors @{ InlinePrediction = "#B3E5FF" }
+if ($PSVersionTable.PSVersion -ge 7.1) {
+  Set-PSReadLineOption -PredictionSource History
+  Set-PSReadLineOption -Colors @{ InlinePrediction = "#B3E5FF" }
+}
 
