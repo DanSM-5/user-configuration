@@ -39,6 +39,8 @@ alias gck="git checkout"
 alias grm="git checkout -- ."
 alias gstatus="git status"
 alias gs="git status"
+alias gamend="git commit --amend"
+alias gdif="git diff"
 
 # General commands
 alias start="explorer.exe"

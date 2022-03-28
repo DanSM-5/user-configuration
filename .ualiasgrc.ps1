@@ -39,38 +39,30 @@ function sgal {
 # GIT
 function gs { git status . }
 function gstatus { git status . }
-
 function gfetch {
   git fetch
 }
-
 function gpull {
   git pull
 }
-
 function gupdate {
   git fetch -and git pull
 }
-
 function grm {
   git checkout -- .
 }
-
 function gck { git checkout $args }
-
 function gcommit { git commit -m $args }
-
 function glg {
   git log --oneline --decorate --graph
 }
-
 function glga {
   git log --all --oneline --decorate --graph
 }
-
 function gadd { git add $args }
-
 function gpush { git push $args }
+function gamend { git commit --amend }
+function gdif { git diff $args }
 
 # NAVIGATION
 function .. {
