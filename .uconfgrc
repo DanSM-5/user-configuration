@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 
 ######################################
 #        GENERAL CONFIGURATION       #
@@ -22,4 +23,64 @@ export PATH="$HOME/bin:$PATH"
 # if [ -d "$HOME/.local/bin" ]; then
 export PATH="$HOME/.local/bin:$PATH"
 # fi
+
+set_linux () {
+  # NVM configuration
+  export NVM_DIR="$HOME/.nvm"
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+  if command -v "/home/linuxbrew/.linuxbrew/bin/brew" &> /dev/null; then
+    # Linux brew
+    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+
+    # oh-my-posh requires brew
+    if command -v oh-my-posh &> /dev/null && test -f ~/omp-theme/jandedobbeleer.omp.json; then
+      eval "$(oh-my-posh --init --shell bash --config ~/omp-theme/jandedobbeleer.omp.json)"
+    fi
+  fi
+
+  # Detect it running on WSL
+  if command -v powershell.exe &> /dev/null && [[ "$(powershell.exe uname)" =~ "MSYS" ]]; then
+    set_wsl
+  fi
+}
+
+set_wsl () {
+  echo no implemented &> /dev/null
+}
+
+set_mac () {
+  if command -v brew &> /dev/null; then
+    # NVM configuration
+    export NVM_DIR="$HOME/.nvm"
+    local nvm_path=$(brew --prefix nvm)
+    [ -s $nvm_path/nvm.sh ] && source $nvm_path/nvm.sh
+    [ -s $nvm_path/etc/bash_completion.d/nvm ] && source $nvm_path/etc/bash_completion.d/nvm
+  fi
+}
+
+set_general () {
+  if command -v register-python-argcomplete &> /dev/null; then
+    eval "$(register-python-argcomplete pipx)"
+  fi
+
+  if command -v starship &> /dev/null; then
+    eval "$(starship init bash)"
+  fi
+
+  # To install useful key bindings and fuzzy completion:
+  # $(brew --prefix)/opt/fzf/install # call only once
+  [ -f ~/.fzf.bash ] && source ~/.fzf.bash
+}
+
+
+# Should be called system agnostic
+set_general
+
+# Set device specific
+case "$(uname)" in
+  Linux*) set_linux;;
+  Darwin*) set_mac;;
+esac
 
