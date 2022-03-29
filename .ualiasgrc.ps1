@@ -45,9 +45,12 @@ function gfetch {
 function gpull {
   git pull
 }
+
 function gupdate {
-  git fetch -and git pull
+  git fetch
+  git pull
 }
+
 function grm {
   git checkout -- .
 }
