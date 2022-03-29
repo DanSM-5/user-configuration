@@ -26,10 +26,10 @@ set_linux () {
     fi
   fi
 
-  # Detect it running on WSL
-  if command -v powershell.exe &> /dev/null && [[ "$(powershell.exe uname)" =~ "MSYS" ]]; then
-    set_wsl
-  fi
+  # Detect if running on WSL
+  # if command -v uname.exe &> /dev/null && [[ "$(uname.exe)" =~ "MSYS" ]]; then
+  #   set_wsl
+  # fi
 }
 
 set_wsl () {
