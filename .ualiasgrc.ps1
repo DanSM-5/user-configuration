@@ -5,7 +5,7 @@
 
 # Follow structure conf folders and files
 $user_conf_path = "$HOME\.usr_conf\.uconfrc.ps1"
-$user_scripts_path = "C:\user-scripts"
+$user_scripts_path = "$HOME\user-scripts"
 $prj = "$HOME\prj"
 
 function gpr { cd $prj }
@@ -143,3 +143,6 @@ function getAllAppsInPort ([String] $port, [Switch] $help = $false) {
   getAppPid $port | awk -v protocol=TCP '{ if ( $1 == protocol ) { print $5 } else { print $4 } }' | Foreach-Object { getTaskByPid $_ }
 }
 
+function makeSymLink ([String] $target, [String] $path) {
+  New-Item -ItemType SymbolicLink -Target $target -Path $path
+}

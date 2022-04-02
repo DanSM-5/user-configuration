@@ -6,13 +6,13 @@
 
 # Follow structure conf folders and files
 export user_conf_path="$HOME/.usr_conf/.uconfrc"
-export user_scripts_path="/mnt/c/user-scripts"
+export user_scripts_path="$HOME/user-scripts"
 export prj="$HOME/prj"
 
 alias gpr="cd $prj"
 alias gus="cd $user_scripts_path"
 alias guc="cd $HOME/.usr_conf"
-alias gsv="cd $HOME/.SpaceVim.d"
+alias gvc="cd $HOME/.SpaceVim.d"
 alias goh="cd $HOME"
 
 export uprf="$HOME/.profile"

@@ -6,7 +6,7 @@
 
 # Follow structure conf folders and files
 user_conf_path="$HOME/.usr_conf/.uconfrc"
-user_scripts_path="/mnt/c/user-scripts"
+user_scripts_path="$HOME/user-scripts"
 prj="$HOME/prj"
 
 
