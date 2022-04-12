@@ -57,6 +57,7 @@ function grm {
 }
 function gck { git checkout $args }
 function gcommit { git commit -m $args }
+function gcomm { git commit $args }
 function glg {
   git log --oneline --decorate --graph
 }
@@ -67,6 +68,13 @@ function gadd { git add $args }
 function gpush { git push $args }
 function gamend { git commit --amend }
 function gdif { git diff $args }
+function gstash { git stash $args }
+function gsl { git stash list $args }
+function gsa { git stash apply $args }
+function gspop { git stash pop $args }
+function gsp { git stash push $args }
+function gss { git stash show $args }
+function gsd { git stash drop $args }
 
 # NAVIGATION
 function .. {
