@@ -165,3 +165,28 @@ function makeSymLink ([String] $target, [String] $path) {
 function ntemp {
   vim "$env:temp/temp-$(New-Guid).txt"
 }
+
+# extract files
+function ex ([String] $filename) {
+  if (Test-Path $fileName) {
+    switch -wildcard -casesensitive ($filename) {
+      "*.tar.bz2"    { tar xjvf $filename; Break }
+      "*.tar.gz"     { tar xzvf $filename; Break }
+      "*.bz2"        { bunzip2 $filename; Break }
+      "*.rar"        { unrar x $filename; Break }
+      "*.gz"         { gunzip $filename; Break }
+      "*.tar"        { tar xvf $filename; Break }
+      "*.tbz2"       { tar xjvf $filename; Break }
+      "*.tgz"        { tar xzvf $filename; Break }
+      "*.zip"        { unzip $filename; Break }
+      "*.Z"          { uncompress $filename; Break }
+      "*.7z"         { 7z x $filename; Break }
+      "*.deb"        { ar x $filename; Break }
+      "*.tar.xz"     { tar xvf $filename; Break }
+      "*.tar.zst"    { unzstd $filename; Break }
+      default        { echo "'$filename' cannot be extracted via ex()!"; Break }
+    }
+  } else {
+    echo "'$filename' is not a file"
+  }
+}
