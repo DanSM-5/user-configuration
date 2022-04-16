@@ -155,3 +155,7 @@ function getAllAppsInPort ([String] $port, [Switch] $help = $false) {
 function makeSymLink ([String] $target, [String] $path) {
   New-Item -ItemType SymbolicLink -Target $target -Path $path
 }
+
+function ntemp {
+  vim "$env:temp/temp-$(New-Guid).txt"
+}
