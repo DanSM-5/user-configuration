@@ -51,6 +51,17 @@ alias gspop="git stash pop"
 alias gsp="git stash push -m"
 alias gss="git stash show"
 alias gsd="git stash drop"
+alias gprev="git diff HEAD^..HEAD"
+gprevd () {
+  local limit="$1"
+
+  # Default to limit of 1
+  if [ -z "$limit" ] || [ "$limit" -le 0 ]; then
+    limit=1
+  fi
+
+  git diff HEAD~"$limit"..HEAD
+}
 
 # General commands
 alias start="explorer.exe"
@@ -117,6 +128,8 @@ rtrim () {
 trim () {
   ltrim | rtrim
 }
+
+alias ntemp="vim /temp/temp-$(uuidgen).txt"
 
 # If path issues, add VS Code path manually
 # export PATH="${WIN_HOME}/AppData/Local/Programs/Microsoft VS Code/bin:$PATH"

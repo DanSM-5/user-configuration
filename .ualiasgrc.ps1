@@ -75,6 +75,10 @@ function gspop { git stash pop $args }
 function gsp { git stash push $args }
 function gss { git stash show $args }
 function gsd { git stash drop $args }
+function gprev { git diff HEAD^..HEAD }
+function gprevd ([int] $num = 1) {
+  git diff HEAD~"$num"..HEAD
+}
 
 # NAVIGATION
 function .. {
@@ -85,9 +89,7 @@ function ... {
   cd ../..
 }
 
-function up ([String] $num = "1") {
-  $val = [int] $num
-  $dirup = ".."
+function up ([int] $val = 1) {
   $cmmd = ""
   if ($val -le 0) {
     $val = 1
@@ -95,7 +97,11 @@ function up ([String] $num = "1") {
   for ($i = 1; $i -lt $val; $i++) {
     $cmmd = "/.." + $cmmd
   }
-  cd "${dirup}${cmmd}"
+  try {
+    cd "..${cmmd}"
+  } catch {
+    echo "Couldn't go up $limit dirs."
+  }
 }
 
 function showAllPorts {
