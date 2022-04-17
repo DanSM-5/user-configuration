@@ -20,7 +20,7 @@ detect_shell () {
     bashcompinit
 
     # auto suggestions (Could be plugin oh-my-zsh  but using oh-my-posh at the moment)
-    source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
+    test -f ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh && source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
   elif [ -n "`$SHELL -c 'echo $BASH_VERSION'`" ]; then
     export IS_ZSH=false
     export IS_BAHS=true
