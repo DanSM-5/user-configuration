@@ -9,22 +9,48 @@ user_conf_path="$HOME/.usr_conf/.uconfrc"
 user_scripts_path="$HOME/user-scripts"
 prj="$HOME/prj"
 
+detect_shell () {
+  if [ -n "`$SHELL -c 'echo $ZSH_VERSION'`" ]; then
+    export IS_ZSH=true
+    export IS_BAHS=false
+    export SHELL_NAME=zsh
+    
+    # Add bash completion for pipx
+    autoload -U bashcompinit
+    bashcompinit
+
+    # auto suggestions (Could be plugin oh-my-zsh  but using oh-my-posh at the moment)
+    source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
+  elif [ -n "`$SHELL -c 'echo $BASH_VERSION'`" ]; then
+    export IS_ZSH=false
+    export IS_BAHS=true
+    export SHELL_NAME=bash
+  else
+    echo "[WARNING]: NO SHELL DETECTED"
+    export IS_ZSH=false
+    export IS_BAHS=false
+    export SHELL_NAME=unknown
+  fi
+}
 
 set_linux () {
-  # NVM configuration
-  export NVM_DIR="$HOME/.nvm"
-  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-
   if command -v "/home/linuxbrew/.linuxbrew/bin/brew" &> /dev/null; then
     # Linux brew
     eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 
     # oh-my-posh requires brew
     if command -v oh-my-posh &> /dev/null && test -f ~/omp-theme/jandedobbeleer.omp.json; then
-      eval "$(oh-my-posh --init --shell bash --config ~/omp-theme/jandedobbeleer.omp.json)"
+      eval "$(oh-my-posh --init --shell $SHELL_NAME --config ~/omp-theme/jandedobbeleer.omp.json)"
     fi
+
+    local brew_nvm=$(brew --prefix nvm)
   fi
+
+  # NVM configuration
+  export NVM_DIR="$HOME/.nvm"
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+  [ -s "$brew_nvm/etc/bash_completion.d/nvm" ] && \. "$brew_nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion from brew
 
   # Detect if running on WSL
   # if command -v uname.exe &> /dev/null && [[ "$(uname.exe)" =~ "MSYS" ]]; then
@@ -37,6 +63,7 @@ set_wsl () {
 }
 
 set_mac () {
+  export BASH_SILENCE_DEPRECATION_WARNING=1
   if command -v brew &> /dev/null; then
     # NVM configuration
     export NVM_DIR="$HOME/.nvm"
@@ -47,6 +74,17 @@ set_mac () {
 }
 
 set_general () {
+  # enable color support of ls and also add handy aliases
+  if [ -x /usr/bin/dircolors ]; then
+    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+    alias ls='ls --color=auto'
+    alias dir='dir --color=auto'
+    alias vdir='vdir --color=auto'
+    alias grep='grep --color=auto'
+    alias fgrep='fgrep --color=auto'
+    alias egrep='egrep --color=auto'
+  fi
+
   # set PATH so it includes user's provate bin if it exists
   # if [ -d "$HOME/bin" ]; then
   export PATH="$HOME/bin:$PATH"
@@ -67,9 +105,14 @@ set_general () {
 
   # To install useful key bindings and fuzzy completion:
   # $(brew --prefix)/opt/fzf/install # call only once
-  [ -f ~/.fzf.bash ] && source ~/.fzf.bash
+  case $SHELL_NAME in
+    zsh)  test -f ~/.fzf.zsh && source ~/.fzf.zsh;;
+    bash) test -f ~/.fzf.bash && source ~/.fzf.bash;;
+  esac
 }
 
+# initialize shell
+detect_shell
 
 # Should be called system agnostic
 set_general
