@@ -100,7 +100,7 @@ set_general () {
   fi
 
   if command -v starship &> /dev/null; then
-    eval "$(starship init bash)"
+    eval "$(starship init $SHELL_NAME)"
   fi
 
   # For envman. Do not edit.
