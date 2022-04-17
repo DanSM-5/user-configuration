@@ -13,6 +13,7 @@ set_destination_bash () {
     echo "No file found to add configuration for bash"
     echo "Creating ~/.profile..."
     touch "$HOME/.profile"
+    destination="$HOME/.profile"
   fi
 }
 
@@ -23,6 +24,7 @@ set_destination_zsh () {
     echo "No file ~/.zshrc found"
     echo "Creating ~/.zshrc..."
     touch "$HOME/.zshrc"
+    destination="$HOME/.zshrc"
   fi
 }
 
