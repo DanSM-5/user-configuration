@@ -4,7 +4,7 @@
 ############################################
 
 # Follow structure conf folders and files
-$user_conf_path = "$HOME\.usr_conf\.uconfrc.ps1"
+$user_conf_path = "$HOME\.usr_conf"
 $user_scripts_path = "$HOME\user-scripts"
 $prj = "$HOME\prj"
 

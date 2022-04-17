@@ -5,7 +5,7 @@
 ######################################
 
 # Follow structure conf folders and files
-user_conf_path="$HOME/.usr_conf/.uconfrc"
+user_conf_path="$HOME/.usr_conf"
 user_scripts_path="$HOME/user-scripts"
 prj="$HOME/prj"
 
@@ -14,11 +14,8 @@ detect_shell () {
     export IS_ZSH=true
     export IS_BAHS=false
     export SHELL_NAME=zsh
-    
-    # Add bash completion for pipx
-    autoload -U bashcompinit
-    bashcompinit
 
+    test -f "$user_conf_path/.zsh_conf" && source "$user_conf_path/.zsh_conf"
     # auto suggestions (Could be plugin oh-my-zsh  but using oh-my-posh at the moment)
     test -f ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh && source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
   elif [ -n "`$SHELL -c 'echo $BASH_VERSION'`" ]; then

@@ -5,7 +5,7 @@
 ######################################
 
 # Follow structure conf folders and files
-export user_conf_path="$HOME/.usr_conf/.uconfrc"
+export user_conf_path="$HOME/.usr_conf"
 export user_scripts_path="$HOME/user-scripts"
 export prj="$HOME/prj"
 
