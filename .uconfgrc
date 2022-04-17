@@ -68,6 +68,17 @@ set_mac () {
     [ -s $nvm_path/nvm.sh ] && source $nvm_path/nvm.sh
     [ -s $nvm_path/etc/bash_completion.d/nvm ] && source $nvm_path/etc/bash_completion.d/nvm
   fi
+
+  if [ -d "$(brew --prefix coreutils)" ]; then
+    echo working...
+    test -r ~/.dircolors && eval "$(gdircolors -b ~/.dircolors)" || eval "$(gdircolors -b)"
+    alias ls='ls --color=auto'
+    alias dir='dir --color=auto'
+    alias vdir='vdir --color=auto'
+    alias grep='grep --color=auto'
+    alias fgrep='fgrep --color=auto'
+    alias egrep='egrep --color=auto'
+  fi
 }
 
 set_general () {
