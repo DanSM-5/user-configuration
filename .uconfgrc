@@ -103,6 +103,9 @@ set_general () {
     eval "$(starship init bash)"
   fi
 
+  # For envman. Do not edit.
+  [ -s "$HOME/.config/envman/load.sh" ] && source "$HOME/.config/envman/load.sh"
+
   # To install useful key bindings and fuzzy completion:
   # $(brew --prefix)/opt/fzf/install # call only once
   case $SHELL_NAME in
