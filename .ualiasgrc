@@ -27,6 +27,7 @@ alias egc="vim $uconfg"
 alias eal="vim $ualias"
 alias ega="vim $ualiasg"
 alias evc="vim $HOME/.SpaceVim.d/init.toml"
+alias ezsh="vim $user_conf_path/.zsh_conf"
 
 # Git
 alias glg="git log --oneline --decorate --graph"
