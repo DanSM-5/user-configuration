@@ -22,7 +22,7 @@ set_destination_zsh () {
   else
     echo "No file ~/.zshrc found"
     echo "Creating ~/.zshrc..."
-    touch "$HOME/.profile"
+    touch "$HOME/.zshrc"
   fi
 }
 
