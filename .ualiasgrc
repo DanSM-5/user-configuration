@@ -131,7 +131,9 @@ trim () {
 }
 
 # Open temp file on vim
-alias ntemp="vim /temp/temp-$(uuidgen).txt"
+ntemp () {
+  vim "/temp/temp-$(uuidgen || date +%d-%m-%Y_%H-%M-%S).txt"
+}
 
 # extract files
 ex () {
