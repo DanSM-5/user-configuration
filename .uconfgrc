@@ -70,7 +70,6 @@ set_mac () {
   fi
 
   if [ -d "$(brew --prefix coreutils)" ]; then
-    echo working...
     test -r ~/.dircolors && eval "$(gdircolors -b ~/.dircolors)" || eval "$(gdircolors -b)"
     alias ls='ls --color=auto'
     alias dir='dir --color=auto'
