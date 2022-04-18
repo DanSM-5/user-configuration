@@ -46,5 +46,5 @@ zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'
 bindkey "^[[1;5C" forward-word
 bindkey "^[[1;5D" backward-word
 # Mac keys
-bindkey "^[^[[D" forward-word
-bindkey "^[^[[C" backward-word
+bindkey "\e\e[C" forward-word
+bindkey "\e\e[D" backward-word
