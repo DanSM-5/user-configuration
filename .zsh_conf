@@ -48,3 +48,6 @@ bindkey "^[[1;5D" backward-word
 # Mac keys
 bindkey "\e\e[C" forward-word
 bindkey "\e\e[D" backward-word
+
+export WORDCHARS="${WORDCHARS//[-_;\~\.\/\\]}"
+
