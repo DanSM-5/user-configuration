@@ -16,14 +16,13 @@ detect_shell () {
     export SHELL_NAME=zsh
 
     test -f "$user_conf_path/.zsh_conf" && source "$user_conf_path/.zsh_conf"
-    # auto suggestions (Could be plugin oh-my-zsh  but using oh-my-posh at the moment)
-    test -f ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh && source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
   elif [ -n "`$SHELL -c 'echo $BASH_VERSION'`" ]; then
     export IS_ZSH=false
     export IS_BAHS=true
     export SHELL_NAME=bash
+    test -f "$user_conf_path/.bash_conf" && source "$user_conf_path/.bash_conf"
   else
-    echo "[WARNING]: NO SHELL DETECTED"
+    echo "[WARNING]: NO SHELL DETECTED!"
     export IS_ZSH=false
     export IS_BAHS=false
     export SHELL_NAME=unknown

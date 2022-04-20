@@ -49,5 +49,15 @@ bindkey "^[[1;5D" backward-word
 bindkey "\e\e[C" forward-word
 bindkey "\e\e[D" backward-word
 
+# Break word chars
 export WORDCHARS="${WORDCHARS//[-_;\~\.\/\\]}"
+
+# Add auto suggestions
+# auto suggestions (Could be plugin of oh-my-zsh  but using oh-my-posh at the moment)
+test -f ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh && source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
+
+# run after cd
+# chpwd () {
+#   ls -a | head -n 5
+# }
 

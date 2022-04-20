@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+# ignore case for completions 
+bind 'set completion-ignore-case on'
