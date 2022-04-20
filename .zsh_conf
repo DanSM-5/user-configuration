@@ -34,6 +34,7 @@ zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
 zstyle ':completion:*' list-colors ''
 zstyle ':completion:*' list-prompt %SAt %p: Hit TAB for more, or the character to insert%s
 zstyle ':completion:*' matcher-list '' 'm:{a-z}={A-Z}' 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=* l:|=*'
+# zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
 zstyle ':completion:*' menu select=long
 zstyle ':completion:*' select-prompt %SScrolling active: current selection at %p%s
 zstyle ':completion:*' use-compctl false
@@ -55,6 +56,9 @@ export WORDCHARS="${WORDCHARS//[-_;\~\.\/\\]}"
 # Add auto suggestions
 # auto suggestions (Could be plugin of oh-my-zsh  but using oh-my-posh at the moment)
 test -f ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh && source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
+
+# Load fzf support
+test -f ~/.fzf.zsh && source ~/.fzf.zsh
 
 # run after cd
 # chpwd () {

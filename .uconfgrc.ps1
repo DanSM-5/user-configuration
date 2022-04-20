@@ -34,6 +34,10 @@ if (testCommand Set-PsFzfOption) {
   Set-PSReadLineKeyHandler -Key Tab -ScriptBlock { Invoke-FzfTabCompletion }
 }
 
+if (testCommand rg) {
+  $env:FZF_DEFAULT_COMMAND='rg --files --no-ignore --hidden --follow --glob "!.git/*"'
+}
+
 # Set Emacs keybindings for readline
 # Set-PSReadLineOption -EditMode Emacs
 

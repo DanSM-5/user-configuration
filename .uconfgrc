@@ -112,12 +112,17 @@ set_general () {
   # For envman. Do not edit.
   [ -s "$HOME/.config/envman/load.sh" ] && source "$HOME/.config/envman/load.sh"
 
+  # fzf support
+  if command -v rg &> /dev/null; then
+    export FZF_DEFAULT_COMMAND='rg --files --no-ignore --hidden --follow --glob "!.git/*"'
+  fi
+
   # To install useful key bindings and fuzzy completion:
   # $(brew --prefix)/opt/fzf/install # call only once
-  case $SHELL_NAME in
-    zsh)  test -f ~/.fzf.zsh && source ~/.fzf.zsh;;
-    bash) test -f ~/.fzf.bash && source ~/.fzf.bash;;
-  esac
+  # case $SHELL_NAME in
+  #   zsh)  test -f ~/.fzf.zsh && source ~/.fzf.zsh;;
+  #   bash) test -f ~/.fzf.bash && source ~/.fzf.bash;;
+  # esac
 }
 
 # initialize shell

@@ -2,3 +2,7 @@
 
 # ignore case for completions 
 bind 'set completion-ignore-case on'
+
+# Load fzf support
+test -f ~/.fzf.bash && source ~/.fzf.bash
+
