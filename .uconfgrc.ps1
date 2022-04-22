@@ -35,7 +35,7 @@ if (testCommand Set-PsFzfOption) {
 }
 
 if (testCommand rg) {
-  $env:FZF_DEFAULT_COMMAND='rg --files --no-ignore --hidden --follow --glob "!.git/*"'
+  $env:FZF_DEFAULT_COMMAND='rg --files --no-ignore --hidden --follow --glob "!.git"'
 }
 
 # Set Emacs keybindings for readline

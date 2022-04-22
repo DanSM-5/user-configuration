@@ -114,7 +114,7 @@ set_general () {
 
   # fzf support
   if command -v rg &> /dev/null; then
-    export FZF_DEFAULT_COMMAND='rg --files --no-ignore --hidden --follow --glob "!.git/*"'
+    export FZF_DEFAULT_COMMAND='rg --files --no-ignore --hidden --follow --glob "!.git"'
   fi
 
   # To install useful key bindings and fuzzy completion:
