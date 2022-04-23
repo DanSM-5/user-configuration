@@ -9,6 +9,13 @@ user_conf_path="$HOME/.usr_conf"
 user_scripts_path="$HOME/user-scripts"
 prj="$HOME/prj"
 
+# Separate path entries that start with /mnt/
+# PATH_BACKUP=$(echo $PATH | tr ":" "\n")
+# WIN_PATH=$(echo $PATH_BACKUP | rg "/mnt/" | tr "\n" ":" | sed 's/:$//')
+# UNIX_PATH=$(echo $PATH_BACKUP | rg "/mnt/" --invert-match | tr "\n" ":" | sed 's/:$//')
+# export PATH="$UNIX_PATH"
+# echo "$PATH"
+
 detect_shell () {
 
   echo "Loading..."
@@ -46,12 +53,13 @@ set_linux () {
     local brew_nvm=$(brew --prefix nvm)
   fi
 
-  # NVM configuration
-  export NVM_DIR="$HOME/.nvm"
-  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-  [ -s "$brew_nvm/etc/bash_completion.d/nvm" ] && \. "$brew_nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion from brew
-
+  # NVM configuration (Bash only)
+  if [[ $SHELL_NAME == "bash" ]]; then
+    export NVM_DIR="$HOME/.nvm"
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+    [ -s "$brew_nvm/etc/bash_completion.d/nvm" ] && \. "$brew_nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion from brew
+  fi
   # Detect if running on WSL
   # if command -v uname.exe &> /dev/null && [[ "$(uname.exe)" =~ "MSYS" ]]; then
   #   set_wsl
