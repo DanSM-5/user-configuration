@@ -57,10 +57,13 @@ export WORDCHARS="${WORDCHARS//[-_;\~\.\/\\]}"
 # auto suggestions (Could be plugin of oh-my-zsh  but using oh-my-posh at the moment)
 test -f ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh && source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
 
-export NVM_DIR="$HOME/.nvm"
-export NVM_LAZY_LOAD=true
-export NVM_COMPLETION=true
-test -f ~/.zsh/zsh-nvm/zsh-nvm.plugin.zsh && source ~/.zsh/zsh-nvm/zsh-nvm.plugin.zsh
+
+if [ -f ~/.zsh/zsh-nvm/zsh-nvm.plugin.zsh ]; then
+  export NVM_DIR="$HOME/.nvm"
+  export NVM_LAZY_LOAD=true
+  export NVM_COMPLETION=true
+  source ~/.zsh/zsh-nvm/zsh-nvm.plugin.zsh
+fi
 
 # Load fzf support
 test -f ~/.fzf.zsh && source ~/.fzf.zsh

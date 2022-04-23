@@ -68,7 +68,12 @@ gprevd () {
 # General commands
 alias start="explorer.exe"
 alias mkdr="mkdir -pv"
-alias ll="ls -lah"
+alias ll='ls -alhF'
+alias la='ls -A'
+alias l='ls -CF'
+# Add an "alert" alias for long running commands.  Use like so:
+#   sleep 10; alert
+alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
 
 # Sys Alias
 alias aptup="sudo apt-get update && sudo apt-get upgrade" 

@@ -11,8 +11,8 @@ prj="$HOME/prj"
 
 # Separate path entries that start with /mnt/
 # PATH_BACKUP=$(echo $PATH | tr ":" "\n")
-# WIN_PATH=$(echo $PATH_BACKUP | rg "/mnt/" | tr "\n" ":" | sed 's/:$//')
-# UNIX_PATH=$(echo $PATH_BACKUP | rg "/mnt/" --invert-match | tr "\n" ":" | sed 's/:$//')
+# WIN_PATH=$(echo $PATH_BACKUP | rg "/mnt/" | sed ':a; N; $!ba; s/\n/:/g')
+# UNIX_PATH=$(echo $PATH_BACKUP | rg "/mnt/" --invert-match | sed ':a; N; $!ba; s/\n/:/g')
 # export PATH="$UNIX_PATH"
 # echo "$PATH"
 
@@ -54,7 +54,7 @@ set_linux () {
   fi
 
   # NVM configuration (Bash only)
-  if [[ $SHELL_NAME == "bash" ]]; then
+  if [ "$IS_BASH" = "true" ]; then
     export NVM_DIR="$HOME/.nvm"
     [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
     [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
@@ -72,7 +72,7 @@ set_wsl () {
 
 set_mac () {
   export BASH_SILENCE_DEPRECATION_WARNING=1
-  if command -v brew &> /dev/null; then
+  if command -v brew &> /dev/null && [ "$IS_BASH" = "true" ]; then
     # NVM configuration
     export NVM_DIR="$HOME/.nvm"
     local nvm_path=$(brew --prefix nvm)
@@ -80,6 +80,7 @@ set_mac () {
     [ -s $nvm_path/etc/bash_completion.d/nvm ] && source $nvm_path/etc/bash_completion.d/nvm
   fi
 
+  # Set color output
   if [ -d "$(brew --prefix coreutils)" ]; then
     test -r ~/.dircolors && eval "$(gdircolors -b ~/.dircolors)" || eval "$(gdircolors -b)"
     alias ls='ls --color=auto'
@@ -102,6 +103,13 @@ set_general () {
     alias fgrep='fgrep --color=auto'
     alias egrep='egrep --color=auto'
   fi
+
+  # colored GCC warnings and errors
+  #export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
+
+  # make less more friendly for non-text input files, see lesspipe(1)
+  [ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
+
 
   # set PATH so it includes user's provate bin if it exists
   # if [ -d "$HOME/bin" ]; then
