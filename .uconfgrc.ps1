@@ -24,6 +24,7 @@ if ((testCommand oh-my-posh) -and (Test-Path "${HOME}\omp-theme")) {
   $env:POSH_THEMES_PATH = "${HOME}\omp-theme"
 
   oh-my-posh --init --shell pwsh --config $env:POSH_THEMES_PATH/jandedobbeleer.omp.json | Invoke-Expression
+  # oh-my-posh --init --shell pwsh --config "$(scoop prefix oh-my-posh)/theme/jandedobbeleer.omp.json" | Invoke-Expression
 }
 
 if (testCommand Set-PsFzfOption) {
