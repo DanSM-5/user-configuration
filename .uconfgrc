@@ -9,15 +9,28 @@ user_conf_path="$HOME/.usr_conf"
 user_scripts_path="$HOME/user-scripts"
 prj="$HOME/prj"
 
+backup_path () {
+  export PATH_BACKUP=$(echo -n $PATH | tr ":" "\n")
+}
+
 # Separate path entries that start with /mnt/
-# PATH_BACKUP=$(echo $PATH | tr ":" "\n")
-# WIN_PATH=$(echo $PATH_BACKUP | rg "/mnt/" | sed ':a; N; $!ba; s/\n/:/g')
-# UNIX_PATH=$(echo $PATH_BACKUP | rg "/mnt/" --invert-match | sed ':a; N; $!ba; s/\n/:/g')
-# export PATH="$UNIX_PATH"
-# echo "$PATH"
+set_windows_path () {
+  export WIN_PATH=$(echo -n $PATH_BACKUP | rg "/mnt/" | sed ':a; N; $!ba; s/\n/:/g')
+}
+
+set_unix_path () {
+  export UNIX_PATH=$(echo -n $PATH_BACKUP | rg "/mnt/" --invert-match | sed ':a; N; $!ba; s/\n/:/g')
+}
+
+set_path () {
+  export PATH="$1"
+}
+
+path_append ()  { path_remove $1; export PATH="$PATH:$1"; }
+path_prepend () { path_remove $1; export PATH="$1:$PATH"; }
+path_remove ()  { export PATH=`echo -n $PATH | awk -v RS=: -v ORS=: '$0 != "'$1'"' | sed 's/:$//'`; }
 
 detect_shell () {
-
   echo "Loading..."
   echo "Running from shell: $SHELL"
   echo
@@ -61,7 +74,7 @@ set_linux () {
     [ -s "$brew_nvm/etc/bash_completion.d/nvm" ] && \. "$brew_nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion from brew
   fi
   # Detect if running on WSL
-  # if command -v uname.exe &> /dev/null && [[ "$(uname.exe)" =~ "MSYS" ]]; then
+  # if command -v /mnt/c/Windows/System32/cmd.exe &> /dev/null; then
   #   set_wsl
   # fi
 }
