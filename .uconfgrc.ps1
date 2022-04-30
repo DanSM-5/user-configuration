@@ -20,11 +20,12 @@ function testCommand {
 
 if ((testCommand oh-my-posh) -and (Test-Path "${HOME}\omp-theme")) {
   # Import-Module oh-my-posh
-  $env:POSH_GIT_ENABLED = $true
   $env:POSH_THEMES_PATH = "${HOME}\omp-theme"
+  # $global:POSH_TRANSIENT=$false
 
-  oh-my-posh --init --shell pwsh --config $env:POSH_THEMES_PATH/jandedobbeleer.omp.json | Invoke-Expression
-  # oh-my-posh --init --shell pwsh --config "$(scoop prefix oh-my-posh)/theme/jandedobbeleer.omp.json" | Invoke-Expression
+  # oh-my-posh --init --shell pwsh --config $env:POSH_THEMES_PATH/jandedobbeleer.omp.json | Invoke-Expression
+  oh-my-posh init pwsh --config $env:POSH_THEMES_PATH/jandedobbeleer.omp.json | Invoke-Expression
+  # oh-my-posh --init --shell pwsh --config "$(scoop prefix oh-my-posh)/themes/jandedobbeleer.omp.json" | Invoke-Expression
 }
 
 if (testCommand Set-PsFzfOption) {

@@ -59,8 +59,8 @@ set_linux () {
     eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 
     # oh-my-posh requires brew
-    if command -v oh-my-posh &> /dev/null && test -f ~/omp-theme/jandedobbeleer.omp.json; then
-      eval "$(oh-my-posh --init --shell $SHELL_NAME --config ~/omp-theme/jandedobbeleer.omp.json)"
+    if command -v oh-my-posh &> /dev/null && test -f ~/omp-theme/jandedobbeleer.omp.v2.json; then
+      eval "$(oh-my-posh --init --shell $SHELL_NAME --config ~/omp-theme/jandedobbeleer.omp.v2.json)"
     fi
 
     local brew_nvm=$(brew --prefix nvm)
