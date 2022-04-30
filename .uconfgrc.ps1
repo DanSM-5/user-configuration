@@ -36,6 +36,12 @@ if (testCommand Set-PsFzfOption) {
   Set-PSReadLineKeyHandler -Key Tab -ScriptBlock { Invoke-FzfTabCompletion }
 }
 
+# Add gsudo !! command
+$script:gsudoModule = "$(scoop prefix gsudo)/gsudoModule.psd1"
+if (Test-Path "$script:gsudoModule") {
+  Import-Module "$script:gsudoModule"
+}
+
 if (testCommand rg) {
   $env:FZF_DEFAULT_COMMAND='rg --files --no-ignore --hidden --follow --glob "!.git"'
 }
