@@ -24,7 +24,7 @@ if ((testCommand oh-my-posh) -and (Test-Path "${HOME}\omp-theme")) {
   # $global:POSH_TRANSIENT=$false
 
   # oh-my-posh --init --shell pwsh --config $env:POSH_THEMES_PATH/jandedobbeleer.omp.json | Invoke-Expression
-  oh-my-posh init pwsh --config $env:POSH_THEMES_PATH/jandedobbeleer.omp.json | Invoke-Expression
+  oh-my-posh init pwsh --config $env:POSH_THEMES_PATH/jandedobbeleer.omp.v2.json | Invoke-Expression
   # oh-my-posh --init --shell pwsh --config "$(scoop prefix oh-my-posh)/themes/jandedobbeleer.omp.json" | Invoke-Expression
 }
 
