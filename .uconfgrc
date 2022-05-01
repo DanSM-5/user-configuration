@@ -73,8 +73,9 @@ set_linux () {
     [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
     [ -s "$brew_nvm/etc/bash_completion.d/nvm" ] && \. "$brew_nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion from brew
   fi
-  # Detect if running on WSL
-  # if command -v /mnt/c/Windows/System32/cmd.exe &> /dev/null; then
+
+  # Setup wsl specifics
+  # if [ "$IS_WSL" = true ]; then
   #   set_wsl
   # fi
 }

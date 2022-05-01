@@ -29,13 +29,10 @@ set_destination_zsh () {
 }
 
 install () {
-  printf "
-  # Source User Scripts
-  test -f \"$HOME/.usr_conf/.uconfgrc\" && . \"$HOME/.usr_conf/.uconfgrc\"
-  test -f \"$HOME/.usr_conf/.ualiasgrc\" && . \"$HOME/.usr_conf/.ualiasgrc\"
-  test -f \"$HOME/.usr_conf/.uconfrc\" && . \"$HOME/.usr_conf/.uconfrc\"
-  test -f \"$HOME/.usr_conf/.ualiasrc\" && . \"$HOME/.usr_conf/.ualiasrc\"
-  " >> $destination
+printf "
+# Source Configuration
+test -f \"$HOME/.usr_conf/load_conf.sh\" && \. \"$HOME/.usr_conf/load_conf.sh\"
+" >> $destination
 }
 
 request () {
