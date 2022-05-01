@@ -167,6 +167,12 @@ ex () {
   fi
 }
 
+if [ "$IS_WSL" = true ]; then
+  export play="yt-dlp.exe -o - $1 | mpv.com -"
+else
+  export play="yt-dlp -o - $1 | mpv -"
+fi
+
 # If path issues, add VS Code path manually
 # export PATH="${WIN_HOME}/AppData/Local/Programs/Microsoft VS Code/bin:$PATH"
 
