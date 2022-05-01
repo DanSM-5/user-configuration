@@ -1,0 +1,35 @@
+$appsMain = @(
+  "7zip"
+  "fzf"
+  "gawk"
+  "gsudo"
+  "lua"
+  "luarocks"
+  "neofetch"
+  "ntop"
+  "openssh"
+  "ripgrep"
+  "sed"
+  "vim"
+  "yt-dlp"  
+)
+
+$appsExtras = @(
+  "pasteboard"
+  "PSFzf"
+  "vscodium"
+)
+
+function install_scoop ([String] $appName, [String] $bucket = "main") {
+  scoop install $appName $bucket
+}
+
+echo "Installing scoop apps..."
+$appsMain | % { install_scoop $_ }
+$appsExtras | % { install_scoop $_ "extras" }
+
+# Special install
+scoop install oh-my-posh https://github.com/JanDeDobbeleer/oh-my-posh/releases/latest/download/oh-my-posh.json
+
+echo "Done"
+

@@ -1,0 +1,15 @@
+$apps = @(
+  mpv
+  teracopy
+  sharex
+  nvm
+)
+
+install_choco ([String] appName) {
+  gsudo choco install $appName
+}
+
+echo "Installing choco apps..."
+$apps | % { install_choco $_ }
+echo "Done"
+
