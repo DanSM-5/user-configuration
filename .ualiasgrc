@@ -119,6 +119,7 @@ alias sgal="source $HOME/.usr_conf/.ualiasgrc"
 alias psh="powershell.exe"
 alias pwsh="pwsh.exe"
 alias cps="pwsh.exe -nolo -nopro -nonin -c"
+alias cmd="cmd.exe /c"
 
 # Trim utilities
 nospace () {
