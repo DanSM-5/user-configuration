@@ -55,3 +55,5 @@ if ($PSVersionTable.PSVersion -ge 7.1) {
   Set-PSReadLineOption -Colors @{ InlinePrediction = "#B3E5FF" }
 }
 
+# Set true color support
+$env:COLORTERM = 'truecolor'
