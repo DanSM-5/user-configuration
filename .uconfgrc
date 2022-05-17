@@ -148,6 +148,10 @@ set_general () {
   # For envman. Do not edit.
   [ -s "$HOME/.config/envman/load.sh" ] && source "$HOME/.config/envman/load.sh"
 
+  if command -v bat &> /dev/null; then
+    export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+  fi
+
   # fzf support
   if command -v rg &> /dev/null; then
     export FZF_DEFAULT_COMMAND='rg --files --no-ignore --hidden --follow --glob "!.git"'
@@ -161,6 +165,12 @@ set_general () {
   # esac
 }
 
+set_general_after () {
+  if [ -f "$HOME/.fzf.$SHELL_NAME" ]; then
+    source "$HOME/.usr_conf/utils/fzf-git.sh"
+  fi
+}
+
 # initialize shell
 detect_shell
 
@@ -172,4 +182,6 @@ case "$(uname)" in
   Linux*) set_linux;;
   Darwin*) set_mac;;
 esac
+
+set_general_after
 
