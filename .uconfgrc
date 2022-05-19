@@ -154,7 +154,10 @@ set_general () {
 
   # fzf support
   if command -v rg &> /dev/null; then
+    FD_OPTIONS="--follow --exclude .git --exclude node_modules"
     export FZF_DEFAULT_COMMAND='rg --files --no-ignore --hidden --follow --glob "!.git"'
+    export FZF_CTRL_T_COMMAND="fd $FD_OPTIONS"
+    export FZF_ALT_C_COMMAND="fd --type d $FD_OPTIONS"
   fi
 
   # To install useful key bindings and fuzzy completion:
