@@ -62,10 +62,10 @@ This repository uses external tools. The configuration won't load specific confi
 * fzf
 * PSFzf (windows)
 * bat
-* coreutils (mac only)
+* coreutils (mac)
 * homebrew (linux and mac)
 * scoop (windows)
-* gsudo
+* gsudo (windows)
 * nvm
 * python
 * pipx
