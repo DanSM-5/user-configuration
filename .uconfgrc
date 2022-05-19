@@ -108,6 +108,8 @@ set_mac () {
 
 set_general () {
   export COLORTERM='truecolor'
+  export BAT_THEME='Dracula'
+  export FZF_DEFAULT_OPTS='--height 80% --layout=reverse --border'
 
   # enable color support of ls and also add handy aliases
   if [ -x /usr/bin/dircolors ]; then
@@ -125,7 +127,6 @@ set_general () {
 
   # make less more friendly for non-text input files, see lesspipe(1)
   [ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
-
 
   # set PATH so it includes user's provate bin if it exists
   # if [ -d "$HOME/bin" ]; then
@@ -148,10 +149,6 @@ set_general () {
   # For envman. Do not edit.
   [ -s "$HOME/.config/envman/load.sh" ] && source "$HOME/.config/envman/load.sh"
 
-  if command -v bat &> /dev/null; then
-    export MANPAGER="sh -c 'col -bx | bat -l man -p'"
-  fi
-
   # fzf support
   if command -v rg &> /dev/null; then
     export FZF_DEFAULT_COMMAND='rg --files --no-ignore --hidden --follow --glob "!.git"'
@@ -173,6 +170,10 @@ set_general () {
 set_general_after () {
   if [ -f "$HOME/.fzf.$SHELL_NAME" ]; then
     source "$HOME/.usr_conf/utils/fzf-git.sh"
+  fi
+
+  if command -v bat &> /dev/null; then
+    export MANPAGER="sh -c 'col -bx | bat -l man -p'"
   fi
 }
 
