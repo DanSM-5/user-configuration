@@ -8,7 +8,7 @@ $user_conf_path = "$HOME\.usr_conf"
 $user_scripts_path = "$HOME\user-scripts"
 $prj = "$HOME\prj"
 
-function testCommand {
+function Test-Command {
   Param ($command)
   $oldPreference = $ErrorActionPreference
   $ErrorActionPreference = 'stop'
@@ -18,7 +18,7 @@ function testCommand {
   finally { $ErrorActionPreference = $oldPreference }
 }
 
-if ((testCommand oh-my-posh) -and (Test-Path "${HOME}\omp-theme")) {
+if ((Test-Command oh-my-posh) -and (Test-Path "${HOME}\omp-theme")) {
   # Import-Module oh-my-posh
   $env:POSH_THEMES_PATH = "${HOME}\omp-theme"
   # $global:POSH_TRANSIENT=$false
@@ -28,7 +28,7 @@ if ((testCommand oh-my-posh) -and (Test-Path "${HOME}\omp-theme")) {
   # oh-my-posh --init --shell pwsh --config "$(scoop prefix oh-my-posh)/themes/jandedobbeleer.omp.json" | Invoke-Expression
 }
 
-if (testCommand Set-PsFzfOption) {
+if (Test-Command Set-PsFzfOption) {
   # fzf
   # replace 'Ctrl+t' and 'Ctrl+r' with your preferred bindings:
   Set-PsFzfOption -PSReadlineChordProvider 'Ctrl+t' -PSReadlineChordReverseHistory 'Ctrl+r'
@@ -42,7 +42,7 @@ if (Test-Path "$script:gsudoModule") {
   Import-Module "$script:gsudoModule"
 }
 
-if (testCommand rg) {
+if (Test-Command rg) {
   $env:FZF_DEFAULT_COMMAND='rg --files --no-ignore --hidden --follow --glob "!.git"'
 }
 

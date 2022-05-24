@@ -162,8 +162,10 @@ function makeSymLink ([String] $target, [String] $path) {
   New-Item -ItemType SymbolicLink -Target $target -Path $path
 }
 
+function ll () { ls $args }
+
 function ntemp {
-  vim "$env:temp/temp-$(New-Guid).txt"
+  nvim "$env:temp/temp-$(New-Guid).txt"
 }
 
 # extract files
