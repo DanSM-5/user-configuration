@@ -40,8 +40,11 @@ alias gpull="git pull"
 alias gupdate="git fetch && git pull"
 alias gpush="git push"
 alias gadd="git add"
+alias fadd='git add $(fgf)'
 alias gck="git checkout"
+alias fck='git checkout $(fgb)'
 alias grm="git checkout -- ."
+alias fgrm='rm $(fgf)'
 alias gstatus="git status"
 alias gs="git status"
 alias gamend="git commit --amend"
@@ -57,12 +60,28 @@ alias gprev="git diff HEAD^..HEAD"
 gprevd () {
   local limit="$1"
 
-  # Default to limit of 1
+  # Default limit: 1
   if [ -z "$limit" ] || [ "$limit" -le 0 ]; then
     limit=1
   fi
 
   git diff HEAD~"$limit"..HEAD
+}
+gprevr () {
+  local first="$1"
+  local second="$2"
+
+  # Default first: 1
+  if [ -z "$first" ] || [ "$first" -le 0 ]; then
+    first=1
+  fi
+
+  # Default second: 0
+  if [ -z "$second" ] || [ "$second" -le 0 ]; then
+    second=0
+  fi
+
+  git diff HEAD~"$first"..HEAD~"$second"
 }
 
 # General commands
@@ -71,6 +90,9 @@ alias mkdr="mkdir -pv"
 alias ll='ls -alhF'
 alias la='ls -A'
 alias l='ls -CF'
+alias frm='\rm $(fd -tf -tx -tl | fzf --preview "bat --color=always {}")'
+alias frdr="rm -rf \$(fd -td -d 1 | fzf --preview \"ls --color=auto -alhF {} | awk '{ if (!(\\\$9 == \\\"./\\\" || \\\$9 == \\\"../\\\")) print }'\")"
+alias fcd="cd \$(fd -td -d 1 | fzf --preview \"ls --color=auto -alhF {} | awk '{ if (!(\\\$9 == \\\"./\\\" || \\\$9 == \\\"../\\\")) print }'\")"
 # Add an "alert" alias for long running commands.  Use like so:
 #   sleep 10; alert
 alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
