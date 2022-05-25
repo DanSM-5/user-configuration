@@ -92,7 +92,29 @@ alias la='ls -A'
 alias l='ls -CF'
 alias frm='\rm $(fd -tf -tx -tl | fzf --preview "bat --color=always {}")'
 alias frdr="rm -rf \$(fd -td -d 1 | fzf --preview \"ls --color=auto -alhF {} | awk '{ if (!(\\\$9 == \\\"./\\\" || \\\$9 == \\\"../\\\")) print }'\")"
-alias fcd="cd \$(fd -td -d 1 | fzf --preview \"ls --color=auto -alhF {} | awk '{ if (!(\\\$9 == \\\"./\\\" || \\\$9 == \\\"../\\\")) print }'\")"
+fcd () {
+  local depth="$1"
+  local selection=""
+  if [ -z "$depth" ] || [ "$depth" = 0 ]; then
+    depth=1
+  fi
+
+  selection=$(fd -td -d "$depth" | fzf --preview "ls --color=auto -alhF {} | awk '{ if (!(\$9 == \"./\" || \$9 == \"../\")) print }'")
+  if [ -n "$selection" ]; then
+    cd $selection
+  fi
+}
+# List folders for quick navigation
+# Requires: quick_access=()
+qnv () {
+  if [ -z "$quick_access" ]; then
+    return
+  fi
+  local selection=$(echo $quick_access | tr ' ' '\n' | fzf --preview "ls --color=auto -alhF {} | awk '{ if (!(\$9 == \"./\" || \$9 == \"../\")) print}'")
+  if [ -n "$selection" ]; then
+    cd $selection
+  fi
+}
 # Add an "alert" alias for long running commands.  Use like so:
 #   sleep 10; alert
 alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
