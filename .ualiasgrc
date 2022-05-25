@@ -40,7 +40,10 @@ alias gpull="git pull"
 alias gupdate="git fetch && git pull"
 alias gpush="git push"
 alias gadd="git add"
-alias fadd='git add $(fgf)'
+alias greset="git reset"
+alias gbranch="git branch"
+alias grebase="git rebase"
+alias gmerge="git merge"
 alias gck="git checkout"
 alias fck='git checkout $(fgb)'
 alias grm="git checkout -- ."
@@ -82,6 +85,13 @@ gprevr () {
   fi
 
   git diff HEAD~"$first"..HEAD~"$second"
+}
+fadd () {
+  local selection=($(fgf))
+  echo "$selection"
+  if [ -n selection ]; then
+    git add "${selection[@]}"
+  fi
 }
 
 # General commands
