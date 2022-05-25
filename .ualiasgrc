@@ -45,7 +45,6 @@ alias gbranch="git branch"
 alias grebase="git rebase"
 alias gmerge="git merge"
 alias gck="git checkout"
-alias fck='git checkout $(fgb)'
 alias grm="git checkout -- ."
 alias fgrm='rm $(fgf)'
 alias gstatus="git status"
@@ -89,8 +88,14 @@ gprevr () {
 fadd () {
   local selection=($(fgf))
   echo "$selection"
-  if [ -n selection ]; then
+  if [ -n "$selection" ]; then
     git add "${selection[@]}"
+  fi
+}
+fck () {
+  local selection=$(fgb)
+  if [ -n "$selection" ]; then
+    git checkout "$selection"
   fi
 }
 
@@ -120,7 +125,7 @@ qnv () {
   if [ -z "$quick_access" ]; then
     return
   fi
-  local selection=$(echo $quick_access | tr ' ' '\n' | fzf --preview "ls --color=auto -alhF {} | awk '{ if (!(\$9 == \"./\" || \$9 == \"../\")) print}'")
+  local selection=$(echo $quick_access | fzf --preview "ls --color=auto -alhF {} | awk '{ if (!(\$9 == \"./\" || \$9 == \"../\")) print}'")
   if [ -n "$selection" ]; then
     cd $selection
   fi
@@ -132,7 +137,7 @@ qed () {
     return
   fi
   local editor="$1"
-  local selection=$(echo $quick_edit | tr ' ' '\n' | fzf --preview "bat --color=always {}")
+  local selection=$(echo $quick_edit | fzf --preview "bat --color=always {}")
   if [ -z "$selection" ]; then
     return
   fi
