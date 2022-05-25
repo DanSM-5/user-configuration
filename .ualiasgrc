@@ -21,14 +21,14 @@ uconfg="$HOME/.usr_conf/.uconfgrc"
 ualias="$HOME/.usr_conf/.ualiasrc"
 ualiasg="$HOME/.usr_conf/.ualiasgrc"
 
-alias epf="vim $HOME/.profile"
-alias ecf="vim $uconf"
-alias egc="vim $uconfg"
-alias eal="vim $ualias"
-alias ega="vim $ualiasg"
-alias evc="vim $HOME/.SpaceVim.d/init.toml"
-alias ezsh="vim $user_conf_path/.zsh_conf"
-alias ebash="vim $user_conf_path/.bash_conf"
+alias epf="nvim $HOME/.profile"
+alias ecf="nvim $uconf"
+alias egc="nvim $uconfg"
+alias eal="nvim $ualias"
+alias ega="nvim $ualiasg"
+alias evc="nvim $HOME/.SpaceVim.d/init.toml"
+alias ezsh="nvim $user_conf_path/.zsh_conf"
+alias ebash="nvim $user_conf_path/.bash_conf"
 
 # Git
 alias glg="git log --oneline --decorate --graph"
@@ -162,7 +162,7 @@ trim () {
 
 # Open temp file on vim
 ntemp () {
-  vim "/temp/temp-$(uuidgen 2>/dev/null || date +%d-%m-%Y_%H-%M-%S).txt"
+  nvim "/temp/temp-$(uuidgen 2>/dev/null || date +%d-%m-%Y_%H-%M-%S).txt"
 }
 
 # extract files
