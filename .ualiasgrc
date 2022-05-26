@@ -99,7 +99,7 @@ fck () {
   fi
 }
 fmerge () {
-  local selection=($(fgb))
+  local selection=$(fgb)
   echo "$selection"
   if [ -n "$selection" ]; then
     git merge "$selection"
