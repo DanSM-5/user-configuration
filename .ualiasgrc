@@ -98,6 +98,13 @@ fck () {
     git checkout "${selection//origin\//}"
   fi
 }
+fmerge () {
+  local selection=($(fgb))
+  echo "$selection"
+  if [ -n "$selection" ]; then
+    git merge "$selection"
+  fi
+}
 fsa () {
   local selection=$(fgs)
   if [ -n "$selection" ]; then
