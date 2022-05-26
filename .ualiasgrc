@@ -98,6 +98,12 @@ fck () {
     git checkout "$selection"
   fi
 }
+fsa () {
+  local selection=$(fgs)
+  if [ -n "$selection" ]; then
+    git stash apply "$selection"
+  fi
+}
 
 # General commands
 alias start="explorer.exe"
