@@ -29,6 +29,7 @@ set_destination_zsh () {
 }
 
 install () {
+  \mkdir -p "$HOME/prj"
 printf "
 # Source Configuration
 test -f \"$HOME/.usr_conf/load_conf.sh\" && \. \"$HOME/.usr_conf/load_conf.sh\"
