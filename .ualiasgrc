@@ -132,6 +132,28 @@ fcd () {
     cd $selection
   fi
 }
+
+# Example quick_access
+# export quick_access=(\
+# "$HOME\n"\
+# # "/mnt/c\n"\
+# # "/mnt/c/Users/user\n"\
+# "$prj\n"\
+# "$user_conf_path\n"\
+# "$user_scripts_path\n"\
+# # "/tmp"\
+# )
+
+# Example quick_edit
+# export quick_edit=(\
+# "$user_conf_path/.uconfgrc\n"\
+# "$user_conf_path/.uconfrc\n"\
+# "$user_conf_path/.ualiasgrc\n"\
+# "$user_conf_path/.ualiasrc\n"\
+# "$HOME/.SpaceVim.d/init.toml\n"\
+# "$HOME/.SpaceVim.d/autoload/config.vim"\
+# )
+
 # List folders for quick navigation
 # Requires: quick_access=()
 qnv () {
