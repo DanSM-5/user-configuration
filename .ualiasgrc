@@ -95,7 +95,7 @@ fadd () {
 fck () {
   local selection=$(fgb)
   if [ -n "$selection" ]; then
-    git checkout "$selection"
+    git checkout "${selection//origin\//}"
   fi
 }
 fsa () {
