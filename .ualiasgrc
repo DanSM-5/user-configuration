@@ -21,7 +21,7 @@ uconfg="$user_conf_path/.uconfgrc"
 ualias="$user_conf_path/.ualiasrc"
 ualiasg="$user_conf_path/.ualiasgrc"
 
-fzf-defaults() {
+fzf-defaults () {
   fzf --height 50% --min-height 20 --border --bind ctrl-/:toggle-preview "$@"
 }
 
@@ -193,6 +193,7 @@ qed () {
   fi
   $editor $selection
 }
+
 # Add an "alert" alias for long running commands.  Use like so:
 #   sleep 10; alert
 alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'

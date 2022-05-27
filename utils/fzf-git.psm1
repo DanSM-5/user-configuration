@@ -148,7 +148,7 @@ function fgr () {
 # '@
 }
 
-function fgst () {
+function fgss () {
   if ($script:is_in_git_repo) { return }
   & "$script:__gitbash__" -lc $script:fgs_command
   # & "$script:__gitbash__" -c @'

@@ -10,16 +10,20 @@ $prj = "$HOME\prj"
 
 function gpr { cd $prj }
 function gus { cd $user_scripts_path }
+function guc { cd $user_conf_path }
+function gvc { cd "$HOME\.SpaceVim.d" }
+function goh { cd "$HOME"}
 
 function epf { nvim $PROFILE }
-function ecf { nvim "$HOME\.usr_conf\.uconfrc.ps1" }
-function egc { nvim "$HOME\.usr_conf\.uconfgrc.ps1" }
-function eal { nvim "$HOME\.usr_conf\.ualiasrc.ps1" }
-function ega { nvim "$HOME\.usr_conf\.ualiasgrc.ps1" }
-function evc { nvim "$HOME\.SpaceVim.d\init.toml" }
+function ecf { nvim "$user_conf_path\.uconfrc.ps1" }
+function egc { nvim "$user_conf_path\.uconfgrc.ps1" }
+function eal { nvim "$user_conf_path\.ualiasrc.ps1" }
+function ega { nvim "$user_conf_path\.ualiasgrc.ps1" }
+function evc { nvim "$user_conf_path\init.toml" }
 
-function guc { cd "$HOME\.usr_conf" }
-function gvc { cd "$HOME\.SpaceVim.d" }
+function fzf-defaults () {
+  fzf --height 50% --min-height 20 --border --bind ctrl-/:toggle-preview $args
+}
 
 function spf {
   . $global:profile
@@ -38,34 +42,33 @@ function sgal {
 }
 
 # GIT
-function gs { git status . }
-function gstatus { git status . }
-function gfetch {
-  git fetch
-}
-function gpull {
-  git pull
-}
 
-function gupdate {
-  git fetch
-  git pull
-}
 
-function grm {
-  git checkout -- .
-}
-function gck { git checkout $args }
-function gcommit { git commit -m $args }
-function gcomm { git commit $args }
 function glg {
   git log --oneline --decorate --graph
 }
 function glga {
   git log --all --oneline --decorate --graph
 }
-function gadd { git add $args }
+function gcommit { git commit -m $args }
+function gcomm { git commit $args }
+function gfetch { git fetch $args }
+function gpull { git pull $args }
+function gupdate {
+  git fetch
+  git pull
+}
 function gpush { git push $args }
+function gadd { git add $args }
+function greset { git reset $args }
+function gbranch { git branch $args }
+function grebase { git grebase $args }
+function gmerge { git merge $args }
+function gck { git checkout $args }
+function grm { git checkout -- . }
+function fgrm { rm "$(fgf)" }
+function gstatus { git status $args }
+function gs { git status $args }
 function gamend { git commit --amend }
 function gdif { git diff $args }
 function gstash { git stash $args }
@@ -76,8 +79,43 @@ function gsp { git stash push $args }
 function gss { git stash show $args }
 function gsd { git stash drop $args }
 function gprev { git diff HEAD^..HEAD }
+
 function gprevd ([int] $num = 1) {
   git diff HEAD~"$num"..HEAD
+}
+
+function gprevr ([int] $first = 1, [int] $second = 0) {
+  git diff HEAD~"$first"..HEAD~"$second"
+}
+
+function fadd () {
+  fgf | % { git add $_ }
+}
+
+function fck () {
+  fgb | % { git checkout "$($_ -replace 'origin/', '')" }
+}
+
+function fsa () {
+  fgss | % { git stash apply $_ }
+}
+
+function qnv () {
+  if (-not $quick_access) {
+    return
+  }
+
+  $quick_access | fzf-defaults --preview 'ls {}' |
+    % { cd "$_" }
+}
+
+function qed ([string] $editor = 'nvim') {
+  if (-not $quick_edit) {
+    return
+  }
+
+  $quick_edit | fzf-defaults --preview 'bat --color=always {}' |
+    % { & "$editor" "$_" }
 }
 
 # NAVIGATION
