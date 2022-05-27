@@ -21,6 +21,10 @@ uconfg="$user_conf_path/.uconfgrc"
 ualias="$user_conf_path/.ualiasrc"
 ualiasg="$user_conf_path/.ualiasgrc"
 
+fzf-defaults() {
+  fzf --height 50% --min-height 20 --border --bind ctrl-/:toggle-preview "$@"
+}
+
 alias epf="nvim $HOME/.profile"
 alias ecf="nvim $uconf"
 alias egc="nvim $uconfg"
@@ -59,6 +63,7 @@ alias gsp="git stash push -m"
 alias gss="git stash show"
 alias gsd="git stash drop"
 alias gprev="git diff HEAD^..HEAD"
+
 gprevd () {
   local limit="$1"
 
@@ -69,6 +74,7 @@ gprevd () {
 
   git diff HEAD~"$limit"..HEAD
 }
+
 gprevr () {
   local first="$1"
   local second="$2"
@@ -85,6 +91,7 @@ gprevr () {
 
   git diff HEAD~"$first"..HEAD~"$second"
 }
+
 fadd () {
   local selection=($(fgf))
   echo "$selection"
@@ -92,12 +99,14 @@ fadd () {
     git add "${selection[@]}"
   fi
 }
+
 fck () {
   local selection=$(fgb)
   if [ -n "$selection" ]; then
     git checkout "${selection//origin\//}"
   fi
 }
+
 fmerge () {
   local selection=$(fgb)
   echo "$selection"
@@ -105,6 +114,7 @@ fmerge () {
     git merge "$selection"
   fi
 }
+
 fsa () {
   local selection=$(fgs)
   if [ -n "$selection" ]; then
@@ -120,6 +130,7 @@ alias la='ls -A'
 alias l='ls -CF'
 alias frm='\rm $(fd -tf -tx -tl | fzf --preview "bat --color=always {}")'
 alias frdr="rm -rf \$(fd -td -d 1 | fzf --preview \"ls --color=auto -alhF {} | awk '{ if (!(\\\$9 == \\\"./\\\" || \\\$9 == \\\"../\\\")) print }'\")"
+
 fcd () {
   local depth="$1"
   local selection=""
@@ -127,7 +138,7 @@ fcd () {
     depth=1
   fi
 
-  selection=$(fd -td -d "$depth" | fzf --preview "ls --color=auto -alhF {} | awk '{ if (!(\$9 == \"./\" || \$9 == \"../\")) print }'")
+  selection=$(fd -td -d "$depth" | fzf-defaults --preview "ls --color=auto -alhF {} | awk '{ if (!(\$9 == \"./\" || \$9 == \"../\")) print }'")
   if [ -n "$selection" ]; then
     cd $selection
   fi
@@ -160,11 +171,12 @@ qnv () {
   if [ -z "$quick_access" ]; then
     return
   fi
-  local selection=$(echo $quick_access | fzf --preview "ls --color=auto -alhF {} | awk '{ if (!(\$9 == \"./\" || \$9 == \"../\")) print}'")
+  local selection=$(echo $quick_access | fzf-defaults --preview "ls --color=auto -alhF {} | awk '{ if (!(\$9 == \"./\" || \$9 == \"../\")) print}'")
   if [ -n "$selection" ]; then
     cd $selection
   fi
 }
+
 # List files for quick edit
 # Requires: quick_edit
 qed () {
@@ -172,7 +184,7 @@ qed () {
     return
   fi
   local editor="$1"
-  local selection=$(echo $quick_edit | fzf --preview "bat --color=always {}")
+  local selection=$(echo $quick_edit | fzf-defaults --preview "bat --color=always {}")
   if [ -z "$selection" ]; then
     return
   fi
