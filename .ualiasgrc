@@ -132,26 +132,20 @@ alias frm='\rm $(fd -tf -tx -tl | fzf-defaults --preview "bat --color=always {}"
 alias frdr="rm -rf \$(fd -td -d 1 | fzf-defaults --preview \"ls --color=auto -alhF {} | sed '1d;2d;3d'\")"
 
 lff () {
-  local selection=$(ls -la |
+  ls -la |
     sed '1d;2d;3d' |
     fzf-defaults --preview 'if [ -f {-1} ]; then bat --color=always {-1}; else bat -pp --color=always <<< $(realpath {-1}; ls -la {-1}); fi' |
-    awk '{ print $9 }')
-
-  if [ -z "$selection" ]; then
-    return
-  fi
-  echo "$selection"
+    awk '{ print $9 }'
 }
 
 lf () {
-  local selection=$(ls -a |
-    sed '1d;2d;3d' |
-    fzf-defaults --preview 'if [ -f {-1} ]; then bat --color=always {}; else bat -pp --color=always <<< $(realpath {}; ls -la {}); fi')
+  ls -a |
+    sed '1d;2d' |
+    fzf-defaults --preview 'if [ -f {-1} ]; then bat --color=always {-1}; else bat -pp --color=always <<< $(realpath {-1}; ls -la {-1}); fi'
+}
 
-  if [ -z "$selection" ]; then
-    return
-  fi
-  echo "$selection"
+lfd () {
+  fd | fzf-defaults --preview 'if [ -f {-1} ]; then bat --color=always {-1}; else bat -pp --color=always <<< $(realpath {-1}; ls -la {-1}); fi'
 }
 
 fcd () {
@@ -165,6 +159,18 @@ fcd () {
   if [ -n "$selection" ]; then
     cd $selection
   fi
+}
+
+fed () {
+  local editor="nvim"
+  local selection=$(fd -tf -d 1 | fzf-defaults --preview "bat --color=always {}")
+  if [ -z "$selection" ]; then
+    return
+  fi
+  if [ -n "$1" ]; then
+    editor="$1"
+  fi
+  $editor "$selection"
 }
 
 # Example quick_access
@@ -332,7 +338,7 @@ else
   }
 fi
 
-alias fzfp="fzf --preview 'bat --color=always --style=numbers --line-range=:500 {}'"
+alias fzfp="fzf-defaults --preview 'bat --color=always --style=numbers --line-range=:500 {}'"
 # If path issues, add VS Code path manually
 # export PATH="${WIN_HOME}/AppData/Local/Programs/Microsoft VS Code/bin:$PATH"
 
