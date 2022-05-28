@@ -293,8 +293,20 @@ ex () {
 
 if [ "$IS_WSL" = true ]; then
   export play="yt-dlp.exe -o - $1 | mpv.com -"
+  mpvl () {
+    local selection=$(ytzfz -L "$@")
+    if [ -n "$selection" ]; then
+      mpv.com "$selection"
+    fi
+  }
 else
   export play="yt-dlp -o - $1 | mpv -"
+  mpvl () {
+    local selection=$(ytzfz -L "$@")
+    if [ -n "$selection" ]; then
+      mpv "$selection"
+    fi
+  }
 fi
 
 alias fzfp="fzf --preview 'bat --color=always --style=numbers --line-range=:500 {}'"

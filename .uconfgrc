@@ -54,6 +54,7 @@ detect_shell () {
 }
 
 set_linux () {
+  export IS_LINUX=true
   if command -v "/home/linuxbrew/.linuxbrew/bin/brew" &> /dev/null; then
     # Linux brew
     eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
@@ -85,6 +86,7 @@ set_wsl () {
 }
 
 set_mac () {
+  export IS_MAC=true
   export BASH_SILENCE_DEPRECATION_WARNING=1
   if command -v brew &> /dev/null; then
     # NVM configuration
