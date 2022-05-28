@@ -128,8 +128,31 @@ alias mkdr="mkdir -pv"
 alias ll='ls -alhF'
 alias la='ls -A'
 alias l='ls -CF'
-alias frm='\rm $(fd -tf -tx -tl | fzf --preview "bat --color=always {}")'
-alias frdr="rm -rf \$(fd -td -d 1 | fzf --preview \"ls --color=auto -alhF {} | awk '{ if (!(\\\$9 == \\\"./\\\" || \\\$9 == \\\"../\\\")) print }'\")"
+alias frm='\rm $(fd -tf -tx -tl | fzf-defaults --preview "bat --color=always {}")'
+alias frdr="rm -rf \$(fd -td -d 1 | fzf-defaults --preview \"ls --color=auto -alhF {} | sed '1d;2d;3d'\")"
+
+lff () {
+  local selection=$(ls -la |
+    sed '1d;2d;3d' |
+    fzf-defaults --preview 'if [ -f {-1} ]; then bat --color=always {-1}; else bat -pp --color=always <<< $(realpath {-1}; ls -la {-1}); fi' |
+    awk '{ print $9 }')
+
+  if [ -z "$selection" ]; then
+    return
+  fi
+  echo "$selection"
+}
+
+lf () {
+  local selection=$(ls -a |
+    sed '1d;2d;3d' |
+    fzf-defaults --preview 'if [ -f {-1} ]; then bat --color=always {}; else bat -pp --color=always <<< $(realpath {}; ls -la {}); fi')
+
+  if [ -z "$selection" ]; then
+    return
+  fi
+  echo "$selection"
+}
 
 fcd () {
   local depth="$1"
@@ -138,7 +161,7 @@ fcd () {
     depth=1
   fi
 
-  selection=$(fd -td -d "$depth" | fzf-defaults --preview "ls --color=auto -alhF {} | awk '{ if (!(\$9 == \"./\" || \$9 == \"../\")) print }'")
+  selection=$(fd -td -d "$depth" | fzf-defaults --preview "ls --color=auto -alhF {} | sed '1d;2d;3d'")
   if [ -n "$selection" ]; then
     cd $selection
   fi
