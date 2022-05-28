@@ -30,6 +30,7 @@ if ((Test-Command oh-my-posh) -and (Test-Path "${HOME}\omp-theme")) {
 
 if (Test-Command Set-PsFzfOption) {
   # fzf
+  $env:FZF_DEFAULT_OPTS='--height 80% --layout=reverse --border'
   # replace 'Ctrl+t' and 'Ctrl+r' with your preferred bindings:
   Set-PsFzfOption -PSReadlineChordProvider 'Ctrl+t' -PSReadlineChordReverseHistory 'Ctrl+r'
   Set-PsFzfOption -TabExpansion

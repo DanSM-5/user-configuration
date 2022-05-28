@@ -21,9 +21,16 @@ function eal { nvim "$user_conf_path\.ualiasrc.ps1" }
 function ega { nvim "$user_conf_path\.ualiasgrc.ps1" }
 function evc { nvim "$user_conf_path\init.toml" }
 
-function fzf-defaults () {
-  fzf --height 50% --min-height 20 --border --bind ctrl-/:toggle-preview $args
-}
+# function fzf-defaults {
+#   [CmdletBinding()]
+#   param(
+#     [Parameter()]
+#     [Array] $piped
+#   )
+#   echo $piped
+#   echo $args
+#   $piped | fzf --height 50% --min-height 20 --border --bind ctrl-/:toggle-preview $args
+# }
 
 function spf {
   . $global:profile
@@ -100,12 +107,36 @@ function fsa () {
   fgss | % { git stash apply $_ }
 }
 
+# Example
+# $quick_access = @(
+#   "$HOME"
+#   "$prj"
+#   "$prj\txt"
+#   "$user_conf_path"
+#   "$user_scripts_path"
+#   "$HOME\.SpaceVim.d"
+#   "$HOME\.SpaceVim.d\autoload"
+#   "$env:AppData"
+#   "$env:AppData\mpv"
+#   "$env:localAppData"
+#   "$env:temp"
+# )
+
+# $quick_edit = @(
+#   "$user_conf_path\.uconfgrc.ps1"
+#   "$user_conf_path\.ualiasgrc.ps1"
+#   "$user_conf_path\.uconfrc.ps1"
+#   "$user_conf_path\.ualiasrc.ps1"
+#   "$HOME\.SpaceVim.d\init.toml"
+#   "$HOME\.SpaceVim.d\autoload\config.vim"
+# )
+
 function qnv () {
   if (-not $quick_access) {
     return
   }
 
-  $quick_access | fzf-defaults --preview 'ls {}' |
+  $quick_access | fzf --min-height 20 --bind ctrl-/:toggle-preview --preview 'echo {} && echo ./ && ls {}' |
     % { cd "$_" }
 }
 
@@ -114,7 +145,7 @@ function qed ([string] $editor = 'nvim') {
     return
   }
 
-  $quick_edit | fzf-defaults --preview 'bat --color=always {}' |
+  $quick_edit | fzf --min-height 20 --bind ctrl-/:toggle-preview --preview 'bat --color=always {}' |
     % { & "$editor" "$_" }
 }
 

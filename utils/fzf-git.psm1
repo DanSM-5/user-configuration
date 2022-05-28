@@ -11,7 +11,7 @@ function is_in_git_repo () {
   if (git rev-parse HEAD 2> $null) { return $true } else { return $false }
 }
 
-$fzf_down = " fzf --height 50% --min-height 20 --border --bind ctrl-/:toggle-preview "
+$fzf_down = " fzf --height 50% --min-height 20 --layout=reverse --border --bind ctrl-/:toggle-preview "
 
 $fgf_command = @'
     git -c color.status=always status --short |
