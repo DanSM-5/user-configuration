@@ -30,6 +30,9 @@ https://github.com/CogentRedTester/mpv-file-browser
 [mpv-user-input]
 https://github.com/CogentRedTester/mpv-user-input
 
+[ytfzf]
+https://github.com/pystardust/ytfzf
+
 [stream-detector]
 https://github.com/rowrawer/stream-detector
 
@@ -41,6 +44,9 @@ https://github.com/aristocratos/btop
 
 [bat]
 https://github.com/sharkdp/bat
+
+[delta]
+https://github.com/dandavison/delta
 
 [CtrlSF]
 https://github.com/dyng/ctrlsf.vim
