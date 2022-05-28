@@ -130,6 +130,7 @@ alias la='ls -A'
 alias l='ls -CF'
 alias frm='\rm $(fd -tf -tx -tl | fzf-defaults --preview "bat --color=always {}")'
 alias frdr="rm -rf \$(fd -td -d 1 | fzf-defaults --preview \"ls --color=auto -alhF {} | sed '1d;2d;3d'\")"
+alias fzfp="fzf-defaults --preview 'bat --color=always --style=numbers --line-range=:500 {}'"
 
 lff () {
   ls -la |
@@ -164,6 +165,18 @@ fcd () {
 fed () {
   local editor="nvim"
   local selection=$(fd -tf -d 1 | fzf-defaults --preview "bat --color=always {}")
+  if [ -z "$selection" ]; then
+    return
+  fi
+  if [ -n "$1" ]; then
+    editor="$1"
+  fi
+  $editor "$selection"
+}
+
+fedd () {
+  local editor="nvim"
+  local selection=$(fd -tf | fzf-defaults --preview "bat --color=always {}")
   if [ -z "$selection" ]; then
     return
   fi
@@ -338,7 +351,6 @@ else
   }
 fi
 
-alias fzfp="fzf-defaults --preview 'bat --color=always --style=numbers --line-range=:500 {}'"
 # If path issues, add VS Code path manually
 # export PATH="${WIN_HOME}/AppData/Local/Programs/Microsoft VS Code/bin:$PATH"
 
