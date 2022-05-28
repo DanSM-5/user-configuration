@@ -136,7 +136,7 @@ function qnv () {
     return
   }
 
-  $quick_access | fzf --min-height 20 --bind ctrl-/:toggle-preview --preview 'echo {} && echo ./ && ls {}' |
+  $quick_access | fzf --min-height 20 --bind ctrl-/:toggle-preview --preview 'echo {} && echo **************** && ls {}' |
     % { cd "$_" }
 }
 
