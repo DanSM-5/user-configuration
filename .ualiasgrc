@@ -397,6 +397,11 @@ else
   }
 fi
 
+if [ $IS_TERMUX = true ]; then
+  alias tcopy="termux-clipboard-set"
+  alias tpaste="termux-clipboard-get"
+fi
+
 # If path issues, add VS Code path manually
 # export PATH="${WIN_HOME}/AppData/Local/Programs/Microsoft VS Code/bin:$PATH"
 
