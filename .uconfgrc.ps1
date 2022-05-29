@@ -32,16 +32,19 @@ if (Test-Command Set-PsFzfOption) {
   # fzf
   $env:FZF_DEFAULT_OPTS='--height 80% --layout=reverse --border'
   # replace 'Ctrl+t' and 'Ctrl+r' with your preferred bindings:
-  Set-PsFzfOption -PSReadlineChordProvider 'Ctrl+t' `
-    -PSReadlineChordReverseHistory 'Ctrl+r'
-  Set-PsFzfOption -TabExpansion
   Set-PSFzfOption -EnableAliasFuzzyEdit `
+    -PSReadlineChordProvider 'Ctrl+t' `
+    -PSReadlineChordReverseHistory 'Ctrl+r' `
     -EnableAliasFuzzyFasd `
     -EnableAliasFuzzyHistory `
     -EnableAliasFuzzyKillProcess `
     -EnableAliasFuzzySetEverything `
     -EnableAliasFuzzyZLocation `
-    -EnableAliasFuzzyGitStatus
+    -EnableAliasFuzzyGitStatus `
+    -EnableAliasFuzzyScoop `
+    -TabExpansion `
+    -EnableFd
+    
     # -EnableAliasFuzzySetLocation `
   Set-PSReadLineKeyHandler -Key Tab -ScriptBlock { Invoke-FzfTabCompletion }
 
