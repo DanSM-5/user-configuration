@@ -378,8 +378,11 @@ ex () {
 
 if [ "$IS_WSL" = true ]; then
   export play="yt-dlp.exe -o - $1 | mpv.com -"
+  mpvg () {
+    mpv.com "$@" 
+  }
   mpvl () {
-    local selection=$(ytzfz -L "$@")
+    local selection=$(ytfzf -L "$@")
     if [ -n "$selection" ]; then
       mpv.com "$selection"
     fi
@@ -387,7 +390,7 @@ if [ "$IS_WSL" = true ]; then
 else
   export play="yt-dlp -o - $1 | mpv -"
   mpvl () {
-    local selection=$(ytzfz -L "$@")
+    local selection=$(ytfzf -L "$@")
     if [ -n "$selection" ]; then
       mpv "$selection"
     fi
