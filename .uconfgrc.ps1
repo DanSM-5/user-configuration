@@ -32,10 +32,21 @@ if (Test-Command Set-PsFzfOption) {
   # fzf
   $env:FZF_DEFAULT_OPTS='--height 80% --layout=reverse --border'
   # replace 'Ctrl+t' and 'Ctrl+r' with your preferred bindings:
-  Set-PsFzfOption -PSReadlineChordProvider 'Ctrl+t' -PSReadlineChordReverseHistory 'Ctrl+r'
+  Set-PsFzfOption -PSReadlineChordProvider 'Ctrl+t' `
+    -PSReadlineChordReverseHistory 'Ctrl+r'
   Set-PsFzfOption -TabExpansion
-  Set-PSFzfOption -EnableAliasFuzzyEdit -EnableAliasFuzzyFasd -EnableAliasFuzzyHistory -EnableAliasFuzzyKillProcess -EnableAliasFuzzySetLocation -EnableAliasFuzzySetEverything -EnableAliasFuzzyZLocation -EnableAliasFuzzyGitStatus
+  Set-PSFzfOption -EnableAliasFuzzyEdit `
+    -EnableAliasFuzzyFasd `
+    -EnableAliasFuzzyHistory `
+    -EnableAliasFuzzyKillProcess `
+    -EnableAliasFuzzySetEverything `
+    -EnableAliasFuzzyZLocation `
+    -EnableAliasFuzzyGitStatus
+    # -EnableAliasFuzzySetLocation `
   Set-PSReadLineKeyHandler -Key Tab -ScriptBlock { Invoke-FzfTabCompletion }
+
+  if (Test-Path Alias:fcd) { Remove-Item Alias:fcd }
+  Set-Alias -Name fcd -Value Invoke-FuzzySetLocation
 
   Import-module "$user_conf_path\utils\fzf-git.psm1"
 }
@@ -47,7 +58,7 @@ if (Test-Path "$script:gsudoModule") {
 }
 
 if (Test-Command rg) {
-  $env:FZF_DEFAULT_COMMAND='rg --files --no-ignore --hidden --follow --glob "!.git"'
+  $env:FZF_DEFAULT_COMMAND='rg --files --no-ignore --hidden --glob "!.git" --glob "!node_modules" --follow'
 }
 
 # Set Emacs keybindings for readline

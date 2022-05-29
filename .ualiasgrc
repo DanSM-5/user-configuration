@@ -22,7 +22,14 @@ ualias="$user_conf_path/.ualiasrc"
 ualiasg="$user_conf_path/.ualiasgrc"
 
 fzf-defaults () {
-  fzf --height 50% --min-height 20 --border --bind ctrl-/:toggle-preview "$@"
+  fzf --height 50% --min-height 20 --border \
+    --bind ctrl-/:toggle-preview \
+    --header 'Press CTRL-/ to toggle preview' \
+    "$@"
+}
+
+fd-defaults () {
+  fd --exclude ".git" --exclude "node_modules" "$@"
 }
 
 alias epf="nvim $HOME/.profile"
@@ -128,25 +135,43 @@ alias mkdr="mkdir -pv"
 alias ll='ls -alhF'
 alias la='ls -A'
 alias l='ls -CF'
-alias frm='\rm $(fd -tf -tx -tl | fzf-defaults --preview "bat --color=always {}")'
-alias frdr="rm -rf \$(fd -td -d 1 | fzf-defaults --preview \"ls --color=auto -alhF {} | sed '1d;2d;3d'\")"
+alias frm='\rm $(fd-defaults -tf -tx -tl | fzf-defaults --preview "bat --color=always {}")'
+alias frdr="rm -rf \$(fd-defaults -td -d 1 | fzf-defaults --preview \"ls --color=always -alhF {} | sed '1d;2d;3d'\")"
 alias fzfp="fzf-defaults --preview 'bat --color=always --style=numbers --line-range=:500 {}'"
+
+rfv () {
+  "$user_conf_path/utils/rgfzf.sh" "$@"
+}
+
+fll () {
+  local selection=$(fd-defaults -td | fzf-defaults --preview "bat -pp --color=always <<< \$(realpath {}); ls -alhF --color=always {}")
+  if [ -n "$selection" ]; then
+    \ls -alhF --color=always "$selection"
+  fi
+}
 
 lff () {
   ls -la |
     sed '1d;2d;3d' |
-    fzf-defaults --preview 'if [ -f {-1} ]; then bat --color=always {-1}; else bat -pp --color=always <<< $(realpath {-1}; ls -la {-1}); fi' |
+    fzf-defaults --preview 'if [ -f {9..} ]; then bat --color=always {9..}; else bat -pp --color=always <<< $(realpath {9..}; ls -la --color=always {9..}); fi' |
     awk '{ print $9 }'
 }
 
 lf () {
   ls -a |
     sed '1d;2d' |
-    fzf-defaults --preview 'if [ -f {-1} ]; then bat --color=always {-1}; else bat -pp --color=always <<< $(realpath {-1}; ls -la {-1}); fi'
+    fzf-defaults --preview 'if [ -f {} ]; then bat --color=always {}; else bat -pp --color=always <<< $(realpath {}; ls -la --color=always {}); fi'
 }
 
 lfd () {
-  fd | fzf-defaults --preview 'if [ -f {-1} ]; then bat --color=always {-1}; else bat -pp --color=always <<< $(realpath {-1}; ls -la {-1}); fi'
+  fd-defaults | fzf-defaults --preview 'if [ -f {9..} ]; then bat --color=always {9..}; else bat -pp --color=always <<< $(realpath {9..}; ls -la --color=always {9..}); fi'
+}
+
+# experimental
+lfa () {
+  local selection=$(cd "/" && fd-defaults |
+    fzf-defaults --preview 'if [ -f {9..} ]; then bat --color=always {9..}; else bat -pp --color=always <<< $(realpath {9..}; ls -la --color=always {9..}); fi')
+  echo "$selection"
 }
 
 fcd () {
@@ -156,7 +181,25 @@ fcd () {
     depth=1
   fi
 
-  selection=$(fd -td -d "$depth" | fzf-defaults --preview "ls --color=auto -alhF {} | sed '1d;2d;3d'")
+  selection=$(fd-defaults -td -d "$depth" | fzf-defaults --preview "ls --color=always -alhF {} | sed '1d;2d;3d'")
+  if [ -n "$selection" ]; then
+    cd $selection
+  fi
+}
+
+fcdd () {
+  local selection=""
+
+  selection=$(fd-defaults -td | fzf-defaults --preview "ls --color=always -alhF {} | sed '1d;2d;3d'")
+  if [ -n "$selection" ]; then
+    cd $selection
+  fi
+}
+
+fcda () {
+  local selection=""
+
+  selection=$(cd / && fd-defaults -td | fzf-defaults --preview "ls --color=always -alhF {} | sed '1d;2d;3d'")
   if [ -n "$selection" ]; then
     cd $selection
   fi
@@ -164,7 +207,7 @@ fcd () {
 
 fed () {
   local editor="nvim"
-  local selection=$(fd -tf -d 1 | fzf-defaults --preview "bat --color=always {}")
+  local selection=$(fd-defaults -tf -d 1 | fzf-defaults --preview "bat --color=always {}")
   if [ -z "$selection" ]; then
     return
   fi
@@ -176,7 +219,7 @@ fed () {
 
 fedd () {
   local editor="nvim"
-  local selection=$(fd -tf | fzf-defaults --preview "bat --color=always {}")
+  local selection=$(fd-defaults -tf | fzf-defaults --preview "bat --color=always {}")
   if [ -z "$selection" ]; then
     return
   fi
@@ -213,7 +256,7 @@ qnv () {
   if [ -z "$quick_access" ]; then
     return
   fi
-  local selection=$(echo $quick_access | fzf-defaults --preview "ls --color=auto -alhF {} | awk '{ if (!(\$9 == \"./\" || \$9 == \"../\")) print}'")
+  local selection=$(echo $quick_access | fzf-defaults --preview "ls --color=always -alhF {} | sed '1d;2d;3d'")
   if [ -n "$selection" ]; then
     cd $selection
   fi

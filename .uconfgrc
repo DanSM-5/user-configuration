@@ -153,7 +153,7 @@ set_general () {
 
   # fzf support
   if command -v rg &> /dev/null; then
-    export FZF_DEFAULT_COMMAND='rg --files --no-ignore --hidden --follow --glob "!.git"'
+    export FZF_DEFAULT_COMMAND='rg --files --no-ignore --hidden --glob "!node_modules" --glob "!.git" --follow'
   fi
 
   if command -v fd &> /dev/null; then
@@ -162,12 +162,12 @@ set_general () {
     export FZF_ALT_C_COMMAND="fd --type d $FD_OPTIONS"
 
     _fzf_compgen_path () {
-      fd --hidden --follow --exclude ".git" . "$1"
+      fd --hidden --follow --exclude "node_modules" --exclude ".git" . "$1"
     }
 
     # Use fd to generate the list for directory completion
     _fzf_compgen_dir () {
-      fd --type d --hidden --follow --exclude ".git" . "$1"
+      fd --type d --hidden --follow --exclude "node_modules" --exclude ".git" . "$1"
     }
   fi
   # To install useful key bindings and fuzzy completion:

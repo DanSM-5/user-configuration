@@ -7,12 +7,19 @@ $appsMain = @(
   "luarocks"
   "neofetch"
   "ntop"
-  "openssh"
   "ripgrep"
+  "grep"
   "sed"
   "vim"
-  "yt-dlp"  
+  "neovim"
+  "yt-dlp"
+  "less"
+  "fd"
+  "bat"
+  "delta"
 )
+
+# "openssh"
 
 $appsExtras = @(
   "pasteboard"
