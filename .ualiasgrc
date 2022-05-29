@@ -29,7 +29,9 @@ fzf-defaults () {
 }
 
 fd-defaults () {
-  fd --exclude ".git" --exclude "node_modules" "$@"
+  fd --exclude ".git" --exclude "node_modules" \
+    --hidden \
+    "$@"
 }
 
 alias epf="nvim $HOME/.profile"
