@@ -379,29 +379,69 @@ ex () {
 }
 
 if [ "$IS_WSL" = true ]; then
-  export play="yt-dlp.exe -o - $1 | mpv.com -"
-  mpvg () {
-    mpv.com "$@" 
+  # export play="yt-dlp.exe -o - $1 | mpv.com -"
+  mpvw () {
+    declare mpv_args=${@:-$(</dev/stdin)}
+    if [ -n "$mpv_args" ]; then
+      mpv.com "$mpv_args"
+    else
+      echo "No args provided"
+      exit 1
+    fi
   }
+  mpvp () {
+    declare url=${*:-$(</dev/stdin)}
+    if [ -n "$url" ]; then
+      yt-dlp.exe -o - "$url" | mpv.com -
+    else
+      echo "No url provided"
+      exit 1
+    fi
+  }
+  # Wrapper for ytfzf to launch on windows mpv player
   mpvl () {
     local selection=$(ytfzf -L "$@")
     if [ -n "$selection" ]; then
       mpv.com "$selection"
     fi
   }
+  play () {
+    pbpaste.exe | mpvw
+  }
+  plpp () {
+    pbpaste.exe | mpvp
+  }
+  alias yf="ytfzf -L"
 else
-  export play="yt-dlp -o - $1 | mpv -"
-  mpvl () {
-    local selection=$(ytfzf -L "$@")
-    if [ -n "$selection" ]; then
-      mpv "$selection"
+  mpvp () {
+    declare url=${*:-$(</dev/stdin)}
+    if [ -n "$url" ]; then
+      yt-dlp -o - "$url" | mpv -
+    else
+      echo "No url provided"
+      exit 1
     fi
   }
-fi
+  alias mpvl="ytfzf"
+  alias yf="ytfzf"
 
-if [ $IS_TERMUX = true ]; then
-  alias tcopy="termux-clipboard-set"
-  alias tpaste="termux-clipboard-get"
+  if [ $IS_TERMUX = true ]; then
+    alias tcopy="termux-clipboard-set"
+    alias tpaste="termux-clipboard-get"
+    # termux mpv function wrapper
+    mpv () {
+      declare url=${*:-$(</dev/stdin)}
+      if [ -n "$url" ]; then
+        am start --user 0 -a android.intent.action.VIEW -d "$url" is.xyz.mpv/.MPVActivity
+      else
+        echo "No url provided"
+        exit 1
+      fi
+    }
+    play () {
+      tpaste | mpv
+    }
+  fi
 fi
 
 # If path issues, add VS Code path manually
