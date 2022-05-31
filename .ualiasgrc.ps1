@@ -76,6 +76,7 @@ function grm { git checkout -- . }
 function fgrm { rm "$(fgf)" }
 function gstatus { git status $args }
 function gs { git status $args }
+function gsv { git status -v $args }
 function gamend { git commit --amend }
 function gdif { git diff $args }
 function gstash { git stash $args }

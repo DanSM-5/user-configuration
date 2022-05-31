@@ -62,6 +62,7 @@ alias grm="git checkout -- ."
 alias fgrm='rm $(fgf)'
 alias gstatus="git status"
 alias gs="git status"
+alias gsv="git status -v"
 alias gamend="git commit --amend"
 alias gdif="git diff"
 alias gstash="git stash"
@@ -422,9 +423,11 @@ else
       exit 1
     fi
   }
-  alias mpvl="ytfzf"
   alias yf="ytfzf"
-
+  # function for compliancy
+  mpvl () {
+    ytfzf
+  }
   if [ $IS_TERMUX = true ]; then
     alias tcopy="termux-clipboard-set"
     alias tpaste="termux-clipboard-get"
