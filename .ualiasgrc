@@ -34,14 +34,16 @@ fd-defaults () {
     "$@"
 }
 
-alias epf="nvim $HOME/.profile"
-alias ecf="nvim $uconf"
-alias egc="nvim $uconfg"
-alias eal="nvim $ualias"
-alias ega="nvim $ualiasg"
-alias evc="nvim $HOME/.SpaceVim.d/init.toml"
-alias ezsh="nvim $user_conf_path/.zsh_conf"
-alias ebash="nvim $user_conf_path/.bash_conf"
+PREFERED_EDITOR="${PREFERED_EDITOR:-vim}"
+
+alias epf="$PREFERED_EDITOR $HOME/.profile"
+alias ecf="$PREFERED_EDITOR $uconf"
+alias egc="$PREFERED_EDITOR $uconfg"
+alias eal="$PREFERED_EDITOR $ualias"
+alias ega="$PREFERED_EDITOR $ualiasg"
+alias evc="$PREFERED_EDITOR $HOME/.SpaceVim.d/init.toml"
+alias ezsh="$PREFERED_EDITOR $user_conf_path/.zsh_conf"
+alias ebash="$PREFERED_EDITOR $user_conf_path/.bash_conf"
 
 # Git
 alias glg="git log --oneline --decorate --graph"
@@ -209,7 +211,7 @@ fcda () {
 }
 
 fed () {
-  local editor="nvim"
+  local editor="${PREFERED_EDITOR:-vim}"
   local selection=$(fd-defaults -tf -d 1 | fzf-defaults --preview "bat --color=always {}")
   if [ -z "$selection" ]; then
     return
@@ -221,7 +223,7 @@ fed () {
 }
 
 fedd () {
-  local editor="nvim"
+  local editor="${PREFERED_EDITOR:-vim}"
   local selection=$(fd-defaults -tf | fzf-defaults --preview "bat --color=always {}")
   if [ -z "$selection" ]; then
     return
@@ -277,7 +279,7 @@ qed () {
     return
   fi
   if [ -z "$editor" ]; then
-    editor="nvim"
+    editor="${PREFERED_EDITOR:-vim}"
   fi
   $editor $selection
 }
@@ -351,7 +353,7 @@ trim () {
 
 # Open temp file on vim
 ntemp () {
-  nvim "/temp/temp-$(uuidgen 2>/dev/null || date +%d-%m-%Y_%H-%M-%S).txt"
+  "${PREFERED_EDITOR:-vim}" "/tmp/temp-$(uuidgen 2>/dev/null || date +%d-%m-%Y_%H-%M-%S).txt"
 }
 
 # extract files

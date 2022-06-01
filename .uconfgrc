@@ -109,6 +109,7 @@ set_mac () {
 }
 
 set_general () {
+  export PREFERED_EDITOR='nvim'
   export COLORTERM='truecolor'
   export BAT_THEME='Dracula'
   export FZF_DEFAULT_OPTS='--height 80% --layout=reverse --border'
