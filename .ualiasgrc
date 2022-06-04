@@ -389,7 +389,7 @@ if [ "$IS_WSL" = true ]; then
       mpv.com "$mpv_args"
     else
       echo "No args provided"
-      exit 1
+      (exit 1) && true
     fi
   }
   mpvp () {
@@ -398,7 +398,7 @@ if [ "$IS_WSL" = true ]; then
       yt-dlp.exe -o - "$url" | mpv.com -
     else
       echo "No url provided"
-      exit 1
+      (exit 1) && true
     fi
   }
   # Wrapper for ytfzf to launch on windows mpv player
@@ -422,7 +422,7 @@ else
       yt-dlp -o - "$url" | mpv -
     else
       echo "No url provided"
-      exit 1
+      (exit 1) && true
     fi
   }
   alias yf="ytfzf"
@@ -440,11 +440,11 @@ else
         am start --user 0 -a android.intent.action.VIEW -d "$url" is.xyz.mpv/.MPVActivity
       else
         echo "No url provided"
-        exit 1
+        (exit 1) && true
       fi
     }
     play () {
-      tpaste | mpv
+      termux-clipboard-set | mpv
     }
   fi
 fi
