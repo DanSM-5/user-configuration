@@ -444,7 +444,7 @@ else
       fi
     }
     play () {
-      termux-clipboard-set | mpv
+      termux-clipboard-get | mpv
     }
   fi
 fi
