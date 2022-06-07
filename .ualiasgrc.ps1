@@ -313,3 +313,5 @@ function With-Env () {
   #>
 }
 
+function play () { mpv $(pbpaste) }
+
