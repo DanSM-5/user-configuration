@@ -85,6 +85,10 @@ set_wsl () {
   echo no implemented &> /dev/null
 }
 
+set_termux () {
+  echo no implemented &> /dev/null
+}
+
 set_mac () {
   export IS_MAC=true
   export BASH_SILENCE_DEPRECATION_WARNING=1
