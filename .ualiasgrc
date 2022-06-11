@@ -143,6 +143,7 @@ alias l='ls -CF'
 alias frm='\rm $(fd-defaults -tf -tx -tl | fzf-defaults --preview "bat --color=always {}")'
 alias frdr="rm -rf \$(fd-defaults -td -d 1 | fzf-defaults --preview \"ls --color=always -alhF {} | sed '1d;2d;3d'\")"
 alias fzfp="fzf-defaults --preview 'bat --color=always --style=numbers --line-range=:500 {}'"
+alias pvim="vim --clean"
 
 rfv () {
   "$user_conf_path/utils/rgfzf.sh" "$@"
@@ -158,24 +159,24 @@ fll () {
 lff () {
   ls -la |
     sed '1d;2d;3d' |
-    fzf-defaults --preview 'if [ -f {9..} ]; then bat --color=always {9..}; else bat -pp --color=always <<< $(realpath {9..}; ls -la --color=always {9..}); fi' |
+    fzf-defaults --preview 'if [ -f {9..} ]; then bat --color=always {9..}; else bat -pp --color=always <<< $(realpath {9..}; ls -lahF --color=always {9..}); fi' |
     awk '{ print $9 }'
 }
 
 lf () {
   ls -a |
     sed '1d;2d' |
-    fzf-defaults --preview 'if [ -f {} ]; then bat --color=always {}; else bat -pp --color=always <<< $(realpath {}; ls -la --color=always {}); fi'
+    fzf-defaults --preview 'if [ -f {} ]; then bat --color=always {}; else bat -pp --color=always <<< $(realpath {}; ls -lahF --color=always {}); fi'
 }
 
 lfd () {
-  fd-defaults | fzf-defaults --preview 'if [ -f {9..} ]; then bat --color=always {9..}; else bat -pp --color=always <<< $(realpath {9..}; ls -la --color=always {9..}); fi'
+  fd-defaults | fzf-defaults --preview 'if [ -f {} ]; then bat --color=always {}; else bat -pp --color=always <<< $(realpath {}; ls -lahF --color=always {}); fi'
 }
 
 # experimental
 lfa () {
   local selection=$(cd "/" && fd-defaults |
-    fzf-defaults --preview 'if [ -f {9..} ]; then bat --color=always {9..}; else bat -pp --color=always <<< $(realpath {9..}; ls -la --color=always {9..}); fi')
+    fzf-defaults --preview 'if [ -f {9..} ]; then bat --color=always {9..}; else bat -pp --color=always <<< $(realpath {9..}; ls -lahF --color=always {9..}); fi')
   echo "$selection"
 }
 
