@@ -315,3 +315,11 @@ function With-Env () {
 
 function play () { mpv $(pbpaste) }
 
+function reboot () { Restart-Computer -ComputerName localhost -Force }
+function setoff () { Stop-Computer -ComputerName localhost -Force }
+
+function restart () { shutdown /r /f /t 0 }
+function turnoff () { shutdown /s /f /t 0 }
+
+function tkill () { taskkill /f /im $args }
+
