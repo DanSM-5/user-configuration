@@ -23,10 +23,10 @@ fi
 
 file="$location\\$filename.png"
 echo "Creating: $file"
-powershell.exe -sta "Add-Type -Assembly PresentationCore;" \
+powershell.exe -nolo -nopro -nonin -sta "Add-Type -Assembly PresentationCore;" \
   '$img = [Windows.Clipboard]::GetImage();' \
   'if ($img -eq $null) {' \
-  'echo "Clipboard does not contain image.";' \
+  'echo "Clipboard does not contain a image.";' \
   'Exit;' \
   '} else {' \
   'echo "Good";}' \
