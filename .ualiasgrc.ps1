@@ -323,3 +323,6 @@ function turnoff () { shutdown /s /f /t 0 }
 
 function tkill () { taskkill /f /im $args }
 
+function pimg () { & "$user_conf_path\utils\paste-image.ps1" $args }
+
+
