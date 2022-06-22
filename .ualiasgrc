@@ -415,7 +415,12 @@ if [ "$IS_WSL" = true ]; then
   plpp () {
     pbpaste.exe | mpvp
   }
-  alias yf="ytfzf -L"
+  yf () {
+    local selection="$(ytfzf -L "$@")"
+    if [ -n "$selection" ]; then
+      mpvw "$selection"
+    fi
+  }
 else
   mpvp () {
     declare url=${*:-$(</dev/stdin)}
