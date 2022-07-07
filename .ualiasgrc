@@ -351,7 +351,7 @@ trim () {
 
 # Open temp file on vim
 ntemp () {
-  nvim "/temp/temp-$(uuidgen 2>/dev/null || date +%d-%m-%Y_%H-%M-%S).txt"
+  nvim "/tmp/temp-$(uuidgen 2>/dev/null || date +%d-%m-%Y_%H-%M-%S).txt"
 }
 
 # extract files
