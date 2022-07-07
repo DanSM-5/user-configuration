@@ -33,6 +33,9 @@ https://github.com/CogentRedTester/mpv-user-input
 [ytfzf]
 https://github.com/pystardust/ytfzf
 
+[gow]
+https://github.com/bmatzelle/gow
+
 [stream-detector]
 https://github.com/rowrawer/stream-detector
 

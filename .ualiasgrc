@@ -34,14 +34,16 @@ fd-defaults () {
     "$@"
 }
 
-alias epf="nvim $HOME/.profile"
-alias ecf="nvim $uconf"
-alias egc="nvim $uconfg"
-alias eal="nvim $ualias"
-alias ega="nvim $ualiasg"
-alias evc="nvim $HOME/.SpaceVim.d/init.toml"
-alias ezsh="nvim $user_conf_path/.zsh_conf"
-alias ebash="nvim $user_conf_path/.bash_conf"
+PREFERED_EDITOR="${PREFERED_EDITOR:-vim}"
+
+alias epf="$PREFERED_EDITOR $HOME/.profile"
+alias ecf="$PREFERED_EDITOR $uconf"
+alias egc="$PREFERED_EDITOR $uconfg"
+alias eal="$PREFERED_EDITOR $ualias"
+alias ega="$PREFERED_EDITOR $ualiasg"
+alias evc="$PREFERED_EDITOR $HOME/.SpaceVim.d/init.toml"
+alias ezsh="$PREFERED_EDITOR $user_conf_path/.zsh_conf"
+alias ebash="$PREFERED_EDITOR $user_conf_path/.bash_conf"
 
 # Git
 alias glg="git log --oneline --decorate --graph"
@@ -59,7 +61,7 @@ alias grebase="git rebase"
 alias gmerge="git merge"
 alias gck="git checkout"
 alias grm="git checkout -- ."
-alias fgrm='rm $(fgf)'
+alias fgrm='rm -rf $(fgf)'
 alias gstatus="git status"
 alias gs="git status"
 alias gsv="git status -v"
@@ -141,6 +143,7 @@ alias l='ls -CF'
 alias frm='\rm $(fd-defaults -tf -tx -tl | fzf-defaults --preview "bat --color=always {}")'
 alias frdr="rm -rf \$(fd-defaults -td -d 1 | fzf-defaults --preview \"ls --color=always -alhF {} | sed '1d;2d;3d'\")"
 alias fzfp="fzf-defaults --preview 'bat --color=always --style=numbers --line-range=:500 {}'"
+alias pvim="vim --clean"
 
 rfv () {
   "$user_conf_path/utils/rgfzf.sh" "$@"
@@ -156,24 +159,24 @@ fll () {
 lff () {
   ls -la |
     sed '1d;2d;3d' |
-    fzf-defaults --preview 'if [ -f {9..} ]; then bat --color=always {9..}; else bat -pp --color=always <<< $(realpath {9..}; ls -la --color=always {9..}); fi' |
+    fzf-defaults --preview 'if [ -f {9..} ]; then bat --color=always {9..}; else bat -pp --color=always <<< $(realpath {9..}; ls -lahF --color=always {9..}); fi' |
     awk '{ print $9 }'
 }
 
 lf () {
   ls -a |
     sed '1d;2d' |
-    fzf-defaults --preview 'if [ -f {} ]; then bat --color=always {}; else bat -pp --color=always <<< $(realpath {}; ls -la --color=always {}); fi'
+    fzf-defaults --preview 'if [ -f {} ]; then bat --color=always {}; else bat -pp --color=always <<< $(realpath {}; ls -lahF --color=always {}); fi'
 }
 
 lfd () {
-  fd-defaults | fzf-defaults --preview 'if [ -f {9..} ]; then bat --color=always {9..}; else bat -pp --color=always <<< $(realpath {9..}; ls -la --color=always {9..}); fi'
+  fd-defaults | fzf-defaults --preview 'if [ -f {} ]; then bat --color=always {}; else bat -pp --color=always <<< $(realpath {}; ls -lahF --color=always {}); fi'
 }
 
 # experimental
 lfa () {
   local selection=$(cd "/" && fd-defaults |
-    fzf-defaults --preview 'if [ -f {9..} ]; then bat --color=always {9..}; else bat -pp --color=always <<< $(realpath {9..}; ls -la --color=always {9..}); fi')
+    fzf-defaults --preview 'if [ -f {9..} ]; then bat --color=always {9..}; else bat -pp --color=always <<< $(realpath {9..}; ls -lahF --color=always {9..}); fi')
   echo "$selection"
 }
 
@@ -209,7 +212,7 @@ fcda () {
 }
 
 fed () {
-  local editor="nvim"
+  local editor="${PREFERED_EDITOR:-vim}"
   local selection=$(fd-defaults -tf -d 1 | fzf-defaults --preview "bat --color=always {}")
   if [ -z "$selection" ]; then
     return
@@ -221,7 +224,7 @@ fed () {
 }
 
 fedd () {
-  local editor="nvim"
+  local editor="${PREFERED_EDITOR:-vim}"
   local selection=$(fd-defaults -tf | fzf-defaults --preview "bat --color=always {}")
   if [ -z "$selection" ]; then
     return
@@ -277,7 +280,7 @@ qed () {
     return
   fi
   if [ -z "$editor" ]; then
-    editor="nvim"
+    editor="${PREFERED_EDITOR:-vim}"
   fi
   $editor $selection
 }
@@ -351,7 +354,7 @@ trim () {
 
 # Open temp file on vim
 ntemp () {
-  nvim "/tmp/temp-$(uuidgen 2>/dev/null || date +%d-%m-%Y_%H-%M-%S).txt"
+  "${PREFERED_EDITOR:-vim}" "/tmp/temp-$(uuidgen 2>/dev/null || date +%d-%m-%Y_%H-%M-%S).txt"
 }
 
 # extract files
@@ -387,7 +390,7 @@ if [ "$IS_WSL" = true ]; then
       mpv.com "$mpv_args"
     else
       echo "No args provided"
-      exit 1
+      (exit 1) && true
     fi
   }
   mpvp () {
@@ -396,7 +399,7 @@ if [ "$IS_WSL" = true ]; then
       yt-dlp.exe -o - "$url" | mpv.com -
     else
       echo "No url provided"
-      exit 1
+      (exit 1) && true
     fi
   }
   # Wrapper for ytfzf to launch on windows mpv player
@@ -412,7 +415,12 @@ if [ "$IS_WSL" = true ]; then
   plpp () {
     pbpaste.exe | mpvp
   }
-  alias yf="ytfzf -L"
+  yf () {
+    local selection="$(ytfzf -L "$@")"
+    if [ -n "$selection" ]; then
+      mpvw "$selection"
+    fi
+  }
 else
   mpvp () {
     declare url=${*:-$(</dev/stdin)}
@@ -420,7 +428,7 @@ else
       yt-dlp -o - "$url" | mpv -
     else
       echo "No url provided"
-      exit 1
+      (exit 1) && true
     fi
   }
   alias yf="ytfzf"
@@ -438,11 +446,11 @@ else
         am start --user 0 -a android.intent.action.VIEW -d "$url" is.xyz.mpv/.MPVActivity
       else
         echo "No url provided"
-        exit 1
+        (exit 1) && true
       fi
     }
     play () {
-      tpaste | mpv
+      termux-clipboard-get | mpv
     }
   fi
 fi

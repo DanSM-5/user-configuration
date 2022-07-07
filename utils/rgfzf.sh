@@ -7,6 +7,9 @@
 # Ref: https://github.com/junegunn/fzf/blob/master/ADVANCED.md#using-fzf-as-interative-ripgrep-launcher
 ###########################################
 
+# Use env variable to setup an editor or default to nvim
+editor="${PREFERED_EDITOR:-nvim}"
+
 # Switch between Ripgrep launcher mode (CTRL-R) and fzf filtering mode (CTRL-F)
 RG_PREFIX="rg --column --line-number --no-heading --color=always --smart-case --no-ignore --glob '!{.git,node_modules}' --hidden "
 INITIAL_QUERY="${*:-}"
@@ -24,4 +27,4 @@ IFS=: read -ra selected < <(
       --preview 'bat --color=always {1} --highlight-line {2}' \
       --preview-window 'up,60%,border-bottom,+{2}+3/3,~3'
 )
-[ -n "${selected[0]}" ] && nvim "${selected[0]}" "+${selected[1]}"
+[ -n "${selected[0]}" ] && "$editor" "${selected[0]}" "+${selected[1]}"
