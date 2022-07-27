@@ -350,6 +350,7 @@ function With-Env () {
 }
 
 function play () { mpv $(pbpaste) }
+function tplay () { webtorrent --mpv "$(pbpaste)" }
 
 function reboot () { Restart-Computer -ComputerName localhost -Force }
 function setoff () { Stop-Computer -ComputerName localhost -Force }

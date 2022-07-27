@@ -394,6 +394,7 @@ if [ "$IS_WSL" = true ]; then
     fi
   }
   mpvp () {
+    # mpv play
     declare url=${*:-$(</dev/stdin)}
     if [ -n "$url" ]; then
       yt-dlp.exe -o - "$url" | mpv.com -
@@ -414,6 +415,9 @@ if [ "$IS_WSL" = true ]; then
   }
   plpp () {
     pbpaste.exe | mpvp
+  }
+  tplay () {
+    cmd.exe /c webtorrent --mpv "$(pbpaste.exe)"
   }
   yf () {
     local selection="$(ytfzf -L "$@")"
