@@ -174,7 +174,7 @@ function fcd ([int] $depth = 1) {
     return
   }
 
-  cd $selection
+  cd "$selection"
 }
 
 function fcdd () {
@@ -192,7 +192,7 @@ function fcdd () {
     return
   }
 
-  cd $selection
+  cd "$selection"
 }
 
 function info () {
@@ -360,24 +360,6 @@ function turnoff () { shutdown /s /f /t 0 }
 function tkill () { taskkill /f /im $args }
 
 function pimg () { & "$user_conf_path\utils\paste-image.ps1" $args }
-
-function fcd () {
-   $selection = "$(fd -td -d 1 | fzf)"
-  if ((-not "$selection") -or -not (Test-Path "$selection")) {
-    return
-  }
-
-   cd "$selection"
-}
-
-function fcdd () {
-   $selection = "$(fd -td | fzf)"
-  if ((-not "$selection") -or -not (Test-Path "$selection")) {
-    return
-  }
-
-   cd "$selection"
-}
 
 function yt-dw () {
   yt-dlp "$(pbpaste)"
