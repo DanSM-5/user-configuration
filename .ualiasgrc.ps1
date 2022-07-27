@@ -361,4 +361,25 @@ function tkill () { taskkill /f /im $args }
 
 function pimg () { & "$user_conf_path\utils\paste-image.ps1" $args }
 
+function fcd () {
+   $selection = "$(fd -td -d 1 | fzf)"
+  if ((-not "$selection") -or -not (Test-Path "$selection")) {
+    return
+  }
+
+   cd "$selection"
+}
+
+function fcdd () {
+   $selection = "$(fd -td | fzf)"
+  if ((-not "$selection") -or -not (Test-Path "$selection")) {
+    return
+  }
+
+   cd "$selection"
+}
+
+function yt-dw () {
+  yt-dlp "$(pbpaste)"
+}
 
