@@ -163,7 +163,7 @@ function fcd ([int] $depth = 1) {
   $selection = "$(
     fd --exclude ".git" `
       --exclude "node_modules" `
-      --hidden -td -d "$depth" |
+      --hidden -tl -td -d "$depth" |
     fzf --height 50% --min-height 20 --border `
       --bind ctrl-/:toggle-preview `
       --header 'Press CTRL-/ to toggle preview' `
@@ -181,7 +181,7 @@ function fcdd () {
   $selection = "$(
     fd --exclude ".git" `
       --exclude "node_modules" `
-      --hidden -td |
+      --hidden -tl -td |
     fzf --height 50% --min-height 20 --border `
       --bind ctrl-/:toggle-preview `
       --header 'Press CTRL-/ to toggle preview' `
