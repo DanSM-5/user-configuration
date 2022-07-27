@@ -159,6 +159,42 @@ function ... {
   cd ../..
 }
 
+function fcd ([int] $depth = 1) {
+  $selection = "$(
+    fd --exclude ".git" `
+      --exclude "node_modules" `
+      --hidden -td -d "$depth" |
+    fzf --height 50% --min-height 20 --border `
+      --bind ctrl-/:toggle-preview `
+      --header 'Press CTRL-/ to toggle preview' `
+      --preview "ls {}"
+    )"
+
+  if ((-not $selection) -or (-not (Test-Path $selection))) {
+    return
+  }
+
+  cd $selection
+}
+
+function fcdd () {
+  $selection = "$(
+    fd --exclude ".git" `
+      --exclude "node_modules" `
+      --hidden -td |
+    fzf --height 50% --min-height 20 --border `
+      --bind ctrl-/:toggle-preview `
+      --header 'Press CTRL-/ to toggle preview' `
+      --preview "ls {}"
+    )"
+
+  if ((-not $selection) -or (-not (Test-Path $selection))) {
+    return
+  }
+
+  cd $selection
+}
+
 function info () {
   # can also be piped into less.exe
   Get-Help -Full $args[0] | bat -l man -p

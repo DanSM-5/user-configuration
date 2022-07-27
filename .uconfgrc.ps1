@@ -48,8 +48,8 @@ if (Test-Command Set-PsFzfOption) {
     # -EnableAliasFuzzySetLocation `
   Set-PSReadLineKeyHandler -Key Tab -ScriptBlock { Invoke-FzfTabCompletion }
 
-  if (Test-Path Alias:fcd) { Remove-Item Alias:fcd }
-  Set-Alias -Name fcd -Value Invoke-FuzzySetLocation
+  # if (Test-Path Alias:fcd) { Remove-Item Alias:fcd }
+  # Set-Alias -Name fcd -Value Invoke-FuzzySetLocation
 
   Import-module "$user_conf_path\utils\fzf-git.psm1"
 }
