@@ -13,6 +13,12 @@ elif command -v termux-setup-storage &> /dev/null; then
   export IS_TERMUX=true
 fi
 
+# Detect System
+case "$(uname)" in
+  Linux*) export IS_LINUX=true;;
+  Darwin*) export IS_MAC=true;;
+esac
+
 # Source User Scripts
 test -f "$HOME/.usr_conf/.uconfgrc" && \. "$HOME/.usr_conf/.uconfgrc"
 test -f "$HOME/.usr_conf/.ualiasgrc" && \. "$HOME/.usr_conf/.ualiasgrc"

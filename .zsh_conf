@@ -47,9 +47,23 @@ zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'
 # Keybindings for ctrl-[left|right]
 bindkey "^[[1;5C" forward-word
 bindkey "^[[1;5D" backward-word
+
 # Mac keys
-bindkey "\e\e[C" forward-word
-bindkey "\e\e[D" backward-word
+if [ "$IS_MAC" = true ]; then
+  terminal_type="$([ -z "$TERM_PROGRAM" ] && echo "$TERM" || echo "$TERM_PROGRAM")"
+  case "$terminal_type" in
+    *kitty)
+      # kitty (alt-[left|right])
+      bindkey "\e[1;3D" backward-word # ⌥←
+      bindkey "\e[1;3C" forward-word # ⌥→
+      ;;
+    iTerm*)
+      # iTerm2 (alt-[left|right])
+      bindkey "\e\e[C" forward-word
+      bindkey "\e\e[D" backward-word
+      ;;
+  esac
+fi
 
 # Break word chars
 export WORDCHARS="${WORDCHARS//[-_;\~\.\/\\]}"
