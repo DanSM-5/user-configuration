@@ -8,6 +8,8 @@ $user_conf_path = "$HOME\.usr_conf"
 $user_scripts_path = "$HOME\user-scripts"
 $prj = "$HOME\prj"
 
+$env:PREFERED_EDITOR = 'nvim'
+
 function Test-Command {
   Param ($command)
   $oldPreference = $ErrorActionPreference

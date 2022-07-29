@@ -8,6 +8,8 @@ $user_conf_path = "$HOME\.usr_conf"
 $user_scripts_path = "$HOME\user-scripts"
 $prj = "$HOME\prj"
 
+$env:PREFERED_EDITOR = if ($env:PREFERED_EDITOR) { $env:PREFERED_EDITOR } else { "vim" }
+
 function gpr { cd $prj }
 function gus { cd $user_scripts_path }
 function guc { cd $user_conf_path }
@@ -366,3 +368,42 @@ function yt-dw () {
   yt-dlp "$(pbpaste)"
 }
 
+function dwi () {
+  gallery-dl "$(pbpaste)"
+}
+
+function fed ([int] $depth = 1) {
+  $selection = "$(
+    fd --exclude ".git" `
+      --exclude "node_modules" `
+      --hidden -tf -d "$depth" |
+    fzf --height 50% --min-height 20 --border `
+      --bind ctrl-/:toggle-preview `
+      --header 'Press CTRL-/ to toggle preview' `
+      --preview "bat --color=always {}"
+    )"
+
+  if ((-not $selection) -or (-not (Test-Path $selection))) {
+    return
+  }
+
+  & "$env:PREFERED_EDITOR" "$selection"
+}
+
+function fedd () {
+  $selection = "$(
+    fd --exclude ".git" `
+      --exclude "node_modules" `
+      --hidden -tf |
+    fzf --height 50% --min-height 20 --border `
+      --bind ctrl-/:toggle-preview `
+      --header 'Press CTRL-/ to toggle preview' `
+      --preview "bat --color=always {}"
+    )"
+
+  if ((-not $selection) -or (-not (Test-Path $selection))) {
+    return
+  }
+
+  & "$env:PREFERED_EDITOR" "$selection"
+}

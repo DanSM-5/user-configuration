@@ -383,6 +383,13 @@ ex () {
 }
 
 if [ "$IS_WSL" = true ]; then
+  dwi () {
+    local img_url="$(pbpaste.exe)"
+    if [ -z "$img_url" ]; then
+      return
+    fi
+    gallery-dl.exe "$img_url"
+  }
   # export play="yt-dlp.exe -o - $1 | mpv.com -"
   mpvw () {
     declare mpv_args=${@:-$(</dev/stdin)}
