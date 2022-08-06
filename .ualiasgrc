@@ -427,7 +427,20 @@ if [ "$IS_WSL" = true ]; then
     cmd.exe /c webtorrent --mpv "$(pbpaste.exe)"
   }
   yf () {
-    local selection="$(ytfzf -L "$@")"
+    # Set starting page with flag -p
+    local startpage=1
+    # Remove -p
+    for arg do
+      shift
+      if [[ "$arg" =~ "-p[0-9]+" ]]; then
+        startpage="${arg:2}"
+        continue
+      fi
+      set -- "$@" "$arg"
+    done
+
+    local selection="$(pages_start="$startpage" ytfzf -L "$@")"
+
     if [ -n "$selection" ]; then
       mpvw "$selection"
     fi
@@ -442,7 +455,22 @@ else
       (exit 1) && true
     fi
   }
-  alias yf="ytfzf"
+
+  yf () {
+    # Set starting page with flag -p
+    local startpage=1
+    # Remove -p
+    for arg do
+      shift
+      if [[ "$arg" =~ "-p[0-9]+" ]]; then
+        startpage="${arg:2}"
+        continue
+      fi
+      set -- "$@" "$arg"
+    done
+
+    pages_start="$startpage" ytfzf "$@"
+  }
   # function for compliancy
   mpvl () {
     ytfzf
