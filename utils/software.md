@@ -2,7 +2,7 @@
 
 #################################################################
 #################################################################
-##                Repositories of interest                     ##
+##                   Projects of interest                      ##
 #################################################################
 #################################################################
 
@@ -90,3 +90,5 @@ https://github.com/ShareX/ShareX
 [brew]
 https://github.com/Homebrew/brew
 
+[Sysinternals]
+https://docs.microsoft.com/en-us/sysinternals/downloads/
