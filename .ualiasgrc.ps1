@@ -275,6 +275,18 @@ function makeSymLink ([String] $target, [String] $path) {
   New-Item -ItemType SymbolicLink -Target $target -Path $path
 }
 
+function makeShortCut ([string] $target, [string] $path, [string] $arguments = '') {
+  if (-not ($path -match '\.lnk')) { $path = "$path.lnk" }
+  $shell = New-Object -ComObject WScript.Shell
+  $shortcut = $shell.CreateShortcut("$path")
+
+  if ($shorcut.TargetPath -ne $target) {
+    $shortcut.TargetPath = "$target"
+    if ($arguments) { $shortcut.Arguments = $arguments }
+    $shortcut.Save()
+  }
+}
+
 function ll () { ls $args }
 
 function ntemp {
