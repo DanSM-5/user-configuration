@@ -16,7 +16,7 @@ fgf() {
   is_in_git_repo || return
   git -c color.status=always status --short |
   fzf-down -m --ansi --nth 2..,.. \
-    --preview 'if [ -f {-1} ]; then git diff --color=always -- {-1} | sed 1,4d | bat -p --color=always; bat --color=always {-1}; else ls -lahF --color=always {-1}; fi' |
+    --preview 'if [ -f {-1} ]; then git diff --color=always -- {-1} | sed 1,4d | bat -p --color=always; bat --color=always {-1}; else ls -aF --color=always {-1}; fi' |
   cut -c4- | sed 's/.* -> //'
   # --preview '(git diff --color=always -- {-1} | sed 1,4d | bat -p --color=always; cat {-1})' |
 }
