@@ -383,17 +383,16 @@ ex () {
 }
 
 if [ "$IS_WSL" = true ]; then
-
-  if command -v mpv &> /dev/null; then
+  if ! command -v mpv &> /dev/null; then
     mpv () {
-      declare mpv_args=${@:-$(</dev/stdin)}
+      declare mpv_args="${@:-$(</dev/stdin)}"
       mpv.com "$mpv_args" 
     }
   fi
 
-  if command -v yt-dlp &> /dev/null; then
+  if ! command -v yt-dlp &> /dev/null; then
     yt-dlp () {
-      declare ytdlp_args=${@:-$(</dev/stdin)}
+      declare ytdlp_args="${@:-$(</dev/stdin)}"
       yt-dlp.exe "$ytdlp_args" 
     }
   fi
