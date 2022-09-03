@@ -383,12 +383,31 @@ ex () {
 }
 
 if [ "$IS_WSL" = true ]; then
+
+  if command -v mpv &> /dev/null; then
+    mpv () {
+      declare mpv_args=${@:-$(</dev/stdin)}
+      mpv.com "$mpv_args" 
+    }
+  fi
+
+  if command -v yt-dlp &> /dev/null; then
+    yt-dlp () {
+      declare ytdlp_args=${@:-$(</dev/stdin)}
+      yt-dlp.exe "$ytdlp_args" 
+    }
+  fi
+
   dwi () {
     local img_url="$(pbpaste.exe)"
     if [ -z "$img_url" ]; then
       return
     fi
     gallery-dl.exe "$img_url"
+  }
+  dwv () {
+    local vid_url="$(pbpaste.exe)"
+    yt-dlp.exe "$vid_url"
   }
   # export play="yt-dlp.exe -o - $1 | mpv.com -"
   mpvw () {

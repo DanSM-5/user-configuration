@@ -364,7 +364,13 @@ function With-Env () {
 }
 
 function play () { mpv $(pbpaste) }
-function tplay () { webtorrent --mpv "$(pbpaste)" }
+function tplay ([Switch] $download = $false) {
+  if ($download) {
+    webtorrent --mpv "$(pbpaste)"
+  } else {
+    webtorrent -u 1 --mpv "$(pbpaste)"
+  }
+}
 
 function reboot () { Restart-Computer -ComputerName localhost -Force }
 function setoff () { Stop-Computer -ComputerName localhost -Force }
@@ -377,6 +383,10 @@ function tkill () { taskkill /f /im $args }
 function pimg () { & "$user_conf_path\utils\paste-image.ps1" $args }
 
 function yt-dw () {
+  yt-dlp "$(pbpaste)"
+}
+
+function dwv () {
   yt-dlp "$(pbpaste)"
 }
 
