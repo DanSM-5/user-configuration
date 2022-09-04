@@ -1,4 +1,5 @@
 
+# Use as process substitution
 $null = New-Module {  # Load as dynamic module
   # Define a succinct alias.
   set-alias cf ConvertTo-TempFile
