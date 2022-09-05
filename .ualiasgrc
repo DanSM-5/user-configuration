@@ -447,11 +447,17 @@ if [ "$IS_WSL" = true ]; then
   yf () {
     # Set starting page with flag -p
     local startpage=1
-    # Remove -p
+    local linkOnly=false
     for arg do
       shift
       if [[ "$arg" =~ "-p[0-9]+" ]]; then
+        # Remove -p arg and use value as pages_start
         startpage="${arg:2}"
+        continue
+      elif [[ $arg = "-L" ]]; then
+        # -L is always called in this wrapper
+        # Detect it here to prevent playback
+        linkOnly=true
         continue
       fi
       set -- "$@" "$arg"
@@ -459,6 +465,12 @@ if [ "$IS_WSL" = true ]; then
 
     local selection="$(pages_start="$startpage" ytfzf -L "$@")"
 
+    if [[ "$linkOnly" = true ]]; then
+      echo "$selection"
+      return
+    fi
+
+    echo "uhh"
     if [ -n "$selection" ]; then
       mpvw "$selection"
     fi
