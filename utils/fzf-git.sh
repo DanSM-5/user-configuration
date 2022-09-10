@@ -23,8 +23,10 @@ fgf() {
 
 fgb() {
   is_in_git_repo || return
+  INITIAL_QUERY="${*:-}"
   git branch -a --color=always | grep -v '/HEAD\s' | sort |
   fzf-down --ansi --multi --tac --preview-window right:70% \
+    --query "$INITIAL_QUERY" \
     --preview 'git log --oneline --graph --date=short --color=always --pretty="format:%C(auto)%cd %h%d %s" $(sed s/^..// <<< {} | cut -d" " -f1)' |
   sed 's/^..//' | cut -d' ' -f1 |
   sed 's#^remotes/##'
