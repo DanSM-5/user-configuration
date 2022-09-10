@@ -105,7 +105,7 @@ gprevr () {
 }
 
 fadd () {
-  local selection=($(fgf))
+  local selection=($(fgf "${*:-}"))
   echo "$selection"
   if [ -n "$selection" ]; then
     git add "${selection[@]}"
@@ -120,7 +120,7 @@ fck () {
 }
 
 fmerge () {
-  local selection=$(fgb)
+  local selection=$(fgb "${*:-}")
   echo "$selection"
   if [ -n "$selection" ]; then
     git merge "$selection"
@@ -128,7 +128,7 @@ fmerge () {
 }
 
 fsa () {
-  local selection=$(fgs)
+  local selection=$(fgs "${*:-}")
   if [ -n "$selection" ]; then
     git stash apply "$selection"
   fi
