@@ -87,3 +87,7 @@ bind 'set completion-ignore-case on'
 # Load fzf support
 test -f ~/.fzf.bash && source ~/.fzf.bash
 
+if [ "$IS_GITBASH" = true ]; then
+  PROMPT_COMMAND='history -a'
+fi
+

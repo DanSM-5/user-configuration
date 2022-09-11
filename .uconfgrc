@@ -33,7 +33,6 @@ path_remove ()  { export PATH=`echo -n $PATH | awk -v RS=: -v ORS=: '$0 != "'$1'
 detect_shell () {
   # echo "Loading..."
   # echo "Running from shell: $SHELL"
-  echo
 
   if [ -n "$ZSH_VERSION" ]; then
     export IS_ZSH=true
