@@ -383,11 +383,21 @@ ex () {
 }
 
 if [ "$IS_WSL" = true ]; then
+  win_mpv="mpv"
   if ! command -v mpv &> /dev/null; then
-    mpv () {
-      declare mpv_args="${@:-$(</dev/stdin)}"
-      mpv.com "$mpv_args" 
-    }
+    if command -v mpv.com &> /dev/null; then
+      win_mpv="mpv.com"
+      mpv () {
+        declare mpv_args="${@:-$(</dev/stdin)}"
+        mpv.com "$mpv_args" 
+      }
+    elif command -v mpv.exe &> /dev/null; then
+      win_mpv="mpv.exe"
+      mpv () {
+        declare mpv_args="${@:-$(</dev/stdin)}"
+        mpv.exe "$mpv_args" 
+      }
+    fi
   fi
 
   if ! command -v yt-dlp &> /dev/null; then
@@ -412,7 +422,7 @@ if [ "$IS_WSL" = true ]; then
   mpvw () {
     declare mpv_args=${@:-$(</dev/stdin)}
     if [ -n "$mpv_args" ]; then
-      mpv.com "$mpv_args"
+      mpv "$mpv_args"
     else
       echo "No args provided"
       (exit 1) && true
@@ -422,7 +432,7 @@ if [ "$IS_WSL" = true ]; then
     # mpv play
     declare url=${*:-$(</dev/stdin)}
     if [ -n "$url" ]; then
-      yt-dlp.exe -o - "$url" | mpv.com -
+      yt-dlp.exe -o - "$url" | "$win_mpv" -
     else
       echo "No url provided"
       (exit 1) && true
@@ -432,7 +442,7 @@ if [ "$IS_WSL" = true ]; then
   mpvl () {
     local selection=$(ytfzf -L "$@")
     if [ -n "$selection" ]; then
-      mpv.com "$selection"
+      mpv "$selection"
     fi
   }
   play () {
