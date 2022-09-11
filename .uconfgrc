@@ -85,6 +85,19 @@ set_wsl () {
   :
 }
 
+set_gitbash () {
+  # Enable oh-my-posh if available
+  if command -v oh-my-posh &> /dev/null && test -f ~/omp-theme/jandedobbeleer.omp.v2.json; then
+    eval "$(oh-my-posh --init --shell $SHELL_NAME --config ~/omp-theme/jandedobbeleer.omp.v2.json)"
+  fi
+
+  # Load fzf-git
+  [ -f "$HOME/.usr_conf/utils/fzf-git.sh" ] && source "$HOME/.usr_conf/utils/fzf-git.sh"
+
+  # Load fzf helpers
+  # [ -f "$HOME/.fzf.bash" ] && source "$HOME/.fzf.bash"
+}
+
 set_termux () {
   :
 }
@@ -111,6 +124,8 @@ set_mac () {
     alias egrep='egrep --color=auto'
   fi
 }
+
+
 
 set_general () {
   export PREFERED_EDITOR='nvim'
@@ -235,6 +250,7 @@ set_general
 case "$(uname)" in
   Linux*) set_linux;;
   Darwin*) set_mac;;
+  *NT*) set_gitbash;;
 esac
 
 set_general_after

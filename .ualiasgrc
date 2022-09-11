@@ -186,8 +186,8 @@ fcd () {
   if [ -z "$depth" ] || [ "$depth" = 0 ]; then
     depth=1
   fi
-
-  selection=$(fd-defaults -tl -td -d "$depth" | fzf-defaults --preview "ls --color=always -alhF {} | sed '1d;2d;3d'")
+  # old preview "ls --color=always -alhF {} | sed '1d;2d;3d'"
+  selection=$(fd-defaults -tl -td -d "$depth" | fzf-defaults --preview "ls --color=always -aF {} | sed '1d;2d'")
   if [ -n "$selection" ]; then
     cd $selection
   fi
@@ -196,7 +196,7 @@ fcd () {
 fcdd () {
   local selection=""
 
-  selection=$(fd-defaults -tl -td | fzf-defaults --preview "ls --color=always -alhF {} | sed '1d;2d;3d'")
+  selection=$(fd-defaults -tl -td | fzf-defaults --preview "ls --color=always -aF {} | sed '1d;2d'")
   if [ -n "$selection" ]; then
     cd $selection
   fi
@@ -205,7 +205,7 @@ fcdd () {
 fcda () {
   local selection=""
 
-  selection=$(cd / && fd-defaults -tl -td | fzf-defaults --preview "ls --color=always -alhF {} | sed '1d;2d;3d'")
+  selection=$(cd / && fd-defaults -tl -td | fzf-defaults --preview "ls --color=always -aF {} | sed '1d;2d'")
   if [ -n "$selection" ]; then
     cd $selection
   fi
@@ -262,7 +262,7 @@ qnv () {
   if [ -z "$quick_access" ]; then
     return
   fi
-  local selection=$(echo $quick_access | fzf-defaults --preview "ls --color=always -alhF {} | sed '1d;2d;3d'")
+  local selection=$(echo $quick_access | fzf-defaults --preview "ls --color=always -aF {} | sed '1d;2d'")
   if [ -n "$selection" ]; then
     cd $selection
   fi
