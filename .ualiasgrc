@@ -382,17 +382,30 @@ ex () {
   fi
 }
 
+# Clipboard wrappers
+clipboard_paste=""
+clipboard_copy=""
+gallery_dl_commd="gallery-dl"
+yt_dlp_commd="yt-dlp"
+mpv_commd='mpv'
+
 if [ "$IS_WSL" = true ]; then
-  win_mpv="mpv"
+  clipboard_paste="pbpaste.exe"
+  clipboard_copy="pbcopy.exe"
+  gallery_dl_commd="gallery-dl.exe"
+  yt_dlp_commd="yt-dlp.exe"
+  mpv_commd='mpv'
+
+  # MPV wrapper for WSL
   if ! command -v mpv &> /dev/null; then
     if command -v mpv.com &> /dev/null; then
-      win_mpv="mpv.com"
+      mpv_commd="mpv.com"
       mpv () {
         declare mpv_args="${@:-$(</dev/stdin)}"
         mpv.com "$mpv_args" 
       }
     elif command -v mpv.exe &> /dev/null; then
-      win_mpv="mpv.exe"
+      mpv_commd="mpv.exe"
       mpv () {
         declare mpv_args="${@:-$(</dev/stdin)}"
         mpv.exe "$mpv_args" 
@@ -400,10 +413,19 @@ if [ "$IS_WSL" = true ]; then
     fi
   fi
 
+  # yt-dlp wrapper for WSL
   if ! command -v yt-dlp &> /dev/null; then
     yt-dlp () {
       declare ytdlp_args="${@:-$(</dev/stdin)}"
       yt-dlp.exe "$ytdlp_args" 
+    }
+  fi
+
+  # gallery-dl wrapper for WSL
+  if ! command -v gallery-dl &> /dev/null; then
+    gallery-dl () {
+      declare gdl_args="${@:-$(</dev/stdin)}"
+      gallery-dl.exe "$gdl_args" 
     }
   fi
 
@@ -414,10 +436,15 @@ if [ "$IS_WSL" = true ]; then
     fi
     gallery-dl.exe "$img_url"
   }
+
   dwv () {
     local vid_url="$(pbpaste.exe)"
+    if [ -z "$vid_url" ]; then
+      return
+    fi
     yt-dlp.exe "$vid_url"
   }
+
   # export play="yt-dlp.exe -o - $1 | mpv.com -"
   mpvw () {
     declare mpv_args=${@:-$(</dev/stdin)}
@@ -428,16 +455,18 @@ if [ "$IS_WSL" = true ]; then
       (exit 1) && true
     fi
   }
+
   mpvp () {
     # mpv play
     declare url=${*:-$(</dev/stdin)}
     if [ -n "$url" ]; then
-      yt-dlp.exe -o - "$url" | "$win_mpv" -
+      yt-dlp.exe -o - "$url" | "$mpv_commd" -
     else
       echo "No url provided"
       (exit 1) && true
     fi
   }
+
   # Wrapper for ytfzf to launch on windows mpv player
   mpvl () {
     local selection=$(ytfzf -L "$@")
@@ -445,15 +474,19 @@ if [ "$IS_WSL" = true ]; then
       mpv "$selection"
     fi
   }
+
   play () {
     pbpaste.exe | mpvw
   }
+
   plpp () {
     pbpaste.exe | mpvp
   }
+
   tplay () {
     cmd.exe /c webtorrent --mpv "$(pbpaste.exe)"
   }
+
   yf () {
     # Set starting page with flag -p
     local startpage=1
@@ -484,6 +517,7 @@ if [ "$IS_WSL" = true ]; then
       mpvw "$selection"
     fi
   }
+
 else
   mpvp () {
     declare url=${*:-$(</dev/stdin)}
@@ -510,13 +544,17 @@ else
 
     pages_start="$startpage" ytfzf "$@"
   }
+
   # function for compliancy
   mpvl () {
-    ytfzf
+    ytfzf "$@"
   }
+
   if [ $IS_TERMUX = true ]; then
     alias tcopy="termux-clipboard-set"
     alias tpaste="termux-clipboard-get"
+    clipboard_copy="termux-clipboard-set"
+    clipboard_paste="termux-clipboard-get"
     # termux mpv function wrapper
     mpv () {
       declare url=${*:-$(</dev/stdin)}
@@ -527,9 +565,11 @@ else
         (exit 1) && true
       fi
     }
+
     play () {
       termux-clipboard-get | mpv
     }
+
   fi
 fi
 
