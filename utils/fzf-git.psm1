@@ -11,13 +11,14 @@ function is_in_git_repo () {
   if (git rev-parse HEAD 2> $null) { return $true } else { return $false }
 }
 
-$fzf_down = " fzf --height 50% --min-height 20 --layout=reverse --border --bind ctrl-/:toggle-preview "
+$fzf_down = " SHELL='/bin/bash' fzf --height 50% --min-height 20 --layout=reverse --border --bind ctrl-/:toggle-preview "
 
+      # --preview '(git diff --color=always -- {-1} | sed 1,4d | bat -p --color=always && bat --color=always {-1})' |
 $fgf_command = @'
     git -c color.status=always status --short |
 '@ + $script:fzf_down + @'
     -m --ansi --nth 2..,.. \
-      --preview '(git diff --color=always -- {-1} | sed 1,4d | bat -p --color=always; bat --color=always {-1})' |
+      --preview 'if \[ -f {-1} \]; then git diff --color=always -- {-1} | sed 1,4d | bat -p --color=always; bat --color=always {-1}; else ls -aF --color=always {-1}; fi' |
     cut -c4- | sed 's/.* -> //'
 '@
 
