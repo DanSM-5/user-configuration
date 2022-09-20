@@ -226,6 +226,10 @@ function npm-list {
   npm list -g --dept=0
 }
 
+function nlg { npm list -g --dept=0 }
+
+function nr { npm run $args }
+
 function getAppPid ([String] $port, [Switch] $help = $false) {
   if ($help) {
     echo ""
