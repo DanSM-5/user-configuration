@@ -181,22 +181,36 @@ lfa () {
 }
 
 fcd () {
-  local depth="$1"
+  local location="${1:-$HOME}"
+  local query="${@:2}"
+  local pattern="."
   local selection=""
-  if [ -z "$depth" ] || [ "$depth" = 0 ]; then
-    depth=1
+
+  if ! [ -d "$location" ]; then
+    pattern="$location"
+    location="$HOME"
   fi
+
   # old preview "ls --color=always -alhF {} | sed '1d;2d;3d'"
-  selection=$(fd-defaults -tl -td -d "$depth" | fzf-defaults --preview "ls --color=always -aF --group-directories-first {} | sed '1d;2d'")
-  if [ -n "$selection" ]; then
-    cd $selection
+  selection=$(fd-defaults -tl -td "$pattern" "$location" |
+    fzf-defaults --query "$query" \
+      --header "Search in: $location" \
+      --preview "realpath {}; ls --color=always -aF --group-directories-first {} | sed '1d;2d'")
+  if [ -z "$selection" ]; then
+    return 1
   fi
+
+  cd $selection
 }
 
 fcdd () {
+  local query="$@"
   local selection=""
 
-  selection=$(fd-defaults -tl -td | fzf-defaults --preview "ls --color=always -aF --group-directories-first {} | sed '1d;2d'")
+  selection=$(fd-defaults -tl -td |
+    fzf-defaults \
+      --query "$query" \
+      --preview "ls --color=always -aF --group-directories-first {} | sed '1d;2d'")
   if [ -n "$selection" ]; then
     cd $selection
   fi
