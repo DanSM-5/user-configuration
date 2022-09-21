@@ -398,6 +398,14 @@ if [ "$IS_WSL" = true ]; then
   yt_dlp_commd="yt-dlp.exe"
   mpv_commd='mpv'
 
+  if command -v mpv &> /dev/null; then 
+    if [ "$IS_ZSH" = true ] && [[ $(type mpv) =~ function ]]; then
+      unset -f mpv
+    elif [ "$IS_BASH" = true ] && [[ $(type -t mpv) == function ]]; then
+      unset -f mpv
+    fi
+  fi
+
   # MPV wrapper for WSL
   if ! command -v mpv &> /dev/null; then
     if command -v mpv.com &> /dev/null; then
