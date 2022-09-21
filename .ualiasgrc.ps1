@@ -433,3 +433,10 @@ function fedd () {
 
   & "$env:PREFERED_EDITOR" "$selection"
 }
+
+function fmpv {
+  $selection = $(fd -tf | Invoke-Fzf -m -q "$args")
+  if ( -not $selection ) { return }
+  mpv $selection
+}
+

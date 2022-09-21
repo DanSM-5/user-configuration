@@ -583,6 +583,16 @@ else
   fi
 fi
 
+fmpv () {
+  local initial="$@"
+  local selection="$(fd -tf | fzf -m --height 50% --min-height 20 --border -q "$initial")"
+  if [ -z "$selection" ]; then
+    return
+  fi
+  local quoted=$(echo $selection | awk '{ printf "\"""%s""\""" ", $0 }')
+  bash -c "$mpv_commd $quoted"
+}
+
 # If path issues, add VS Code path manually
 # export PATH="${WIN_HOME}/AppData/Local/Programs/Microsoft VS Code/bin:$PATH"
 
