@@ -161,15 +161,26 @@ function ... {
   cd ../..
 }
 
-function fcd ([int] $depth = 1) {
+function fcd () {
+  $location = $args[0] ?? "$HOME"
+  $query = $args[1..$args.length]
+  $pattern = "."
+
+  if ( -not (Test-Path $location) ) {
+    $pattern = "$location"
+    $location = "$HOME"
+  }
+
   $selection = "$(
     fd --exclude ".git" `
       --exclude "node_modules" `
-      --hidden -tl -td -d "$depth" |
-    fzf --height 50% --min-height 20 --border `
-      --bind ctrl-/:toggle-preview `
-      --header 'Press CTRL-/ to toggle preview' `
-      --preview "ls {}"
+      --hidden -tl -td `
+      "$pattern" "$location" |
+    Invoke-Fzf -Height 50% -MinHeight 20 -Border `
+      -Bind ctrl-/:toggle-preview `
+      -Preview "ls {}" `
+      -Header "Search in: $location" `
+      -Query "$query"
     )"
 
   if ((-not $selection) -or (-not (Test-Path $selection))) {
