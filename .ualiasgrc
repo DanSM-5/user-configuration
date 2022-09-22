@@ -249,7 +249,7 @@ fedd () {
   $editor "$selection"
 }
 
-fns () {
+fnr () {
   if ! [ -f package.json ]; then
     echo "No package.json in dir $(pwd)"
     return 1
