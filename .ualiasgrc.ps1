@@ -230,6 +230,23 @@ function nlg { npm list -g --dept=0 }
 
 function nr { npm run $args }
 
+function fnr {
+  if ( -not (Test-Path package.json) ) {
+    echo "No package.json in dir $(pwd)"
+    return
+  }
+
+  $query = "$args"
+
+  $selection = "$(cat package.json |
+    jq -r '.scripts | keys[]' |
+    sort |
+    Invoke-Fzf -Query "$query" -Height 50% -MinHeight 20 -Border)"
+
+  if( -not $selection ) { return }
+  npm run $selection
+}
+
 function getAppPid ([String] $port, [Switch] $help = $false) {
   if ($help) {
     echo ""
