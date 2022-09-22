@@ -179,7 +179,7 @@ function fcd () {
     Invoke-Fzf -Height 50% -MinHeight 20 -Border `
       -Bind ctrl-/:toggle-preview `
       -Preview "ls {}" `
-      -Header "Search in: $location" `
+      -Header "(ctrl-/) Search in: $location" `
       -Query "$query"
     )"
 
@@ -191,14 +191,16 @@ function fcd () {
 }
 
 function fcdd () {
+  $query = "$args"
   $selection = "$(
     fd --exclude ".git" `
       --exclude "node_modules" `
       --hidden -tl -td |
-    fzf --height 50% --min-height 20 --border `
-      --bind ctrl-/:toggle-preview `
-      --header 'Press CTRL-/ to toggle preview' `
-      --preview "ls {}"
+    Invoke-Fzf -Height 50% -MinHeight 20 -Border `
+      -Bind ctrl-/:toggle-preview `
+      -Header 'Press CTRL-/ to toggle preview' `
+      -Preview "ls {}" `
+      -Query "$query"
     )"
 
   if ((-not $selection) -or (-not (Test-Path $selection))) {
@@ -415,51 +417,80 @@ function tkill () { taskkill /f /im $args }
 function pimg () { & "$user_conf_path\utils\paste-image.ps1" $args }
 
 function yt-dw () {
-  yt-dlp "$(pbpaste)"
+  $video_url = "$(pbpaste)"
+  if ( -not $video_url ) { return }
+  yt-dlp "$video_url"
 }
 
 function dwv () {
-  yt-dlp "$(pbpaste)"
+  $video_url= "$(pbpaste)"
+  if ( -not $video_url) { return }
+  yt-dlp "$video_url"
 }
 
 function dwi () {
-  gallery-dl "$(pbpaste)"
+  $image_url = "$(pbpaste)"
+  if ( -not $image_url ) { return }
+  gallery-dl "$image_url"
 }
 
-function fed ([int] $depth = 1) {
+function fed () {
+  $location = $args[0] ?? "$HOME"
+  $query = $args[2..$args.length]
+  $pattern = "."
+  $editor = "$env:PREFERED_EDITOR" ?? 'vim'
+
+  if ( -not (Test-Path $location) ) {
+    $pattern = "$location"
+    $location = "$HOME"
+  }
+
   $selection = "$(
     fd --exclude ".git" `
       --exclude "node_modules" `
-      --hidden -tf -d "$depth" |
-    fzf --height 50% --min-height 20 --border `
-      --bind ctrl-/:toggle-preview `
-      --header 'Press CTRL-/ to toggle preview' `
-      --preview "bat --color=always {}"
-    )"
+      --hidden -tf `
+      "$pattern" "$location" |
+    Invoke-Fzf -Height 50% -MinHeight 20 -Border `
+      -Bind ctrl-/:toggle-preview `
+      -Preview "bat --color=always {}" `
+      -Header "(ctrl-/) Search in: $location" `
+      -Query "$query"
+  )"
 
   if ((-not $selection) -or (-not (Test-Path $selection))) {
     return
   }
 
-  & "$env:PREFERED_EDITOR" "$selection"
+  if ($args[1] -and ($args[1] -ne "-")) {
+    $editor = $args[1]
+  }
+
+  & "$editor" "$selection"
 }
 
 function fedd () {
+  $query = $args[1..$args.length]
+  $editor = "$env:PREFERED_EDITOR" ?? 'vim'
   $selection = "$(
     fd --exclude ".git" `
       --exclude "node_modules" `
       --hidden -tf |
-    fzf --height 50% --min-height 20 --border `
-      --bind ctrl-/:toggle-preview `
-      --header 'Press CTRL-/ to toggle preview' `
-      --preview "bat --color=always {}"
+    Invoke-Fzf -Height 50% -MinHeight 20 -Border `
+      -Bind ctrl-/:toggle-preview `
+      -Preview "bat --color=always {}" `
+      -Header "(ctrl-/) Search in: $location" `
+      -Query "$query"
     )"
 
   if ((-not $selection) -or (-not (Test-Path $selection))) {
     return
   }
 
-  & "$env:PREFERED_EDITOR" "$selection"
+  if ($args[0] -and ($args[0] -ne "-")) {
+    $editor = $args[0]
+  }
+
+  & "$editor" "$selection"
 }
 
 function fmpv {

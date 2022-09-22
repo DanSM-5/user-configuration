@@ -194,7 +194,7 @@ fcd () {
   # old preview "ls --color=always -alhF {} | sed '1d;2d;3d'"
   selection=$(fd-defaults -tl -td "$pattern" "$location" |
     fzf-defaults --query "$query" \
-      --header "Search in: $location" \
+      --header "(ctrl-/) Search in: $location" \
       --preview "realpath {}; ls --color=always -aF --group-directories-first {} | sed '1d;2d'")
   if [ -z "$selection" ]; then
     return 1
@@ -226,24 +226,38 @@ fcda () {
 }
 
 fed () {
+  local location="${1:-$HOME}"
+  local query="${@:3}"
+  local pattern="."
   local editor="${PREFERED_EDITOR:-vim}"
-  local selection=$(fd-defaults -tf -d 1 | fzf-defaults --preview "bat --color=always {}")
+
+  if ! [ -d "$location" ]; then
+    pattern="$location"
+    location="$HOME"
+  fi
+
+  local selection=$(fd-defaults -tf "$pattern" "$location" |
+    fzf-defaults \
+      --preview "bat --color=always {}" \
+      --header "(ctrl-/) Search in: $location" \
+      --query "$query")
   if [ -z "$selection" ]; then
     return
   fi
-  if [ -n "$1" ]; then
-    editor="$1"
+  if [ -n "$2" ] && [ "$2" != "-" ]; then
+    editor="$2"
   fi
   $editor "$selection"
 }
 
 fedd () {
+  local query="${@:2}"
   local editor="${PREFERED_EDITOR:-vim}"
-  local selection=$(fd-defaults -tf | fzf-defaults --preview "bat --color=always {}")
+  local selection=$(fd-defaults -tf | fzf-defaults --preview "bat --color=always {}" --query "$query")
   if [ -z "$selection" ]; then
     return
   fi
-  if [ -n "$1" ]; then
+  if [ -n "$1" ] && [ "$1" != "-" ]; then
     editor="$1"
   fi
   $editor "$selection"
