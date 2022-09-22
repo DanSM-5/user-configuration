@@ -9,6 +9,10 @@ $user_scripts_path = "$HOME\user-scripts"
 $prj = "$HOME\prj"
 
 $env:PREFERED_EDITOR = 'nvim'
+$env:EDITOR = 'nvim'
+
+# Set true color support
+$env:COLORTERM = 'truecolor'
 
 function Test-Command {
   Param ($command)
@@ -74,6 +78,3 @@ if ($PSVersionTable.PSVersion -ge 7.1) {
   Set-PSReadLineOption -PredictionSource History
   Set-PSReadLineOption -Colors @{ InlinePrediction = "#B3E5FF" }
 }
-
-# Set true color support
-$env:COLORTERM = 'truecolor'
