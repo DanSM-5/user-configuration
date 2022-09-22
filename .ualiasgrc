@@ -137,9 +137,9 @@ fsa () {
 # General commands
 alias start="explorer.exe"
 alias mkdr="mkdir -pv"
-alias ll='ls -alhF --group-directories-first'
-alias la='ls -A --group-directories-first'
-alias l='ls -CF --group-directories-first'
+alias ll='ls -alhF '
+alias la='ls -A '
+alias l='ls -CF '
 alias frm='\rm $(fd-defaults -tf -tx -tl | fzf-defaults --preview "bat --color=always {}")'
 alias frdr="rm -rf \$(fd-defaults -td -d 1 | fzf-defaults --preview \"ls --color=always -aF {} | sed '1d;2d;3d'\")"
 alias fzfp="fzf-defaults --preview 'bat --color=always --style=numbers --line-range=:500 {}'"
@@ -150,33 +150,33 @@ rfv () {
 }
 
 fll () {
-  local selection=$(fd-defaults -td | fzf-defaults --preview "bat -pp --color=always <<< \$(realpath {}); ls -aF --group-directories-first --color=always {} | sed '1d;2d'")
+  local selection=$(fd-defaults -td | fzf-defaults --preview "bat -pp --color=always <<< \$(realpath {}); ls -aF  --color=always {} | sed '1d;2d'")
   if [ -n "$selection" ]; then
-    \ls -alhF --group-directories-first --color=always "$selection"
+    \ls -alhF  --color=always "$selection"
   fi
 }
 
 lff () {
-  ls -la --group-directories-first |
+  ls -la  |
     sed '1d;2d;3d' |
-    fzf-defaults --preview 'if [ -f {9..} ]; then bat --color=always {9..}; else bat -pp --color=always <<< $(realpath {9..}; ls -aF --group-directories-first --color=always {9..} | sed "1d;2d"); fi' |
+    fzf-defaults --preview 'if [ -f {9..} ]; then bat --color=always {9..}; else bat -pp --color=always <<< $(realpath {9..}; ls -aF  --color=always {9..} | sed "1d;2d"); fi' |
     awk '{ print $9 }'
 }
 
 lf () {
-  ls -a --group-directories-first |
+  ls -a  |
     sed '1d;2d' |
-    fzf-defaults --preview 'if [ -f {} ]; then bat --color=always {}; else bat -pp --color=always <<< $(realpath {}; ls -aF --group-directories-first --color=always {} | sed "1d;2d"); fi'
+    fzf-defaults --preview 'if [ -f {} ]; then bat --color=always {}; else bat -pp --color=always <<< $(realpath {}; ls -aF  --color=always {} | sed "1d;2d"); fi'
 }
 
 lfd () {
-  fd-defaults | fzf-defaults --preview 'if [ -f {} ]; then bat --color=always {}; else bat -pp --color=always <<< $(realpath {}; ls -aF --group-directories-first --color=always {} | sed "1d;2d"); fi'
+  fd-defaults | fzf-defaults --preview 'if [ -f {} ]; then bat --color=always {}; else bat -pp --color=always <<< $(realpath {}; ls -aF  --color=always {} | sed "1d;2d"); fi'
 }
 
 # experimental
 lfa () {
   local selection=$(cd "/" && fd-defaults |
-    fzf-defaults --preview 'if [ -f {9..} ]; then bat --color=always {9..}; else bat -pp --color=always <<< $(realpath {9..}; ls -aF --group-directories-first --color=always {9..} | sed "1d;2d"); fi')
+    fzf-defaults --preview 'if [ -f {9..} ]; then bat --color=always {9..}; else bat -pp --color=always <<< $(realpath {9..}; ls -aF  --color=always {9..} | sed "1d;2d"); fi')
   echo "$selection"
 }
 
@@ -195,7 +195,7 @@ fcd () {
   selection=$(fd-defaults -tl -td "$pattern" "$location" |
     fzf-defaults --query "$query" \
       --header "(ctrl-/) Search in: $location" \
-      --preview "realpath {}; ls --color=always -aF --group-directories-first {} | sed '1d;2d'")
+      --preview "realpath {}; ls --color=always -aF  {} | sed '1d;2d'")
   if [ -z "$selection" ]; then
     return 1
   fi
@@ -210,7 +210,7 @@ fcdd () {
   selection=$(fd-defaults -tl -td |
     fzf-defaults \
       --query "$query" \
-      --preview "ls --color=always -aF --group-directories-first {} | sed '1d;2d'")
+      --preview "ls --color=always -aF  {} | sed '1d;2d'")
   if [ -n "$selection" ]; then
     cd $selection
   fi
@@ -219,7 +219,7 @@ fcdd () {
 fcda () {
   local selection=""
 
-  selection=$(cd / && fd-defaults -tl -td | fzf-defaults --preview "ls --color=always -aF --group-directories-first {} | sed '1d;2d'")
+  selection=$(cd / && fd-defaults -tl -td | fzf-defaults --preview "ls --color=always -aF  {} | sed '1d;2d'")
   if [ -n "$selection" ]; then
     cd $selection
   fi
