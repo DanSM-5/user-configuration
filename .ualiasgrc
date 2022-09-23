@@ -458,14 +458,13 @@ if [ "$IS_WSL" = true ]; then
     if command -v mpv.com &> /dev/null; then
       mpv_commd="mpv.com"
       mpv () {
-        declare mpv_args="${@:-$(</dev/stdin)}"
-        mpv.com "$mpv_args" 
+        mpv.com "$@" 
       }
+
     elif command -v mpv.exe &> /dev/null; then
       mpv_commd="mpv.exe"
       mpv () {
-        declare mpv_args="${@:-$(</dev/stdin)}"
-        mpv.exe "$mpv_args" 
+        mpv.exe "$@" 
       }
     fi
   fi
@@ -473,23 +472,22 @@ if [ "$IS_WSL" = true ]; then
   # yt-dlp wrapper for WSL
   if ! command -v yt-dlp &> /dev/null; then
     yt-dlp () {
-      declare ytdlp_args="${@:-$(</dev/stdin)}"
-      yt-dlp.exe "$ytdlp_args" 
+      yt-dlp.exe "$@" 
     }
   fi
 
   # gallery-dl wrapper for WSL
   if ! command -v gallery-dl &> /dev/null; then
     gallery-dl () {
-      declare gdl_args="${@:-$(</dev/stdin)}"
-      gallery-dl.exe "$gdl_args" 
+      gallery-dl.exe "$@" 
     }
   fi
 
   dwi () {
     local img_url="$(pbpaste.exe)"
     if [ -z "$img_url" ]; then
-      return
+      echo "No image url"
+      return 1
     fi
     gallery-dl.exe "$img_url"
   }
@@ -497,27 +495,42 @@ if [ "$IS_WSL" = true ]; then
   dwv () {
     local vid_url="$(pbpaste.exe)"
     if [ -z "$vid_url" ]; then
-      return
+      echo "No video url"
+      return 1
     fi
     yt-dlp.exe "$vid_url"
   }
 
   # export play="yt-dlp.exe -o - $1 | mpv.com -"
   mpvw () {
-    declare mpv_args=${@:-$(</dev/stdin)}
-    if [ -n "$mpv_args" ]; then
-      mpv "$mpv_args"
-    else
-      echo "No args provided"
-      (exit 1) && true
-    fi
+    "$mpv_commd" "$@"
   }
 
   mpvp () {
     # mpv play
-    declare url=${*:-$(</dev/stdin)}
-    if [ -n "$url" ]; then
-      yt-dlp.exe -o - "$url" | "$mpv_commd" -
+    # declare url=${*:-$(</dev/stdin)}
+    local use_stdin=false
+    for arg do
+      shift
+      if [[ "$arg" = "-" ]]; then
+        # Remove -p arg and use value as pages_start
+        use_stdin=true
+        continue
+      fi
+      set -- "$@" "$arg"
+    done
+
+    if [ "$use_stdin" = true ]; then
+
+      read -t 5 url
+      if [ -z "$url" ]; then
+        echo "No url provided"
+        (exit 1) && true
+      fi
+
+      yt-dlp.exe -o - "$url" | "$mpv_commd" --cache "${@:2}"  -
+    elif [ -n "$1" ]; then
+      yt-dlp.exe -o - "$1" | "$mpv_commd" --cache "${@:2}"  -
     else
       echo "No url provided"
       (exit 1) && true
@@ -533,15 +546,38 @@ if [ "$IS_WSL" = true ]; then
   }
 
   play () {
-    pbpaste.exe | mpvw
+    local url="$("$clipboard_paste")"
+    if [ -z "$url" ]; then
+      echo "No url in clipboard"
+      return 1
+    fi
+
+    if [[ "$url" =~ ".torrent" ]] ||
+      [[ "$url" =~ "magnet:" ]] ||
+      [[ "$url" =~ "webtorrent://" ]] ||
+      [[ "$url" =~ "peerflix://" ]]; then
+      cmd.exe /c webtorrent --mpv "$url"
+    else
+      mpvw "$url"
+    fi
   }
 
   plpp () {
-    pbpaste.exe | mpvp
+    local url="$("$clipboard_paste")"
+    if [ -z "$url" ]; then
+      echo "No url in clipboard"
+      return 1
+    fi
+    mpvp "$url"
   }
 
   tplay () {
-    cmd.exe /c webtorrent --mpv "$(pbpaste.exe)"
+    local url="$("$clipboard_paste")"
+    if [ -z "$url" ]; then
+      echo "No url in clipboard"
+      return 1
+    fi
+    cmd.exe /c webtorrent --mpv "$url"
   }
 
   yf () {
@@ -645,4 +681,5 @@ fmpv () {
 
 # Dependencies
 # export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
 
