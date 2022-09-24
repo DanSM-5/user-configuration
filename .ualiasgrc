@@ -620,7 +620,7 @@ if [ "$IS_WSL" = true ]; then
   }
 
   ocd () {
-    local filepath="$("$clipboard_paste")"
+    local filepath="$("$clipboard_paste" | tr -d "\r\n" )"
 
     if [ -z "$filepath" ]; then
       return 1
@@ -628,7 +628,7 @@ if [ "$IS_WSL" = true ]; then
 
     local linuxpath="" windowspath=""
 
-    if [ -f "$filepath" ] || [ -d "$filepath" ]; then # Valid unix path
+    if [[ -f "$filepath" ]] || [[ -d "$filepath" ]]; then # Valid unix path
       linuxpath="$(wslpath -au "$(wslpath -aw $filepath)")"
     else # win path
       linuxpath="$(wslpath -au "$filepath")"
@@ -710,6 +710,31 @@ fmpv () {
   fi
   local quoted=$(echo $selection | awk '{ printf "\"""%s""\""" ", $0 }')
   bash -c "$mpv_commd $quoted"
+}
+
+ptc () {
+  local location="${1:-$HOME}"
+  local query="${@:2}"
+  local pattern="."
+  local selection=""
+
+  if ! [ -d "$location" ]; then
+    pattern="$location"
+    location="$HOME"
+  fi
+
+  # old preview "ls --color=always -alhF {} | sed '1d;2d;3d'"
+  selection=$(fd-defaults -tl -td -tf "$pattern" "$location" |
+    fzf-defaults --query "$query" \
+      --header "(ctrl-/) Search in: $location" \
+      --preview "realpath {}; ls --color=always -aF  {} | sed '1d;2d'")
+  if [ -z "$selection" ]; then
+    return 1
+  fi
+  
+  selection="$(realpath "$selection")"
+
+  echo "$selection" | "$clipboard_copy"
 }
 
 # If path issues, add VS Code path manually
