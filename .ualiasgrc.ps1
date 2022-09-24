@@ -511,3 +511,32 @@ function ocd () {
   Start-Process "$directory"
 }
 
+function ptc () {
+  $location = $args[0] ?? "$HOME"
+  $query = $args[1..$args.length]
+  $pattern = "."
+
+  if ( -not (Test-Path $location) ) {
+    $pattern = "$location"
+    $location = "$HOME"
+  }
+
+  $selection = "$(
+    fd --exclude ".git" `
+      --exclude "node_modules" `
+      --hidden -tl -td -tf `
+      "$pattern" "$location" |
+    Invoke-Fzf -Height 50% -MinHeight 20 -Border `
+      -Bind ctrl-/:toggle-preview `
+      -Preview "ls {}" `
+      -Header "(ctrl-/) Search in: $location" `
+      -Query "$query"
+    )"
+
+  if ((-not $selection) -or (-not (Test-Path $selection))) {
+    return
+  }
+
+  $selection = Get-Item "$selection" | Select-Object FullName | % { $_.FullName }
+  echo "$selection" | tr -d "\r\n" | pbcopy
+}
