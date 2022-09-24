@@ -484,21 +484,21 @@ if [ "$IS_WSL" = true ]; then
   fi
 
   dwi () {
-    local img_url="$(pbpaste.exe)"
+    local img_url="$("$clipboard_paste")"
     if [ -z "$img_url" ]; then
       echo "No image url"
       return 1
     fi
-    gallery-dl.exe "$img_url"
+    "$gallery_dl_commd" "$img_url"
   }
 
   dwv () {
-    local vid_url="$(pbpaste.exe)"
+    local vid_url="$("$clipboard_paste")"
     if [ -z "$vid_url" ]; then
       echo "No video url"
       return 1
     fi
-    yt-dlp.exe "$vid_url"
+    "$yt_dlp_commd" "$vid_url"
   }
 
   # export play="yt-dlp.exe -o - $1 | mpv.com -"
@@ -534,7 +534,7 @@ if [ "$IS_WSL" = true ]; then
     else
       echo "No url provided"
       (exit 1) && true
-    fi
+   fi
   }
 
   # Wrapper for ytfzf to launch on windows mpv player
@@ -609,6 +609,42 @@ if [ "$IS_WSL" = true ]; then
     if [ -n "$selection" ]; then
       mpvw "$selection"
     fi
+  }
+
+  linuxToWindowsPath () {
+    echo "$(wslpath -aw "$1")"
+  }
+
+  windowsToLinuxPath () {
+    echo "$(wslpath -au "$1")"
+  }
+
+  ocd () {
+    local filepath="$("$clipboard_paste")"
+
+    if [ -z "$filepath" ]; then
+      return 1
+    fi
+
+    local linuxpath="" windowspath=""
+
+    if [ -f "$filepath" ] || [ -d "$filepath" ]; then # Valid unix path
+      linuxpath="$(wslpath -au "$(wslpath -aw $filepath)")"
+    else # win path
+      linuxpath="$(wslpath -au "$filepath")"
+    fi
+
+    if [ -d "$linuxpath" ]; then
+      local windowspath="$(wslpath -aw "$linuxpath")"
+    elif [ -f "$linuxpath" ]; then
+      local windowspath="$(dirname "$linuxpath" | xargs -i wslpath -aw {})"
+    else
+      echo "Invalid path"
+      return 1
+    fi
+
+    pwsh.exe -nolo -nonin -nopro -c Start-Process \""$windowspath"\"
+
   }
 
 else
