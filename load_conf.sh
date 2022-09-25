@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+# Identify commands existance
+command_exists () {
+	command -v "$1" &> /dev/null
+}
+
 # Default values for device detection
 export IS_WSL=false
 export IS_TERMUX=false
@@ -8,11 +13,11 @@ export IS_MAC=false
 export IS_GITBASH=false
 
 # Detect if running WSL
-if command -v /mnt/c/Windows/System32/cmd.exe &> /dev/null; then
+if command_exists /mnt/c/Windows/System32/cmd.exe; then
   export IS_WSL=true 
-elif command -v termux-setup-storage &> /dev/null; then
+elif command_exists termux-setup-storage; then
   export IS_TERMUX=true
-elif command -v /c/Windows/System32/cmd.exe &> /dev/null; then
+elif command_exists /c/Windows/System32/cmd.exe; then
   export IS_GITBASH=true
 fi
 

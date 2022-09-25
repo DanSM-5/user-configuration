@@ -39,27 +39,30 @@ detect_shell () {
     export IS_BASH=false
     export SHELL_NAME=zsh
     test -f "$user_conf_path/.zsh_conf" && source "$user_conf_path/.zsh_conf"
+
   elif [ -n "$BASH_VERSION" ]; then
     export IS_ZSH=false
     export IS_BASH=true
     export SHELL_NAME=bash
     test -f "$user_conf_path/.bash_conf" && source "$user_conf_path/.bash_conf"
+
   else
     echo "[WARNING]: NO VALID CONFIGURATION DETECTED!"
     export IS_ZSH=false
     export IS_BAHS=false
     export SHELL_NAME=unknown
+
   fi
 }
 
 set_linux () {
   # export IS_LINUX=true
-  if command -v "/home/linuxbrew/.linuxbrew/bin/brew" &> /dev/null; then
+  if command_exists "/home/linuxbrew/.linuxbrew/bin/brew"; then
     # Linux brew
     eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 
     # oh-my-posh requires brew
-    if command -v oh-my-posh &> /dev/null && test -f ~/omp-theme/jandedobbeleer.omp.v2.json; then
+    if command_exists oh-my-posh && test -f ~/omp-theme/jandedobbeleer.omp.v2.json; then
       eval "$(oh-my-posh --init --shell $SHELL_NAME --config ~/omp-theme/jandedobbeleer.omp.v2.json)"
     fi
 
@@ -88,7 +91,7 @@ set_wsl () {
 
 set_gitbash () {
   # Enable oh-my-posh if available
-  if command -v oh-my-posh &> /dev/null && test -f ~/omp-theme/jandedobbeleer.omp.v2.json; then
+  if command_exists oh-my-posh && test -f ~/omp-theme/jandedobbeleer.omp.v2.json; then
     eval "$(oh-my-posh --init --shell $SHELL_NAME --config ~/omp-theme/jandedobbeleer.omp.v2.json)"
   fi
 
@@ -106,7 +109,7 @@ set_termux () {
 set_mac () {
   # export IS_MAC=true
   export BASH_SILENCE_DEPRECATION_WARNING=1
-  if command -v brew &> /dev/null; then
+  if command_exists brew; then
     # NVM configuration
     export NVM_DIR="$HOME/.nvm"
     local nvm_path=$(brew --prefix nvm)
@@ -190,11 +193,11 @@ set_general_after () {
     source "$HOME/.usr_conf/utils/fzf-git.sh"
   fi
 
-  if command -v register-python-argcomplete &> /dev/null; then
+  if command_exists register-python-argcomplete; then
     eval "$(register-python-argcomplete pipx)"
   fi
 
-  if command -v starship &> /dev/null; then
+  if command_exists starship; then
     eval "$(starship init $SHELL_NAME)"
   fi
 
@@ -202,11 +205,11 @@ set_general_after () {
   [ -s "$HOME/.config/envman/load.sh" ] && source "$HOME/.config/envman/load.sh"
 
   # fzf support
-  if command -v rg &> /dev/null; then
+  if command_exists rg; then
     export FZF_DEFAULT_COMMAND='rg --files --no-ignore --hidden --glob "!node_modules" --glob "!.git" --follow'
   fi
 
-  if command -v fd &> /dev/null; then
+  if command_exists fd; then
     FD_OPTIONS="--follow --exclude .git --exclude node_modules"
     export FZF_CTRL_T_COMMAND="fd $FD_OPTIONS"
     export FZF_ALT_C_COMMAND="fd --type d $FD_OPTIONS"
@@ -221,7 +224,7 @@ set_general_after () {
     }
   fi
 
-  if command -v rga &> /dev/null; then
+  if command_exists rga; then
     rga-fzf() {
     RG_PREFIX="rga --files-with-matches"
     local file
@@ -237,7 +240,7 @@ set_general_after () {
           }
   fi
 
-  if command -v bat &> /dev/null; then
+  if command_exists bat; then
     export MANPAGER="sh -c 'col -bx | bat -l man -p'"
   fi
 }

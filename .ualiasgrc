@@ -444,6 +444,30 @@ gallery_dl_commd="gallery-dl"
 yt_dlp_commd="yt-dlp"
 mpv_commd='mpv'
 
+# Standard wrapper function names that should work on all platforms
+clipboard_pastew () {
+  "$clipboard_paste" "$@"
+}
+clipboard_copyw () {
+  "$clipboard_copy" "$@"
+}
+
+gallery-dlw () {
+  "$gallery_dl_commd" "$@"
+}
+
+yt-dlpw () {
+  "$yt_dlp_commd" "$@"
+}
+
+mpvw () {
+  "$mpv_commd" "$@"
+}
+
+webtorrentw () {
+  webtorrent "$@"
+}
+
 mpvp () {
   # mpv play
   # declare url=${*:-$(</dev/stdin)}
@@ -493,11 +517,6 @@ dwv () {
   "$yt_dlp_commd" "$vid_url"
 }
 
-# Standard wrapper name for mpv that should work on all platforms
-mpvw () {
-  "$mpv_commd" "$@"
-}
-
 # Wrapper for ytfzf to launch on windows mpv player
 mpvl () {
   local selection=$(ytfzf -L "$@")
@@ -509,18 +528,13 @@ mpvl () {
 yf () {
   # Set starting page with flag -p[n]
   local startpage=1
-  local linkOnly=false
   local direct_play=false
+  local selection=""
   for arg do
     shift
     if [[ "$arg" =~ "-p[0-9]+" ]]; then
       # Remove -p arg and use value as pages_start
       startpage="${arg:2}"
-      continue
-    elif [[ "$arg" = "-L" ]]; then
-      # -L is always called in this wrapper
-      # Detect it here to prevent playback
-      linkOnly=true
       continue
     elif [[ "$arg" = "--direct-play" ]]; then
       direct_play=true
@@ -529,31 +543,23 @@ yf () {
     set -- "$@" "$arg"
   done
 
-  local selection="$(pages_start="$startpage" ytfzf -L "$@")"
+  if [[ "$direct_play" = true ]]; then
+    selection="$(pages_start="$startpage" ytfzf -L "$@")"
 
-  if [ -z "$selection" ]; then
-    return 1 
-  fi
+    if [ -z "$selection" ]; then
+      return 1 
+    fi
 
-  if [[ "$linkOnly" = true ]]; then
-    echo "$selection"
-    return
-  elif [[ "$direct_play" = true ]]; then
     mpvp "$selection"
-  else
-    mpvw "$selection"
+    return
   fi
+
+  pages_start="$startpage" ytfzf "$@"
 }
 
 yfd () {
   yf --direct-play "$@"
 }
-
-# Standard wrapper name for webtorrent that should work on all platforms
-webtorrentw () {
-  webtorrent "$@"
-}
-
 
 play () {
   local url="$("$clipboard_paste")"
@@ -590,6 +596,18 @@ tplay () {
   webtorrentw --mpv "$url"
 }
 
+ocd () {
+  local filepath="$("$clipboard_paste" | tr -d "\r\n")"
+
+  if ! [[ -f "$filepath" ]] || ! [[ -d "$filepath" ]]; then
+    echo "None or wrong path provided"
+    return 1
+  fi
+
+  local location="$(realpath "$filepath")"
+  clipboard_copyw "$location"
+}
+
 if [ "$IS_WSL" = true ]; then
   clipboard_paste="pbpaste.exe"
   clipboard_copy="pbcopy.exe"
@@ -597,7 +615,7 @@ if [ "$IS_WSL" = true ]; then
   yt_dlp_commd="yt-dlp.exe"
   mpv_commd='mpv'
 
-  if command -v mpv &> /dev/null; then 
+  if command_exists mpv; then 
     if [ "$IS_ZSH" = true ] && [[ $(type mpv) =~ function ]]; then
       unset -f mpv
     elif [ "$IS_BASH" = true ] && [[ $(type -t mpv) == function ]]; then
@@ -606,14 +624,14 @@ if [ "$IS_WSL" = true ]; then
   fi
 
   # MPV wrapper for WSL
-  if ! command -v mpv &> /dev/null; then
-    if command -v mpv.com &> /dev/null; then
+  if ! command_exists mpv; then
+    if command_exists mpv.com; then
       mpv_commd="mpv.com"
       mpv () {
         mpv.com "$@" 
       }
 
-    elif command -v mpv.exe &> /dev/null; then
+    elif command_exists mpv.exe; then
       mpv_commd="mpv.exe"
       mpv () {
         mpv.exe "$@" 
@@ -622,14 +640,14 @@ if [ "$IS_WSL" = true ]; then
   fi
 
   # yt-dlp wrapper for WSL
-  if ! command -v yt-dlp &> /dev/null; then
+  if ! command_exists yt-dlp; then
     yt-dlp () {
       yt-dlp.exe "$@" 
     }
   fi
 
   # gallery-dl wrapper for WSL
-  if ! command -v gallery-dl &> /dev/null; then
+  if ! command_exists gallery-dl; then
     gallery-dl () {
       gallery-dl.exe "$@" 
     }
@@ -637,6 +655,46 @@ if [ "$IS_WSL" = true ]; then
 
   webtorrentw () {
     cmd.exe /c webtorrent "$@"
+  }
+
+  # Windows override of yf
+  yf () {
+    # Set starting page with flag -p[n]
+    local startpage=1
+    local linkOnly=false
+    local direct_play=false
+    for arg do
+      shift
+      if [[ "$arg" =~ "-p[0-9]+" ]]; then
+        # Remove -p arg and use value as pages_start
+        startpage="${arg:2}"
+        continue
+      elif [[ "$arg" = "-L" ]]; then
+        # -L is always called in this wrapper
+        # Detect it here to prevent playback
+        linkOnly=true
+        continue
+      elif [[ "$arg" = "--direct-play" ]]; then
+        direct_play=true
+        continue
+      fi
+      set -- "$@" "$arg"
+    done
+
+    local selection="$(pages_start="$startpage" ytfzf -L "$@")"
+
+    if [ -z "$selection" ]; then
+      return 1 
+    fi
+
+    if [[ "$linkOnly" = true ]]; then
+      echo "$selection"
+      return
+    elif [[ "$direct_play" = true ]]; then
+      mpvp "$selection"
+    else
+      mpvw "$selection"
+    fi
   }
 
   linuxToWindowsPath () {
@@ -676,38 +734,14 @@ if [ "$IS_WSL" = true ]; then
   }
 
 else
-  mpvp () {
-    declare url=${*:-$(</dev/stdin)}
-    if [ -n "$url" ]; then
-      yt-dlp -o - "$url" | mpv -
-    else
-      echo "No url provided"
-      (exit 1) && true
-    fi
-  }
 
-  yf () {
-    # Set starting page with flag -p
-    local startpage=1
-    # Remove -p
-    for arg do
-      shift
-      if [[ "$arg" =~ "-p[0-9]+" ]]; then
-        startpage="${arg:2}"
-        continue
-      fi
-      set -- "$@" "$arg"
-    done
-
-    pages_start="$startpage" ytfzf "$@"
-  }
 
   # function for compliancy
   mpvl () {
     ytfzf "$@"
   }
 
-  if [ $IS_TERMUX = true ]; then
+  if [ "$IS_TERMUX" = true ]; then
     alias tcopy="termux-clipboard-set"
     alias tpaste="termux-clipboard-get"
     clipboard_copy="termux-clipboard-set"
@@ -743,9 +777,10 @@ else
       fi
     }
 
-    play () {
-      termux-clipboard-get | mpv -
-    }
+  elif [ "$IS_MAC" = true ]; then
+
+    clipboard_copy="pbcopy"
+    clipboard_paste="pbpaste"
 
   fi
 fi
