@@ -36,6 +36,8 @@ fd-defaults () {
     --exclude ".vscode-server" \
     --exclude ".SpaceVim" \
     --exclude ".cache" \
+    --exclude ".bun" \
+    --exclude ".nvm" \
     --hidden \
     "$@"
 }
@@ -146,8 +148,8 @@ alias mkdr="mkdir -pv"
 alias ll='ls -alhF '
 alias la='ls -A '
 alias l='ls -CF '
-alias frm='\rm $(fd-defaults -tf -tx -tl | fzf-defaults --preview "bat --color=always {}")'
-alias frdr="rm -rf \$(fd-defaults -td -d 1 | fzf-defaults --preview \"ls --color=always -aF {} | sed '1d;2d;3d'\")"
+alias frm='\rm $(fd-defaults -tf -tx -tl | fzf-defaults --preview "bat --color=always --style=numbers {} ")'
+alias frdr="rm -rf \$(fd-defaults -td -d 1 | fzf-defaults --preview \"ls --color=always -aFL {} | sed '1d;2d;3d'\")"
 alias fzfp="fzf-defaults --preview 'bat --color=always --style=numbers --line-range=:500 {}'"
 alias pvim="vim --clean"
 
@@ -156,7 +158,7 @@ rfv () {
 }
 
 fll () {
-  local selection=$(fd-defaults -td | fzf-defaults --preview "bat -pp --color=always <<< \$(realpath {}); ls -aF  --color=always {} | sed '1d;2d'")
+  local selection=$(fd-defaults -td | fzf-defaults --preview "bat -pp --color=always <<< \$(echo \"Path: \$(realpath {})\"); ls -aFL --color=always {} | sed '1d;2d'")
   if [ -n "$selection" ]; then
     \ls -alhF  --color=always "$selection"
   fi
@@ -165,24 +167,24 @@ fll () {
 lff () {
   ls -la  |
     sed '1d;2d;3d' |
-    fzf-defaults --preview 'if [ -f {9..} ]; then bat --color=always {9..}; else bat -pp --color=always <<< $(realpath {9..}; ls -aF  --color=always {9..} | sed "1d;2d"); fi' |
+    fzf-defaults --preview 'if [ -f {9..} ]; then bat --color=always --style=numbers {9..}; else bat -pp --color=always <<< $(echo "Path: $(realpath {9..})"; ls -aFL --color=always {9..} | sed "1d;2d"); fi' |
     awk '{ print $9 }'
 }
 
 lf () {
   ls -a  |
     sed '1d;2d' |
-    fzf-defaults --preview 'if [ -f {} ]; then bat --color=always {}; else bat -pp --color=always <<< $(realpath {}; ls -aF  --color=always {} | sed "1d;2d"); fi'
+    fzf-defaults --preview 'if [ -f {} ]; then bat --color=always --style=numbers {}; else bat -pp --color=always <<< $(echo "Path: $(realpath {})"; ls -aFL --color=always {} | sed "1d;2d"); fi'
 }
 
 lfd () {
-  fd-defaults | fzf-defaults --preview 'if [ -f {} ]; then bat --color=always {}; else bat -pp --color=always <<< $(realpath {}; ls -aF  --color=always {} | sed "1d;2d"); fi'
+  fd-defaults | fzf-defaults --preview 'if [ -f {} ]; then bat --color=always --style=numbers {}; else bat -pp --color=always <<< $(echo "Path: $(realpath {})"; ls -aFL --color=always {} | sed "1d;2d"); fi'
 }
 
 # experimental
 lfa () {
   local selection=$(cd "/" && fd-defaults |
-    fzf-defaults --preview 'if [ -f {9..} ]; then bat --color=always {9..}; else bat -pp --color=always <<< $(realpath {9..}; ls -aF  --color=always {9..} | sed "1d;2d"); fi')
+    fzf-defaults --preview 'if [ -f {9..} ]; then bat --color=always --style=numbers {9..}; else bat -pp --color=always <<< $(realpath {9..}; ls -aFL --color=always {9..} | sed "1d;2d"); fi')
   echo "$selection"
 }
 
@@ -201,7 +203,7 @@ fcd () {
   selection=$(fd-defaults -tl -td "$pattern" "$location" |
     fzf-defaults --query "$query" \
       --header "(ctrl-/) Search in: $location" \
-      --preview "realpath {}; ls --color=always -aF  {} | sed '1d;2d'")
+      --preview "realpath {}; ls --color=always -aFL {} | sed '1d;2d'")
   if [ -z "$selection" ]; then
     return 1
   fi
@@ -216,7 +218,7 @@ fcdd () {
   selection=$(fd-defaults -tl -td |
     fzf-defaults \
       --query "$query" \
-      --preview "ls --color=always -aF  {} | sed '1d;2d'")
+      --preview "ls --color=always -aFL {} | sed '1d;2d'")
   if [ -n "$selection" ]; then
     cd $selection
   fi
@@ -225,7 +227,7 @@ fcdd () {
 fcda () {
   local selection=""
 
-  selection=$(cd / && fd-defaults -tl -td | fzf-defaults --preview "ls --color=always -aF  {} | sed '1d;2d'")
+  selection=$(cd / && fd-defaults -tl -td | fzf-defaults --preview "ls --color=always -aFL {} | sed '1d;2d'")
   if [ -n "$selection" ]; then
     cd $selection
   fi
@@ -244,7 +246,7 @@ fed () {
 
   local selection=$(fd-defaults -L -tf "$pattern" "$location" |
     fzf-defaults \
-      --preview "bat --color=always {}" \
+      --preview "bat --color=always --style=numbers {}" \
       --header "(ctrl-/) Search in: $location" \
       --query "$query")
   if [ -z "$selection" ]; then
@@ -259,7 +261,7 @@ fed () {
 fedd () {
   local query="${@:2}"
   local editor="${PREFERED_EDITOR:-vim}"
-  local selection=$(fd-defaults -L -tf | fzf-defaults --preview "bat --color=always {}" --query "$query")
+  local selection=$(fd-defaults -L -tf | fzf-defaults --preview "bat --color=always --style=numbers {}" --query "$query")
   if [ -z "$selection" ]; then
     return
   fi
@@ -315,7 +317,7 @@ qnv () {
   if [ -z "$quick_access" ]; then
     return
   fi
-  local selection=$(echo $quick_access | fzf-defaults --preview "ls --color=always -aF {} | sed '1d;2d'")
+  local selection=$(echo $quick_access | fzf-defaults --preview "ls --color=always -aFL {} | sed '1d;2d'")
   if [ -n "$selection" ]; then
     cd $selection
   fi
@@ -328,7 +330,7 @@ qed () {
     return
   fi
   local editor="$1"
-  local selection=$(echo $quick_edit | fzf-defaults --preview "bat --color=always {}")
+  local selection=$(echo $quick_edit | fzf-defaults --preview "bat --color=always --style=numbers {}")
   if [ -z "$selection" ]; then
     return
   fi
@@ -810,7 +812,7 @@ ptc () {
   selection=$(fd-defaults -tl -td -tf "$pattern" "$location" |
     fzf-defaults --query "$query" \
       --header "(ctrl-/) Search in: $location" \
-      --preview "realpath {}; ls --color=always -aF  {} | sed '1d;2d'")
+      --preview "realpath {}; ls --color=always -aFL  {} | sed '1d;2d'")
   if [ -z "$selection" ]; then
     return 1
   fi
