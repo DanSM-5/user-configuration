@@ -203,7 +203,7 @@ fcd () {
   selection=$(fd-defaults -tl -td "$pattern" "$location" |
     fzf-defaults --query "$query" \
       --header "(ctrl-/) Search in: $location" \
-      --preview "realpath {}; ls --color=always -aFL {} | sed '1d;2d'")
+      --preview "bat -pp --color=always <<< \$(echo \"Path: \$(realpath {})\"); ls --color=always -aFL {} | sed '1d;2d'")
   if [ -z "$selection" ]; then
     return 1
   fi
@@ -218,7 +218,7 @@ fcdd () {
   selection=$(fd-defaults -tl -td |
     fzf-defaults \
       --query "$query" \
-      --preview "ls --color=always -aFL {} | sed '1d;2d'")
+      --preview "bat -pp --color=always <<< \$(echo \"Path: \$(realpath {})\"); ls --color=always -aFL {} | sed '1d;2d'")
   if [ -n "$selection" ]; then
     cd $selection
   fi
@@ -227,7 +227,7 @@ fcdd () {
 fcda () {
   local selection=""
 
-  selection=$(cd / && fd-defaults -tl -td | fzf-defaults --preview "ls --color=always -aFL {} | sed '1d;2d'")
+  selection=$(cd / && fd-defaults -tl -td | fzf-defaults --preview "bat -pp --color=always <<< \$(echo \"Path: \$(realpath {})\"); ls --color=always -aFL {} | sed '1d;2d'")
   if [ -n "$selection" ]; then
     cd $selection
   fi
@@ -317,7 +317,7 @@ qnv () {
   if [ -z "$quick_access" ]; then
     return
   fi
-  local selection=$(echo $quick_access | fzf-defaults --preview "ls --color=always -aFL {} | sed '1d;2d'")
+  local selection=$(echo $quick_access | fzf-defaults --preview "bat -pp --color=always <<< \$(echo \"Path: \$(realpath {})\"); ls --color=always -aFL {} | sed '1d;2d'")
   if [ -n "$selection" ]; then
     cd $selection
   fi
@@ -809,10 +809,10 @@ ptc () {
   fi
 
   # old preview "ls --color=always -alhF {} | sed '1d;2d;3d'"
-  selection=$(fd-defaults -tl -td -tf "$pattern" "$location" |
+  selection=$(fd-defaults -tl -td -tf -L "$pattern" "$location" |
     fzf-defaults --query "$query" \
       --header "(ctrl-/) Search in: $location" \
-      --preview "realpath {}; ls --color=always -aFL  {} | sed '1d;2d'")
+      --preview "if [ -f {} ]; then bat -pp --color=always --style=numbers {}; else bat -pp --color=always <<< \$(echo \"Path: \$(realpath {})\"); ls --color=always -aFL  {} | sed '1d;2d'; fi")
   if [ -z "$selection" ]; then
     return 1
   fi
