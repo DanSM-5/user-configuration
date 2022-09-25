@@ -22,14 +22,20 @@ ualias="$user_conf_path/.ualiasrc"
 ualiasg="$user_conf_path/.ualiasgrc"
 
 fzf-defaults () {
+# --bind ctrl-/:toggle-preview \
   fzf --height 50% --min-height 20 --border \
-    --bind ctrl-/:toggle-preview \
+    --bind ctrl-/:toggle-preview,alt-up:preview-page-up,alt-down:preview-page-down \
     --header 'Press CTRL-/ to toggle preview' \
     "$@"
 }
 
 fd-defaults () {
-  fd --exclude ".git" --exclude "node_modules" \
+  fd --exclude ".git" \
+    --exclude "node_modules" \
+    --exclude ".npm" \
+    --exclude ".vscode-server" \
+    --exclude ".SpaceVim" \
+    --exclude ".cache" \
     --hidden \
     "$@"
 }
@@ -236,7 +242,7 @@ fed () {
     location="$HOME"
   fi
 
-  local selection=$(fd-defaults -tf "$pattern" "$location" |
+  local selection=$(fd-defaults -L -tf "$pattern" "$location" |
     fzf-defaults \
       --preview "bat --color=always {}" \
       --header "(ctrl-/) Search in: $location" \
@@ -253,7 +259,7 @@ fed () {
 fedd () {
   local query="${@:2}"
   local editor="${PREFERED_EDITOR:-vim}"
-  local selection=$(fd-defaults -tf | fzf-defaults --preview "bat --color=always {}" --query "$query")
+  local selection=$(fd-defaults -L -tf | fzf-defaults --preview "bat --color=always {}" --query "$query")
   if [ -z "$selection" ]; then
     return
   fi
@@ -431,12 +437,158 @@ ex () {
   fi
 }
 
-# Clipboard wrappers
+# System executables
 clipboard_paste=""
 clipboard_copy=""
 gallery_dl_commd="gallery-dl"
 yt_dlp_commd="yt-dlp"
 mpv_commd='mpv'
+
+mpvp () {
+  # mpv play
+  # declare url=${*:-$(</dev/stdin)}
+  local use_stdin=false
+  for arg do
+    shift
+    if [[ "$arg" = "-" ]]; then
+      # Remove - arg
+      use_stdin=true
+      continue
+    fi
+    set -- "$@" "$arg"
+  done
+
+  if [ "$use_stdin" = true ]; then
+
+    read -t 5 url
+    if [ -z "$url" ]; then
+      echo "No url provided"
+      (exit 1) && true
+    fi
+
+    "$yt_dlp_commd" -o - "$url" | "$mpv_commd" --cache "${@:2}"  -
+  elif [ -n "$1" ]; then
+    "$yt_dlp_commd" -o - "$1" | "$mpv_commd" --cache "${@:2}"  -
+  else
+    echo "No url provided"
+    (exit 1) && true
+  fi
+}
+
+dwi () {
+  local img_url="$("$clipboard_paste")"
+  if [ -z "$img_url" ]; then
+    echo "No image url"
+    return 1
+  fi
+  "$gallery_dl_commd" "$img_url"
+}
+
+dwv () {
+  local vid_url="$("$clipboard_paste")"
+  if [ -z "$vid_url" ]; then
+    echo "No video url"
+    return 1
+  fi
+  "$yt_dlp_commd" "$vid_url"
+}
+
+# Standard wrapper name for mpv that should work on all platforms
+mpvw () {
+  "$mpv_commd" "$@"
+}
+
+# Wrapper for ytfzf to launch on windows mpv player
+mpvl () {
+  local selection=$(ytfzf -L "$@")
+  if [ -n "$selection" ]; then
+    "$mpv_commd" "$selection"
+  fi
+}
+
+yf () {
+  # Set starting page with flag -p[n]
+  local startpage=1
+  local linkOnly=false
+  local direct_play=false
+  for arg do
+    shift
+    if [[ "$arg" =~ "-p[0-9]+" ]]; then
+      # Remove -p arg and use value as pages_start
+      startpage="${arg:2}"
+      continue
+    elif [[ "$arg" = "-L" ]]; then
+      # -L is always called in this wrapper
+      # Detect it here to prevent playback
+      linkOnly=true
+      continue
+    elif [[ "$arg" = "--direct-play" ]]; then
+      direct_play=true
+      continue
+    fi
+    set -- "$@" "$arg"
+  done
+
+  local selection="$(pages_start="$startpage" ytfzf -L "$@")"
+
+  if [ -z "$selection" ]; then
+    return 1 
+  fi
+
+  if [[ "$linkOnly" = true ]]; then
+    echo "$selection"
+    return
+  elif [[ "$direct_play" = true ]]; then
+    mpvp "$selection"
+  else
+    mpvw "$selection"
+  fi
+}
+
+yfd () {
+  yf --direct-play "$@"
+}
+
+# Standard wrapper name for webtorrent that should work on all platforms
+webtorrentw () {
+  webtorrent "$@"
+}
+
+
+play () {
+  local url="$("$clipboard_paste")"
+  if [ -z "$url" ]; then
+    echo "No url in clipboard"
+    return 1
+  fi
+
+  if [[ "$url" =~ ".torrent" ]] ||
+    [[ "$url" =~ "magnet:" ]] ||
+    [[ "$url" =~ "webtorrent://" ]] ||
+    [[ "$url" =~ "peerflix://" ]]; then
+    webtorrentw --mpv "$url"
+  else
+    mpvw "$url"
+  fi
+}
+
+plpp () {
+  local url="$("$clipboard_paste")"
+  if [ -z "$url" ]; then
+    echo "No url in clipboard"
+    return 1
+  fi
+  mpvp "$url"
+}
+
+tplay () {
+  local url="$("$clipboard_paste")"
+  if [ -z "$url" ]; then
+    echo "No url in clipboard"
+    return 1
+  fi
+  webtorrentw --mpv "$url"
+}
 
 if [ "$IS_WSL" = true ]; then
   clipboard_paste="pbpaste.exe"
@@ -483,132 +635,8 @@ if [ "$IS_WSL" = true ]; then
     }
   fi
 
-  dwi () {
-    local img_url="$("$clipboard_paste")"
-    if [ -z "$img_url" ]; then
-      echo "No image url"
-      return 1
-    fi
-    "$gallery_dl_commd" "$img_url"
-  }
-
-  dwv () {
-    local vid_url="$("$clipboard_paste")"
-    if [ -z "$vid_url" ]; then
-      echo "No video url"
-      return 1
-    fi
-    "$yt_dlp_commd" "$vid_url"
-  }
-
-  # export play="yt-dlp.exe -o - $1 | mpv.com -"
-  mpvw () {
-    "$mpv_commd" "$@"
-  }
-
-  mpvp () {
-    # mpv play
-    # declare url=${*:-$(</dev/stdin)}
-    local use_stdin=false
-    for arg do
-      shift
-      if [[ "$arg" = "-" ]]; then
-        # Remove -p arg and use value as pages_start
-        use_stdin=true
-        continue
-      fi
-      set -- "$@" "$arg"
-    done
-
-    if [ "$use_stdin" = true ]; then
-
-      read -t 5 url
-      if [ -z "$url" ]; then
-        echo "No url provided"
-        (exit 1) && true
-      fi
-
-      yt-dlp.exe -o - "$url" | "$mpv_commd" --cache "${@:2}"  -
-    elif [ -n "$1" ]; then
-      yt-dlp.exe -o - "$1" | "$mpv_commd" --cache "${@:2}"  -
-    else
-      echo "No url provided"
-      (exit 1) && true
-   fi
-  }
-
-  # Wrapper for ytfzf to launch on windows mpv player
-  mpvl () {
-    local selection=$(ytfzf -L "$@")
-    if [ -n "$selection" ]; then
-      mpv "$selection"
-    fi
-  }
-
-  play () {
-    local url="$("$clipboard_paste")"
-    if [ -z "$url" ]; then
-      echo "No url in clipboard"
-      return 1
-    fi
-
-    if [[ "$url" =~ ".torrent" ]] ||
-      [[ "$url" =~ "magnet:" ]] ||
-      [[ "$url" =~ "webtorrent://" ]] ||
-      [[ "$url" =~ "peerflix://" ]]; then
-      cmd.exe /c webtorrent --mpv "$url"
-    else
-      mpvw "$url"
-    fi
-  }
-
-  plpp () {
-    local url="$("$clipboard_paste")"
-    if [ -z "$url" ]; then
-      echo "No url in clipboard"
-      return 1
-    fi
-    mpvp "$url"
-  }
-
-  tplay () {
-    local url="$("$clipboard_paste")"
-    if [ -z "$url" ]; then
-      echo "No url in clipboard"
-      return 1
-    fi
-    cmd.exe /c webtorrent --mpv "$url"
-  }
-
-  yf () {
-    # Set starting page with flag -p
-    local startpage=1
-    local linkOnly=false
-    for arg do
-      shift
-      if [[ "$arg" =~ "-p[0-9]+" ]]; then
-        # Remove -p arg and use value as pages_start
-        startpage="${arg:2}"
-        continue
-      elif [[ $arg = "-L" ]]; then
-        # -L is always called in this wrapper
-        # Detect it here to prevent playback
-        linkOnly=true
-        continue
-      fi
-      set -- "$@" "$arg"
-    done
-
-    local selection="$(pages_start="$startpage" ytfzf -L "$@")"
-
-    if [[ "$linkOnly" = true ]]; then
-      echo "$selection"
-      return
-    fi
-
-    if [ -n "$selection" ]; then
-      mpvw "$selection"
-    fi
+  webtorrentw () {
+    cmd.exe /c webtorrent "$@"
   }
 
   linuxToWindowsPath () {
@@ -686,9 +714,29 @@ else
     clipboard_paste="termux-clipboard-get"
     # termux mpv function wrapper
     mpv () {
-      declare url=${*:-$(</dev/stdin)}
-      if [ -n "$url" ]; then
+      local use_stdin=false
+
+      for arg do
+        shift
+        if [[ "$arg" = "-" ]]; then
+          # Remove -p arg and use value as pages_start
+          use_stdin=true
+          continue
+        fi
+        set -- "$@" "$arg"
+      done
+
+      if [ "$use_stdin" = true ]; then
+
+        read -t 5 url
+        if [ -z "$url" ]; then
+          echo "No url provided"
+          (exit 1) && true
+        fi
+
         am start --user 0 -a android.intent.action.VIEW -d "$url" is.xyz.mpv/.MPVActivity
+      elif [ -n "$1" ]; then
+        am start --user 0 -a android.intent.action.VIEW -d "$@" is.xyz.mpv/.MPVActivity
       else
         echo "No url provided"
         (exit 1) && true
@@ -696,7 +744,7 @@ else
     }
 
     play () {
-      termux-clipboard-get | mpv
+      termux-clipboard-get | mpv -
     }
 
   fi
