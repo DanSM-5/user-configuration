@@ -23,6 +23,16 @@ function eal { nvim "$user_conf_path\.ualiasrc.ps1" }
 function ega { nvim "$user_conf_path\.ualiasgrc.ps1" }
 function evc { nvim "$user_conf_path\init.toml" }
 
+function getPsFzfOptions {
+  $path = $PWD.ProviderPath.Replace('\', '/')
+  $psFzfPreviewScript = "$(scoop prefix PSFzf)/helpers/PsFzfTabExpansion-Preview.ps1"
+  $psFzfOptions = @{
+    Preview = $("pwsh -NoProfile -NonInteractive -NoLogo -File \""$psFzfPreviewScript\"" \""" + $path + "\"" {}" );
+    Bind = 'ctrl-/:toggle-preview','alt-up:preview-page-up','alt-down:preview-page-down'
+  }
+  return $psFzfOptions
+}
+
 # function fzf-defaults {
 #   [CmdletBinding()]
 #   param(
@@ -161,10 +171,19 @@ function ... {
   cd ../..
 }
 
+function rfv {
+  if ($args) {
+    Invoke-PsFzfRipgrep "$args"
+  } else {
+    Invoke-PsFzfRipgrep
+  }
+}
+
 function fcd () {
   $location = $args[0] ?? "$HOME"
   $query = $args[1..$args.length]
   $pattern = "."
+  $options = getPsFzfOptions
 
   if ( -not (Test-Path $location) ) {
     $pattern = "$location"
@@ -177,10 +196,9 @@ function fcd () {
       --hidden -tl -td `
       "$pattern" "$location" |
     Invoke-Fzf -Height 50% -MinHeight 20 -Border `
-      -Bind ctrl-/:toggle-preview `
-      -Preview "ls {}" `
       -Header "(ctrl-/) Search in: $location" `
-      -Query "$query"
+      -Query "$query" `
+      @options
     )"
 
   if ((-not $selection) -or (-not (Test-Path $selection))) {
@@ -191,16 +209,18 @@ function fcd () {
 }
 
 function fcdd () {
-  $query = "$args"
+  $pattern = $args[0] ?? '.'
+  $query = $args[1..$args.length]
+  $options = getPsFzfOptions
+
   $selection = "$(
     fd --exclude ".git" `
       --exclude "node_modules" `
-      --hidden -tl -td |
+      --hidden -tl -td "$pattern" |
     Invoke-Fzf -Height 50% -MinHeight 20 -Border `
-      -Bind ctrl-/:toggle-preview `
       -Header 'Press CTRL-/ to toggle preview' `
-      -Preview "ls {}" `
-      -Query "$query"
+      -Query "$query" `
+      @options
     )"
 
   if ((-not $selection) -or (-not (Test-Path $selection))) {
@@ -439,6 +459,7 @@ function fed () {
   $query = $args[2..$args.length]
   $pattern = "."
   $editor = "$env:PREFERED_EDITOR" ?? 'vim'
+  $options = getPsFzfOptions
 
   if ( -not (Test-Path $location) ) {
     $pattern = "$location"
@@ -451,10 +472,9 @@ function fed () {
       --hidden -tf `
       "$pattern" "$location" |
     Invoke-Fzf -Height 50% -MinHeight 20 -Border `
-      -Bind ctrl-/:toggle-preview `
-      -Preview "bat --color=always {}" `
       -Header "(ctrl-/) Search in: $location" `
-      -Query "$query"
+      -Query "$query" `
+      @options
   )"
 
   if ((-not $selection) -or (-not (Test-Path $selection))) {
@@ -471,16 +491,18 @@ function fed () {
 function fedd () {
   $query = $args[1..$args.length]
   $editor = "$env:PREFERED_EDITOR" ?? 'vim'
+  $options = getPsFzfOptions
   $selection = "$(
     fd --exclude ".git" `
       --exclude "node_modules" `
       --hidden -tf |
     Invoke-Fzf -Height 50% -MinHeight 20 -Border `
-      -Bind ctrl-/:toggle-preview `
-      -Preview "bat --color=always {}" `
       -Header "(ctrl-/) Search in: $location" `
-      -Query "$query"
+      -Query "$query" `
+      @options
     )"
+  # -Bind ctrl-/:toggle-preview `
+# -Preview "bat --color=always {}" `
 
   if ((-not $selection) -or (-not (Test-Path $selection))) {
     return
@@ -515,6 +537,7 @@ function ptc () {
   $location = $args[0] ?? "$HOME"
   $query = $args[1..$args.length]
   $pattern = "."
+  $options = getPsFzfOptions
 
   if ( -not (Test-Path $location) ) {
     $pattern = "$location"
@@ -527,10 +550,9 @@ function ptc () {
       --hidden -tl -td -tf `
       "$pattern" "$location" |
     Invoke-Fzf -Height 50% -MinHeight 20 -Border `
-      -Bind ctrl-/:toggle-preview `
-      -Preview "ls {}" `
       -Header "(ctrl-/) Search in: $location" `
-      -Query "$query"
+      -Query "$query" `
+      @options
     )"
 
   if ((-not $selection) -or (-not (Test-Path $selection))) {
