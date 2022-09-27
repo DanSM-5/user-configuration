@@ -180,7 +180,7 @@ function rfv {
 }
 
 function fcd () {
-  $location = $args[0] ?? "$HOME"
+  $location = if ($args[0]) { $args[0] } else { "$HOME" }
   $query = $args[1..$args.length]
   $pattern = "."
   $options = getPsFzfOptions
@@ -189,6 +189,8 @@ function fcd () {
     $pattern = "$location"
     $location = "$HOME"
   }
+
+  $location = if ("$location" -eq "~") { "$HOME" } else { "$location" }
 
   $selection = "$(
     fd --exclude ".git" `
@@ -209,7 +211,7 @@ function fcd () {
 }
 
 function fcdd () {
-  $pattern = $args[0] ?? '.'
+  $pattern = if ($args[0]) { $args[0] } else { "." }
   $query = $args[1..$args.length]
   $options = getPsFzfOptions
 
@@ -222,6 +224,38 @@ function fcdd () {
       -Query "$query" `
       @options
     )"
+
+  if ((-not $selection) -or (-not (Test-Path $selection))) {
+    return
+  }
+
+  cd "$selection"
+}
+
+function fcde () {
+  $location = if ($args[0]) { $args[0] } else { "." }
+  $pattern = if ($args[1]) { $args[1] } else { "." }
+  $query = $args[2..$args.length]
+  $options = getPsFzfOptions
+
+  if ( -not (Test-Path $location) ) {
+    echo "Invalid location. Defaulting to cwd."
+    $location = "$(pwd)"
+  }
+
+  $location = if ("$location" -eq "~") { "$HOME" } else { "$location" }
+
+  $selection = "$(
+    fd --exclude '.git' `
+      --exclude 'node_modules' `
+      --hidden -L -tf "$pattern" "$location" |
+    % { Split-Path "$_" } |
+    Sort-Object -Unique |
+    Invoke-Fzf -Height 50% -MinHeight 20 -Border `
+      -Header 'Press CTRL-/ to toggle preview' `
+      -Query "$query" `
+      @options
+  )"
 
   if ((-not $selection) -or (-not (Test-Path $selection))) {
     return
@@ -466,6 +500,8 @@ function fed () {
     $location = "$HOME"
   }
 
+  $location = if ("$location" -eq "~") { "$HOME" } else { "$location" }
+
   $selection = "$(
     fd --exclude ".git" `
       --exclude "node_modules" `
@@ -492,6 +528,7 @@ function fedd () {
   $query = $args[1..$args.length]
   $editor = "$env:PREFERED_EDITOR" ?? 'vim'
   $options = getPsFzfOptions
+
   $selection = "$(
     fd --exclude ".git" `
       --exclude "node_modules" `
@@ -528,7 +565,8 @@ function ocd () {
   if ( (Get-Item "$filepath") -is [System.IO.DirectoryInfo] ) { # Is directory
     $directory = "$filepath"
   } else {
-    $directory = Get-Item "$filepath" | Select-Object DirectoryName | % { $_.DirectoryName }
+    # $directory = Get-Item "$filepath" | Select-Object DirectoryName | % { $_.DirectoryName }
+    $directory = Split-Path "$filepath"
   }
   Start-Process "$directory"
 }

@@ -219,9 +219,37 @@ fcdd () {
     fzf-defaults \
       --query "$query" \
       --preview "bat -pp --color=always <<< \$(echo \"Path: \$(realpath {})\"); ls --color=always -aFL {} | sed '1d;2d'")
-  if [ -n "$selection" ]; then
-    cd $selection
+
+  if [ -z "$selection" ]; then
+    return 1
   fi
+
+  cd $selection
+}
+
+fcde () {
+  local location="${1:-.}"
+  local pattern="${2:-.}"
+  local query="${@:3}"
+
+  if ! [ -d "$location" ]; then
+    echo "Invalid location. Defaulting to cwd."
+    location="$(pwd)"
+  fi
+
+  local selection=$(
+    fd-defaults -L -tf "$pattern" "$location" \
+      -x dirname {} |
+    sort -u |
+    fzf-defaults \
+      --preview "ls -aFL {} | sed '1d;2d'" \
+      --header "(ctrl-/) Search in: $location" \
+      --query "$query")
+  if [ -z "$selection" ]; then
+    return
+  fi
+
+  cd "$selection"
 }
 
 fcda () {
