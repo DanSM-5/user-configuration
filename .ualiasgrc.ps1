@@ -558,17 +558,35 @@ function fmpv {
   mpv $selection
 }
 
-function ocd () {
+function getClipboardPath {
   $filepath = "$(pbpaste)"
-  $directory
-  if ( -not "$filepath" -or -not (Test-Path "$filepath") ) { echo "Invalid Path"; return }
+  $directory = ""
+  if ( -not "$filepath" -or -not (Test-Path "$filepath") ) { return }
   if ( (Get-Item "$filepath") -is [System.IO.DirectoryInfo] ) { # Is directory
     $directory = "$filepath"
   } else {
     # $directory = Get-Item "$filepath" | Select-Object DirectoryName | % { $_.DirectoryName }
     $directory = Split-Path "$filepath"
   }
-  Start-Process "$directory"
+  return "$directory"
+}
+
+function ccd () {
+  $filepath = getClipboardPath
+  if ( -not "$filepath" ) {
+    echo "Invalid path"
+    return
+  }
+  cd "$filepath"
+}
+
+function ocd () {
+  $filepath = getClipboardPath
+  if ( -not "$filepath" ) {
+    echo "Invalid path"
+    return
+  }
+  Start-Process "$filepath"
 }
 
 function ptc () {

@@ -482,6 +482,10 @@ clipboard_copyw () {
   "$clipboard_copy" "$@"
 }
 
+file_explorer_open () {
+  :
+}
+
 gallery-dlw () {
   "$gallery_dl_commd" "$@"
 }
@@ -626,16 +630,42 @@ tplay () {
   webtorrentw --mpv "$url"
 }
 
-ocd () {
+getClipboardPath () {
   local filepath="$("$clipboard_paste" | tr -d "\r\n")"
 
-  if ! [[ -f "$filepath" ]] || ! [[ -d "$filepath" ]]; then
+  if [ -z "$filepath" ]; then
+    echo ""
+    return
+  fi
+
+  if ! [[ -f "$filepath" ]] && ! [[ -d "$filepath" ]]; then
+    echo ""
+    return
+  fi
+
+  echo "$(realpath "$filepath")"
+}
+
+ccd () {
+  local filepath="$(getClipboardPath)"
+
+  if [[ -z "$filepath" ]]; then
     echo "None or wrong path provided"
     return 1
   fi
 
-  local location="$(realpath "$filepath")"
-  clipboard_copyw "$location"
+  cd "$filepath"
+}
+
+ocd () {
+  local filepath="$(getClipboardPath)"
+
+  if [[ -z "$filepath" ]]; then
+    echo "None or wrong path provided"
+    return 1
+  fi
+
+  file_explorer_open "$filepath"
 }
 
 if [ "$IS_WSL" = true ]; then
@@ -644,6 +674,10 @@ if [ "$IS_WSL" = true ]; then
   gallery_dl_commd="gallery-dl.exe"
   yt_dlp_commd="yt-dlp.exe"
   mpv_commd='mpv'
+
+  file_explorer_open () {
+    pwsh.exe -nolo -nonin -nopro -c Start-Process \""$@"\"
+  }
 
   if command_exists mpv; then 
     if [ "$IS_ZSH" = true ] && [[ $(type mpv) =~ function ]]; then
@@ -735,11 +769,12 @@ if [ "$IS_WSL" = true ]; then
     echo "$(wslpath -au "$1")"
   }
 
-  ocd () {
-    local filepath="$("$clipboard_paste" | tr -d "\r\n" )"
+  getClipboardPath () {
+    local filepath="$("$clipboard_paste" | tr -d "\r\n")"
 
     if [ -z "$filepath" ]; then
-      return 1
+      echo ""
+      return
     fi
 
     local linuxpath="" windowspath=""
@@ -751,20 +786,53 @@ if [ "$IS_WSL" = true ]; then
     fi
 
     if [ -d "$linuxpath" ]; then
-      local windowspath="$(wslpath -aw "$linuxpath")"
+      windowspath="$(wslpath -aw "$linuxpath")"
     elif [ -f "$linuxpath" ]; then
-      local windowspath="$(dirname "$linuxpath" | xargs -i wslpath -aw {})"
-    else
-      echo "Invalid path"
+      windowspath="$(dirname "$linuxpath" | xargs -i wslpath -aw {})"
+    fi
+
+    echo "$windowspath"
+  }
+
+  ccd () {
+    local filepath="$(getClipboardPath)"
+
+    if [[ -z "$filepath" ]]; then
+      echo "None or wrong path provided"
       return 1
     fi
 
-    pwsh.exe -nolo -nonin -nopro -c Start-Process \""$windowspath"\"
-
+    cd "$(wslpath -au "$filepath")"
   }
 
-else
+  # ocd () {
+  #   local filepath="$("$clipboard_paste" | tr -d "\r\n" )"
 
+  #   if [ -z "$filepath" ]; then
+  #     return 1
+  #   fi
+
+  #   local linuxpath="" windowspath=""
+
+  #   if [[ -f "$filepath" ]] || [[ -d "$filepath" ]]; then # Valid unix path
+  #     linuxpath="$(wslpath -au "$(wslpath -aw $filepath)")"
+  #   else # win path
+  #     linuxpath="$(wslpath -au "$filepath")"
+  #   fi
+
+  #   if [ -d "$linuxpath" ]; then
+  #     local windowspath="$(wslpath -aw "$linuxpath")"
+  #   elif [ -f "$linuxpath" ]; then
+  #     local windowspath="$(dirname "$linuxpath" | xargs -i wslpath -aw {})"
+  #   else
+  #     echo "Invalid path"
+  #     return 1
+  #   fi
+
+  #   pwsh.exe -nolo -nonin -nopro -c Start-Process \""$windowspath"\"
+  # }
+
+else
 
   # function for compliancy
   mpvl () {
@@ -776,6 +844,15 @@ else
     alias tpaste="termux-clipboard-get"
     clipboard_copy="termux-clipboard-set"
     clipboard_paste="termux-clipboard-get"
+
+    clipboard_copyw () {
+      termux-clipboard-set "$@"
+    }
+
+    clipboard_pastew () {
+      termux-clipboard-get "$@"
+    }
+
     # termux mpv function wrapper
     mpv () {
       local use_stdin=false
@@ -806,7 +883,21 @@ else
         (exit 1) && true
       fi
     }
+  elif [ "$IS_LINUX" = true ]; then
+    clipboard_copyw () {
+      xsel -ib "$@"
+    }
 
+    clipboard_pastew () {
+      xsel -ob "$@"
+    }
+
+    clipboard_copy="clipboard_copyw"
+    clipboard_paste="clipboard_pastew"
+
+    file_explorer_open () {
+      xdg-open "$@"
+    }
   elif [ "$IS_MAC" = true ]; then
 
     clipboard_copy="pbcopy"
