@@ -451,7 +451,44 @@ function With-Env () {
   #>
 }
 
-function play () { mpv $(pbpaste) }
+function mpvp () {
+  $url = $args[0]
+  $extra_args = $args[1..$args.length]
+
+  $command_str = "yt-dlp -o - ""$url"" | mpv --cache " + $extra_args + " -"
+  cmd /c "$command_str"
+}
+
+function plpp () {
+  $url = "$(pbpaste)"
+
+  if ( -not "$url" ) {
+    echo "Invalid url"
+  }
+
+  mpvp "$url"
+}
+
+function play () {
+  $url = "$(pbpaste)"
+
+  if ( -not "$url" ) {
+    echo "Invalid url"
+  }
+
+  if (
+    "$url".contains('.torrent') -or
+    "$url".contains('magnet:') -or
+    "$url".contains('webtorrent://') -or
+    "$url".contains('peerflix://')
+  ) {
+    webtorrent -u 1 --mpv "$url"
+  } else {
+    mpv "$url"
+  }
+
+}
+
 function tplay ([Switch] $download = $false) {
   if ($download) {
     webtorrent --mpv "$(pbpaste)"
