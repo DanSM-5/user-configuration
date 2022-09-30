@@ -21,7 +21,7 @@ function ecf { nvim "$user_conf_path\.uconfrc.ps1" }
 function egc { nvim "$user_conf_path\.uconfgrc.ps1" }
 function eal { nvim "$user_conf_path\.ualiasrc.ps1" }
 function ega { nvim "$user_conf_path\.ualiasgrc.ps1" }
-function evc { nvim "$user_conf_path\init.toml" }
+function evc { nvim "$HOME\.SpaceVim.d\init.toml" }
 
 function getPsFzfOptions {
   $path = $PWD.ProviderPath.Replace('\', '/')
