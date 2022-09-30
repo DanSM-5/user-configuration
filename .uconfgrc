@@ -133,7 +133,7 @@ set_mac () {
 
 set_general () {
   export PREFERED_EDITOR='vim'
-  if command_exist nvim; then
+  if command_exists nvim; then
     export PREFERED_EDITOR='nvim'
   fi
  
