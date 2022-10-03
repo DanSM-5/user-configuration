@@ -132,7 +132,11 @@ set_mac () {
 
 
 set_general () {
-  export PREFERED_EDITOR='nvim'
+  export PREFERED_EDITOR='vim'
+  if command_exists nvim; then
+    export PREFERED_EDITOR='nvim'
+  fi
+ 
   export EDITOR="$PREFERED_EDITOR"
   export COLORTERM='truecolor'
   export BAT_THEME='Dracula'
