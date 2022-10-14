@@ -73,7 +73,7 @@ $fgs_command = @'
 
 function fgf () {
   if ($script:is_in_git_repo) { return }
-  & "$script:__gitbash__" -c $script:fgf_command
+  & "$script:__gitbash__" --norc -ic $script:fgf_command
   # & "$script:__gitbash__" -c @'
   #   git -c color.status=always status --short |
   #   fzf --height 50% --min-height 20 --border --bind ctrl-/:toggle-preview -m --ansi --nth 2..,.. \
@@ -85,16 +85,16 @@ function fgf () {
 function fgb () {
   if ($script:is_in_git_repo) { return }
   # requires -l flag for sub-shell process
-  & "$script:__gitbash__" -lc $script:fgb_command
+  & "$script:__gitbash__" --norc -ilc $script:fgb_command
 
   # require to escape the string twice in pwsh and once in gitbash
-  # iex $("& `"$__gitbash__`" -lc `"git branch -a --color=always | grep -v '/HEAD\s' | sort | fzf --height 50% --min-height 20 --border --bind ctrl-/:toggle-preview --ansi --multi --tac --preview 'git log --oneline --graph --date=short --color=always --pretty=\```"format:%C(auto)%cd %h%d %s\```" ```$(sed s/^..// <<< {} | cut -d\```" \```" -f1)' | sed 's/^..//' | cut -d' ' -f1 | sed 's#^remotes##'`"")
+  # iex $("& `"$__gitbash__`" -ilc `"git branch -a --color=always | grep -v '/HEAD\s' | sort | fzf --height 50% --min-height 20 --border --bind ctrl-/:toggle-preview --ansi --multi --tac --preview 'git log --oneline --graph --date=short --color=always --pretty=\```"format:%C(auto)%cd %h%d %s\```" ```$(sed s/^..// <<< {} | cut -d\```" \```" -f1)' | sed 's/^..//' | cut -d' ' -f1 | sed 's#^remotes##'`"")
 
   # only one escape for pwsh and one for gitbash
-  # & "$testbash" -lc "git branch -a --color=always | grep -v '/HEAD\s' | sort | fzf --height 50% --min-height 20 --border --bind ctrl-/:toggle-preview --ansi --multi --tac --preview 'git log --oneline --graph --date=short --color=always --pretty=\`"format:%C(auto)%cd %h%d %s\`" `$(sed s/^..// <<< {} | cut -d\`" \`" -f1)' | sed 's/^..//' | cut -d' ' -f1 | sed 's#^remotes##'"
+  # & "$testbash" -ilc "git branch -a --color=always | grep -v '/HEAD\s' | sort | fzf --height 50% --min-height 20 --border --bind ctrl-/:toggle-preview --ansi --multi --tac --preview 'git log --oneline --graph --date=short --color=always --pretty=\`"format:%C(auto)%cd %h%d %s\`" `$(sed s/^..// <<< {} | cut -d\`" \`" -f1)' | sed 's/^..//' | cut -d' ' -f1 | sed 's#^remotes##'"
 
   # Final version
-  # & "$script:__gitbash__" -lc @'
+  # & "$script:__gitbash__" -ilc @'
   #   git branch -a --color=always | grep -v '/HEAD\s' | sort |
   #     fzf --height 50% --min-height 20 --border --bind ctrl-/:toggle-preview --ansi --multi --tac \
   #       --preview 'git log --oneline --graph --date=short --color=always --pretty=\"format:%C(auto)%cd %h%d %s\" $(sed s/^..// <<< {} | cut -d\" \" -f1)' |
@@ -106,7 +106,7 @@ function fgb () {
 
 function fgt () {
   if ($script:is_in_git_repo) { return }
-  & "$script:__gitbash__" -lc $script:fgt_command
+  & "$script:__gitbash__" --norc -ilc $script:fgt_command
   # & "$script:__gitbash__" -c @'
   # git tag --sort -version:refname |
   # fzf --height 50% --min-height 20 --border --bind ctrl-/:toggle-preview --multi --preview-window right:70% \
@@ -116,8 +116,8 @@ function fgt () {
 
 function fgh () {
   if ($script:is_in_git_repo) { return }
-  & "$script:__gitbash__" -lc $script:fgh_command
-  # & "$script:__gitbash__" -lc @'
+  & "$script:__gitbash__" --norc -ilc $script:fgh_command
+  # & "$script:__gitbash__" -ilc @'
   #   git log --date=short --format='%C(green)%C(bold)%cd %C(auto)%h%d %s (%an)' --graph --color=always |
   #   fzf --height 50% --min-height 20 --border --bind ctrl-/:toggle-preview --ansi --no-sort --reverse --multi --bind 'ctrl-s:toggle-sort' \
   #     --header 'Press CTRL-S to toggle sort' \
@@ -128,8 +128,8 @@ function fgh () {
 
 function fgha () {
   if ($script:is_in_git_repo) { return }
-  & "$script:__gitbash__" -lc $script:fgha_command
-  # & "$script:__gitbash__" -lc @'
+  & "$script:__gitbash__" --norc -ilc $script:fgha_command
+  # & "$script:__gitbash__" -ilc @'
   #   git log --all --date=short --format='%C(green)%C(bold)%cd %C(auto)%h%d %s (%an)' --graph --color=always |
   #   fzf --height 50% --min-height 20 --border --bind ctrl-/:toggle-preview --ansi --no-sort --reverse --multi --bind 'ctrl-s:toggle-sort' \
   #     --header 'Press CTRL-S to toggle sort' \
@@ -140,7 +140,7 @@ function fgha () {
 
 function fgr () {
   if ($script:is_in_git_repo) { return }
-  & "$script:__gitbash__" -lc $script:fgr_command
+  & "$script:__gitbash__" --norc -ilc $script:fgr_command
   # & "$script:__gitbash__" -c @'
   #   git remote -v | awk '{print $1 \"\t\" $2}' | uniq |
   #   fzf --height 50% --min-height 20 --border --bind ctrl-/:toggle-preview --tac \
@@ -151,7 +151,7 @@ function fgr () {
 
 function fgss () {
   if ($script:is_in_git_repo) { return }
-  & "$script:__gitbash__" -lc $script:fgs_command
+  & "$script:__gitbash__" --norc -ilc $script:fgs_command
   # & "$script:__gitbash__" -c @'
   #   git stash list |
   #   fzf --height 50% --min-height 20 --border --bind ctrl-/:toggle-preview \
