@@ -797,7 +797,7 @@ if [ "$IS_WSL" = true ]; then
     fi
 
     # Return escaped string to allow \f \n \t directories
-    printf "%q" "$windowspath"
+    echo "$(printf "%q" "$windowspath" | sed 's/\\ / /g')"
   }
 
   ccd () {
