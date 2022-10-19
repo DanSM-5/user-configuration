@@ -904,8 +904,12 @@ else
     file_explorer_open () {
       xdg-open "$@"
     }
-  elif [ "$IS_MAC" = true ]; then
 
+  elif [ "$IS_MAC" = true ]; then
+    clipboard_copy="pbcopy"
+    clipboard_paste="pbpaste"
+
+  elif [ "$IS_GITBASH" = true ]; then
     clipboard_copy="pbcopy"
     clipboard_paste="pbpaste"
 
