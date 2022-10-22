@@ -132,11 +132,6 @@ set_mac () {
 
 
 set_general () {
-  export PREFERED_EDITOR='vim'
-  if command_exists nvim; then
-    export PREFERED_EDITOR='nvim'
-  fi
- 
   export EDITOR="$PREFERED_EDITOR"
   export COLORTERM='truecolor'
   export BAT_THEME='Dracula'
@@ -203,6 +198,11 @@ set_general_after () {
 
   if command_exists starship; then
     eval "$(starship init $SHELL_NAME)"
+  fi
+
+  export PREFERED_EDITOR='vim'
+  if command_exists nvim; then
+    export PREFERED_EDITOR='nvim'
   fi
 
   # For envman. Do not edit.
