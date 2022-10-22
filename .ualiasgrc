@@ -494,6 +494,14 @@ yt-dlpw () {
   "$yt_dlp_commd" "$@"
 }
 
+yt-dlp-play () {
+  "$yt_dlp_commd" -o - "$@"
+}
+
+yt-dlp-play-quality () {
+  yt-dlp-play -f bestvideo+bestaudio/best "$@"
+}
+
 mpvw () {
   "$mpv_commd" "$@"
 }
@@ -524,9 +532,9 @@ mpvp () {
       (exit 1) && true
     fi
 
-    "$yt_dlp_commd" -o - "$url" | "$mpv_commd" --cache "${@:2}"  -
+    yt-dlp-play-quality "$url" | "$mpv_commd" --cache "${@:2}"  -
   elif [ -n "$1" ]; then
-    "$yt_dlp_commd" -o - "$1" | "$mpv_commd" --cache "${@:2}"  -
+    yt-dlp-play-quality "$1" | "$mpv_commd" --cache "${@:2}"  -
   else
     echo "No url provided"
     (exit 1) && true
