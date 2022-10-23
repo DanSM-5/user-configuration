@@ -61,11 +61,6 @@ set_linux () {
     # Linux brew
     eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 
-    # oh-my-posh requires brew
-    if command_exists oh-my-posh && test -f ~/omp-theme/jandedobbeleer.omp.v2.json; then
-      eval "$(oh-my-posh --init --shell $SHELL_NAME --config ~/omp-theme/jandedobbeleer.omp.v2.json)"
-    fi
-
     local brew_nvm=$(brew --prefix nvm)
   fi
 
@@ -90,11 +85,6 @@ set_wsl () {
 }
 
 set_gitbash () {
-  # Enable oh-my-posh if available
-  if command_exists oh-my-posh && test -f ~/omp-theme/jandedobbeleer.omp.v2.json; then
-    eval "$(oh-my-posh --init --shell $SHELL_NAME --config ~/omp-theme/jandedobbeleer.omp.v2.json)"
-  fi
-
   # Load fzf-git
   [ -f "$HOME/.usr_conf/utils/fzf-git.sh" ] && source "$HOME/.usr_conf/utils/fzf-git.sh"
 
@@ -198,6 +188,11 @@ set_general_after () {
 
   if command_exists starship; then
     eval "$(starship init $SHELL_NAME)"
+  fi
+
+  # oh-my-posh requires brew
+  if command_exists oh-my-posh && test -f ~/omp-theme/jandedobbeleer.omp.v2.json; then
+    eval "$(oh-my-posh --init --shell $SHELL_NAME --config ~/omp-theme/jandedobbeleer.omp.v2.json)"
   fi
 
   export PREFERED_EDITOR='vim'
