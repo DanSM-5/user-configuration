@@ -193,9 +193,18 @@ function fcd () {
   $location = if ("$location" -eq "~") { "$HOME" } else { "$location" }
 
   $selection = "$(
-    fd --exclude ".git" `
+    fd `
+      --hidden `
+      --no-ignore-vcs `
+      --exclude ".git" `
       --exclude "node_modules" `
-      --hidden -tl -td `
+      --exclude ".npm" `
+      --exclude ".vscode-server" `
+      --exclude ".SpaceVim" `
+      --exclude ".cache" `
+      --exclude ".bun" `
+      --exclude ".nvm" `
+      -tl -td `
       "$pattern" "$location" |
     Invoke-Fzf -Height 50% -MinHeight 20 -Border `
       -Header "(ctrl-/) Search in: $location" `
@@ -216,9 +225,18 @@ function fcdd () {
   $options = getPsFzfOptions
 
   $selection = "$(
-    fd --exclude ".git" `
+    fd `
+      --hidden `
+      --no-ignore-vcs `
+      --exclude ".git" `
       --exclude "node_modules" `
-      --hidden -tl -td "$pattern" |
+      --exclude ".npm" `
+      --exclude ".vscode-server" `
+      --exclude ".SpaceVim" `
+      --exclude ".cache" `
+      --exclude ".bun" `
+      --exclude ".nvm" `
+      -tl -td "$pattern" |
     Invoke-Fzf -Height 50% -MinHeight 20 -Border `
       -Header 'Press CTRL-/ to toggle preview' `
       -Query "$query" `
@@ -246,9 +264,18 @@ function fcde () {
   $location = if ("$location" -eq "~") { "$HOME" } else { "$location" }
 
   $selection = "$(
-    fd --exclude '.git' `
-      --exclude 'node_modules' `
-      --hidden -L -tf "$pattern" "$location" |
+    fd `
+      --hidden `
+      --no-ignore-vcs `
+      --exclude ".git" `
+      --exclude "node_modules" `
+      --exclude ".npm" `
+      --exclude ".vscode-server" `
+      --exclude ".SpaceVim" `
+      --exclude ".cache" `
+      --exclude ".bun" `
+      --exclude ".nvm" `
+      -L -tf "$pattern" "$location" |
     % { Split-Path "$_" } |
     Sort-Object -Unique |
     Invoke-Fzf -Height 50% -MinHeight 20 -Border `
@@ -540,9 +567,18 @@ function fed () {
   $location = if ("$location" -eq "~") { "$HOME" } else { "$location" }
 
   $selection = "$(
-    fd --exclude ".git" `
+    fd `
+      --hidden `
+      --no-ignore-vcs `
+      --exclude ".git" `
       --exclude "node_modules" `
-      --hidden -tf `
+      --exclude ".npm" `
+      --exclude ".vscode-server" `
+      --exclude ".SpaceVim" `
+      --exclude ".cache" `
+      --exclude ".bun" `
+      --exclude ".nvm" `
+      -tf `
       "$pattern" "$location" |
     Invoke-Fzf -Height 50% -MinHeight 20 -Border `
       -Header "(ctrl-/) Search in: $location" `
@@ -567,9 +603,18 @@ function fedd () {
   $options = getPsFzfOptions
 
   $selection = "$(
-    fd --exclude ".git" `
+    fd `
+      --hidden `
+      --no-ignore-vcs `
+      --exclude ".git" `
       --exclude "node_modules" `
-      --hidden -tf |
+      --exclude ".npm" `
+      --exclude ".vscode-server" `
+      --exclude ".SpaceVim" `
+      --exclude ".cache" `
+      --exclude ".bun" `
+      --exclude ".nvm" `
+      -tf |
     Invoke-Fzf -Height 50% -MinHeight 20 -Border `
       -Header "(ctrl-/) Search in: $location" `
       -Query "$query" `
@@ -638,9 +683,18 @@ function ptc () {
   }
 
   $selection = "$(
-    fd --exclude ".git" `
+    fd `
+      --hidden `
+      --no-ignore-vcs `
+      --exclude ".git" `
       --exclude "node_modules" `
-      --hidden -tl -td -tf `
+      --exclude ".npm" `
+      --exclude ".vscode-server" `
+      --exclude ".SpaceVim" `
+      --exclude ".cache" `
+      --exclude ".bun" `
+      --exclude ".nvm" `
+      -tl -td -tf `
       "$pattern" "$location" |
     Invoke-Fzf -Height 50% -MinHeight 20 -Border `
       -Header "(ctrl-/) Search in: $location" `

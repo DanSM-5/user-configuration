@@ -30,7 +30,10 @@ fzf-defaults () {
 }
 
 fd-defaults () {
-  fd --exclude ".git" \
+  fd \
+    --hidden \
+    --no-ignore-vcs \
+    --exclude ".git" \
     --exclude "node_modules" \
     --exclude ".npm" \
     --exclude ".vscode-server" \
@@ -38,7 +41,6 @@ fd-defaults () {
     --exclude ".cache" \
     --exclude ".bun" \
     --exclude ".nvm" \
-    --hidden \
     "$@"
 }
 
