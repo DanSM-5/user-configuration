@@ -21,6 +21,10 @@ uconfg="$user_conf_path/.uconfgrc"
 ualias="$user_conf_path/.ualiasrc"
 ualiasg="$user_conf_path/.ualiasgrc"
 
+cmd () {
+  :
+}
+
 fzf-defaults () {
 # --bind ctrl-/:toggle-preview \
   fzf --height 50% --min-height 20 --border \
@@ -420,7 +424,6 @@ alias sgal="source $HOME/.usr_conf/.ualiasgrc"
 alias psh="powershell.exe"
 alias pwsh="pwsh.exe"
 alias cps="pwsh.exe -nolo -nopro -nonin -c"
-alias cmd="cmd.exe /c"
 
 # Trim utilities
 nospace () {
@@ -690,6 +693,10 @@ if [ "$IS_WSL" = true ]; then
   yt_dlp_commd="yt-dlp.exe"
   mpv_commd='mpv'
 
+  cmd () {
+    cmd.exe /c "$@"
+  }
+
   file_explorer_open () {
     pwsh.exe -nolo -nonin -nopro -c Start-Process \""$@"\"
   }
@@ -733,7 +740,7 @@ if [ "$IS_WSL" = true ]; then
   fi
 
   webtorrentw () {
-    cmd.exe /c webtorrent "$@"
+    cmd webtorrent "$@"
   }
 
   # Windows override of yf
@@ -922,6 +929,10 @@ else
   elif [ "$IS_GITBASH" = true ]; then
     clipboard_copy="pbcopy"
     clipboard_paste="pbpaste"
+
+    cmd () {
+      cmd.exe //c "$@"
+    }
 
   fi
 fi
