@@ -106,3 +106,7 @@ _fix_cursor() {
 }
 precmd_functions+=(_fix_cursor)
 
+if [ "$IS_GITBASH" = true ]; then
+  bindkey "^[[3~" delete-char
+fi
+
