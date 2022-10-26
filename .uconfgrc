@@ -88,6 +88,8 @@ set_gitbash () {
   # Load fzf-git
   [ -f "$HOME/.usr_conf/utils/fzf-git.sh" ] && source "$HOME/.usr_conf/utils/fzf-git.sh"
 
+  export MSYS="$MSYS winsymlinks:nativestrict"
+
   [ "$IS_ZSH" = true ] && fpath=(~/.zsh $fpath)
   # Load fzf helpers
   # [ -f "$HOME/.fzf.bash" ] && source "$HOME/.fzf.bash"
