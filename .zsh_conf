@@ -51,6 +51,9 @@ zle -N bracketed-paste bracketed-paste-magic
 autoload -Uz url-quote-magic
 zle -N self-insert url-quote-magic
 
+# Keybinding for delete key
+bindkey "^[[3~" delete-char
+
 # Keybindings for ctrl-[left|right]
 bindkey "^[[1;5C" forward-word
 bindkey "^[[1;5D" backward-word
@@ -106,9 +109,6 @@ _fix_cursor() {
 }
 precmd_functions+=(_fix_cursor)
 
-if [ "$IS_GITBASH" = true ]; then
-  bindkey "^[[3~" delete-char
-fi
 
 
 # Must be the last line of this file
