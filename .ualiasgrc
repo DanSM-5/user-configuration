@@ -926,6 +926,10 @@ else
     clipboard_copy="pbcopy"
     clipboard_paste="pbpaste"
 
+    file_explorer_open () {
+      open "$@"
+    }
+
   elif [ "$IS_GITBASH" = true ]; then
     clipboard_copy="pbcopy"
     clipboard_paste="pbpaste"
