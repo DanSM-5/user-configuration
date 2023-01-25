@@ -482,7 +482,9 @@ function mpvp () {
   $url = $args[0]
   $extra_args = $args[1..$args.length]
 
-  $command_str = "yt-dlp -o - ""$url"" | mpv --cache " + $extra_args + " -"
+  $yt_dlp_args = "-f bestvideo+bestaudio/best"
+
+  $command_str = "yt-dlp $yt_dlp_args -o - ""$url"" | mpv --cache " + $extra_args + " -"
   cmd /c "$command_str"
 }
 
