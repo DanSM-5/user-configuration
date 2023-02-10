@@ -26,7 +26,7 @@ function evc { nvim "$HOME\.SpaceVim.d\init.toml" }
 function getPsFzfOptions {
   $path = $PWD.ProviderPath.Replace('\', '/')
   Write-Host "$path"
-  $psFzfPreviewScript = "$(scoop prefix PSFzf)/helpers/PsFzfTabExpansion-Preview.ps1"
+  $psFzfPreviewScript = "$user_conf_path\utils\PsFzfTabExpansion-Preview.ps1"
   $psFzfOptions = @{
     Preview = $("pwsh -NoProfile -NonInteractive -NoLogo -File \""$psFzfPreviewScript\"" \""" + $path + "\"" {}" );
     Bind = 'ctrl-/:change-preview-window(down|hidden|)','alt-up:preview-page-up','alt-down:preview-page-down'
