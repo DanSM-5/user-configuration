@@ -222,7 +222,10 @@ set_general_after () {
       --header 'Press CTRL-Y to copy command into clipboard'"
 
     # Print tree structure in the preview window
-    export FZF_ALT_C_OPTS="--preview 'ls -aF --color=always {-1}'"
+    export FZF_ALT_C_OPTS="
+      --preview 'ls -aF --color=always {-1}'
+      --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down'"
+
     export FZF_CTRL_T_OPTS="
       --preview 'if [ -f {} ]; then bat -pp --color=always --style=numbers {}; else bat -pp --color=always <<< "'$(echo "Path: $(realpath {})"'"; ls -aFL --color=always {} | sed "'"1d;2d"'"); fi'
       --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down'"

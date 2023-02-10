@@ -42,6 +42,8 @@ if (Test-Command Set-PsFzfOption) {
   Set-PSFzfOption -EnableAliasFuzzyEdit `
     -PSReadlineChordProvider 'Ctrl+t' `
     -PSReadlineChordReverseHistory 'Ctrl+r' `
+    -PSReadlineChordSetLocation 'Alt+c' `
+    -PSReadlineChordReverseHistoryArgs 'Alt+a' `
     -EnableAliasFuzzyFasd `
     -EnableAliasFuzzyHistory `
     -EnableAliasFuzzyKillProcess `
@@ -61,10 +63,33 @@ if (Test-Command Set-PsFzfOption) {
   Import-module "$user_conf_path\utils\fzf-git.psm1"
 }
 
+if (Test-Command fzf) {
+  $env:FZF_CTRL_R_OPTS = "
+    --preview 'echo {}' --preview-window up:3:hidden:wrap
+    --bind 'ctrl-/:toggle-preview'
+    --bind 'ctrl-y:execute-silent(echo {} | pbcopy)+abort'
+    --color header:italic
+    --header 'Press CTRL-Y to copy command into clipboard'"
+
+  $psFzfPreviewScript = "$(scoop prefix PSFzf)/helpers/PsFzfTabExpansion-Preview.ps1"
+
+  $env:FZF_CTRL_T_OPTS = "
+    --preview 'pwsh -NoProfile -NonInteractive -NoLogo -File $psFzfPreviewScript " + ". {}'
+    --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down'"
+
+  $env:FZF_ALT_C_OPTS = $env:FZF_CTRL_T_OPTS
+}
+
 # Add gsudo !! command
 $script:gsudoModule = "$(scoop prefix gsudo)/gsudoModule.psd1"
 if (Test-Path "$script:gsudoModule") {
   Import-Module "$script:gsudoModule"
+}
+
+if (Test-Command fd) {
+  $FD_OPTIONS="--hidden --follow --exclude .git --exclude node_modules"
+  $env:FZF_CTRL_T_COMMAND="fd $FD_OPTIONS"
+  $env:FZF_ALT_C_COMMAND="fd --type d $FD_OPTIONS"
 }
 
 if (Test-Command rg) {
