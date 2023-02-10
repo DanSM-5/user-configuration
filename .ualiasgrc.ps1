@@ -25,24 +25,14 @@ function evc { nvim "$HOME\.SpaceVim.d\init.toml" }
 
 function getPsFzfOptions {
   $path = $PWD.ProviderPath.Replace('\', '/')
+  Write-Host "$path"
   $psFzfPreviewScript = "$(scoop prefix PSFzf)/helpers/PsFzfTabExpansion-Preview.ps1"
   $psFzfOptions = @{
     Preview = $("pwsh -NoProfile -NonInteractive -NoLogo -File \""$psFzfPreviewScript\"" \""" + $path + "\"" {}" );
-    Bind = 'ctrl-/:toggle-preview','alt-up:preview-page-up','alt-down:preview-page-down'
+    Bind = 'ctrl-/:change-preview-window(down|hidden|)','alt-up:preview-page-up','alt-down:preview-page-down'
   }
   return $psFzfOptions
 }
-
-# function fzf-defaults {
-#   [CmdletBinding()]
-#   param(
-#     [Parameter()]
-#     [Array] $piped
-#   )
-#   echo $piped
-#   echo $args
-#   $piped | fzf --height 50% --min-height 20 --border --bind ctrl-/:toggle-preview $args
-# }
 
 function spf {
   . $global:profile
@@ -61,8 +51,6 @@ function sgal {
 }
 
 # GIT
-
-
 function glg {
   git log --oneline --decorate --graph
 }
@@ -149,7 +137,12 @@ function qnv () {
     return
   }
 
-  $quick_access | fzf --min-height 20 --bind ctrl-/:toggle-preview --preview 'echo {} && echo **************** && ls {}' |
+  $options = getPsFzfOptions
+
+  $quick_access |
+    Invoke-Fzf -Height 50% -MinHeight 20 -Border `
+      -Header "(ctrl-/) Toggle preview" `
+      @options |
     % { cd "$_" }
 }
 
@@ -158,7 +151,12 @@ function qed ([string] $editor = 'nvim') {
     return
   }
 
-  $quick_edit | fzf --min-height 20 --bind ctrl-/:toggle-preview --preview 'bat --color=always {}' |
+  $options = getPsFzfOptions
+
+  $quick_edit |
+    Invoke-Fzf -Height 50% -MinHeight 20 -Border `
+      -Header "(ctrl-/) Toggle preview" `
+      @options |
     % { & "$editor" "$_" }
 }
 
