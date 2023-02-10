@@ -118,6 +118,28 @@ gprevr () {
   git diff HEAD~"$first"..HEAD~"$second"
 }
 
+# fshow - git commit browser (enter for show, ctrl-d for diff, ` toggles sort)
+fshow() {
+  local out shas sha q k
+  while out=$(
+      git log --graph --color=always \
+          --format="%C(auto)%h%d %s %C(black)%C(bold)%cr" "$@" |
+      fzf --ansi --multi --no-sort --reverse --query="$q" \
+          --print-query --expect=ctrl-d --bind=ctrl-s:toggle-sort); do
+    q=$(head -1 <<< "$out")
+    k=$(head -2 <<< "$out" | tail -1)
+    shas=$(sed '1,2d;s/^[^a-z0-9]*//;/^$/d' <<< "$out" | awk '{print $1}')
+    [ -z "$shas" ] && continue
+    if [ "$k" = ctrl-d ]; then
+      git diff --color=always $shas | less -R
+    else
+      for sha in $shas; do
+        git show --color=always $sha | less -R
+      done
+    fi
+  done
+}
+
 fadd () {
   local selection=($(fgf "${*:-}"))
   echo "$selection"
@@ -473,8 +495,8 @@ ex () {
 }
 
 # System executables
-clipboard_paste=""
-clipboard_copy=""
+export clipboard_paste=""
+export clipboard_copy=""
 gallery_dl_commd="gallery-dl"
 yt_dlp_commd="yt-dlp"
 mpv_commd='mpv'
@@ -687,8 +709,8 @@ ocd () {
 }
 
 if [ "$IS_WSL" = true ]; then
-  clipboard_paste="pbpaste.exe"
-  clipboard_copy="pbcopy.exe"
+  export clipboard_paste="pbpaste.exe"
+  export clipboard_copy="pbcopy.exe"
   gallery_dl_commd="gallery-dl.exe"
   yt_dlp_commd="yt-dlp.exe"
   mpv_commd='mpv'
@@ -865,8 +887,8 @@ else
   if [ "$IS_TERMUX" = true ]; then
     alias tcopy="termux-clipboard-set"
     alias tpaste="termux-clipboard-get"
-    clipboard_copy="termux-clipboard-set"
-    clipboard_paste="termux-clipboard-get"
+    export clipboard_copy="termux-clipboard-set"
+    export clipboard_paste="termux-clipboard-get"
 
     clipboard_copyw () {
       termux-clipboard-set "$@"
@@ -915,24 +937,24 @@ else
       xsel -ob "$@"
     }
 
-    clipboard_copy="clipboard_copyw"
-    clipboard_paste="clipboard_pastew"
+    export clipboard_copy="clipboard_copyw"
+    export clipboard_paste="clipboard_pastew"
 
     file_explorer_open () {
       xdg-open "$@"
     }
 
   elif [ "$IS_MAC" = true ]; then
-    clipboard_copy="pbcopy"
-    clipboard_paste="pbpaste"
+    export clipboard_copy="pbcopy"
+    export clipboard_paste="pbpaste"
 
     file_explorer_open () {
       open "$@"
     }
 
   elif [ "$IS_GITBASH" = true ]; then
-    clipboard_copy="pbcopy"
-    clipboard_paste="pbpaste"
+    export clipboard_copy="pbcopy"
+    export clipboard_paste="pbpaste"
 
     cmd () {
       cmd.exe //c "$@"
