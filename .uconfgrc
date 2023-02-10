@@ -211,6 +211,23 @@ set_general_after () {
   # For envman. Do not edit.
   [ -s "$HOME/.config/envman/load.sh" ] && source "$HOME/.config/envman/load.sh"
 
+  if command_exists fzf; then
+    # CTRL-/ to toggle small preview window to see the full command
+    # CTRL-Y to copy the command into clipboard using pbcopy
+    export FZF_CTRL_R_OPTS="
+      --preview 'echo {}' --preview-window up:3:hidden:wrap
+      --bind 'ctrl-/:toggle-preview'
+      --bind 'ctrl-y:execute-silent(echo -n {2..} | \$clipboard_copy)+abort'
+      --color header:italic
+      --header 'Press CTRL-Y to copy command into clipboard'"
+
+    # Print tree structure in the preview window
+    export FZF_ALT_C_OPTS="--preview 'ls -aF --color=always {-1}'"
+    export FZF_CTRL_T_OPTS="
+      --preview 'if [ -f {} ]; then bat -pp --color=always --style=numbers {}; else bat -pp --color=always <<< "'$(echo "Path: $(realpath {})"'"; ls -aFL --color=always {} | sed "'"1d;2d"'"); fi'
+      --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down'"
+  fi
+
   # fzf support
   if command_exists rg; then
     export FZF_DEFAULT_COMMAND='rg --files --no-ignore --hidden --glob "!node_modules" --glob "!.git" --follow'
@@ -221,6 +238,8 @@ set_general_after () {
     export FZF_CTRL_T_COMMAND="fd $FD_OPTIONS"
     export FZF_ALT_C_COMMAND="fd --type d $FD_OPTIONS"
 
+    # Use fd (https://github.com/sharkdp/fd) instead of the default find
+    # command for listing path candidates.
     _fzf_compgen_path () {
       fd --hidden --follow --exclude "node_modules" --exclude ".git" . "$1"
     }
