@@ -171,7 +171,6 @@ fsa () {
 }
 
 # General commands
-alias start="explorer.exe"
 alias mkdr="mkdir -pv"
 alias ll='ls -alhF '
 alias la='ls -A '
@@ -180,6 +179,10 @@ alias frm='\rm $(fd-defaults -tf -tx -tl | fzf-defaults --preview "bat --color=a
 alias frdr="rm -rf \$(fd-defaults -td -d 1 | fzf-defaults --preview \"ls --color=always -aFL {} | sed '1d;2d;3d'\")"
 alias fzfp="fzf-defaults --preview 'bat --color=always --style=numbers --line-range=:500 {}'"
 alias pvim="vim --clean"
+
+start () {
+  file_explorer_open "$@"
+}
 
 rfv () {
   "$user_conf_path/utils/rgfzf.sh" "$@"
@@ -952,7 +955,7 @@ else
     export clipboard_paste="clipboard_pastew"
 
     file_explorer_open () {
-      xdg-open "$@"
+      xdg-open "$@" &
     }
 
   elif [ "$IS_MAC" = true ]; then
