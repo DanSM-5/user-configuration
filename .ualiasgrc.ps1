@@ -25,7 +25,6 @@ function evc { nvim "$HOME\.SpaceVim.d\init.toml" }
 
 function getPsFzfOptions {
   $path = $PWD.ProviderPath.Replace('\', '/')
-  Write-Host "$path"
   $psFzfPreviewScript = "$user_conf_path\utils\PsFzfTabExpansion-Preview.ps1"
   $psFzfOptions = @{
     Preview = $("pwsh -NoProfile -NonInteractive -NoLogo -File \""$psFzfPreviewScript\"" \""" + $path + "\"" {}" );
@@ -337,6 +336,22 @@ function fnr {
 
   if( -not $selection ) { return }
   npm run $selection
+}
+
+
+function fif () {
+  if ($args.length -eq 0) {
+    echo 'Need a string to search for!'
+    return
+  }
+
+  $single = "$args"
+  $options = getPsFzfOptions
+
+  rg --files-with-matches --no-messages "$single" |
+    Invoke-Fzf `
+      -Bind $options.Bind `
+      -Preview "pwsh -NoLogo -NonInteractive -NoProfile -File $user_conf_path/utils/highlight.ps1 \`"$single\`" {}"
 }
 
 function getAppPid ([String] $port, [Switch] $help = $false) {

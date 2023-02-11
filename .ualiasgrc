@@ -327,6 +327,17 @@ fedd () {
   $editor "$selection"
 }
 
+fif () {
+  if [ ! "$#" -gt 0 ]; then
+    echo 'Need a string to search for!'
+    return 1;
+  fi
+
+  rg --files-with-matches --no-messages "$*" |
+    fzf-defaults \
+      --preview "highlight -O ansi -l {} 2> /dev/null | rg --colors 'match:bg:yellow' --ignore-case --pretty --context 10 '$*' || rg --ignore-case --pretty --context 10 '$*' {}"
+}
+
 fnr () {
   if ! [ -f package.json ]; then
     echo "No package.json in dir $(pwd)"
