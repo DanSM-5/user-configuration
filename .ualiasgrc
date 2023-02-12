@@ -970,6 +970,10 @@ else
     export clipboard_copy="pbcopy"
     export clipboard_paste="pbpaste"
 
+    file_explorer_open () {
+      pwsh.exe -nolo -nonin -nopro -c Start-Process \""$@"\"
+    }
+
     cmd () {
       cmd.exe //c "$@"
     }
