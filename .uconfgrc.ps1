@@ -64,13 +64,11 @@ if (Test-Command Set-PsFzfOption) {
 }
 
 if (Test-Command fzf) {
-  $__gitecho__ = $(where.exe echo | grep 'Git\\usr\\bin\\echo')
-  $__gitecho__ = $__gitecho__.Replace('\', '/').Replace('Program Files', '"Program Files"')
 
   $env:FZF_CTRL_R_OPTS = "
-    --preview '$__gitecho__ {}' --preview-window up:3:hidden:wrap
+    --preview 'pwsh -NoLogo -NonInteractive -NoProfile -File $user_conf_path\utils\log-helper.ps1 {}' --preview-window up:3:hidden:wrap
     --bind 'ctrl-/:toggle-preview'
-    --bind 'ctrl-y:execute-silent(echo {} | pbcopy)+abort'
+    --bind 'ctrl-y:execute-silent(pwsh -NoLogo -NonInteractive -NoProfile -File $user_conf_path\utils\copy-helper.ps1 {})+abort'
     --color header:italic
     --header 'Press CTRL-Y to copy command into clipboard'"
 
