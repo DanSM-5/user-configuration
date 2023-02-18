@@ -544,6 +544,7 @@ yt-dlp-play-quality () {
 }
 
 mpvw () {
+  echo "Playing: $@"
   "$mpv_commd" "$@"
 }
 
@@ -573,8 +574,10 @@ mpvp () {
       (exit 1) && true
     fi
 
+    echo "Playing: $url\n"
     yt-dlp-play-quality "$url" | "$mpv_commd" --cache "${@:2}"  -
   elif [ -n "$1" ]; then
+    echo "Playing: $1\n"
     yt-dlp-play-quality "$1" | "$mpv_commd" --cache "${@:2}"  -
   else
     echo "No url provided"
@@ -583,20 +586,26 @@ mpvp () {
 }
 
 dwi () {
-  local img_url="$("$clipboard_paste")"
+  local img_url="$("$clipboard_paste" | trim)"
   if [ -z "$img_url" ]; then
     echo "No image url"
     return 1
   fi
+
+  echo "Downloading: $img_url\n"
+
   "$gallery_dl_commd" "$img_url"
 }
 
 dwv () {
-  local vid_url="$("$clipboard_paste")"
+  local vid_url="$("$clipboard_paste" | trim)"
   if [ -z "$vid_url" ]; then
     echo "No video url"
     return 1
   fi
+
+  echo "Downloading: $vid_url\n"
+
   "$yt_dlp_commd" "$vid_url"
 }
 
@@ -650,7 +659,7 @@ yfd () {
 }
 
 play () {
-  local url="$("$clipboard_paste")"
+  local url="$("$clipboard_paste" | trim)"
   if [ -z "$url" ]; then
     echo "No url in clipboard"
     return 1
@@ -676,7 +685,7 @@ plpp () {
 }
 
 tplay () {
-  local url="$("$clipboard_paste")"
+  local url="$("$clipboard_paste" | trim)"
   if [ -z "$url" ]; then
     echo "No url in clipboard"
     return 1
@@ -725,6 +734,7 @@ ocd () {
 if [ "$IS_WSL" = true ]; then
   export clipboard_paste="pbpaste.exe"
   export clipboard_copy="pbcopy.exe"
+
   gallery_dl_commd="gallery-dl.exe"
   yt_dlp_commd="yt-dlp.exe"
   mpv_commd='mpv'
@@ -735,6 +745,39 @@ if [ "$IS_WSL" = true ]; then
 
   file_explorer_open () {
     pwsh.exe -nolo -nonin -nopro -c Start-Process \""$@"\"
+  }
+
+  getPath () {
+    local filepath="$@"
+
+    if [ -z "$filepath" ]; then
+      echo ""
+      return
+    fi
+
+    local linuxpath="" windowspath=""
+
+    if [[ -f "$filepath" ]] || [[ -d "$filepath" ]]; then # Valid unix path
+      linuxpath="$(wslpath -au "$(wslpath -aw $filepath)")"
+    else # win path
+      linuxpath="$(wslpath -au "$filepath")"
+    fi
+
+    if [ -d "$linuxpath" ]; then
+      windowspath="$(wslpath -aw "$linuxpath")"
+    elif [ -f "$linuxpath" ]; then
+      windowspath="$(dirname "$linuxpath" | xargs -i wslpath -aw {})"
+    fi
+
+    # Return escaped string to allow \f \n \t directories
+    echo "$(printf "%q" "$windowspath" | sed 's/\\ / /g')"
+  }
+
+  start () {
+    local trimmed_path="$(echo "$@" | trim)"
+    local filepath="$(getPath "$trimmed_path")"
+
+    file_explorer_open "$filepath"
   }
 
   if command_exists mpv; then 
@@ -971,7 +1014,13 @@ else
     export clipboard_paste="pbpaste"
 
     file_explorer_open () {
-      pwsh.exe -nolo -nonin -nopro -c Start-Process \""$@"\"
+      # Special parsing for windows paths
+      local location_path="$(echo "$@" |
+        trim |
+        sed -re "s#^/([a-zA-Z])/(.*$)#\u\1:/\2#g" |
+        tr '/' '\\')"
+
+      pwsh.exe -nolo -nonin -nopro -c Start-Process \""$location_path"\"
     }
 
     cmd () {
