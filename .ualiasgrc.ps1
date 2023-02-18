@@ -495,6 +495,8 @@ function mpvp () {
   $url = $args[0]
   $extra_args = $args[1..$args.length]
 
+  echo "Playing: $url"
+
   $yt_dlp_args = "-f bestvideo+bestaudio/best"
 
   $command_str = "yt-dlp $yt_dlp_args -o - ""$url"" | mpv --cache " + $extra_args + " -"
@@ -523,6 +525,7 @@ function play () {
   }
 
   $url = $url.Trim()
+  echo "Playing: $url"
 
   if (
     "$url".contains('.torrent') -or
@@ -545,6 +548,7 @@ function tplay ([Switch] $download = $false) {
   }
 
   $url = $url.Trim()
+  echo "Playing: $url"
 
   if ($download) {
     webtorrent --mpv "$url"
@@ -572,12 +576,14 @@ function yt-dw () {
 function dwv () {
   $video_url= "$(pbpaste)"
   if ( -not $video_url) { return }
+  echo "Downloading: $video_url"
   yt-dlp "$video_url"
 }
 
 function dwi () {
   $image_url = "$(pbpaste)"
   if ( -not $image_url ) { return }
+  echo "Downloading: $image_url"
   gallery-dl "$image_url"
 }
 
