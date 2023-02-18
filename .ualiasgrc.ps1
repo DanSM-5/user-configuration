@@ -506,7 +506,10 @@ function plpp () {
 
   if ( -not "$url" ) {
     echo "Invalid url"
+    return
   }
+
+  $url = $url.Trim()
 
   mpvp "$url"
 }
@@ -516,7 +519,10 @@ function play () {
 
   if ( -not "$url" ) {
     echo "Invalid url"
+    return
   }
+
+  $url = $url.Trim()
 
   if (
     "$url".contains('.torrent') -or
@@ -528,14 +534,22 @@ function play () {
   } else {
     mpv "$url"
   }
-
 }
 
 function tplay ([Switch] $download = $false) {
+  $url = "$(pbpaste)"
+
+  if (-not $url) {
+    echo "No url"
+    return
+  }
+
+  $url = $url.Trim()
+
   if ($download) {
-    webtorrent --mpv "$(pbpaste)"
+    webtorrent --mpv "$url"
   } else {
-    webtorrent -u 1 --mpv "$(pbpaste)"
+    webtorrent -u 1 --mpv "$url"
   }
 }
 
