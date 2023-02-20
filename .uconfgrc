@@ -186,6 +186,10 @@ set_general () {
 }
 
 set_general_after () {
+  if command_exists delta; then
+    export __git_pager__=delta
+  fi
+
   if [ -f "$HOME/.fzf.$SHELL_NAME" ]; then
     source "$HOME/.usr_conf/utils/fzf-git.sh"
   fi

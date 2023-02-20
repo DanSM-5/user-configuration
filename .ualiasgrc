@@ -120,6 +120,8 @@ gprevr () {
 
 # fshow - git commit browser (enter for show, ctrl-d for diff, ` toggles sort)
 fshow() {
+  local def_pager="less -R"
+  local pager="${__git_pager__:-${def_pager}}"
   local out shas sha q k
   while out=$(
       git log --graph --color=always \
@@ -131,10 +133,10 @@ fshow() {
     shas=$(sed '1,2d;s/^[^a-z0-9]*//;/^$/d' <<< "$out" | awk '{print $1}')
     [ -z "$shas" ] && continue
     if [ "$k" = ctrl-d ]; then
-      git diff --color=always $shas | less -R
+      git diff --color=always $shas | $pager
     else
       for sha in $shas; do
-        git show --color=always $sha | less -R
+        git show --color=always $sha | $pager
       done
     fi
   done
