@@ -1017,11 +1017,14 @@ else
 
     file_explorer_open () {
       # Special parsing for windows paths
-      local location_path="$(echo "$@" |
+      local location_path="$(printf "%q" "$@" |
         trim |
         sed -re "s#^/([a-zA-Z])/(.*$)#\u\1:/\2#g" |
         tr '/' '\\')"
 
+      location_path="$(printf "%q" "$location_path" | sed 's/\\ / /g')"
+
+      echo "$location_path"
       pwsh.exe -nolo -nonin -nopro -c Start-Process \""$location_path"\"
     }
 
