@@ -1024,7 +1024,6 @@ else
 
       location_path="$(printf "%q" "$location_path" | sed 's/\\ / /g')"
 
-      echo "$location_path"
       pwsh.exe -nolo -nonin -nopro -c Start-Process \""$location_path"\"
     }
 
