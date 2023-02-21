@@ -600,7 +600,7 @@ dwi () {
     return 1
   fi
 
-  echo "Downloading: $img_ur"
+  echo "Downloading: $img_url"
 
   "$gallery_dl_commd" "$img_url"
 }
