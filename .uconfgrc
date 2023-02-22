@@ -215,6 +215,7 @@ set_general_after () {
   # For nix package manager
   if command_exists nix-env; then
     # alias nxs="nix-env -qaP '.*$1.*'"
+    alias nxl="nix-env -q"
     alias nxi="nix-env -iA"
     alias nxr="nix-env -e"
     alias nxu="nix-env -u"
