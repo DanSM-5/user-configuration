@@ -879,7 +879,7 @@ if [ "$IS_WSL" = true ]; then
   }
 
   getClipboardPath () {
-    local filepath="$("$clipboard_paste" | tr -d "\r\n")"
+    local filepath="$("$clipboard_paste" | trim | tr -d "\r\n")"
 
     if [ -z "$filepath" ]; then
       echo ""
