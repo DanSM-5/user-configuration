@@ -33,6 +33,9 @@ fzf-defaults () {
     "$@"
 }
 
+fzf_preview_ls='if [ -f {} ]; then bat --color=always --style=numbers {}; else bat -pp --color=always <<< $(echo "Path: $(realpath {})"; ls -aFL --color=always {} | sed "1d;2d"); fi'
+fzf_preview_ll='if [ -f {9..} ]; then bat --color=always --style=numbers {9..}; else bat -pp --color=always <<< $(echo "Path: $(realpath {9..})"; ls -aFL --color=always {9..} | sed "1d;2d"); fi'
+
 fd-defaults () {
   fd \
     --hidden \
@@ -223,7 +226,7 @@ lfd () {
 # experimental
 lfa () {
   local selection=$(cd "/" && fd-defaults |
-    fzf-defaults --preview 'if [ -f {9..} ]; then bat --color=always --style=numbers {9..}; else bat -pp --color=always <<< $(realpath {9..}; ls -aFL --color=always {9..} | sed "1d;2d"); fi')
+    fzf-defaults --preview 'if [ -f {9..} ]; then bat --color=always --style=numbers {9..}; else bat -pp --color=always <<< $(echo "Path: $(realpath {9..})"; ls -aFL --color=always {9..} | sed "1d;2d"); fi')
   echo "$selection"
 }
 
@@ -347,6 +350,17 @@ fif () {
   rg --files-with-matches --no-messages "$*" |
     fzf-defaults \
       --preview "highlight -O ansi -l {} 2> /dev/null | rg --colors 'match:bg:yellow' --ignore-case --pretty --context 10 '$*' || rg --ignore-case --pretty --context 10 '$*' {}"
+}
+
+fdir () {
+  local selection="$(dirs -v |
+    fzf-defaults \
+    --preview 'echo "Path: {2..}\n"; ls -aFL --color=always $(bash -c "echo "{2..}) | sed "1d;2d"' |
+    awk '{print $1}')"
+
+  if [ -n "$selection" ]; then
+    pushd "+$selection"
+  fi
 }
 
 fnr () {
