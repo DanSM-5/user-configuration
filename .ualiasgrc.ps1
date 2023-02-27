@@ -354,6 +354,18 @@ function fif () {
       -Preview "pwsh -NoLogo -NonInteractive -NoProfile -File $user_conf_path/utils/highlight.ps1 \`"$single\`" {}"
 }
 
+function fdir () {
+  $options = getPsFzfOptions
+
+  $selection = $($(Get-Location -Stack) |
+    Invoke-Fzf `
+      @options)
+
+  if ($selection) {
+    Set-Location "$selection"
+  }
+}
+
 function getAppPid ([String] $port, [Switch] $help = $false) {
   if ($help) {
     echo ""
