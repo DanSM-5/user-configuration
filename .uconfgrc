@@ -234,6 +234,7 @@ set_general_after () {
     export FZF_CTRL_R_OPTS="
       --preview 'echo {}' --preview-window up:3:hidden:wrap
       --bind 'ctrl-/:toggle-preview'
+      --bind 'ctrl-s:toggle-sort'
       --bind 'ctrl-y:execute-silent(echo -n {2..} | \$clipboard_copy)+abort'
       --color header:italic
       --header 'Press CTRL-Y to copy command into clipboard'"
@@ -241,11 +242,11 @@ set_general_after () {
     # Print tree structure in the preview window
     export FZF_ALT_C_OPTS="
       --preview 'ls -aF --color=always {-1}'
-      --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down'"
+      --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort'"
 
     export FZF_CTRL_T_OPTS="
       --preview 'if [ -f {} ]; then bat -pp --color=always --style=numbers {}; else bat -pp --color=always <<< "'$(echo "Path: $(realpath {})"'"; ls -aFL --color=always {} | sed "'"1d;2d"'"); fi'
-      --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down'"
+      --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort'"
   fi
 
   # fzf support

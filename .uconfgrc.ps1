@@ -67,7 +67,7 @@ if (Test-Command fzf) {
 
   $env:FZF_CTRL_R_OPTS = "
     --preview 'pwsh -NoLogo -NonInteractive -NoProfile -File $user_conf_path\utils\log-helper.ps1 {}' --preview-window up:3:hidden:wrap
-    --bind 'ctrl-/:toggle-preview'
+    --bind 'ctrl-/:toggle-preview,ctrl-s:toggle-sort'
     --bind 'ctrl-y:execute-silent(pwsh -NoLogo -NonInteractive -NoProfile -File $user_conf_path\utils\copy-helper.ps1 {})+abort'
     --color header:italic
     --header 'Press CTRL-Y to copy command into clipboard'"
@@ -76,7 +76,7 @@ if (Test-Command fzf) {
 
   $env:FZF_CTRL_T_OPTS = "
     --preview 'pwsh -NoProfile -NonInteractive -NoLogo -File $psFzfPreviewScript " + ". {}'
-    --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down'"
+    --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort'"
 
   $env:FZF_ALT_C_OPTS = $env:FZF_CTRL_T_OPTS
 }

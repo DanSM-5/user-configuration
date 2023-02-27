@@ -28,7 +28,7 @@ function getPsFzfOptions {
   $psFzfPreviewScript = "$user_conf_path\utils\PsFzfTabExpansion-Preview.ps1"
   $psFzfOptions = @{
     Preview = $("pwsh -NoProfile -NonInteractive -NoLogo -File \""$psFzfPreviewScript\"" \""" + $path + "\"" {}" );
-    Bind = 'ctrl-/:change-preview-window(down|hidden|)','alt-up:preview-page-up','alt-down:preview-page-down'
+    Bind = 'ctrl-/:change-preview-window(down|hidden|)','alt-up:preview-page-up','alt-down:preview-page-down','ctrl-s:toggle-sort'
   }
   return $psFzfOptions
 }

@@ -11,7 +11,7 @@ is_in_git_repo() {
 fzf-down() {
   fzf --height 50% \
     --min-height 20 \
-    --bind "ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down" \
+    --bind "ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort" \
     --border "$@"
 }
 
