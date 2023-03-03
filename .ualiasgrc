@@ -76,7 +76,7 @@ alias greset="git reset"
 alias gbranch="git branch"
 alias grebase="git rebase"
 alias gmerge="git merge"
-alias gck="git checkout"
+alias gco="git checkout"
 alias grm="git checkout -- ."
 alias fgrm='rm -rf $(fgf)'
 alias gstatus="git status"
@@ -159,10 +159,17 @@ fadd () {
   fi
 }
 
-fck () {
+fco () {
   local selection=$(fgb "${*:-}")
   if [ -n "$selection" ]; then
     git checkout "${selection//origin\//}"
+  fi
+}
+
+fgrm () {
+  local selection=($(fgf "${*:-}"))
+  if [ -n "$selection" ]; then
+    git checkout -- "${selection[@]}"
   fi
 }
 
@@ -352,7 +359,7 @@ fif () {
       --preview "highlight -O ansi -l {} 2> /dev/null | rg --colors 'match:bg:yellow' --ignore-case --pretty --context 10 '$*' || rg --ignore-case --pretty --context 10 '$*' {}"
 }
 
-fdir () {
+fdirs () {
   local selection="$(dirs -v |
     fzf-defaults \
     --preview 'echo "Path: {2..}\n"; ls -aFL --color=always $(bash -c "echo "{2..}) | sed "1d;2d"' |

@@ -70,7 +70,7 @@ function greset { git reset $args }
 function gbranch { git branch $args }
 function grebase { git grebase $args }
 function gmerge { git merge $args }
-function gck { git checkout $args }
+function gco { git checkout $args }
 function grm { git checkout -- . }
 function fgrm { rm "$(fgf)" }
 function gstatus { git status $args }
@@ -99,8 +99,12 @@ function fadd () {
   fgf | % { git add $_ }
 }
 
-function fck () {
+function fco () {
   fgb | % { git checkout "$($_ -replace 'origin/', '')" }
+}
+
+function fgrm () {
+  fgf | % { git checkout -- "$_" }
 }
 
 function fsa () {
@@ -354,7 +358,7 @@ function fif () {
       -Preview "pwsh -NoLogo -NonInteractive -NoProfile -File $user_conf_path/utils/highlight.ps1 \`"$single\`" {}"
 }
 
-function fdir () {
+function fdirs () {
   $options = getPsFzfOptions
 
   $selection = $($(Get-Location -Stack) |
@@ -689,6 +693,7 @@ function fmpv {
 
 function getClipboardPath {
   $filepath = "$(pbpaste)"
+  $filepath = $filepath.Trim()
   $directory = ""
   if ( -not "$filepath" -or -not (Test-Path "$filepath") ) { return }
   if ( (Get-Item "$filepath") -is [System.IO.DirectoryInfo] ) { # Is directory
