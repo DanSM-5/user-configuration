@@ -71,6 +71,7 @@ function gbranch { git branch $args }
 function grebase { git grebase $args }
 function gmerge { git merge $args }
 function gco { git checkout $args }
+function gck { git checkout $args }
 function grm { git checkout -- . }
 function gstatus { git status $args }
 function gs { git status $args }
@@ -99,6 +100,10 @@ function fadd () {
 }
 
 function fco () {
+  fgb | % { git checkout "$($_ -replace 'origin/', '')" }
+}
+
+function fck () {
   fgb | % { git checkout "$($_ -replace 'origin/', '')" }
 }
 

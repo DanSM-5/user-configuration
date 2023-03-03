@@ -77,6 +77,7 @@ alias gbranch="git branch"
 alias grebase="git rebase"
 alias gmerge="git merge"
 alias gco="git checkout"
+alias gck="git checkout"
 alias grm="git checkout -- ."
 alias gstatus="git status"
 alias gs="git status"
@@ -159,6 +160,13 @@ fadd () {
 }
 
 fco () {
+  local selection=$(fgb "${*:-}")
+  if [ -n "$selection" ]; then
+    git checkout "${selection//origin\//}"
+  fi
+}
+
+fck () {
   local selection=$(fgb "${*:-}")
   if [ -n "$selection" ]; then
     git checkout "${selection//origin\//}"
