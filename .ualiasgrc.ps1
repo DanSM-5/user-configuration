@@ -72,7 +72,6 @@ function grebase { git grebase $args }
 function gmerge { git merge $args }
 function gco { git checkout $args }
 function grm { git checkout -- . }
-function fgrm { rm "$(fgf)" }
 function gstatus { git status $args }
 function gs { git status $args }
 function gsv { git status -v $args }

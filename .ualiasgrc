@@ -78,7 +78,6 @@ alias grebase="git rebase"
 alias gmerge="git merge"
 alias gco="git checkout"
 alias grm="git checkout -- ."
-alias fgrm='rm -rf $(fgf)'
 alias gstatus="git status"
 alias gs="git status"
 alias gsv="git status -v"
