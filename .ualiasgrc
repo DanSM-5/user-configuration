@@ -377,6 +377,31 @@ fdirs () {
   fi
 }
 
+__get__env () {
+  while IFS='=' read -r -d '' n v; do
+    printf "%s=%s\n" "$n" "${v//$'\n'}"
+  done < <(env -0)
+}
+
+fenv () {
+  local showValue=false
+
+  if [ "$1" = '-v' ]; then
+    showValue=true
+  fi
+
+  __get__env |
+    fzf-defaults \
+      --preview 'printf "%q" {}' --preview-window up:3:hidden:wrap \
+      --bind 'ctrl-/:toggle-preview' \
+      --bind 'ctrl-s:toggle-sort' \
+      --bind 'ctrl-y:execute-silent(printf "%q" {} | $clipboard_copy)+abort' \
+      --color header:italic \
+      --header 'Press CTRL-Y to copy command into clipboard' |
+    cut -d '=' -f "$(if [ "$showValue" = true ]; then echo "2-"; else echo "1"; fi)" |
+    trim
+}
+
 fnr () {
   if ! [ -f package.json ]; then
     echo "No package.json in dir $(pwd)"

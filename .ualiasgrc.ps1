@@ -374,6 +374,35 @@ function fdirs () {
   }
 }
 
+function fenv () {
+  $showValue = $false
+
+  if ($args[0] -eq '-v') { $showValue = $true }
+
+  $options = @{
+    Preview = $("pwsh -NoLogo -NonInteractive -NoProfile -File \""$($user_conf_path -Replace '\\', '/')/utils/log-helper.ps1\"" {}");
+    Bind = @(
+      'ctrl-/:toggle-preview'
+      # TODO: Investigate change-preview-window not working
+      # 'ctrl-/:change-preview-window(down|hidden|)'
+      'alt-up:preview-page-up'
+      'alt-down:preview-page-down'
+      'ctrl-s:toggle-sort'
+      "ctrl-y:execute-silent(pwsh -NoLogo -NonInteractive -NoProfile -File $user_conf_path\utils\copy-helper.ps1 {})+abort"
+    )
+  }
+
+  Get-childItem -Path env: |
+    % { echo "$($_.key)=$($_.value.Trim() -Replace '\n', ' ')" } |
+    Invoke-Fzf `
+      -PreviewWindow 'up:3:hidden:wrap' `
+      @options |
+    % {
+      $res = $($_ -Split '=')
+      if ($showValue) { $res[1..$res.length] -Join '=' } else { $res[0] }
+    }
+}
+
 function getAppPid ([String] $port, [Switch] $help = $false) {
   if ($help) {
     echo ""
