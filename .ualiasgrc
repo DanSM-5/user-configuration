@@ -1171,7 +1171,7 @@ fcmd () {
   # --preview "rg -A 20 -B 1 --text --color=always '^{} ' $tmpfile" \
   echo "$available_commands" |
     fzf-defaults \
-      --preview "rg -A 20 -B 1 '^{} ' $tmpfile | bat -l bash --color=always -p -H 2" \
+      --preview "rg -A 35 -B 1 -m 1 '^{} ' $tmpfile | bat -l bash --color=always -p -H 2" \
       --bind 'ctrl-y:execute-silent(echo -n {} | $clipboard_copy)+abort' || return 0
 }
 
