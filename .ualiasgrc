@@ -377,12 +377,6 @@ fdirs () {
   fi
 }
 
-__get__env () {
-  while IFS='=' read -r -d '' n v; do
-    printf "%s=%s\n" "$n" "${v//$'\n'}"
-  done < <(env -0)
-}
-
 fenv () {
   local showValue=false
 
@@ -390,7 +384,13 @@ fenv () {
     showValue=true
   fi
 
-  __get__env |
+  tmpfile="$(mktemp)"
+
+  while IFS='=' read -r -d '' n v; do
+    printf "%s=%s\n" "$n" "${v//$'\n'}"
+  done < <(env -0) > "$tmpfile"
+
+  cat "$tmpfile" |
     fzf-defaults \
       --preview 'printf "%q" {}' --preview-window up:3:hidden:wrap \
       --bind 'ctrl-/:toggle-preview' \
@@ -1078,7 +1078,7 @@ else
       # Special parsing for windows paths
       local location_path="$(printf "%q" "$@" |
         trim |
-        sed -re "s#^/([a-zA-Z])/(.*$)#\u\1:/\2#g" |
+        sed -re "s|^/([a-zA-Z])/(.*$)|\u\1:/\2|g" |
         tr '/' '\\')"
 
       location_path="$(printf "%q" "$location_path" | sed 's/\\ / /g')"
@@ -1134,4 +1134,39 @@ ptc () {
 # Dependencies
 # export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
+getShellAliasAndFunctions () {
+  if [ "$IS_BASH" = true ]; then
+    {
+      # Functions
+      typeset -F | awk '{ if ( $3 !~ /_.+/) { print $3 } }';
+      # Aliases
+      alias | awk '{ split($2,o,"="); print o[1] }'
+    }
+  else
+    {
+      # Functions
+      print -l ${(ok)functions} |
+        awk '{ if ($1 !~ /^_.+/) { print $1 } }';
+      # Aliases
+      # alias | cut -d '=' -f 1
+      compgen -a
+    }
+  fi
+}
+
+fcmd () {
+  local available_commands="$(getShellAliasAndFunctions | sort)"
+  local tmpfile="$(mktemp)"
+
+  # Get the output of type and store it in tmpfile
+  for cm in $(echo ${available_commands}); do
+    type -f "$cm" 2>/dev/null || type "$cm" 2>/dev/null
+    echo ""
+  done > "$tmpfile"
+
+  echo "$available_commands" |
+    fzf-defaults \
+      --preview "rg -A 20 -B 1 --text --color=always '^{} ' $tmpfile" \
+      --bind 'ctrl-y:execute-silent(echo -n {} | $clipboard_copy)+abort' || return 0
+}
 
