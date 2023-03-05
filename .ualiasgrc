@@ -384,13 +384,15 @@ fenv () {
     showValue=true
   fi
 
-  tmpfile="$(mktemp)"
+  local tmpfile="$(mktemp)"
+  # Cleanup file on exit
+  trap "rm -- '$tmpfile'" EXIT
 
   while IFS='=' read -r -d '' n v; do
     printf "%s=%s\n" "$n" "${v//$'\n'}"
   done < <(env -0) > "$tmpfile"
 
-  cat "$tmpfile" |
+  cat -v "$tmpfile" |
     fzf-defaults \
       --preview 'printf "%q" {}' --preview-window up:3:hidden:wrap \
       --bind 'ctrl-/:toggle-preview' \
@@ -1157,16 +1159,19 @@ getShellAliasAndFunctions () {
 fcmd () {
   local available_commands="$(getShellAliasAndFunctions | sort)"
   local tmpfile="$(mktemp)"
+  # Cleanup file on exit
+  trap "rm -- '$tmpfile'" EXIT
 
   # Get the output of type and store it in tmpfile
   for cm in $(echo ${available_commands}); do
-    type -f "$cm" 2>/dev/null || type "$cm" 2>/dev/null
     echo ""
+    type -f "$cm" 2>/dev/null || type "$cm" 2>/dev/null
   done > "$tmpfile"
 
+  # --preview "rg -A 20 -B 1 --text --color=always '^{} ' $tmpfile" \
   echo "$available_commands" |
     fzf-defaults \
-      --preview "rg -A 20 -B 1 --text --color=always '^{} ' $tmpfile" \
+      --preview "rg -A 20 -B 1 '^{} ' $tmpfile | bat -l bash --color=always -p -H 2" \
       --bind 'ctrl-y:execute-silent(echo -n {} | $clipboard_copy)+abort' || return 0
 }
 
