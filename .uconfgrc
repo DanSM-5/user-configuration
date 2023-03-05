@@ -288,7 +288,14 @@ set_general_after () {
   fi
 
   if command_exists bat; then
-    export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+
+    if [ "$IS_TERMUX" = true ]; then
+      export MANPAGER="$HOME/.local/bin/manpager-helper"
+    else
+      # TODO: Investigate manpager-helper not working on WSL
+      export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+    fi
+
   fi
 }
 
