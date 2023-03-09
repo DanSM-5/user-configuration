@@ -91,7 +91,12 @@ alias gspop="git stash pop"
 alias gsp="git stash push -m"
 alias gss="git stash show"
 alias gsd="git stash drop"
-alias gprev="git diff HEAD^..HEAD"
+
+if command_exists delta; then
+  alias gprev="git diff HEAD^..HEAD | delta"
+else
+  alias gprev="git diff HEAD^..HEAD | bat"
+fi
 
 gprevd () {
   local limit="$1"
@@ -101,7 +106,11 @@ gprevd () {
     limit=1
   fi
 
-  git diff HEAD~"$limit"..HEAD
+  if command_exists delta; then
+    git diff HEAD~"$limit"..HEAD | delta
+  else
+    git diff HEAD~"$limit"..HEAD | bat
+  fi
 }
 
 gprevr () {
@@ -118,7 +127,11 @@ gprevr () {
     second=0
   fi
 
-  git diff HEAD~"$first"..HEAD~"$second"
+  if command_exists delta; then
+    git diff HEAD~"$first"..HEAD~"$second" | delta
+  else
+    git diff HEAD~"$first"..HEAD~"$second" | bat
+  fi
 }
 
 # fshow - git commit browser (enter for show, ctrl-d for diff, ` toggles sort)
@@ -1172,6 +1185,7 @@ fcmd () {
   echo "$available_commands" |
     fzf-defaults \
       --preview "rg -A 35 -B 1 -m 1 '^{} ' $tmpfile | bat -l bash --color=always -p -H 2" \
+      --preview-window right:70% \
       --bind 'ctrl-y:execute-silent(echo -n {} | $clipboard_copy)+abort' || return 0
 }
 
