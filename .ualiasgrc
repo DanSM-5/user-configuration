@@ -210,7 +210,7 @@ fsa () {
 
 # General commands
 alias mkdr="mkdir -pv"
-alias ll='ls -alhF '
+alias ll='ls -AlhF '
 alias la='ls -A '
 alias l='ls -CF '
 alias frm='\rm $(fd-defaults -tf -tx -tl | fzf-defaults --preview "bat --color=always --style=numbers {} ")'
