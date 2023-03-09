@@ -767,7 +767,12 @@ tplay () {
     echo "No url in clipboard"
     return 1
   fi
-  webtorrentw --mpv "$url"
+
+  if [ "$1" = '-l' ]; then
+    webtorrentw --mpv "$url" -u 1 "${@:2}" 
+  else
+    webtorrentw --mpv "$url" "$@"
+  fi
 }
 
 getClipboardPath () {
