@@ -29,7 +29,7 @@ fgf () {
     --query "$INITIAL_QUERY" \
     --preview 'if [ -f {-1} ]; then git diff --color=always -- {-1}'"$__page_command__"' |
       sed 1,4d |
-      bat -p --color=always; bat --color=always {-1}; else ls -aF --color=always {-1}; fi' |
+      bat -p --color=always; bat --color=always {-1}; else ls -AF --color=always {-1}; fi' |
   cut -c4- | sed 's/.* -> //'
   # --preview '(git diff --color=always -- {-1} | sed 1,4d | bat -p --color=always; cat {-1})' |
 }
