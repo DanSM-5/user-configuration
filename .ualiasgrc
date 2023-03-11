@@ -1076,8 +1076,8 @@ else
       xsel -ob "$@"
     }
 
-    export clipboard_copy="xsel -ib"
-    export clipboard_paste="xsel -ob"
+    export clipboard_copy="$user_conf_path/utils/copy-helper-linux.sh"
+    export clipboard_paste="$user_conf_path/utils/paste-helper-linux.sh"
 
     file_explorer_open () {
       xdg-open "$@" &
