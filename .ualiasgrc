@@ -1071,8 +1071,8 @@ else
       xsel -ob "$@"
     }
 
-    export clipboard_copy="clipboard_copyw"
-    export clipboard_paste="clipboard_pastew"
+    export clipboard_copy="xsel -ib"
+    export clipboard_paste="xsel -ob"
 
     file_explorer_open () {
       xdg-open "$@" &
@@ -1141,7 +1141,7 @@ ptc () {
   
   selection="$(realpath "$selection")"
 
-  echo "$selection" | "$clipboard_copy"
+  echo "$selection" | clipboard_copyw
 }
 
 # If path issues, add VS Code path manually
