@@ -746,9 +746,9 @@ play () {
     [[ "$url" =~ "magnet:" ]] ||
     [[ "$url" =~ "webtorrent://" ]] ||
     [[ "$url" =~ "peerflix://" ]]; then
-    webtorrentw --mpv "$url"
+    webtorrentw --mpv "$url" "$@"
   else
-    mpvw "$url"
+    mpvw "$url" "$@"
   fi
 }
 

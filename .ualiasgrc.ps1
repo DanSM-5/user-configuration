@@ -582,9 +582,9 @@ function play () {
     "$url".contains('webtorrent://') -or
     "$url".contains('peerflix://')
   ) {
-    webtorrent -u 1 --mpv "$url"
+    webtorrent --mpv "$url" $args
   } else {
-    mpv "$url"
+    mpv "$url" $args
   }
 }
 
