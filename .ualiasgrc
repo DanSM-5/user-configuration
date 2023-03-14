@@ -671,7 +671,7 @@ dwi () {
 
   echo "Downloading: $img_url"
 
-  "$gallery_dl_commd" "$img_url"
+  "$gallery_dl_commd" "$img_url" "$@"
 }
 
 dwv () {
@@ -681,7 +681,7 @@ dwv () {
     return 1
   fi
 
-  echo "Downloading: $vid_url"
+  echo "Downloading: $vid_url" "$@"
 
   "$yt_dlp_commd" "$vid_url"
 }

@@ -619,21 +619,21 @@ function pimg () { & "$user_conf_path\utils\paste-image.ps1" $args }
 function yt-dw () {
   $video_url = "$(pbpaste)"
   if ( -not $video_url ) { return }
-  yt-dlp "$video_url"
+  yt-dlp "$video_url" $args
 }
 
 function dwv () {
   $video_url= "$(pbpaste)"
   if ( -not $video_url) { return }
   echo "Downloading: $video_url"
-  yt-dlp "$video_url"
+  yt-dlp "$video_url" $args
 }
 
 function dwi () {
   $image_url = "$(pbpaste)"
   if ( -not $image_url ) { return }
   echo "Downloading: $image_url"
-  gallery-dl "$image_url"
+  gallery-dl "$image_url" $args
 }
 
 function fed () {
