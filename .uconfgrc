@@ -241,11 +241,17 @@ set_general_after () {
 
     # Print tree structure in the preview window
     export FZF_ALT_C_OPTS="
-      --preview 'ls -AF --color=always {-1}'
+      --preview 'ls -AF --color=always {-1} 2> /dev/null || echo "'"Cannot access directory {}"'"'
       --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort'"
 
     export FZF_CTRL_T_OPTS="
-      --preview 'if [ -f {} ]; then bat -pp --color=always --style=numbers {}; else bat -pp --color=always <<< "'$(echo "Path: $(realpath {})"'"; ls -AFL --color=always {} ); fi'
+      --preview 'if [ -f {} ]; then
+          bat -pp --color=always --style=numbers {}
+        else
+          "'echo "Path: $(realpath {})"'"
+          echo ''
+          ls -AFL --color=always {}
+        fi'
       --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort'"
   fi
 

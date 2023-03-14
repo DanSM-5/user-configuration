@@ -33,8 +33,20 @@ fzf-defaults () {
     "$@"
 }
 
-fzf_preview_ls='if [ -f {} ]; then bat --color=always --style=numbers {}; else bat -pp --color=always <<< $(echo "Path: $(realpath {})"; ls -AFL --color=always {}); fi'
-fzf_preview_ll='if [ -f {9..} ]; then bat --color=always --style=numbers {9..}; else bat -pp --color=always <<< $(echo "Path: $(realpath {9..})"; ls -AFL --color=always {9..}); fi'
+fzf_preview_ls='if [ -f {} ]; then
+    bat --color=always --style=numbers {};
+  else
+    echo "Path: $(realpath {})"
+    echo ""
+    ls -AFL --color=always {}
+  fi'
+fzf_preview_ll='if [ -f {9..} ]; then
+    bat --color=always --style=numbers {9..};
+  else
+    echo "Path: $(realpath {9..})"
+    echo ""
+    ls -AFL --color=always {9..}
+  fi'
 
 fd-defaults () {
   fd \
@@ -227,33 +239,63 @@ rfv () {
 }
 
 fll () {
-  local selection=$(fd-defaults -td | fzf-defaults --preview "bat -pp --color=always <<< \$(echo \"Path: \$(realpath {})\"); ls -AFL --color=always {}")
+  local selection=$(fd-defaults -td |
+    fzf-defaults \
+      --preview "
+        echo \"Path: \$(realpath {})\"
+        echo ''
+        ls -AFL --color=always {}")
   if [ -n "$selection" ]; then
     \ls -alhF  --color=always "$selection"
   fi
 }
 
 lff () {
-  ls -la  |
-    sed '1d;2d;3d' |
-    fzf-defaults --preview 'if [ -f {9..} ]; then bat --color=always --style=numbers {9..}; else bat -pp --color=always <<< $(echo "Path: $(realpath {9..})"; ls -AFL --color=always {9..}); fi' |
+  ls -lA  |
+    sed '1d' |
+    fzf-defaults --preview 'if [ -f {9..} ]; then
+        bat --color=always --style=numbers {9..}
+      else
+        echo "Path: $(realpath {9..})"
+        echo ""
+        ls -AFL --color=always {9..} 2> /dev/null || echo "Cannot access directory {}"
+      fi' |
     awk '{ print $9 }'
 }
 
 lf () {
   ls -a  |
     sed '1d;2d' |
-    fzf-defaults --preview 'if [ -f {} ]; then bat --color=always --style=numbers {}; else bat -pp --color=always <<< $(echo "Path: $(realpath {})"; ls -AFL --color=always {}); fi'
+    fzf-defaults --preview 'if [ -f {} ]; then
+        bat --color=always --style=numbers {}
+      else
+        echo "Path: $(realpath {})"
+        echo ""
+        ls -AFL --color=always {} 2> /dev/null || echo "Cannot access directory {}"
+      fi'
 }
 
 lfd () {
-  fd-defaults | fzf-defaults --preview 'if [ -f {} ]; then bat --color=always --style=numbers {}; else bat -pp --color=always <<< $(echo "Path: $(realpath {})"; ls -AFL --color=always {}); fi'
+  fd-defaults |
+    fzf-defaults --preview 'if [ -f {} ]; then
+        bat --color=always --style=numbers {}
+      else
+        echo "Path: $(realpath {})"
+        echo ""
+        ls -AFL --color=always {} 2> /dev/null || echo "Cannot access directory {}"
+      fi'
 }
 
 # experimental
 lfa () {
   local selection=$(cd "/" && fd-defaults |
-    fzf-defaults --preview 'if [ -f {9..} ]; then bat --color=always --style=numbers {9..}; else bat -pp --color=always <<< $(echo "Path: $(realpath {9..})"; ls -AFL --color=always {9..}); fi')
+    fzf-defaults --preview 'if [ -f {} ]; then
+        bat --color=always --style=numbers {}
+      else
+        echo "Path: $(realpath {} 2> /dev/null || echo File cannot be opened)"
+        echo ""
+        ls -AFL --color=always {} 2> /dev/null || echo "Cannot access directory {}"
+      fi')
   echo "$selection"
 }
 
@@ -272,7 +314,10 @@ fcd () {
   selection=$(fd-defaults -tl -td "$pattern" "$location" |
     fzf-defaults --query "$query" \
       --header "(ctrl-/) Search in: $location" \
-      --preview "bat -pp --color=always <<< \$(echo \"Path: \$(realpath {})\"); ls --color=always -AFL {}")
+      --preview "
+        echo \"Path: \$(realpath {})\"
+        echo ''
+        ls --color=always -AFL {} 2> /dev/null || echo 'Cannot access directory {}'")
   if [ -z "$selection" ]; then
     return 1
   fi
@@ -288,7 +333,10 @@ fcdd () {
   selection=$(fd-defaults -tl -td |
     fzf-defaults \
       --query "$query" \
-      --preview "bat -pp --color=always <<< \$(echo \"Path: \$(realpath {})\"); ls --color=always -AFL {}")
+      --preview "
+        echo \"Path: \$(realpath {})\"
+        echo ''
+        ls --color=always -AFL {} 2> /dev/null || echo 'Cannot access directory {}'")
 
   if [ -z "$selection" ]; then
     return 1
@@ -325,7 +373,10 @@ fcde () {
 fcda () {
   local selection=""
 
-  selection=$(cd / && fd-defaults -tl -td | fzf-defaults --preview "bat -pp --color=always <<< \$(echo \"Path: \$(realpath {})\"); ls --color=always -AFL {}")
+  selection=$(cd / && fd-defaults -tl -td | fzf-defaults --preview "
+    echo \"Path: \$(realpath {})\"
+    echo ''
+    ls --color=always -AFL {} 2> /dev/null || echo 'Cannot access directory {}'")
   if [ -n "$selection" ]; then
     cd $selection
   fi
@@ -377,13 +428,18 @@ fif () {
 
   rg --files-with-matches --no-messages "$*" |
     fzf-defaults \
-      --preview "highlight -O ansi -l {} 2> /dev/null | rg --colors 'match:bg:yellow' --ignore-case --pretty --context 10 '$*' || rg --ignore-case --pretty --context 10 '$*' {}"
+      --preview "
+        highlight -O ansi -l {} 2> /dev/null |
+        rg --colors 'match:bg:yellow' --ignore-case --pretty --context 10 '$*' || rg --ignore-case --pretty --context 10 '$*' {}"
 }
 
 fdirs () {
   local selection="$(dirs -v |
     fzf-defaults \
-    --preview 'echo "Path: {2..}\n"; ls -AFL --color=always $(bash -c "echo "{2..})' |
+    --preview '
+      echo "Path: {2..}"
+      echo ''
+      ls -AFL --color=always $(bash -c "echo "{2..})' |
     awk '{print $1}')"
 
   if [ -n "$selection" ]; then
@@ -464,7 +520,8 @@ qnv () {
   if [ -z "$quick_access" ]; then
     return
   fi
-  local selection=$(echo $quick_access | fzf-defaults --preview "bat -pp --color=always <<< \$(echo \"Path: \$(realpath {})\"); ls --color=always -AFL {}")
+  local selection=$(echo $quick_access |
+    fzf-defaults --preview "echo \"Path: \$(realpath {})\"; ls --color=always -AFL {}")
   if [ -n "$selection" ]; then
     cd $selection
   fi
@@ -528,7 +585,7 @@ up () {
 }
 
 # Sourcing
-alias spf="source $HOME/.profile"
+alias spf="source $HOME/.${SHELL_NAME}rc"
 alias scfg="source $HOME/.usr_conf/.uconfrc"
 alias sgcf="source $HOME/.usr_conf/.uconfgrc"
 alias sals="source $HOME/.usr_conf/.ualiasrc"
@@ -1116,11 +1173,13 @@ fi
 
 fmpv () {
   local initial="$@"
-  local selection="$(fd -tf | fzf -m --height 50% --min-height 20 --border -q "$initial")"
+  local selection="$(fd -tf |
+    fzf -m --height 50% --min-height 20 --border -q "$initial")"
   if [ -z "$selection" ]; then
     return
   fi
-  local quoted=$(echo $selection | awk '{ printf "\"""%s""\""" ", $0 }')
+  local quoted=$(echo $selection |
+    awk '{ printf "\"""%s""\""" ", $0 }')
   bash -c "$mpv_commd $quoted"
 }
 
@@ -1139,7 +1198,13 @@ ptc () {
   selection=$(fd-defaults -tl -td -tf -L "$pattern" "$location" |
     fzf-defaults --query "$query" \
       --header "(ctrl-/) Search in: $location" \
-      --preview "if [ -f {} ]; then bat -pp --color=always --style=numbers {}; else bat -pp --color=always <<< \$(echo \"Path: \$(realpath {})\"); ls --color=always -AFL  {}; fi")
+      --preview "if [ -f {} ]; then
+          bat -pp --color=always --style=numbers {}
+        else
+          echo \"Path: \$(realpath {})\"
+          echo ''
+          ls --color=always -AFL  {} 2> /dev/null || echo 'Cannot access directory {}'
+        fi")
   if [ -z "$selection" ]; then
     return 1
   fi
@@ -1190,7 +1255,9 @@ fcmd () {
   # --preview "rg -A 20 -B 1 --text --color=always '^{} ' $tmpfile" \
   echo "$available_commands" |
     fzf-defaults \
-      --preview "rg -A 50 -B 1 -m 1 '^{} ' $tmpfile | bat -l bash --color=always -p -H 2" \
+      --preview "
+        rg -A 50 -B 1 -m 1 '^{} ' $tmpfile |
+          bat -l bash --color=always -p -H 2" \
       --preview-window right:70% \
       --bind 'ctrl-y:execute-silent(echo -n {} | $clipboard_copy)+abort' || return 0
 }
