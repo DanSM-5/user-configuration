@@ -448,12 +448,6 @@ fdirs () {
 }
 
 fenv () {
-  local showValue=false
-
-  if [ "$1" = '-v' ]; then
-    showValue=true
-  fi
-
   local tmpfile="$(mktemp)"
   # Cleanup file on exit
   trap "rm -- '$tmpfile'" EXIT
@@ -462,16 +456,47 @@ fenv () {
     printf "%s=%s\n" "$n" "${v//$'\n'}"
   done < <(env -0) > "$tmpfile"
 
-  cat -v "$tmpfile" |
+
+  # FZF process
+  # --expect will return an arry with the expected key
+  # as first element if key is pressed
+  local output=($(cat -v "$tmpfile" |
     fzf-defaults \
       --preview 'printf "%q" {}' --preview-window up:3:hidden:wrap \
       --bind 'ctrl-/:toggle-preview' \
       --bind 'ctrl-s:toggle-sort' \
-      --bind 'ctrl-y:execute-silent(printf "%q" {} | $clipboard_copy)+abort' \
+      --bind 'ctrl-y:execute-silent(echo -n {} | $clipboard_copy)+abort' \
+      --expect 'ctrl-h,ctrl-v' \
       --color header:italic \
-      --header 'Press CTRL-Y to copy command into clipboard' |
-    cut -d '=' -f "$(if [ "$showValue" = true ]; then echo "2-"; else echo "1"; fi)" |
-    trim
+      --header 'Press CTRL-Y to copy command into clipboard'))
+
+  # Subshell to keep helper functions as local
+  (
+    getKey () {
+      cut -d '=' -f "1" | trim
+    }
+
+    getValue () {
+      cut -d '=' -f "2-" | trim
+    }
+
+    case ${output[1]} in
+      ctrl-h)
+        # Print key only
+        echo "${output[@]:1}" | getKey
+        ;;
+      ctrl-v)
+        # Print value only
+        echo "${output[@]:1}" | getValue
+        ;;
+      *)
+        # Print everything if selected
+        if [ -n "${output[1]}" ]; then
+          echo "${output[@]}"
+        fi
+        ;;
+    esac
+  )
 }
 
 fnr () {
