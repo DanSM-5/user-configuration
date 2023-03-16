@@ -545,8 +545,9 @@ qnv () {
   if [ -z "$quick_access" ]; then
     return
   fi
-  local selection=$(echo $quick_access |
-    fzf-defaults --preview "echo \"Path: \$(realpath {})\"; ls --color=always -AFL {}")
+  local selection=$(printf "%s\n" "${quick_access[@]}" |
+    fzf-defaults --preview "
+      echo \"Path: \$(realpath {})\"; ls --color=always -AFL {}")
   if [ -n "$selection" ]; then
     cd $selection
   fi
@@ -559,7 +560,9 @@ qed () {
     return
   fi
   local editor="$1"
-  local selection=$(echo $quick_edit | fzf-defaults --preview "bat --color=always --style=numbers {}")
+  local selection=$(printf "%s\n" "${quick_edit[@]}" |
+    fzf-defaults --preview "bat --color=always --style=numbers {}")
+
   if [ -z "$selection" ]; then
     return
   fi
