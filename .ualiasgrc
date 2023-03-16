@@ -547,7 +547,9 @@ qnv () {
   fi
   local selection=$(printf "%s\n" "${quick_access[@]}" |
     fzf-defaults --preview "
-      echo \"Path: \$(realpath {})\"; ls --color=always -AFL {}")
+      echo \"Path: \$(realpath {} 2> /dev/null || echo 'Unable to display')\"
+      echo ''
+      ls --color=always -AFL {} 2> /dev/null || echo 'No preview available'")
   if [ -n "$selection" ]; then
     cd $selection
   fi
@@ -561,9 +563,10 @@ qed () {
   fi
   local editor="$1"
   local selection=$(printf "%s\n" "${quick_edit[@]}" |
-    fzf-defaults --preview "bat --color=always --style=numbers {}")
+    fzf-defaults --preview "
+      bat --color=always --style=numbers {} 2> /dev/null || echo 'Cannot preview {}'")
 
-  if [ -z "$selection" ]; then
+  if ! [ -f "$selection" ]; then
     return
   fi
   if [ -z "$editor" ]; then
