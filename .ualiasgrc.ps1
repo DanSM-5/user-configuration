@@ -750,7 +750,7 @@ function ptc () {
 function cdirs () {
   Get-ChildItem | % {
     if (Test-Path -Path $_.Name -PathType Container) {
-      Write-Host "$_`t`t`t$(fd --hidden -td . $_.Name | Measure-Object | % { $_.Count)"
+      Write-Host "$_`t`t`t$(fd --hidden -td . $_.Name | Measure-Object | % { $_.Count })"
     } 
   }
 }
