@@ -261,11 +261,20 @@ set_general_after () {
   fi
 
   if command_exists fd; then
-    FD_OPTIONS=(
-      --follow --hidden --no-ignore
+    export FD_SHOW_OPTIONS=(
+      --follow
+      --hidden
+      --no-ignore
+    )
+
+    export FD_EXCLUDE_OPTIONS=(
+      --exclude AppData
       --exclude node_modules
       --exclude tizen-studio
       --exclude Library
+      --exclude scoop
+      --exclude vimfiles
+      --exclude .vscode-server
       --exclude .git
       --exclude .gradle
       --exclude .nix-defexpr
@@ -279,10 +288,11 @@ set_general_after () {
       --exclude .DS_Store
       --exclude .vscode
       --exclude .vim
+      --exclude .bun
     )
 
-    export FZF_CTRL_T_COMMAND="fd ${FD_OPTIONS[@]}"
-    export FZF_ALT_C_COMMAND="fd --type d ${FD_OPTIONS[@]}"
+    export FZF_CTRL_T_COMMAND="fd ${FD_SHOW_OPTIONS[@]} ${FD_EXCLUDE_OPTIONS[@]}"
+    export FZF_ALT_C_COMMAND="fd --type d ${FD_SHOW_OPTIONS[@]} ${FD_EXCLUDE_OPTIONS[@]}"
 
     # Use fd (https://github.com/sharkdp/fd) instead of the default find
     # command for listing path candidates.
