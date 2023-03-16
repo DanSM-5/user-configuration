@@ -33,6 +33,12 @@ function getPsFzfOptions {
   return $psFzfOptions
 }
 
+function fd-Excluded {
+  $exclusionArr = @( $env:FD_SHOW_OPTIONS -Split ' ' )
+  $exclusionArr += @( $env:FD_EXCLUDE_OPTIONS -Split ' ' )
+  return $exclusionArr
+}
+
 function spf {
   . $global:profile
 }
@@ -196,11 +202,11 @@ function fcd () {
   }
 
   $location = if ("$location" -eq "~") { "$HOME" } else { "$location" }
+  $exclude = fd-Excluded
 
   $selection = "$(
     fd `
-      $env:FD_SHOW_OPTIONS `
-      $env:FD_EXCLUDE_OPTIONS `
+      $exclude `
       -tl -td `
       "$pattern" "$location" |
     Invoke-Fzf -Height 50% -MinHeight 20 -Border `
@@ -220,11 +226,11 @@ function fcdd () {
   $pattern = if ($args[0]) { $args[0] } else { "." }
   $query = $args[1..$args.length]
   $options = getPsFzfOptions
+  $exclude = fd-Excluded
 
   $selection = "$(
     fd `
-      $env:FD_SHOW_OPTIONS `
-      $env:FD_EXCLUDE_OPTIONS `
+      $exclude `
       -tl -td "$pattern" |
     Invoke-Fzf -Height 50% -MinHeight 20 -Border `
       -Header 'Press CTRL-/ to toggle preview' `
@@ -251,11 +257,11 @@ function fcde () {
   }
 
   $location = if ("$location" -eq "~") { "$HOME" } else { "$location" }
+  $exclude = fd-Excluded
 
   $selection = "$(
     fd `
-      $env:FD_SHOW_OPTIONS `
-      $env:FD_EXCLUDE_OPTIONS `
+      $exclude `
       -L -tf "$pattern" "$location" |
     % { Split-Path "$_" } |
     Sort-Object -Unique |
@@ -625,11 +631,11 @@ function fed () {
   }
 
   $location = if ("$location" -eq "~") { "$HOME" } else { "$location" }
+  $exclude = fd-Excluded
 
   $selection = "$(
     fd `
-      $env:FD_SHOW_OPTIONS `
-      $env:FD_EXCLUDE_OPTIONS `
+      $exclude `
       -tf `
       "$pattern" "$location" |
     Invoke-Fzf -Height 50% -MinHeight 20 -Border `
@@ -653,11 +659,11 @@ function fedd () {
   $query = $args[1..$args.length]
   $editor = "$env:PREFERED_EDITOR" ?? 'vim'
   $options = getPsFzfOptions
+  $exclude = fd-Excluded
 
   $selection = "$(
     fd `
-      $env:FD_SHOW_OPTIONS `
-      $env:FD_EXCLUDE_OPTIONS `
+      $exclude `
       -tf |
     Invoke-Fzf -Height 50% -MinHeight 20 -Border `
       -Header "(ctrl-/) Search in: $location" `
@@ -727,10 +733,11 @@ function ptc () {
     $location = "$HOME"
   }
 
+  $exclude = fd-Excluded
+
   $selection = "$(
     fd `
-      $env:FD_SHOW_OPTIONS `
-      $env:FD_EXCLUDE_OPTIONS `
+      $exclude `
       -tl -td -tf `
       "$pattern" "$location" |
     Invoke-Fzf -Height 50% -MinHeight 20 -Border `

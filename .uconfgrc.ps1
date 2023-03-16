@@ -89,9 +89,9 @@ if (Test-Path "$script:gsudoModule") {
 
 if (Test-Command fd) {
     $env:FD_SHOW_OPTIONS = @(
-      "--follow",
-      "--hidden",
-      "--no-ignore"
+      '--follow',
+      '--hidden',
+      '--no-ignore'
     )
 
     $env:FD_EXCLUDE_OPTIONS = @(
@@ -102,7 +102,7 @@ if (Test-Command fd) {
       '--exclude', 'Library',
       '--exclude', 'scoop',
       '--exclude', 'vimfiles',
-      '--exclude', 'aws'
+      '--exclude', 'aws',
       '--exclude', '.vscode-server',
       '--exclude', '.vscode-server-server',
       '--exclude', '.git',
