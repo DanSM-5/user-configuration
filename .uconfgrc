@@ -257,11 +257,11 @@ set_general_after () {
 
   # fzf support
   if command_exists rg; then
-    export FZF_DEFAULT_COMMAND='rg --files --no-ignore --hidden --glob "!node_modules" --glob "!.git" --follow'
+    export FZF_DEFAULT_COMMAND='rg --files --follow --no-ignore --hidden --glob "!node_modules" --glob "!.git"'
   fi
 
   if command_exists fd; then
-    FD_OPTIONS="--follow --exclude .git --exclude node_modules"
+    FD_OPTIONS="--follow --hidden --no-ignore --exclude .git --exclude node_modules"
     export FZF_CTRL_T_COMMAND="fd $FD_OPTIONS"
     export FZF_ALT_C_COMMAND="fd --type d $FD_OPTIONS"
 
