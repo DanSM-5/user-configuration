@@ -109,7 +109,10 @@ _fix_cursor() {
 }
 precmd_functions+=(_fix_cursor)
 
-
+if [ "$IS_MAC" = true ]; then
+  # Fix alt-c keybinding in macos
+  bindkey "ç" fzf-cd-widget
+fi
 
 # Must be the last line of this file
 [ -f "$HOME/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ] && source "$HOME/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
