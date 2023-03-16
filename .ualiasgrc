@@ -1285,3 +1285,9 @@ fcmd () {
       --bind 'ctrl-y:execute-silent(echo -n {} | $clipboard_copy)+abort' || return 0
 }
 
+cdirs () {
+  for dirl in $(ls -A); do
+    [ -d "$dirl" ] && printf "$dirl\t\t\t$(fd --hidden -td . "$dirl" | wc -l)\n"
+  done
+}
+

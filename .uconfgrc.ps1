@@ -88,7 +88,42 @@ if (Test-Path "$script:gsudoModule") {
 }
 
 if (Test-Command fd) {
-  $FD_OPTIONS="--hidden --follow --exclude .git --exclude node_modules"
+    $env:FD_SHOW_OPTIONS = @(
+      "--follow",
+      "--hidden",
+      "--no-ignore"
+    )
+
+    $env:FD_EXCLUDE_OPTIONS = @(
+      '--exclude', 'AppData',
+      '--exclude', 'Android',
+      '--exclude', 'node_modules',
+      '--exclude', 'tizen-studio',
+      '--exclude', 'Library',
+      '--exclude', 'scoop',
+      '--exclude', 'vimfiles',
+      '--exclude', 'aws'
+      '--exclude', '.vscode-server',
+      '--exclude', '.vscode-server-server',
+      '--exclude', '.git',
+      '--exclude', '.gitbook',
+      '--exclude', '.gradle',
+      '--exclude', '.nix-defexpr',
+      '--exclude', '.azure',
+      '--exclude', '.SpaceVim',
+      '--exclude', '.cache',
+      '--exclude', '.node-gyp',
+      '--exclude', '.npm',
+      '--exclude', '.nvm',
+      '--exclude', '.colima',
+      '--exclude', '.pyenv',
+      '--exclude', '.DS_Store',
+      '--exclude', '.vscode',
+      '--exclude', '.vim',
+      '--exclude', '.bun'
+    )
+
+  $FD_OPTIONS="$env:FD_SHOW_OPTIONS $env:FD_EXCLUDE_OPTIONS"
   $env:FZF_CTRL_T_COMMAND="fd $FD_OPTIONS"
   $env:FZF_ALT_C_COMMAND="fd --type d $FD_OPTIONS"
 }

@@ -199,16 +199,8 @@ function fcd () {
 
   $selection = "$(
     fd `
-      --hidden `
-      --no-ignore-vcs `
-      --exclude ".git" `
-      --exclude "node_modules" `
-      --exclude ".npm" `
-      --exclude ".vscode-server" `
-      --exclude ".SpaceVim" `
-      --exclude ".cache" `
-      --exclude ".bun" `
-      --exclude ".nvm" `
+      $env:FD_SHOW_OPTIONS `
+      $env:FD_EXCLUDE_OPTIONS `
       -tl -td `
       "$pattern" "$location" |
     Invoke-Fzf -Height 50% -MinHeight 20 -Border `
@@ -231,16 +223,8 @@ function fcdd () {
 
   $selection = "$(
     fd `
-      --hidden `
-      --no-ignore-vcs `
-      --exclude ".git" `
-      --exclude "node_modules" `
-      --exclude ".npm" `
-      --exclude ".vscode-server" `
-      --exclude ".SpaceVim" `
-      --exclude ".cache" `
-      --exclude ".bun" `
-      --exclude ".nvm" `
+      $env:FD_SHOW_OPTIONS `
+      $env:FD_EXCLUDE_OPTIONS `
       -tl -td "$pattern" |
     Invoke-Fzf -Height 50% -MinHeight 20 -Border `
       -Header 'Press CTRL-/ to toggle preview' `
@@ -270,16 +254,8 @@ function fcde () {
 
   $selection = "$(
     fd `
-      --hidden `
-      --no-ignore-vcs `
-      --exclude ".git" `
-      --exclude "node_modules" `
-      --exclude ".npm" `
-      --exclude ".vscode-server" `
-      --exclude ".SpaceVim" `
-      --exclude ".cache" `
-      --exclude ".bun" `
-      --exclude ".nvm" `
+      $env:FD_SHOW_OPTIONS `
+      $env:FD_EXCLUDE_OPTIONS `
       -L -tf "$pattern" "$location" |
     % { Split-Path "$_" } |
     Sort-Object -Unique |
@@ -487,7 +463,7 @@ function ex ([String] $filename) {
       "*.7z"         { 7z x $filename; Break }
       "*.deb"        { ar x $filename; Break }
       "*.tar.xz"     { tar xvf $filename; Break }
-      "*.tar.zst"    { unzstd $filename; Break }
+      "*.tar.zst"    { zstd -d $filename; Break }
       default        { echo "'$filename' cannot be extracted via ex()!"; Break }
     }
   } else {
@@ -652,16 +628,8 @@ function fed () {
 
   $selection = "$(
     fd `
-      --hidden `
-      --no-ignore-vcs `
-      --exclude ".git" `
-      --exclude "node_modules" `
-      --exclude ".npm" `
-      --exclude ".vscode-server" `
-      --exclude ".SpaceVim" `
-      --exclude ".cache" `
-      --exclude ".bun" `
-      --exclude ".nvm" `
+      $env:FD_SHOW_OPTIONS `
+      $env:FD_EXCLUDE_OPTIONS `
       -tf `
       "$pattern" "$location" |
     Invoke-Fzf -Height 50% -MinHeight 20 -Border `
@@ -688,16 +656,8 @@ function fedd () {
 
   $selection = "$(
     fd `
-      --hidden `
-      --no-ignore-vcs `
-      --exclude ".git" `
-      --exclude "node_modules" `
-      --exclude ".npm" `
-      --exclude ".vscode-server" `
-      --exclude ".SpaceVim" `
-      --exclude ".cache" `
-      --exclude ".bun" `
-      --exclude ".nvm" `
+      $env:FD_SHOW_OPTIONS `
+      $env:FD_EXCLUDE_OPTIONS `
       -tf |
     Invoke-Fzf -Height 50% -MinHeight 20 -Border `
       -Header "(ctrl-/) Search in: $location" `
@@ -769,16 +729,8 @@ function ptc () {
 
   $selection = "$(
     fd `
-      --hidden `
-      --no-ignore-vcs `
-      --exclude ".git" `
-      --exclude "node_modules" `
-      --exclude ".npm" `
-      --exclude ".vscode-server" `
-      --exclude ".SpaceVim" `
-      --exclude ".cache" `
-      --exclude ".bun" `
-      --exclude ".nvm" `
+      $env:FD_SHOW_OPTIONS `
+      $env:FD_EXCLUDE_OPTIONS `
       -tl -td -tf `
       "$pattern" "$location" |
     Invoke-Fzf -Height 50% -MinHeight 20 -Border `
@@ -794,3 +746,12 @@ function ptc () {
   $selection = Get-Item "$selection" | Select-Object FullName | % { $_.FullName }
   echo "$selection" | tr -d "\r\n" | pbcopy
 }
+
+function cdirs () {
+  Get-ChildItem | % {
+    if (Test-Path -Path $_.Name -PathType Container) {
+      Write-Host "$_`t`t`t$(fd --hidden -td . $_.Name | Measure-Object | % { $_.Count)"
+    } 
+  }
+}
+
