@@ -1285,9 +1285,51 @@ fcmd () {
       --bind 'ctrl-y:execute-silent(echo -n {} | $clipboard_copy)+abort' || return 0
 }
 
+# TODO: Using `fd --hidden --follow -td -d 1`
+# has issues with file names with spaces.
+# Investigate if fixin the issue is faster
+countFiles () {
+  local searchSize="$1"
+  local fdArgs=(${@:2})
+
+  (
+    printSimple () {
+      printf "$1\t$(fd --hidden "${fdArgs[@]}" . "$1" | wc -l)\n"
+    }
+
+    printWithFileSize () {
+      local count="$(fd --hidden "${fdArgs[@]}" . "$1" | wc -l)"
+      printf "$(du -sh "$1" 2> /dev/null)\t$count\n"
+    }
+
+    local printFunc=printSimple
+
+    if [ "$searchSize" = true ]; then
+      printFunc=printWithFileSize
+    fi
+
+    for dirl in .*/ */; do
+      $printFunc "$dirl"
+    done | column -t -s $'\t'
+  )
+}
+
 cdirs () {
-  for dirl in $(ls -A); do
-    [ -d "$dirl" ] && printf "$dirl\t\t\t$(fd --hidden -td . "$dirl" | wc -l)\n"
-  done
+  printf "Counting directories in $(pwd):\n\n"
+  local size=false
+  [ "$1" = -s ] && size=true
+  countFiles "$size" -td
+}
+
+cfiles () {
+  printf "Counting files in $(pwd):\n\n"
+  [ "$1" = -s ] && size=true
+  countFiles "$size" -tf
+}
+
+cevery () {
+  printf "Counting all files in $(pwd):\n\n"
+  [ "$1" = -s ] && size=true
+  countFiles "$size"
 }
 

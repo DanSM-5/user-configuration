@@ -754,11 +754,56 @@ function ptc () {
   echo "$selection" | tr -d "\r\n" | pbcopy
 }
 
-function cdirs () {
-  Get-ChildItem | % {
-    if (Test-Path -Path $_.Name -PathType Container) {
-      Write-Host "$_`t`t`t$(fd --hidden -td . $_.Name | Measure-Object | % { $_.Count })"
-    } 
+function Count-Files (
+  [Switch] $Size,
+  [String[]]
+  [Parameter(Position=1, ValueFromRemainingArguments)]
+  $FdProps
+) {
+
+  function Get-SimpleCount () {
+    $dir = $_.Name
+    fd --hidden $FdProps . $dir | Measure-Object | % {
+      [PSCustomObject] @{
+        Name = $dir
+        Count = $_.Count
+      }
+    }
   }
+
+  function Get-CountWithSize () {
+    $dir = $_.Name
+    $size = Get-ChildItem -Recurse -Path $dir | Measure-Object -Property Length -Sum
+    fd --hidden $FdProps . "$dir" | Measure-Object | % {
+      [PSCustomObject] @{
+        Name = $dir
+        Count = $_.Count
+        Size = $size.Sum
+      }
+    }
+  }
+
+  if ($Size) {
+    $result = Get-ChildItem -Attributes Directory, Directory+Hidden | % { Get-CountWithSize $_ }
+  } else {
+    $result = Get-ChildItem -Attributes Directory, Directory+Hidden | % { Get-SimpleCount $_ }
+  }
+
+  $result | Format-Table -Auto -Wrap
+}
+
+function cevery ([Switch] $Size) {
+  Write-Host "Counting all files in $PWD"
+  Count-Files -Size:$Size
+}
+
+function cdirs ([Switch] $Size) {
+  Write-Host "Counting directories in $PWD"
+  Count-Files -Size:$Size -td
+}
+
+function cfiles ([Switch] $Size) {
+  Write-Host "Counting files in $PWD"
+  Count-Files -Size:$Size -tf
 }
 
