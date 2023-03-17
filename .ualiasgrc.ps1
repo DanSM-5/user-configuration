@@ -773,12 +773,32 @@ function Count-Files (
 
   function Get-CountWithSize () {
     $dir = $_.Name
-    $size = Get-ChildItem -Recurse -Path $dir | Measure-Object -Property Length -Sum
+    $size = Get-ChildItem -Recurse -Path $dir 2>&1 | % {
+      if ($_ -is [System.Management.Automation.ErrorRecord]) {
+        # Print message if it is an error
+        Write-Host $_.Exception.Message -ForegroundColor Red
+      } else {
+        # Otherwise, just output the input object as-is
+        $_
+      }
+    } | Measure-Object -Property Length -Sum
+
+    if ($size.Sum -gt 1GB) {
+      $size = "$([math]::Round($size.Sum / 1GB, 3))GB"
+    } elseif ($size.Sum -gt 1MB) {
+      $size = "$([math]::Round($size.Sum / 1MB, 3))MB"
+    } elseif ($size.Sum -gt 1KB) {
+      $size = "$([math]::Round($size.Sum / 1KB, 3))KB"
+    } else {
+      $temp = if ($size.Sum) { $size.Sum } else { 0 }
+      $size = "$([math]::Round($temp, 3))B"
+    }
+
     fd --hidden $FdProps . "$dir" | Measure-Object | % {
       [PSCustomObject] @{
         Name = $dir
         Count = $_.Count
-        Size = $size.Sum
+        Size = $size
       }
     }
   }
