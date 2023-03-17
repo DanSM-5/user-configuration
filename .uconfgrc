@@ -276,6 +276,7 @@ set_general_after () {
       --exclude scoop
       --exclude vimfiles
       --exclude aws
+      --exclude nvim
       --exclude .vscode-server
       --exclude .vscode-server-server
       --exclude .git
