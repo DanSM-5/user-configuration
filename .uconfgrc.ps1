@@ -10,6 +10,9 @@ $prj = "$HOME\prj"
 
 $env:PREFERED_EDITOR = 'nvim'
 $env:EDITOR = 'nvim'
+$env:user_conf_path = "$user_conf_path"
+$env:user_scripts_path = "$user_scripts_path"
+$env:prj = "$prj"
 
 # Set true color support
 $env:COLORTERM = 'truecolor'
