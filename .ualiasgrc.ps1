@@ -17,6 +17,9 @@ $env:PREFERED_EDITOR = if ($env:PREFERED_EDITOR) { $env:PREFERED_EDITOR } else {
 . "$user_conf_path\utils\function-With-Env.ps1"
 . "$user_conf_path\utils\function-New-CommandWrapper.ps1"
 
+# Script called from function
+function pimg () { & "$user_conf_path\utils\paste-image.ps1" $args }
+
 function gpr { cd $prj }
 function gus { cd $user_scripts_path }
 function guc { cd $user_conf_path }
@@ -592,8 +595,6 @@ function restart () { shutdown /r /f /t 0 }
 function turnoff () { shutdown /s /f /t 0 }
 
 function tkill () { taskkill /f /im $args }
-
-function pimg () { & "$user_conf_path\utils\paste-image.ps1" $args }
 
 function yt-dw () {
   $video_url = "$(pbpaste)"
