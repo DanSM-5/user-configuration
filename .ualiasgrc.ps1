@@ -459,6 +459,8 @@ function makeShortCut ([string] $target, [string] $path, [string] $arguments = '
 function ll () { ls $args }
 
 function l () {  
+  $path = if($args[0]) { $args[0] } else { '.' }
+
   # Regext for color output
   $colorMap = @{
     # Match names ending with '/' either that the start or end. => Directories
@@ -469,7 +471,7 @@ function l () {
     ('^[\.]?\b[\w\W].*\b@(?= )', '(?<=  )[\.]?\b[\w\W].*\b@') = 'cyan'
   }
 
-  Get-ChildItem -Attributes Directory, Directory+Hidden, Hidden, Archive, Archive+Hidden | % {
+  Get-ChildItem -Attributes Directory, Directory+Hidden, Hidden, Archive, Archive+Hidden -Path $path | % {
     # $acc = [PSCustomObject] @{ Dirs = '' }
     # $acc = @()
   # } {
@@ -823,5 +825,11 @@ function cdirs ([Switch] $Size) {
 function cfiles ([Switch] $Size) {
   Write-Host "Counting files in $PWD"
   Count-Files -Size:$Size -tf
+}
+
+if (Test-Command Download-Gdl) {
+  function dgl () {
+    Download-Gdl
+  }
 }
 
