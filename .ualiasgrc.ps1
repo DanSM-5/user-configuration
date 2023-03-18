@@ -10,6 +10,13 @@ $prj = "$HOME\prj"
 
 $env:PREFERED_EDITOR = if ($env:PREFERED_EDITOR) { $env:PREFERED_EDITOR } else { "vim" }
 
+# Dot sourcing function scripts
+# TODO: Loop through files and source them
+# E.G. Get-ChildItem -Path utils | Where { $_.Name -Like 'function-*.ps1' }
+. "$user_conf_path\utils\function-Out-HostColored.ps1"
+. "$user_conf_path\utils\function-With-Env.ps1"
+. "$user_conf_path\utils\function-New-CommandWrapper.ps1"
+
 function gpr { cd $prj }
 function gus { cd $user_scripts_path }
 function guc { cd $user_conf_path }
@@ -448,6 +455,41 @@ function makeShortCut ([string] $target, [string] $path, [string] $arguments = '
 
 function ll () { ls $args }
 
+function l () {  
+  # Regext for color output
+  $colorMap = @{
+    # Match names ending with '/' either that the start or end. => Directories
+    ('^[\.]?\b[\w\W].*\b/(?= )', '(?<=  )[\.]?\b[\w\W].*\b\/') = 'white,darkblue'
+    # Match names ending with '*' either that the start or end. => Files
+    ('^[\.]?\b[\w\W].*\b\*(?= )', '(?<=  )[\.]?\b[\w\W].*\b\*') = 'green'
+    # Match names ending with '@' either that the start or end. => Links
+    ('^[\.]?\b[\w\W].*\b@(?= )', '(?<=  )[\.]?\b[\w\W].*\b@') = 'cyan'
+  }
+
+  Get-ChildItem -Attributes Directory, Directory+Hidden, Hidden, Archive, Archive+Hidden | % {
+    # $acc = [PSCustomObject] @{ Dirs = '' }
+    # $acc = @()
+  # } {
+    $fileName = $_.Name
+    $item = [PSCustomObject] @{ Content = '' }
+
+    # if (Test-Path -PathType Leaf -Path f) {}
+    if ($_.Attributes -Band [Io.FileAttributes]::ReparsePoint) {
+      $fileName = "$fileName@"
+    } elseif ($_.Attributes -Band [Io.FileAttributes]::Directory) {
+      $fileName = "$fileName/"
+    } elseif ($_.Attributes -Band [Io.FileAttributes]::Archive) {
+      $fileName = "$fileName*"
+    }
+
+    $item.Content = $fileName
+    return $item
+  # } {
+  #   $acc.Dirs 
+  } | Format-Wide -Property Content |
+    Out-HostColored $colorMap
+}
+
 function ntemp {
   nvim "$env:temp/temp-$(New-Guid).txt"
 }
@@ -475,51 +517,6 @@ function ex ([String] $filename) {
   } else {
     echo "'$filename' is not a file"
   }
-}
-
-# Mimic env.exe to include env variables to call a ps1 script
-# E.g. With-Env VAR=VAL script.ps1
-# Ref: https://devblogs.microsoft.com/scripting/proxy-functions-spice-up-your-powershell-core-cmdlets/
-# PS > $MetaData = New-Object System.Management.Automation.CommandMetaData (Get-Command  Some-Command)
-# PS > [System.Management.Automation.ProxyCommand]::Create($MetaData)
-function With-Env () {
-  param()
-
-  begin
-  {
-      try {
-          $wrappedCmd = $ExecutionContext.InvokeCommand.GetCommand("$user_conf_path\utils\With-Env.ps1", [System.Management.Automation.CommandTypes]::ExternalScript)
-          $PSBoundParameters.Add('$args', $args)
-          $scriptCmd = {& $wrappedCmd @PSBoundParameters }
-
-          $steppablePipeline = $scriptCmd.GetSteppablePipeline($myInvocation.CommandOrigin)
-          $steppablePipeline.Begin($myInvocation.ExpectingInput, $ExecutionContext)
-      } catch {
-          throw
-      }
-  }
-
-  process
-  {
-      try {
-          $steppablePipeline.Process($_)
-      } catch {
-          throw
-      }
-  }
-
-  end
-  {
-      try {
-          $steppablePipeline.End()
-      } catch {
-          throw
-      }
-  }
-  <#
-    .ForwardHelpTargetName $user_conf_path\utils\With-Env.ps1
-    .ForwardHelpCategory ExternalScript
-  #>
 }
 
 function mpvp () {
