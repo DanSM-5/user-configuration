@@ -459,7 +459,15 @@ function makeShortCut ([string] $target, [string] $path, [string] $arguments = '
 function ll () { ls $args }
 
 function l () {  
-  $path = if($args[0]) { $args[0] } else { '.' }
+  # $path = if($args[0]) { $args[0] } else { '.' }
+  [CmdletBinding()]
+  param(
+    $DirectoryName = '.',
+    [Parameter(ValueFromPipeline = $true)]
+    $PathFromPipe
+  )
+
+  $path = if ($PathFromPipe) { $PathFromPipe } else { $DirectoryName }
 
   # Regext for color output
   $colorMap = @{
@@ -471,11 +479,19 @@ function l () {
     ('^[\.]?\b[\w\W].*\b@(?= )', '(?<=  )[\.]?\b[\w\W].*\b@') = 'cyan'
   }
 
+  $position = $PSCmdlet.MyInvocation.PipelinePosition
+  $length = $PSCmdlet.MyInvocation.PipelineLength
+
   Get-ChildItem -Attributes Directory, Directory+Hidden, Hidden, Archive, Archive+Hidden -Path $path | % {
     # $acc = [PSCustomObject] @{ Dirs = '' }
     # $acc = @()
   # } {
     $fileName = $_.Name
+
+    if ($position -ne $length) {
+      return $fileName
+    }
+
     $item = [PSCustomObject] @{ Content = '' }
 
     # if (Test-Path -PathType Leaf -Path f) {}
@@ -828,8 +844,8 @@ function cfiles ([Switch] $Size) {
 }
 
 if (Test-Command Download-Gdl) {
-  function dgl () {
-    Download-Gdl
-  }
+  # Alias to Set-Env
+  if (Test-Path Alias:dgl) { Remove-Item Alias:dgl }
+  Set-Alias -Name dgl -Value Download-Gdl
 }
 
