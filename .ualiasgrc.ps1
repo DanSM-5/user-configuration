@@ -588,7 +588,7 @@ function play () {
   }
 }
 
-function tplay ([Switch] $limit = $false) {
+function tplay ([Switch] $limit) {
   $url = "$(pbpaste)"
 
   if (-not $url) {
@@ -599,10 +599,21 @@ function tplay ([Switch] $limit = $false) {
   $url = $url.Trim()
   echo "Playing: $url"
 
+  $webtorrent_args = @()
+
   if ($limit) {
-    webtorrent -u 1 --mpv "$url" $args
+    $webtorrent_args += '-u'
+    $webtorrent_args += 1
+  }
+
+  foreach ($wa in $args) {
+    $webtorrent_args += $wa
+  }
+
+  if ($webtorrent_args) {
+    webtorrent --mpv "$url" $webtorrent_args
   } else {
-    webtorrent --mpv "$url" $args
+    webtorrent --mpv "$url"
   }
 }
 
