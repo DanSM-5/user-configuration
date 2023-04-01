@@ -901,6 +901,12 @@ if [ "$IS_WSL" = true ]; then
   yt_dlp_commd="yt-dlp.exe"
   mpv_commd='mpv'
 
+  dgl () {
+    pushd "$WIN_HOME"
+    pwsh.exe -NoLogo -NonInteractive -Command "Download-Gdl $@"
+    popd
+  }
+
   cmd () {
     cmd.exe /c "$@"
   }
@@ -1191,6 +1197,9 @@ else
       cmd.exe //c "$@"
     }
 
+    dgl () {
+      pwsh.exe -NoLogo -NonInteractive -Command "Download-Gdl $@"
+    }
   fi
 fi
 
