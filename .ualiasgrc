@@ -176,6 +176,14 @@ fadd () {
   fi
 }
 
+fpad () {
+  local selection=($(fgf "${*:-}"))
+  echo "$selection"
+  if [ -n "$selection" ]; then
+    git add -p "${selection[@]}"
+  fi
+}
+
 fco () {
   local selection=$(fgb "${*:-}")
   if [ -n "$selection" ]; then

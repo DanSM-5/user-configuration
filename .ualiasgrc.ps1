@@ -115,6 +115,15 @@ function fadd () {
   fgf | % { git add $_ }
 }
 
+function fpad () {
+  $files = @()
+  fgf | % { $files += "$_" }
+
+  if ($files) {
+    git add -p $files
+  }
+}
+
 function fco () {
   fgb | % { git checkout "$($_ -replace 'origin/', '')" }
 }
