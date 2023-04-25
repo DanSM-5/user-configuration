@@ -465,6 +465,8 @@ function makeShortCut ([string] $target, [string] $path, [string] $arguments = '
   }
 }
 
+function mkdr { New-Item $args -ItemType Directory -ea 0 }
+
 function ll () { ls $args }
 
 function l () {  
@@ -865,6 +867,78 @@ function cdirs ([Switch] $Size) {
 function cfiles ([Switch] $Size) {
   Write-Host "Counting files in $PWD"
   Count-Files -Size:$Size -tf
+}
+
+function mountDir ([string] $letter, [string] $pathToMount) {
+  if (-Not (Test-Path -Path "$pathToMount" -ErrorAction SilentlyContinue)) {
+    Write-Output "Error, the path '$pathToMount' does not exist"
+    return
+  }
+
+  if (-Not $letter) {
+    Write-Output "Mount letter required"
+    return
+  }
+
+  subst "${letter}:" "$pathToMount"
+}
+
+function unmountDir ([string] $letter) {
+  if (-Not $letter) {
+    Write-Output "Mount letter required"
+    return
+  }
+
+  subst /d "${letter}:"
+}
+
+function unshort ([string] $url) {
+  curl.exe --head --location "$url" | Select-String "Location"
+}
+
+
+function publicip {
+  curl.exe checkip.amazonaws.com
+}
+
+function qrcode ([String] $text) {
+  curl.exe "qrenco.de/$text"
+}
+
+function wifiList ([string] $wifiName = '') {
+
+  function parseNetsh ([string] $line) {
+    ($line -Split ':')[1].Trim()
+  }
+
+  if ($wifiName) {
+    $profilePass = "No Password"
+    $out_content = netsh wlan show profile "$wifiName" key=clear
+
+    if (-Not $?) {
+      Write-Output $out_content
+      return
+    }
+
+    $out_content = $out_content | Select-String "Key Content"
+
+    $profilePass = parseNetsh "$out_content"
+
+    Write-Output "${wifiName}: $profilePass"
+    return
+  }
+
+  netsh wlan show profile | Select-String "All User" | % {
+    $profileName = parseNetsh "$_"
+    $profilePass = "No Password"
+
+    $profilePass = netsh wlan show profile "$profileName" key=clear |
+      Select-String "Key Content" | % { parseNetsh "$_" }
+
+    $profilePass = if ($profilePass) { $profilePass } else { "No Password" }
+
+    Write-Output "${profileName}: $profilePass"
+  }
 }
 
 if (Test-Command Download-Gdl) {
