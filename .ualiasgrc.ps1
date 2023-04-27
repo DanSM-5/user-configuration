@@ -192,15 +192,6 @@ function qed ([string] $editor = 'nvim') {
     % { & "$editor" "$_" }
 }
 
-# NAVIGATION
-function .. {
-  cd ..
-}
-
-function ... {
-  cd ../..
-}
-
 function rfv {
   if ($args) {
     Invoke-PsFzfRipgrep "$args"
@@ -315,6 +306,17 @@ function up ([int] $val = 1) {
   } catch {
     echo "Couldn't go up $limit dirs."
   }
+}
+
+# NAVIGATION
+function .. {
+  $index = if ($args) { $args } else { 0 }
+
+  up $index
+}
+
+function ... {
+  up 2
 }
 
 function showAllPorts {
@@ -675,18 +677,19 @@ function fed () {
   $location = if ("$location" -eq "~") { "$HOME" } else { "$location" }
   $exclude = fd-Excluded
 
-  $selection = "$(
+  $selection = @($(
     fd `
       $exclude `
       -tf `
       "$pattern" "$location" |
     Invoke-Fzf -Height 50% -MinHeight 20 -Border `
+      -Multi `
       -Header "(ctrl-/) Search in: $location" `
       -Query "$query" `
       @options
-  )"
+  ))
 
-  if ((-not $selection) -or (-not (Test-Path $selection))) {
+  if (-not $selection) {
     return
   }
 
@@ -694,7 +697,7 @@ function fed () {
     $editor = $args[1]
   }
 
-  & "$editor" "$selection"
+  & "$editor" $selection
 }
 
 function fedd () {

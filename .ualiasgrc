@@ -393,18 +393,20 @@ fed () {
     location="$HOME"
   fi
 
-  local selection=$(fd-defaults -L -tf "$pattern" "$location" |
+  local selection=($(fd-defaults -L -tf "$pattern" "$location" |
     fzf-defaults \
+      --multi \
       --preview "bat --color=always --style=numbers {}" \
       --header "(ctrl-/) Search in: $location" \
-      --query "$query")
+      --query "$query"))
   if [ -z "$selection" ]; then
     return
   fi
   if [ -n "$2" ] && [ "$2" != "-" ]; then
     editor="$2"
   fi
-  $editor "$selection"
+
+  $editor "$selection[@]"
 }
 
 fedd () {
@@ -592,9 +594,6 @@ alias nlg="npm list -g --dept=0"
 alias nr="npm run"
 
 # Navigation
-alias ..="cd .."
-alias ...="cd ../.."
-
 # Nav up n directories
 up () {
   local d=""
@@ -613,6 +612,14 @@ up () {
   if ! cd "$d"; then
     echo "Couldn't go up $limit dirs."
   fi
+}
+
+.. () {
+  up "$@"
+}
+
+... () {
+  up 2
 }
 
 # Sourcing
