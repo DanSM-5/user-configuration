@@ -16,14 +16,20 @@ getpass () {
       ;;
   esac
 
-  local name="$(op item list --format=json | jq -r '.[] | .title' | fzf)"
+  # local name="$(op item list --format=json | jq -r '.[] | .title' | fzf)"
+  local json="$(op item list --categories 'Login' --format=json |
+    jq -r 'to_entries | map({ id: .value.id, title: ((.key | tostring) + " " + .value.title) })')"
 
-  if [ -z $name ]; then
+  if [ -z $json ]; then
     return 1
   fi
 
+  local index=$(echo $json | jq -r '.[] | .title' | fzf | cut -d ' ' -f 1)
+
+  local id=$(echo $json | jq -r ".[$index] | .id")
+
   local keys=($(
-    op item get --format=json "$name" |
+    op item get --format json "$id" |
       jq -r '.fields | .[] | select(.id == "username" or .id == "password") | .value'
   ))
 
@@ -37,6 +43,26 @@ getpass () {
   echo "${keys[@]:0:1}"
 }
 
+shownote () {
+  # case "${1}" in
+  #   [rR]aw[tT]ext|-[rR]|--[rR]aw|-+[rR]aw[tT]ext)
+  #     displayRaw=true
+  #     ;;
+  # esac
+
+  local json="$(op item list --categories 'Secure Note' --format=json |
+    jq -r 'to_entries | map({ id: .value.id, title: ((.key | tostring) + " " + .value.title) })')"
+
+  if [ -z $json ]; then
+    return 1
+  fi
+
+  local index=$(echo $json | jq -r '.[] | .title' | fzf | cut -d ' ' -f 1)
+
+  local id=$(echo $json | jq -r ".[$index] | .id")
+
+  op item get --format=json "$id" | jq -r '.fields | .[] | .value' | bat -pp
+}
 # TODO: Install bash completion package
 # if [ "$IS_BASH" = true ]; then
   
