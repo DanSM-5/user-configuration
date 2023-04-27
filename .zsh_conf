@@ -7,6 +7,7 @@
 # prompt adam1
 
 setopt histignorealldups sharehistory
+setopt HIST_IGNORE_SPACE
 
 # Use emacs keybindings even if our EDITOR is set to vi
 bindkey -e
