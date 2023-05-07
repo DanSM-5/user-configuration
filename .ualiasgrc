@@ -406,7 +406,7 @@ fed () {
     editor="$2"
   fi
 
-  $editor "$selection[@]"
+  $editor "${selection[@]}"
 }
 
 fedd () {
