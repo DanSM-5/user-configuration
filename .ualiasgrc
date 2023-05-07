@@ -1273,7 +1273,8 @@ getShellAliasAndFunctions () {
       # Functions
       typeset -F | awk '{ if ( $3 !~ /_.+/) { print $3 } }';
       # Aliases
-      alias | awk '{ split($2,o,"="); print o[1] }'
+      # alias | awk '{ split($2,o,"="); print o[1] }'
+      compgen -a
     }
   else
     {
