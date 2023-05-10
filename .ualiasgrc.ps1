@@ -950,3 +950,15 @@ if (Test-Command Download-Gdl) {
   Set-Alias -Name dgl -Value Download-Gdl
 }
 
+function bdif () {
+  if (git rev-parse HEAD) { } else { return }
+
+  $changed_files = @(git diff --name-only --relative --diff-filter=d)
+
+  if (-not $changed_files) {
+    return
+  }
+
+  bat --diff $changed_files 
+}
+

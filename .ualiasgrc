@@ -1359,3 +1359,8 @@ cevery () {
   countFiles "$size"
 }
 
+bdif () {
+  git rev-parse HEAD > /dev/null 2>&1 || return
+
+  git diff --name-only --relative --diff-filter=d | xargs bat --diff
+}
