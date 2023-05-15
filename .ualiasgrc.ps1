@@ -663,7 +663,7 @@ function dwi () {
 }
 
 function fed () {
-  $location = $args[0] ?? "$HOME"
+  $location = $args[0] ?? "."
   $query = $args[2..$args.length]
   $pattern = "."
   $editor = "$env:PREFERED_EDITOR" ?? 'vim'

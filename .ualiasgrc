@@ -383,7 +383,7 @@ fcda () {
 }
 
 fed () {
-  local location="${1:-$HOME}"
+  local location="${1:-.}"
   local query="${@:3}"
   local pattern="."
   local editor="${PREFERED_EDITOR:-vim}"
