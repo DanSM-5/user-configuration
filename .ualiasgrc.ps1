@@ -201,7 +201,7 @@ function rfv {
 }
 
 function fcd () {
-  $location = if ($args[0]) { $args[0] } else { "$HOME" }
+  $location = if ($args[0]) { $args[0] } else { "." }
   $query = $args[1..$args.length]
   $pattern = "."
   $options = getPsFzfOptions

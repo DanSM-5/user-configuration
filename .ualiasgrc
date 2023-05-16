@@ -300,7 +300,7 @@ lfa () {
 }
 
 fcd () {
-  local location="${1:-$HOME}"
+  local location="${1:-.}"
   local query="${@:2}"
   local pattern="."
   local selection=""
