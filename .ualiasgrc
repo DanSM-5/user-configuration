@@ -878,7 +878,11 @@ getClipboardPath () {
     return
   fi
 
-  if ! [[ -f "$filepath" ]] && ! [[ -d "$filepath" ]]; then
+  if [[ -f "$filepath" ]]; then
+    filepath="$(dirname "$filepath")"
+  elif [[ -d "$filepath" ]]; then
+    :
+  else
     echo ""
     return
   fi
