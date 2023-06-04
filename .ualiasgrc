@@ -224,7 +224,7 @@ fsa () {
 alias mkdr="mkdir -pv"
 alias ll='ls -AlhF '
 alias la='ls -A '
-alias l='ls -CF '
+alias l='ls -ACF '
 alias frm='\rm $(fd-defaults -tf -tx -tl | fzf-defaults --preview "bat --color=always --style=numbers {} ")'
 alias frdr="rm -rf \$(fd-defaults -td -d 1 | fzf-defaults --preview \"ls --color=always -AFL {} | sed '1d;'\")"
 alias fzfp="fzf-defaults --preview 'bat --color=always --style=numbers --line-range=:500 {}'"
