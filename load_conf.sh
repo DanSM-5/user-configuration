@@ -12,9 +12,12 @@ export IS_TERMUX=false
 export IS_LINUX=false
 export IS_MAC=false
 export IS_GITBASH=false
+export IS_WINDOWS=false
+export IS_POWERSHELL=false
 
 # Detect if running WSL
 if command_exists /mnt/c/Windows/System32/cmd.exe; then
+  export IS_WINDOWS=true
   export IS_WSL=true 
   if [[ $(uname -a) =~ "WSL2" ]]; then
     export IS_WSL2=true
@@ -22,6 +25,7 @@ if command_exists /mnt/c/Windows/System32/cmd.exe; then
 elif command_exists termux-setup-storage; then
   export IS_TERMUX=true
 elif command_exists /c/Windows/System32/cmd.exe; then
+  export IS_WINDOWS=true
   export IS_GITBASH=true
 fi
 
