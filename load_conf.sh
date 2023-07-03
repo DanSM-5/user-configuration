@@ -7,6 +7,7 @@ command_exists () {
 
 # Default values for device detection
 export IS_WSL=false
+export IS_WSL1=false
 export IS_WSL2=false
 export IS_TERMUX=false
 export IS_LINUX=false
@@ -21,6 +22,8 @@ if command_exists /mnt/c/Windows/System32/cmd.exe; then
   export IS_WSL=true 
   if [[ $(uname -a) =~ "WSL2" ]]; then
     export IS_WSL2=true
+  else
+    export IS_WSL1=true
   fi
 elif command_exists termux-setup-storage; then
   export IS_TERMUX=true
