@@ -11,16 +11,25 @@ function getpass ([Switch] $RawText) {
     return
   }
 
-  $index = $json | jq -r '.[] | .title' | fzf | % {
-    $items = $_ -Split ' '
-    $items[0]
+  $index = $json | jq -r '.[] | .title' | fzf
+
+  # No index selected
+  if (-not $index) {
+    return
   }
+
+  $index = ($index -Split ' ')[0]
 
   $id = $json | jq -r ".[$index] | .id"
 
   $keys = @(
     op item get --format=json "$id" |
-      jq -r '.fields | .[] | select(.id == "username" or .id == "password") | .value'
+      jq -r '.fields
+        | [ .[]
+        | select(.id == "username" or .id == "password") ]
+        | reduce .[] as $item ({}; .[$item.id] = $item.value)
+        | [ .username, .password ]
+        | .[]'
   )
 
   if ($RawText) {
@@ -45,11 +54,14 @@ function shownote () {
     return
   }
 
-  $index = $json | jq -r '.[] | .title' | fzf | % {
-    $items = $_ -Split ' '
-    # @($items[0], ($items[1..$items.length] -Join ' '))
-    $items[0]
+  $index = $json | jq -r '.[] | .title' | fzf
+
+  # No index selected
+  if (-not $index) {
+    return
   }
+
+  $index = ($index -Split ' ')[0]
 
   $id = $json | jq -r ".[$index] | .id"
 

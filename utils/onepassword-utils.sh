@@ -26,11 +26,21 @@ getpass () {
 
   local index=$(echo $json | jq -r '.[] | .title' | fzf | cut -d ' ' -f 1)
 
+  # No index selected
+  if [ -z "$index" ]; then
+    return 0
+  fi
+
   local id=$(echo $json | jq -r ".[$index] | .id")
 
   local keys=($(
     op item get --format json "$id" |
-      jq -r '.fields | .[] | select(.id == "username" or .id == "password") | .value'
+      jq -r '.fields
+        | [ .[]
+        | select(.id == "username" or .id == "password") ]
+        | reduce .[] as $item ({}; .[$item.id] = $item.value)
+        | [ .username, .password ]
+        | .[]'
   ))
 
   if [ "$displayRaw" = true ]; then
@@ -58,6 +68,11 @@ shownote () {
   fi
 
   local index=$(echo $json | jq -r '.[] | .title' | fzf | cut -d ' ' -f 1)
+
+  # No index selected
+  if [ -z "$index" ]; then
+    return
+  fi
 
   local id=$(echo $json | jq -r ".[$index] | .id")
 
