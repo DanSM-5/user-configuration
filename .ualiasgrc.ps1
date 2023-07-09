@@ -651,6 +651,8 @@ function yt-dw () {
 function dwv () {
   $video_url= "$(pbpaste)"
   if ( -not $video_url) { return }
+
+  $video_url = $video_url.Trim()
   echo "Downloading: $video_url"
   yt-dlp "$video_url" $args
 }
@@ -658,6 +660,8 @@ function dwv () {
 function dwi () {
   $image_url = "$(pbpaste)"
   if ( -not $image_url ) { return }
+
+  $image_url = $image_url.Trim()
   echo "Downloading: $image_url"
   gallery-dl "$image_url" $args
 }
@@ -675,6 +679,10 @@ function fed () {
   }
 
   $location = if ("$location" -eq "~") { "$HOME" } else { "$location" }
+  if ("$location" -like '~*') {
+    $location = "$HOME" + $location.Substring(1)
+  }
+
   $exclude = fd-Excluded
 
   $selection = @($(
