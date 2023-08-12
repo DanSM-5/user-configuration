@@ -263,17 +263,17 @@ lff () {
     awk '{ print $9 }'
 }
 
-lf () {
-  ls -a  |
-    sed '1d;2d' |
-    fzf-defaults --preview 'if [ -f {} ]; then
-        bat --color=always --style=numbers {}
-      else
-        echo "Path: $(realpath {})"
-        echo ""
-        ls -AFL --color=always {} 2> /dev/null || echo "Cannot access directory {}"
-      fi'
-}
+# lf () {
+#   ls -a  |
+#     sed '1d;2d' |
+#     fzf-defaults --preview 'if [ -f {} ]; then
+#         bat --color=always --style=numbers {}
+#       else
+#         echo "Path: $(realpath {})"
+#         echo ""
+#         ls -AFL --color=always {} 2> /dev/null || echo "Cannot access directory {}"
+#       fi'
+# }
 
 lfd () {
   fd-defaults |
