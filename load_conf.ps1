@@ -8,10 +8,10 @@
 # $env:IS_TERMUX = $false
 # $env:IS_GITBASH = $false
 
-$env:IS_WINDOWS = $IsWindows
-$env:IS_MAC = $IsMacOS
-$env:IS_LINUX = $IsLinux
-$env:IS_POWERSHELL = $true
+$env:IS_WINDOWS = if ($IsWindows) { 'true' } else { 'false' }
+$env:IS_MAC = if ($IsMacOS) { 'true' } else { 'false' }
+$env:IS_LINUX = if ($IsLinux) { 'true' } else { 'false' }
+$env:IS_POWERSHELL = 'true'
 
 if (Test-Path -Path $HOME\.usr_conf\.uconfgrc.ps1 -PathType Leaf) {
   . $HOME\.usr_conf\.uconfgrc.ps1
