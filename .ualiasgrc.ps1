@@ -747,6 +747,13 @@ function getClipboardPath {
   $filepath = "$(pbpaste)"
   $filepath = $filepath.Trim()
   $directory = ""
+  
+  if ("$filepath" -match '^/[a-z]') {
+    $filepath = $filepath.Substring(1, 1) + ':' + $filepath.Substring(2)
+  } elseif ("$filepath" -match '^/mnt/[a-z]') {
+    $filepath = $filepath.Substring(5, 1) + ':' + $filepath.Substring(6)
+  }
+
   if ( -not "$filepath" -or -not (Test-Path "$filepath") ) { return }
   if ( (Get-Item "$filepath") -is [System.IO.DirectoryInfo] ) { # Is directory
     $directory = "$filepath"
