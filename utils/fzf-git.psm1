@@ -199,7 +199,7 @@ function fgss () {
 }
 
 # fshow - git commit browser (enter for show, ctrl-d for diff, ` toggles sort)
-$fshow_pager = if (Test-Command delta) { 'delta' } else { 'less -R' }
+$fshow_pager = if (Test-Command delta) { 'delta --paging=always' } else { 'less -R' }
 $fshow_command = @'
   func () {
   local out shas sha q k
