@@ -1126,10 +1126,10 @@ if [ "$IS_WSL" = true ]; then
   # }
 
   getTempDir () {
-    pushd "$WIN_HOME"
+    pushd "$WIN_HOME" &> /dev/null
     local dir_path="$(cmd.exe /c "echo %TEMP%" | sed 's/\\ / /g' | sed -e 's/[[:space:]]*$//')"
-    popd
-    printf "%q" "$(wslpath -au "$dif_path")"
+    popd &> /dev/null
+    printf "%q" "$(wslpath -au "$dir_path")"
   }
 
 else
