@@ -912,6 +912,10 @@ ocd () {
   file_explorer_open "$filepath"
 }
 
+getTempDir () {
+  echo "/tmp"
+}
+
 if [ "$IS_WSL" = true ]; then
   export clipboard_paste="pbpaste.exe"
   export clipboard_copy="pbcopy.exe"
@@ -1120,6 +1124,13 @@ if [ "$IS_WSL" = true ]; then
 
   #   pwsh.exe -nolo -nonin -nopro -c Start-Process \""$windowspath"\"
   # }
+
+  getTempDir () {
+    pushd "$WIN_HOME"
+    local dir_path="$(cmd.exe /c "echo %TEMP%" | sed 's/\\ / /g' | sed -e 's/[[:space:]]*$//')"
+    popd
+    printf "%q" "$(wslpath -au "$dif_path")"
+  }
 
 else
 
