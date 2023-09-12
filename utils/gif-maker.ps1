@@ -86,7 +86,7 @@ function make_gif (
     if ($IS_ONLINE) {
       $out_name = "$(& "$YT_DLP" --skip-download --get-title --no-playlist "$url")"
       $out_name = "$out_name" -replace "[\\/|?`"'>< []", "_" # Clean some chars
-      $filename = "${tmp_location}/${segment}.mp4"
+      $Filename = "${tmp_location}/${segment}.mp4"
       $position = "0"
       $duration = "$($end_time - $start_time)"
 
@@ -109,29 +109,29 @@ function make_gif (
         "$url"
     } else {
       # Get file name: https://stackoverflow.com/questions/35813186/extract-the-filename-from-a-path
-      $out_name = [System.IO.Path]::GetFileNameWithoutExtension("$filename")
+      $out_name = [System.IO.Path]::GetFileNameWithoutExtension("$Filename")
       $out_name = "$out_name" -replace "[\\/|?`"'>< []", "_" # Clean some chars
       $position = "$start_time"
       $duration = "$($end_time - $start_time)"
     }
 
-    if ($IncludeSubtitles -and (has_subtitles "$filename")) {
+    if ($IncludeSubtitles -and (has_subtitles "$Filename")) {
       Write-Host "Embeding captions in gif"
-      $SUB_FILTER = ",subtitles='$("$filename" -replace ":","\:")':si=0"
+      $SUB_FILTER = ",subtitles='$("$Filename" -replace ":","\:")':si=0"
     }
 
   
     # Make palette
     & "$FFMPEG" -v warning `
       -ss "$position" -t "$duration" `
-      -i "$filename" `
+      -i "$Filename" `
       -vf "[0:v:0] fps=${FPS},scale='trunc(ih*dar/2)*2:trunc(ih/2)*2',setsar=1/1,scale=${WIDTH}:${HEIGHT}:flags=${FLAGS},palettegen=stats_mode=diff" `
       -y "$tmp_location/$palette"
 
     # Make gif
     & "$FFMPEG" -v warning `
       -ss "$position" -t "$duration" -copyts `
-      -i "$filename" `
+      -i "$Filename" `
       -i "$tmp_location/$palette" `
       -an -ss "$position" `
       -lavfi "[0:v:0] fps=${FPS},scale='trunc(ih*dar/2)*2:trunc(ih/2)*2',setsar=1/1,scale=${WIDTH}:${HEIGHT}:flags=${FLAGS}${SUB_FILTER} [x]; [x][1:v] paletteuse=dither=bayer:bayer_scale=5:diff_mode=rectangle" `
