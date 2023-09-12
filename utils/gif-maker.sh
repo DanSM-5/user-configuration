@@ -2,9 +2,9 @@
 
 make_gif () {
   local filename="$1"
-  local include_subtitles="${2:-false}"
-  local start_time="$3"
-  local end_time="$4"
+  local start_time="$2"
+  local end_time="$3"
+  local include_subtitles="${4:-false}"
   local url="$1"
   local IS_FILE=false
   local IS_ONLINE=false

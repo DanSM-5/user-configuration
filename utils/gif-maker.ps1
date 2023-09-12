@@ -3,12 +3,12 @@
 function make_gif (
   # Name of file to create gif (or url from video)
   [string] $Filename,
-  # Burn subtitles if available
-  [boolean] $IncludeSubtitles = $false,
   # Start time from video source
   [decimal] $StartTime,
   # End time from video source
-  [decimal] $EndTime
+  [decimal] $EndTime,
+  # Burn subtitles if available
+  [boolean] $IncludeSubtitles = $false
 ) {
   $IS_ONLINE = $false
   $IS_FILE = $false
