@@ -870,6 +870,35 @@ tplay () {
   fi
 }
 
+getHostPath () {
+  local input="$@"
+  local filepath="$(echo "$input" | tr -d "\r\n")"
+
+  if [ -z "$filepath" ]; then
+    echo ""
+    return
+  fi
+
+  if [[ -f "$filepath" ]]; then
+    filepath="$(dirname "$filepath")"
+  elif [[ -d "$filepath" ]]; then
+    :
+  else
+    echo ""
+    return
+  fi
+
+  echo "$(realpath "$filepath")"
+}
+
+getPath () {
+  getHostPath "$@"
+}
+
+getSystemClipboardPath () {
+  getHostPath "$($clipboard_paste)"
+}
+
 getClipboardPath () {
   local filepath="$("$clipboard_paste" | tr -d "\r\n")"
 
@@ -938,35 +967,9 @@ if [ "$IS_WSL" = true ]; then
     pwsh.exe -nolo -nonin -nopro -c Start-Process \""$@"\"
   }
 
-  getPath () {
-    local filepath="$@"
-
-    if [ -z "$filepath" ]; then
-      echo ""
-      return
-    fi
-
-    local linuxpath="" windowspath=""
-
-    if [[ -f "$filepath" ]] || [[ -d "$filepath" ]]; then # Valid unix path
-      linuxpath="$(wslpath -au "$(wslpath -aw $filepath)")"
-    else # win path
-      linuxpath="$(wslpath -au "$filepath")"
-    fi
-
-    if [ -d "$linuxpath" ]; then
-      windowspath="$(wslpath -aw "$linuxpath")"
-    elif [ -f "$linuxpath" ]; then
-      windowspath="$(dirname "$linuxpath" | xargs -i wslpath -aw {})"
-    fi
-
-    # Return escaped string to allow \f \n \t directories
-    echo "$(printf "%q" "$windowspath" | sed 's/\\ / /g')"
-  }
-
   start () {
     local trimmed_path="$(echo "$@" | trim)"
-    local filepath="$(getPath "$trimmed_path")"
+    local filepath="$(getHostPath "$trimmed_path")"
 
     file_explorer_open "$filepath"
   }
@@ -1061,8 +1064,9 @@ if [ "$IS_WSL" = true ]; then
     echo "$(wslpath -au "$1")"
   }
 
-  getClipboardPath () {
-    local filepath="$("$clipboard_paste" | trim | tr -d "\r\n")"
+  getHostPath () {
+    local input="$@"
+    local filepath="$(trim <<< "$input" | tr -d "\r\n")"
 
     if [ -z "$filepath" ]; then
       echo ""
@@ -1085,6 +1089,21 @@ if [ "$IS_WSL" = true ]; then
 
     # Return escaped string to allow \f \n \t directories
     echo "$(printf "%q" "$windowspath" | sed 's/\\ / /g')"
+  }
+
+  getPath () {
+    local input="$@"
+    local win_path="$(getHostPath "$input")"
+
+    printf "%q" "$(wslpath -ua "$win_path")"
+  }
+
+  getSystemClipboardPath () {
+    getPath "$($clipboard_paste)"
+  }
+
+  getClipboardPath () {
+    getHostPath "$($clipboard_paste)"
   }
 
   ccd () {
@@ -1223,6 +1242,61 @@ else
       pwsh.exe -nolo -nonin -nopro -c Start-Process \""$location_path"\"
     }
 
+    getSystemClipboardPath () {
+      getPath "$($clipboard_paste)"
+    }
+
+    getPath () {
+      local input="$@"
+      local filepath="$(echo "$input" | tr -d "\r\n")"
+
+      if [ -z "$filepath" ]; then
+        echo ""
+        return
+      fi
+
+      if [[ -f "$filepath" ]]; then
+        filepath="$(dirname "$filepath")"
+      elif [[ -d "$filepath" ]]; then
+        :
+      else
+        echo ""
+        return
+      fi
+
+      if [[ "$filepath" =~ : ]]; then
+        local drive_letter="$(sed -rn 's#^([A-Za-z]):.*#\1#p' <<< "$filepath" | tr '[:upper:]' '[:lower:]')"
+        filepath="/${drive_letter}/${filepath:2}"
+      fi
+
+      echo "$(realpath "$filepath")"
+    }
+
+    getHostPath () {
+      local filepath="$(getPath "$@")"
+
+      if [ -z "$filepath" ]; then
+        echo ""
+        return
+      elif ! [ -f "$filepath" ] && ! [ -d "$filepath" ]; then
+        echo ""
+        return
+      fi
+
+      local windowspath=""
+      local drive_letter=""
+
+      if ! [[ "$filepath" =~ : ]]; then
+        drive_letter="$(sed -rn 's#^/([A-Za-z])/.*#\1#p' <<< "$filepath" | tr '[:lower:]' '[:upper:]')"
+        windowspath="${drive_letter}:${filepath:2}"
+      else
+        windowspath="$filepath"
+      fi
+
+      # Return escaped string to allow \f \n \t directories
+      echo "$(printf "%q" "$windowspath" | sed 's/\\ / /g')"
+    }
+
     cmd () {
       cmd.exe //c "$@"
     }
@@ -1246,7 +1320,7 @@ fmpv () {
 }
 
 ptc () {
-  local location="${1:-$HOME}"
+  local location="${1:-.}" # Current location
   local query="${@:2}"
   local pattern="."
   local selection=""
