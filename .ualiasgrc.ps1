@@ -783,7 +783,7 @@ function ocd () {
 }
 
 function ptc () {
-  $location = $args[0] ?? "$HOME"
+  $location = $args[0] ?? "."
   $query = $args[1..$args.length]
   $pattern = "."
   $options = getPsFzfOptions
