@@ -1337,8 +1337,8 @@ countFiles () {
       printFunc=printWithFileSize
     fi
 
-    # for dirl in $(fd ${FD_SHOW_OPTIONS[@]} ${FD_EXCLUDE_OPTIONS[@]} -td -d 1); do
-    for dirl in .*/ */; do
+    for dirl in $(fd ${FD_SHOW_OPTIONS[@]} ${FD_EXCLUDE_OPTIONS[@]} -td -d 1); do
+    # for dirl in .*/ */; do
       $printFunc "$dirl"
     done | column -t -s $'\t'
   )
