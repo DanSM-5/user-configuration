@@ -1331,7 +1331,9 @@ ptc () {
   fi
 
   # old preview "ls --color=always -alhF {} | sed '1d;2d;3d'"
+  # NOTE: cat - <() is there to add '.' as an option in the pipe
   selection=$(fd-defaults -tl -td -tf -L "$pattern" "$location" |
+    cat <(echo '.') - |
     fzf-defaults --query "$query" \
       --header "(ctrl-/) Search in: $location" \
       --preview "if [ -f {} ]; then
