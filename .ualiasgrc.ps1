@@ -800,6 +800,7 @@ function ptc () {
       $exclude `
       -tl -td -tf `
       "$pattern" "$location" |
+    % -Begin { '.' } { "$_" } |
     Invoke-Fzf -Height 50% -MinHeight 20 -Border `
       -Header "(ctrl-/) Search in: $location" `
       -Query "$query" `
