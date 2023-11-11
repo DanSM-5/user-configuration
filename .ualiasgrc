@@ -230,10 +230,6 @@ alias frdr="rm -rf \$(fd-defaults -td -d 1 | fzf-defaults --preview \"ls --color
 alias fzfp="fzf-defaults --preview 'bat --color=always --style=numbers --line-range=:500 {}'"
 alias pvim="vim --clean"
 
-start () {
-  file_explorer_open "$@"
-}
-
 rfv () {
   "$user_conf_path/utils/rgfzf.sh" "$@"
 }
@@ -946,6 +942,10 @@ getTempDir () {
 }
 
 if [ "$IS_WSL" = true ]; then
+  start () {
+    file_explorer_open "$@"
+  }
+
   export clipboard_paste="pbpaste.exe"
   export clipboard_copy="pbcopy.exe"
 
@@ -1164,6 +1164,10 @@ else
     export clipboard_copy="termux-clipboard-set"
     export clipboard_paste="termux-clipboard-get"
 
+    start () {
+      file_explorer_open "$@"
+    }
+
     clipboard_copyw () {
       termux-clipboard-set "$@"
     }
@@ -1203,6 +1207,12 @@ else
       fi
     }
   elif [ "$IS_LINUX" = true ]; then
+    start () {
+      # Previous - new xdg-open
+      # file_explorer_open "$@"
+      xdg-open "$@" &
+    }
+
     clipboard_copyw () {
       xsel -ib "$@"
     }
@@ -1221,6 +1231,10 @@ else
   elif [ "$IS_MAC" = true ]; then
     export clipboard_copy="pbcopy"
     export clipboard_paste="pbpaste"
+
+    start () {
+      open "$@"
+    }
 
     file_explorer_open () {
       open "$@"
