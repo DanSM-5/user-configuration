@@ -96,3 +96,8 @@ elif [ "$IS_MAC" = true ]; then
   bind -m vi-insert '"ç": "\C-z\ec\C-z"'
 fi
 
+# Add ctrl+o keybinding for lfcd
+if command -v lf &> /dev/null; then
+  bind '"\C-o":"lfcd\C-m"'
+fi
+

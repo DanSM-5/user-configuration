@@ -115,5 +115,11 @@ if [ "$IS_MAC" = true ]; then
   bindkey "ç" fzf-cd-widget
 fi
 
+# Add ctrl+o keybinding for lfcd
+if command -v lf &> /dev/null; then
+  bindkey -s '^o' 'lfcd\n'
+fi
+
 # Must be the last line of this file
 [ -f "$HOME/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ] && source "$HOME/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+
