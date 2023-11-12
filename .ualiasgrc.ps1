@@ -978,7 +978,7 @@ function bdif () {
   bat --diff $changed_files 
 }
 
-if (Test-Command -Name "lf.exe" -ErrorAction SilentlyContinue) {
+if (Get-Command -Name "lf.exe" -ErrorAction SilentlyContinue) {
   function lf () {
     # Important to use @args and no $args to forward arguments
     lf.ps1 @args
