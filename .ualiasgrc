@@ -1280,10 +1280,10 @@ else
 
       if [[ "$filepath" =~ : ]]; then
         local drive_letter="$(sed -rn 's#^([A-Za-z]):.*#\1#p' <<< "$filepath" | tr '[:upper:]' '[:lower:]')"
-        filepath="/${drive_letter}/${filepath:2}"
+        filepath="/${drive_letter}/${filepath:3}"
       fi
 
-      echo "$(realpath "$filepath")"
+      printf "%s" "$(realpath "$filepath")"
     }
 
     getHostPath () {
