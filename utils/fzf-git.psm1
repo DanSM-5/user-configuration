@@ -12,12 +12,11 @@ $__gitenv__ = $(where.exe env | grep 'Git\\usr\\bin\\env')
 $GITBASH_ENVIRONMENT = @(
   # Enable MINGW work as running gitbash directly
   "MSYS='enable_pcon'"
-  "MSYSTEM='MING64'"
+  "MSYSTEM='MINGW64'"
   "enable_pcon='1'"
   # Avoid POSIX to WINDOWS path conversions
   # "MSYS_NO_PATHCONV='1'"
   # "MSYS2_ARG_CONV_EXCL='*'"
-  # Add ENV variables for tizen-help
 )
 
 $__apend_path__ = "export PATH=`"/usr/bin:`$PATH`";"
