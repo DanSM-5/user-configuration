@@ -21,7 +21,7 @@ IFS=: read -ra selected < <(
       --bind "change:reload:sleep 0.1; $RG_PREFIX {q} || true" \
       --bind "ctrl-f:unbind(change,ctrl-f)+change-prompt(2. fzf> )+enable-search+clear-query+rebind(ctrl-r)" \
       --bind "ctrl-r:unbind(ctrl-r)+change-prompt(1. ripgrep> )+disable-search+reload($RG_PREFIX {q} || true)+rebind(change,ctrl-f)" \
-      --bind "ctrl-/:change-preview-window(right|)" \
+      --bind "ctrl-/:change-preview-window(right|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort" \
       --prompt '1. Ripgrep> ' \
       --delimiter : \
       --header '╱ CTRL-R (Ripgrep mode) ╱ CTRL-F (fzf mode) ╱' \
