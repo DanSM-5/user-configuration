@@ -1473,3 +1473,15 @@ bdif () {
 publicip () {
   curl checkip.amazonaws.com
 }
+
+# cd when exit lf
+lfcd () {
+  if command -v lf &> /dev/null; then
+    # `command` is needed in case `lfcd` is aliased to `lf`
+    cd "$(command lf -print-last-dir "$@")"
+  else
+    printf "%s" "Command lf not found. Please intall lf first.\n"
+    (exit 1) && true
+  fi
+}
+
