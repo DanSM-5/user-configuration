@@ -529,27 +529,52 @@ function ntemp {
 }
 
 # extract files
-function ex ([String] $filename) {
-  if (Test-Path $fileName) {
+function ex () {
+  $filename = $args[0]
+  $options = $args[1..$args.Length]
+
+  if (Test-Path "$fileName" -ErrorAction SilentlyContinue) {
     switch -wildcard -casesensitive ($filename) {
-      "*.tar.bz2"    { tar xjvf $filename; Break }
-      "*.tar.gz"     { tar xzvf $filename; Break }
-      "*.bz2"        { bunzip2 $filename; Break }
-      "*.rar"        { unrar x $filename; Break }
-      "*.gz"         { gunzip $filename; Break }
-      "*.tar"        { tar xvf $filename; Break }
-      "*.tbz2"       { tar xjvf $filename; Break }
-      "*.tgz"        { tar xzvf $filename; Break }
-      "*.zip"        { unzip $filename; Break }
-      "*.Z"          { uncompress $filename; Break }
-      "*.7z"         { 7z x $filename; Break }
-      "*.deb"        { ar x $filename; Break }
-      "*.tar.xz"     { tar xvf $filename; Break }
-      "*.tar.zst"    { zstd -d $filename; Break }
-      default        { echo "'$filename' cannot be extracted via ex()!"; Break }
+      "*.tbz"        { tar xjvf "$filename" $options; Break }
+      "*.tar.bz2"    { tar xjvf "$filename" $options; Break }
+      "*.tar.bz"     { tar xjvf "$filename" $options; Break }
+      "*.tbz2"       { tar xjvf "$filename" $options; Break }
+      "*.tar.gz"     { tar xzvf "$filename" $options; Break }
+      "*.tgz"        { tar xzvf "$filename" $options; Break }
+      "*.bz2"        { bunzip2 "$filename" $options; Break }
+      "*.rar"        { unrar x "$filename" $options; Break }
+      "*.gz"         { gunzip "$filename" $options; Break }
+      "*.tar"        { tar xvf "$filename" $options; Break }
+      "*.zip"        { unzip "$filename" $options; Break }
+      "*.Z"          { uncompress "$filename" $options; Break }
+      "*.7z"         { 7z x "$filename" $options; Break }
+      "*.iso"        { 7z x "$filename" $options; Break }
+      "*.deb"        { ar x "$filename" $options; Break }
+      "*.tar.xz"     { tar xJvf "$filename" $options; Break }
+      "*.txz"        { tar xJvf "$filename" $options; Break }
+      "*.tar.zst"    { zstd -d "$filename" $options; Break }
+      "*.ipk"        { zstd -d "$filename" $options; Break }
+      "*.wgt"        { zstd -d "$filename" $options; Break }
+      "*.apk"        { zstd -d "$filename" $options; Break }
+      default        { Write-Host "'$filename' cannot be extracted via ex command!"; Break }
     }
   } else {
-    echo "'$filename' is not a file"
+    Write-Host "'$filename' is not a file"
+  }
+}
+
+function archive () {
+  $atype = $args[0]
+  $filename = $args[1]
+  $options = $args[2..$args.Length]
+
+  switch -wildcard -casesensitive ($atype) {
+    "*.tar"        { tar cvf "$filename" $options; Break }
+    "*.tgz"        { tar czvf "$filename" $options; Break }
+    "*.7z"         { 7z a "$filename" $options; Break }
+    "*.zip"        { zip -r "$filename" $options; Break }
+    "*.rar"        { rar a "$filename" $options; Break }
+    default        { Write-Host "Archive type '$filename' is not supported by archive command!"; Break }
   }
 }
 
@@ -561,7 +586,7 @@ function mpvp () {
 
   $yt_dlp_args = "-f bestvideo+bestaudio/best"
 
-  $command_str = "yt-dlp $yt_dlp_args -o - ""$url"" | mpv --cache " + $extra_args + " -"
+  $command_str = "yt-dlp $yt_dlp_args -o - ""$url"" | mpv --cache $extra_args -"
   cmd /c "$command_str"
 }
 

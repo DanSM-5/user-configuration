@@ -658,25 +658,45 @@ ex () {
   # all other arguments are passed to the respective utility
   if [ -f "$1" ]; then
     case $1 in
+      *.tbz)        tar xjvf "$1" "${@:2}";;
       *.tar.bz2)    tar xjvf "$1" "${@:2}";;
+      *.tar.bz)     tar xjvf "$1" "${@:2}";;
+      *.tbz2)       tar xjvf "$1" "${@:2}";;
       *.tar.gz)     tar xzvf "$1" "${@:2}";;
+      *.tgz)        tar xzvf "$1" "${@:2}";;
       *.bz2)        bunzip2 "$1" "${@:2}";;
       *.rar)        unrar x "$1" "${@:2}";;
       *.gz)         gunzip "$1" "${@:2}";;
       *.tar)        tar xvf "$1" "${@:2}";;
-      *.tbz2)       tar xjvf "$1" "${@:2}";;
-      *.tgz)        tar xzvf "$1" "${@:2}";;
       *.zip)        unzip "$1" "${@:2}";;
       *.Z)          uncompress "$1" "${@:2}";;
       *.7z)         7z x "$1" "${@:2}";;
+      *.iso)        7z x "$1" "${@:2}";;
       *.deb)        ar x "$1" "${@:2}";;
-      *.tar.xz)     tar xvf "$1" "${@:2}";;
+      *.tar.xz)     tar xJvf "$1" "${@:2}";;
+      *.txz)        tar xJvf "$1" "${@:2}";;
       *.tar.zst)    unzstd "$1" "${@:2}";;
+      *.ipk)        tar zxpvf "$1" "${@:2}";;
+      *.wgt)        unzip "$1" "${@:2}";;
+      *.apk)        apktool d "$1" "${@:2}";;
       *)            echo "'$1' cannot be extracted via ex command!";;
     esac
   else
     echo "'$1' is not a file"
   fi
+}
+
+archive () {
+  atype="$1"
+  
+  case atype in
+    tar)   tar cvf "$2" "${@:3}";;
+    tgz)   tar czvf "$2" "${@:3}";;
+    7z)    7z a "$2" "${@:3}";;
+    zip)   zip -r "$2" "${@:3}";;
+    rar)   rar a "$2" "${@:3}";;
+    *) echo "Archive type '$1' not supported by archive command!"
+  esac
 }
 
 # System executables
