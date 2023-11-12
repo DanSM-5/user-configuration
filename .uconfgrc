@@ -202,7 +202,7 @@ set_general_after () {
     eval "$(register-python-argcomplete pipx | tr -d '\r')"
   fi
 
-  if command_exists starship; then
+  if command_exists starship && [ "$IS_TERMUX" = true ]; then
     eval "$(starship init $SHELL_NAME)"
   fi
 
