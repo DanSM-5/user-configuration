@@ -146,3 +146,19 @@ if ($PSVersionTable.PSVersion -ge 7.1) {
   Set-PSReadLineOption -PredictionSource History
   Set-PSReadLineOption -Colors @{ InlinePrediction = "#B3E5FF" }
 }
+
+if ((
+  Test-Path -Path "${env:user_scripts_path}/bin" -ErrorAction SilentlyContinue
+) -and (
+  -not (Test-Command 'path_end')
+)) {
+  $env:PATH += ";${env:user_scripts_path}/bin"
+}
+
+if (Test-Command 'lf.exe') {
+  Set-PSReadLineKeyHandler -Chord Ctrl+o -ScriptBlock {
+    [Microsoft.PowerShell.PSConsoleReadLine]::RevertLine()
+    [Microsoft.PowerShell.PSConsoleReadLine]::Insert('lfcd.ps1')
+    [Microsoft.PowerShell.PSConsoleReadLine]::AcceptLine()
+  }
+}

@@ -5,9 +5,9 @@
 ######################################
 
 # Follow structure conf folders and files
-user_conf_path="$HOME/.usr_conf"
-user_scripts_path="$HOME/user-scripts"
-prj="$HOME/prj"
+export user_conf_path="$HOME/.usr_conf"
+export user_scripts_path="$HOME/user-scripts"
+export prj="$HOME/prj"
 
 backup_path () {
   export PATH_BACKUP=$(echo -n $PATH | tr ":" "\n")
@@ -343,6 +343,10 @@ set_general_after () {
       export MANPAGER="sh -c 'col -bx | bat -l man -p'"
     fi
 
+  fi
+
+  if [ -d "$user_scripts_path/bin" ] && ! command -v 'path_end' &> /dev/null; then
+    export PATH="$PATH:$user_scripts_path/bin"
   fi
 }
 
