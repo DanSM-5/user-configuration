@@ -15,6 +15,7 @@ export IS_MAC=false
 export IS_GITBASH=false
 export IS_WINDOWS=false
 export IS_POWERSHELL=false
+export IS_CMD=false
 
 # Detect if running WSL
 if command_exists /mnt/c/Windows/System32/cmd.exe; then
