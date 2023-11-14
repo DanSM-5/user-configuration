@@ -216,10 +216,10 @@ function fcd () {
 
   $selection = "$(
     fd `
-      $exclude `
+      @exclude `
       -tl -td `
       "$pattern" "$location" |
-    Invoke-Fzf -Height 50% -MinHeight 20 -Border `
+    Invoke-Fzf -Height 80% -MinHeight 20 -Border `
       -Header "(ctrl-/) Search in: $location" `
       -Query "$query" `
       @options
@@ -454,6 +454,9 @@ function getAllAppsInPort ([String] $port, [Switch] $help = $false) {
 function makeSymLink ([String] $target, [String] $path) {
   New-Item -ItemType SymbolicLink -Target $target -Path $path
 }
+
+if (Test-Path Alias:ln-s) { Remove-Item Alias:ln-s }
+Set-Alias -Name ln-s -Value makeSymLink
 
 function makeShortCut ([string] $target, [string] $path, [string] $arguments = '') {
   if (-not ($path -match '\.lnk')) { $path = "$path.lnk" }
@@ -1008,5 +1011,34 @@ if (Get-Command -Name "lf.exe" -ErrorAction SilentlyContinue) {
     # Important to use @args and no $args to forward arguments
     lf.ps1 @args
   }
+}
+
+# Matches both soft and hard link
+function Test-ReparsePoint([string]$path) {
+  $file = Get-Item $path -Force -ea SilentlyContinue
+  return [bool]($file.Attributes -band [IO.FileAttributes]::ReparsePoint)
+}
+
+# TODO: If condition is not reliable with LinkType ("SymbolicLink" | "HardLink")
+# Try using Test-ReparsePoint or dir /aL
+# https://stackoverflow.com/questions/817794/find-out-whether-a-file-is-a-symbolic-link-in-powershell
+function frm () {
+  $query = "$args"
+  $options = getPsFzfOptions
+  $exclude = fd-Excluded
+
+  fd `
+    @exclude `
+    -tf -tl |
+  Invoke-Fzf `
+    @options `
+    -Multi `
+    -Height 80% -MinHeight 20 -Border `
+    -Query "$query" | ? { 
+      # If item is a file or a SymbolicLink
+      (
+        Test-Path -PathType Leaf "$_" -ErrorAction SilentlyContinue
+      ) -or ($_.LinkType)
+    } | Remove-Item
 }
 
