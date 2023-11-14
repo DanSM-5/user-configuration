@@ -13,9 +13,10 @@ export IS_TERMUX=false
 export IS_LINUX=false
 export IS_MAC=false
 export IS_GITBASH=false
-export IS_WINDOWS=false
+export IS_WINDOWS=false # PLATFORM IS WINDOWS
 export IS_POWERSHELL=false
 export IS_CMD=false
+export IS_WINSHELL=false # PWSH, GITBASH or CMD
 
 # Detect if running WSL
 if command_exists /mnt/c/Windows/System32/cmd.exe; then
@@ -31,6 +32,7 @@ elif command_exists termux-setup-storage; then
 elif command_exists /c/Windows/System32/cmd.exe; then
   export IS_WINDOWS=true
   export IS_GITBASH=true
+  export IS_WINSHELL=true
 fi
 
 # Detect System
