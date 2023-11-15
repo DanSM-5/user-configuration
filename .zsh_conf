@@ -116,7 +116,8 @@ if [ "$IS_MAC" = true ]; then
 fi
 
 # Add ctrl+o keybinding for lfcd
-if command -v lf &> /dev/null; then
+# Add alternative for nix store
+if command -v lf &> /dev/null || command -v ~/.nix-profile/bin/lf &> /dev/null; then
   bindkey -s '^o' 'lfcd\n'
 fi
 
