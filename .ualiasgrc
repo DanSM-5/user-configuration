@@ -1501,7 +1501,10 @@ publicip () {
 lfcd () {
   if command -v lf &> /dev/null; then
     # `command` is needed in case `lfcd` is aliased to `lf`
-    cd "$(command lf -print-last-dir "$@")"
+    local path_on_exit="$(command lf -print-last-dir "$@")"
+    if [ -d "$path_on_exit" ]; then
+      cd "$path_on_exit"
+    fi
   else
     printf "%s" "Command lf not found. Please intall lf first.\n"
     (exit 1) && true
