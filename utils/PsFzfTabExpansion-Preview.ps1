@@ -17,6 +17,9 @@ else {
 }
 # is directory?
 if (Test-Path $path -PathType Container) {
+    # Display fullname on top
+    $fullpath = (Resolve-Path $path).Path
+    Write-Output "Path: $fullpath" ""
 
     # don't output anything if not a git repo
     Push-Location $path
@@ -28,7 +31,11 @@ if (Test-Path $path -PathType Container) {
     }
     Pop-Location
 
-    Get-ChildItem $path
+    if (Get-Command erd -ErrorAction SilentlyContinue) {
+      erd --layout inverted --color force --level 3 --suppress-size -- $path
+    } else {
+      Get-ChildItem $path
+    }
 }
 # is file?
 elseif (Test-Path $path -PathType leaf) {
