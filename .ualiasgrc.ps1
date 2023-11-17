@@ -39,6 +39,9 @@ function getPsFzfOptions {
   $psFzfOptions = @{
     Preview = $("pwsh -NoProfile -NonInteractive -NoLogo -File \""$psFzfPreviewScript\"" \""" + $path + "\"" {}" );
     Bind = 'ctrl-/:change-preview-window(down|hidden|)','alt-up:preview-page-up','alt-down:preview-page-down','ctrl-s:toggle-sort'
+    Height = '80%'
+    MinHeight = 20
+    Border = $true
   }
   return $psFzfOptions
 }
@@ -172,7 +175,7 @@ function qnv () {
   $options = getPsFzfOptions
 
   $quick_access |
-    Invoke-Fzf -Height 50% -MinHeight 20 -Border `
+    Invoke-Fzf `
       -Header "(ctrl-/) Toggle preview" `
       @options |
     % { cd "$_" }
@@ -186,7 +189,7 @@ function qed ([string] $editor = 'nvim') {
   $options = getPsFzfOptions
 
   $quick_edit |
-    Invoke-Fzf -Height 50% -MinHeight 20 -Border `
+    Invoke-Fzf `
       -Header "(ctrl-/) Toggle preview" `
       @options |
     % { & "$editor" "$_" }
@@ -219,7 +222,7 @@ function fcd () {
       @exclude `
       -tl -td `
       "$pattern" "$location" |
-    Invoke-Fzf -Height 80% -MinHeight 20 -Border `
+    Invoke-Fzf `
       -Header "(ctrl-/) Search in: $location" `
       -Query "$query" `
       @options
@@ -242,7 +245,7 @@ function fcdd () {
     fd `
       $exclude `
       -tl -td "$pattern" |
-    Invoke-Fzf -Height 50% -MinHeight 20 -Border `
+    Invoke-Fzf `
       -Header 'Press CTRL-/ to toggle preview' `
       -Query "$query" `
       @options
@@ -275,7 +278,7 @@ function fcde () {
       -L -tf "$pattern" "$location" |
     % { Split-Path "$_" } |
     Sort-Object -Unique |
-    Invoke-Fzf -Height 50% -MinHeight 20 -Border `
+    Invoke-Fzf `
       -Header 'Press CTRL-/ to toggle preview' `
       -Query "$query" `
       @options
@@ -361,6 +364,7 @@ function fif () {
 
   rg --files-with-matches --no-messages "$single" |
     Invoke-Fzf `
+      -Height $options.Height -MinHeight $options.MinHeight -Border `
       -Bind $options.Bind `
       -Preview "pwsh -NoLogo -NonInteractive -NoProfile -File $user_conf_path/utils/highlight.ps1 \`"$single\`" {}"
 }
@@ -718,7 +722,7 @@ function fed () {
       $exclude `
       -tf `
       "$pattern" "$location" |
-    Invoke-Fzf -Height 50% -MinHeight 20 -Border `
+    Invoke-Fzf `
       -Multi `
       -Header "(ctrl-/) Search in: $location" `
       -Query "$query" `
@@ -746,7 +750,7 @@ function fedd () {
     fd `
       $exclude `
       -tf |
-    Invoke-Fzf -Height 50% -MinHeight 20 -Border `
+    Invoke-Fzf `
       -Header "(ctrl-/) Search in: $location" `
       -Query "$query" `
       @options
@@ -829,7 +833,7 @@ function ptc () {
       -tl -td -tf `
       "$pattern" "$location" |
     % -Begin { '.' } { "$_" } |
-    Invoke-Fzf -Height 50% -MinHeight 20 -Border `
+    Invoke-Fzf `
       -Header "(ctrl-/) Search in: $location" `
       -Query "$query" `
       @options
@@ -1033,12 +1037,30 @@ function frm () {
   Invoke-Fzf `
     @options `
     -Multi `
-    -Height 80% -MinHeight 20 -Border `
     -Query "$query" | ? { 
       # If item is a file or a SymbolicLink
       (
         Test-Path -PathType Leaf "$_" -ErrorAction SilentlyContinue
       ) -or ($_.LinkType)
     } | Remove-Item
+}
+
+function frdr () {
+  $query = "$args"
+  $options = getPsFzfOptions
+  $exclude = fd-Excluded
+
+  fd `
+    @exclude `
+    -td -d 1 |
+  Invoke-Fzf `
+    @options `
+    -Multi `
+    -Query "$query" | ? { 
+      # If item is a file or a SymbolicLink
+      (
+        Test-Path -PathType Container "$_" -ErrorAction SilentlyContinue
+      ) -or ($_.LinkType)
+    } | Remove-Item -recurse -force
 }
 
