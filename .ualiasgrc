@@ -27,26 +27,57 @@ cmd () {
 
 fzf-defaults () {
 # --bind ctrl-/:toggle-preview \
-  fzf --height 50% --min-height 20 --border \
+  fzf --height 80% --min-height 20 --border \
     --bind "ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort" \
     --header 'Press CTRL-/ to toggle preview' \
     "$@"
 }
 
+# Previews for ls
 fzf_preview_ls='if [ -f {} ]; then
-    bat --color=always --style=numbers {};
+    bat --color=always --style=numbers {}
   else
-    echo "Path: $(realpath {})"
+    echo "Path: $(realpath {} 2> /dev/null || echo {})"
     echo ""
-    ls -AFL --color=always {}
+    ls -AFL --color=always {} 2> /dev/null || echo "Cannot access directory {}"
   fi'
-fzf_preview_ll='if [ -f {9..} ]; then
-    bat --color=always --style=numbers {9..};
+fzf_preview_erd='if [ -f {} ]; then
+    bat --color=always --style=numbers {}
   else
-    echo "Path: $(realpath {9..})"
+    echo "Path: $(realpath {} 2> /dev/null || echo {})"
     echo ""
-    ls -AFL --color=always {9..}
+    erd --layout inverted --color force --level 3 --suppress-size -- {} 2> /dev/null || echo "Cannot access directory {}"
   fi'
+fzf_preview_from_ll='if [ -f {9..9} ]; then
+    bat --color=always --style=numbers {9..9}
+  else
+    echo "Path: $(realpath {9..9} 2> /dev/null || echo {9..})"
+    echo ""
+    ls -AFL --color=always {9..9} 2> /dev/null || echo "Cannot access directory {9..9}"
+  fi'
+fzf_preview_erd_ll='if [ -f {9..9} ]; then
+    bat --color=always --style=numbers {9..9}
+  else
+    echo "Path: $(realpath {9..9} 2> /dev/null || echo {9..})"
+    echo ""
+    erd --layout inverted --color force --level 3 --suppress-size -- {9..9} 2> /dev/null || echo "Cannot access directory {9..9}"
+  fi'
+fzf_preview_file='bat --color=always --style=numbers {}'
+fzf_preview_file_ll='bat --color=always --style=numbers {9..9}'
+fzf_preview_dir='echo "Path: $(realpath {} 2> /dev/null || echo {})"
+echo ""
+ls -AFL --color=always {} 2> /dev/null || echo "Cannot access directory {}"'
+fzf_preview_dir_ll='echo "Path: $(realpath {9..9} 2> /dev/null || echo {9..9})"
+echo ""
+ls -AFL --color=always {9..9} 2> /dev/null || echo "Cannot access directory {9..9}"'
+
+if command_exists erd; then
+  fzf_preview_normal="$fzf_preview_erd"
+  fzf_preview_from_ll="$fzf_preview_erd_ll"
+else
+  fzf_preview_normal="$fzf_preview_ls"
+  fzf_preview_from_ll="$fzf_preview_ll"
+fi
 
 fd-defaults () {
   fd \
@@ -225,10 +256,30 @@ alias mkdr="mkdir -pv"
 alias ll='ls -AlhF '
 alias la='ls -A '
 alias l='ls -ACF '
-alias frm='\rm $(fd-defaults -tf -tl | fzf-defaults --multi --preview "bat --color=always --style=numbers {} ")'
-alias frdr="rm -rf \$(fd-defaults -td -d 1 | fzf-defaults --preview \"ls --color=always -AFL {} | sed '1d;'\")"
 alias fzfp="fzf-defaults --preview 'bat --color=always --style=numbers --line-range=:500 {}'"
 alias pvim="vim --clean"
+
+frm () {
+  local selection=($(fd-defaults -tf -tl |
+    fzf-defaults --multi --preview "$fzf_preview_file"))
+
+  if [ -z "$selection" ]; then
+    return
+  fi
+
+  \rm "${selection[@]}"
+}
+
+frdr () {
+  local selection=($(fd-defaults -td -d 1 |
+    fzf-defaults --preview "$fzf_preview_normal"))
+
+  if [ -z "$selection" ]; then
+    return
+  fi
+
+  \rm -rf "${selection[@]}"
+}
 
 rfv () {
   "$user_conf_path/utils/rgfzf.sh" "$@"
@@ -237,10 +288,7 @@ rfv () {
 fll () {
   local selection=$(fd-defaults -td |
     fzf-defaults \
-      --preview "
-        echo \"Path: \$(realpath {})\"
-        echo ''
-        ls -AFL --color=always {}")
+      --preview "$fzf_preview_normal")
   if [ -n "$selection" ]; then
     \ls -alhF  --color=always "$selection"
   fi
@@ -249,49 +297,26 @@ fll () {
 lff () {
   ls -lA  |
     sed '1d' |
-    fzf-defaults --preview 'if [ -f {9..} ]; then
-        bat --color=always --style=numbers {9..}
-      else
-        echo "Path: $(realpath {9..})"
-        echo ""
-        ls -AFL --color=always {9..} 2> /dev/null || echo "Cannot access directory {}"
-      fi' |
+      fzf-defaults --preview "$fzf_preview_from_ll" |
     awk '{ print $9 }'
 }
 
+# Supressed
 # lf () {
 #   ls -a  |
 #     sed '1d;2d' |
-#     fzf-defaults --preview 'if [ -f {} ]; then
-#         bat --color=always --style=numbers {}
-#       else
-#         echo "Path: $(realpath {})"
-#         echo ""
-#         ls -AFL --color=always {} 2> /dev/null || echo "Cannot access directory {}"
-#       fi'
+#     fzf-defaults --preview "$fzf_preview_normal"
 # }
 
 lfd () {
   fd-defaults |
-    fzf-defaults --preview 'if [ -f {} ]; then
-        bat --color=always --style=numbers {}
-      else
-        echo "Path: $(realpath {})"
-        echo ""
-        ls -AFL --color=always {} 2> /dev/null || echo "Cannot access directory {}"
-      fi'
+    fzf-defaults --preview "$fzf_preview_normal"
 }
 
 # experimental
 lfa () {
   local selection=$(cd "/" && fd-defaults |
-    fzf-defaults --preview 'if [ -f {} ]; then
-        bat --color=always --style=numbers {}
-      else
-        echo "Path: $(realpath {} 2> /dev/null || echo File cannot be opened)"
-        echo ""
-        ls -AFL --color=always {} 2> /dev/null || echo "Cannot access directory {}"
-      fi')
+    fzf-defaults --preview "$fzf_preview_normal")
   echo "$selection"
 }
 
@@ -310,10 +335,7 @@ fcd () {
   selection=$(fd-defaults -tl -td "$pattern" "$location" |
     fzf-defaults --query "$query" \
       --header "(ctrl-/) Search in: $location" \
-      --preview "
-        echo \"Path: \$(realpath {})\"
-        echo ''
-        ls --color=always -AFL {} 2> /dev/null || echo 'Cannot access directory {}'")
+      --preview "$fzf_preview_normal")
   if [ -z "$selection" ]; then
     return 1
   fi
@@ -329,10 +351,7 @@ fcdd () {
   selection=$(fd-defaults -tl -td |
     fzf-defaults \
       --query "$query" \
-      --preview "
-        echo \"Path: \$(realpath {})\"
-        echo ''
-        ls --color=always -AFL {} 2> /dev/null || echo 'Cannot access directory {}'")
+      --preview "$fzf_preview_normal")
 
   if [ -z "$selection" ]; then
     return 1
@@ -356,7 +375,7 @@ fcde () {
       -x dirname {} |
     sort -u |
     fzf-defaults \
-      --preview "ls -AFL {}" \
+      --preview "$fzf_preview_normal" \
       --header "(ctrl-/) Search in: $location" \
       --query "$query")
   if [ -z "$selection" ]; then
@@ -369,10 +388,7 @@ fcde () {
 fcda () {
   local selection=""
 
-  selection=$(cd / && fd-defaults -tl -td | fzf-defaults --preview "
-    echo \"Path: \$(realpath {})\"
-    echo ''
-    ls --color=always -AFL {} 2> /dev/null || echo 'Cannot access directory {}'")
+  selection=$(cd / && fd-defaults -tl -td | fzf-defaults --preview "$fzf_preview_normal")
   if [ -n "$selection" ]; then
     cd $selection
   fi
@@ -392,7 +408,7 @@ fed () {
   local selection=($(fd-defaults -L -tf "$pattern" "$location" |
     fzf-defaults \
       --multi \
-      --preview "bat --color=always --style=numbers {}" \
+      --preview "$fzf_preview_file" \
       --header "(ctrl-/) Search in: $location" \
       --query "$query"))
   if [ -z "$selection" ]; then
@@ -409,14 +425,14 @@ fedd () {
   local query="${@:2}"
   local editor="${PREFERED_EDITOR:-vim}"
   local selection=$(fd-defaults -L -tf |
-    fzf-defaults --preview "bat --color=always --style=numbers {}" --query "$query")
+    fzf-defaults --multi --preview "$fzf_preview_file" --query "$query")
   if [ -z "$selection" ]; then
     return
   fi
   if [ -n "$1" ] && [ "$1" != "-" ]; then
     editor="$1"
   fi
-  "$editor" "$selection"
+  "$editor" "${selection[@]}"
 }
 
 fif () {
@@ -562,8 +578,7 @@ qed () {
   fi
   local editor="$1"
   local selection=$(printf "%s\n" "${quick_edit[@]}" |
-    fzf-defaults --preview "
-      bat --color=always --style=numbers {} 2> /dev/null || echo 'Cannot preview {}'")
+    fzf-defaults --preview "$fzf_preview_file")
 
   if ! [ -f "$selection" ]; then
     return
@@ -1373,13 +1388,7 @@ ptc () {
     cat <(echo '.') - |
     fzf-defaults --query "$query" \
       --header "(ctrl-/) Search in: $location" \
-      --preview "if [ -f {} ]; then
-          bat -pp --color=always --style=numbers {}
-        else
-          echo \"Path: \$(realpath {})\"
-          echo ''
-          ls --color=always -AFL  {} 2> /dev/null || echo 'Cannot access directory {}'
-        fi")
+      --preview "$fzf_preview_normal")
   if [ -z "$selection" ]; then
     return 1
   fi

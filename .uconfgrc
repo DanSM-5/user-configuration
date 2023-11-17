@@ -247,17 +247,24 @@ set_general_after () {
 
     # Print tree structure in the preview window
     export FZF_ALT_C_OPTS="
-      --preview 'ls -AF --color=always {-1} 2> /dev/null || echo "'"Cannot access directory {}"'"'
+      --preview '
+        echo "'"Path: $(realpath {} 2> /dev/null || echo {})"'"
+        echo "'""'"
+        if command -v erd &> /dev/null; then
+          erd --layout inverted --color force --level 3 --suppress-size -- {} 2> /dev/null || echo "'"Cannot access directory {}"'"
+        else
+          ls -AF --color=always {-1} 2> /dev/null || echo "'"Cannot access directory {}"'"
+        fi'
       --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort'"
 
     export FZF_CTRL_T_OPTS="
       --preview 'if [ -f {} ]; then
           bat -pp --color=always --style=numbers {}
         else
-          "'echo "Path: $(realpath {})"'"
-          echo ''
-          ls -AFL --color=always {}
-        fi'
+          echo "'"Path: $(realpath {} 2> /dev/null || echo {})"'"
+          echo "'""'"
+          erd --layout inverted --color force --level 3 --suppress-size -- {} 2> /dev/null || ls -AFL --color=always {} || echo "'"Cannot access directory {}"'"
+      fi'
       --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort'"
   fi
 
