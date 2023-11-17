@@ -20,18 +20,22 @@ if (Test-Path $path -PathType Container) {
     # Display fullname on top
     $fullpath = (Resolve-Path $path).Path
     Write-Output "Path: $fullpath" ""
+    $addspace = $false
 
     # don't output anything if not a git repo
     Push-Location $path
     if ($ansiCompatible) {
         git log --color=always -1 2> $null
+        $addspace = $?
     }
     else {
         git log -1 2> $null
+        $addspace = $?
     }
     Pop-Location
 
     if (Get-Command erd -ErrorAction SilentlyContinue) {
+      if ($addspace) { Write-Output "" }
       erd --layout inverted --color force --level 3 --suppress-size -- $path
     } else {
       Get-ChildItem $path
