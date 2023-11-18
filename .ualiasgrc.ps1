@@ -542,27 +542,27 @@ function ex () {
 
   if (Test-Path "$fileName" -ErrorAction SilentlyContinue) {
     switch -wildcard -casesensitive ($filename) {
-      "*.tbz"        { tar xjvf "$filename" $options; Break }
-      "*.tar.bz2"    { tar xjvf "$filename" $options; Break }
-      "*.tar.bz"     { tar xjvf "$filename" $options; Break }
-      "*.tbz2"       { tar xjvf "$filename" $options; Break }
-      "*.tar.gz"     { tar xzvf "$filename" $options; Break }
-      "*.tgz"        { tar xzvf "$filename" $options; Break }
-      "*.bz2"        { bunzip2 "$filename" $options; Break }
-      "*.rar"        { unrar x "$filename" $options; Break }
-      "*.gz"         { gunzip "$filename" $options; Break }
-      "*.tar"        { tar xvf "$filename" $options; Break }
-      "*.zip"        { unzip "$filename" $options; Break }
-      "*.Z"          { uncompress "$filename" $options; Break }
-      "*.7z"         { 7z x "$filename" $options; Break }
-      "*.iso"        { 7z x "$filename" $options; Break }
-      "*.deb"        { ar x "$filename" $options; Break }
-      "*.tar.xz"     { tar xJvf "$filename" $options; Break }
-      "*.txz"        { tar xJvf "$filename" $options; Break }
-      "*.tar.zst"    { zstd -d "$filename" $options; Break }
-      "*.ipk"        { zstd -d "$filename" $options; Break }
-      "*.wgt"        { zstd -d "$filename" $options; Break }
-      "*.apk"        { zstd -d "$filename" $options; Break }
+      "*.tbz"        { tar xjvf "$filename" @options; Break }
+      "*.tar.bz2"    { tar xjvf "$filename" @options; Break }
+      "*.tar.bz"     { tar xjvf "$filename" @options; Break }
+      "*.tbz2"       { tar xjvf "$filename" @options; Break }
+      "*.tar.gz"     { tar xzvf "$filename" @options; Break }
+      "*.tgz"        { tar xzvf "$filename" @options; Break }
+      "*.bz2"        { bunzip2 "$filename" @options; Break }
+      "*.rar"        { unrar x "$filename" @options; Break }
+      "*.gz"         { gunzip "$filename" @options; Break }
+      "*.tar"        { tar xvf "$filename" @options; Break }
+      "*.zip"        { unzip "$filename" @options; Break }
+      "*.Z"          { uncompress "$filename" @options; Break }
+      "*.7z"         { 7z x "$filename" @options; Break }
+      "*.iso"        { 7z x "$filename" @options; Break }
+      "*.deb"        { ar x "$filename" @options; Break }
+      "*.tar.xz"     { tar xJvf "$filename" @options; Break }
+      "*.txz"        { tar xJvf "$filename" @options; Break }
+      "*.tar.zst"    { zstd -d "$filename" @options; Break }
+      "*.ipk"        { zstd -d "$filename" @options; Break }
+      "*.wgt"        { zstd -d "$filename" @options; Break }
+      "*.apk"        { zstd -d "$filename" @options; Break }
       default        { Write-Host "'$filename' cannot be extracted via ex command!"; Break }
     }
   } else {
