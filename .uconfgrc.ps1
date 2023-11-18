@@ -141,20 +141,6 @@ if (Test-Command rg) {
 # Set Emacs keybindings for readline
 # Set-PSReadLineOption -EditMode Emacs
 
-# Set Prediction - PS 7.1 or above only
-if ($PSVersionTable.PSVersion -ge 7.1) {
-  Set-PSReadLineOption -PredictionSource History
-  Set-PSReadLineOption -Colors @{ InlinePrediction = "#B3E5FF" }
-}
-
-if ((
-  Test-Path -Path "${env:user_scripts_path}/bin" -ErrorAction SilentlyContinue
-) -and (
-  -not (Test-Command 'path_end')
-)) {
-  $env:PATH += ";${env:user_scripts_path}/bin"
-}
-
 if (Test-Command 'lf.exe') {
   Set-PSReadLineKeyHandler -Chord Ctrl+o -ScriptBlock {
     [Microsoft.PowerShell.PSConsoleReadLine]::RevertLine()
@@ -162,3 +148,30 @@ if (Test-Command 'lf.exe') {
     [Microsoft.PowerShell.PSConsoleReadLine]::AcceptLine()
   }
 }
+
+# Set Prediction - PS 7.1 or above only
+if ($PSVersionTable.PSVersion -ge 7.1) {
+  Set-PSReadLineOption -PredictionSource History
+  Set-PSReadLineOption -Colors @{ InlinePrediction = "#B3E5FF" }
+}
+
+if ((
+  Test-Path -Path "${env:user_scripts_path}\bin" -ErrorAction SilentlyContinue
+) -and (
+  -not (Test-Command 'path_end')
+)) {
+  $env:PATH += ";${env:user_scripts_path}\bin"
+}
+
+# Temporary hold the first entries in the path
+$firstpathentries = "$($env:PATH -split ';' | Select -First 10)"
+if (-not ($firstpathentries -Match ([regex]::Escape("$HOME\bin")))) {
+  $env:PATH = "$HOME\bin;${env:PATH}"
+}
+
+if (-not ($firstpathentries -Match ([regex]::Escape("$HOME\.local\bin")))) {
+  $env:PATH = "$HOME\.local\bin;${env:PATH}"
+}
+# Remove firstpathentries
+Remove-Variable firstpathentries
+
