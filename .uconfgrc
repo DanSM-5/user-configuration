@@ -130,6 +130,8 @@ set_mac () {
 
 
 set_general () {
+  # Experimental
+  # export PAGER='bat -p --paging=always'
   export COLORTERM='truecolor'
   export BAT_THEME='Dracula'
   # dark='--color=bg+:#3F3F3F,bg:#4B4B4B,border:#6B6B6B,spinner:#98BC99,hl:#719872,fg:#D9D9D9,header:#719872,info:#BDBB72,pointer:#E12672,marker:#E17899,fg+:#D9D9D9,preview-bg:#3F3F3F,prompt:#98BEDE,hl+:#98BC99'
@@ -161,16 +163,6 @@ set_general () {
   # make less more friendly for non-text input files, see lesspipe(1)
   [ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
 
-  # set PATH so it includes user's provate bin if it exists
-  # if [ -d "$HOME/bin" ]; then
-  export PATH="$HOME/bin:$PATH"
-  # fi
-
-  # set PATH so it includes user's provate bin if it exists
-  # if [ -d "$HOME/.local/bin" ]; then
-  export PATH="$HOME/.local/bin:$PATH"
-  # fi
-
   if [ -d "$HOME/.bun" ]; then
     # bun completions
     [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
@@ -180,6 +172,10 @@ set_general () {
     export PATH="$BUN_INSTALL/bin:$PATH"
   fi
 
+  # Cargo for rust applications
+  if command_exists cargo; then
+    export PATH="$HOME/.cargo/bin:$PATH"
+  fi
 
   # To install useful key bindings and fuzzy completion:
   # $(brew --prefix)/opt/fzf/install # call only once
@@ -187,6 +183,21 @@ set_general () {
   #   zsh)  test -f ~/.fzf.zsh && source ~/.fzf.zsh;;
   #   bash) test -f ~/.fzf.bash && source ~/.fzf.bash;;
   # esac
+
+  # Make user bin locations the top of the path
+  # ~/.local/bin can be used by other programs like pipx
+  # ~/bin should be used exclusively by the user
+
+  # set PATH so it includes user's provate bin if it exists
+  # if [ -d "$HOME/.local/bin" ]; then
+  export PATH="$HOME/.local/bin:$PATH"
+  # fi
+
+  # set PATH so it includes user's provate bin if it exists
+  # if [ -d "$HOME/bin" ]; then
+  export PATH="$HOME/bin:$PATH"
+  # fi
+
 }
 
 set_general_after () {
@@ -352,6 +363,7 @@ set_general_after () {
 
   fi
 
+  # User scripts bin should be the bottom of the path as a safer location to add binaries or scripts
   if [ -d "$user_scripts_path/bin" ] && ! command -v 'path_end' &> /dev/null; then
     export PATH="$PATH:$user_scripts_path/bin"
   fi
