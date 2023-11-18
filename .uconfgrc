@@ -194,10 +194,6 @@ set_general_after () {
     source "$HOME/.usr_conf/utils/fzf-git.sh"
   fi
 
-  if command_exists register-python-argcomplete; then
-    eval "$(register-python-argcomplete pipx | tr -d '\r')"
-  fi
-
   if command_exists starship && [ "$IS_TERMUX" = true ]; then
     eval "$(starship init $SHELL_NAME)"
   fi
@@ -368,6 +364,11 @@ set_general_after () {
   # fi
 
   export PATH
+
+  # Depends on path to be configured properly
+  if command_exists register-python-argcomplete; then
+    eval "$(register-python-argcomplete pipx | tr -d '\r')"
+  fi
 }
 
 # initialize shell
