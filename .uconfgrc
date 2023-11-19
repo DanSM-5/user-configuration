@@ -146,6 +146,12 @@ set_general () {
     . "$HOME/.nix-profile/etc/profile.d/nix.sh"
   fi # added by Nix installer
 
+  # Add home manager if available
+  if [ -f "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh" ]; then
+    source "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh"
+  fi
+
+
   # enable color support of ls and also add handy aliases
   if [ -x /usr/bin/dircolors ]; then
     test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
