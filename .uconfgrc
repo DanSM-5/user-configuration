@@ -218,14 +218,15 @@ set_general_after () {
 
   # For nix package manager
   if command_exists nix-env; then
-    # alias nxs="nix-env -qaP '.*$1.*'"
-    alias nxl="nix-env -q"
-    alias nxi="nix-env -iA"
-    alias nxr="nix-env -e"
-    alias nxu="nix-env -u"
+    alias nxl="nix-env -q"     # List
+    alias nxi="nix-env -iA"    # Install
+    alias nxr="nix-env -e"     # Remove
+    alias nxu="nix-env -u"     # Update
 
     nxs () {
-      nix-env -qaP ".*$@.*"
+      # This can use regular expressions. E.g.
+      # nix-env --query --available --attr-path ".*$@.*"
+      nix-env --query --available --attr-path "$@"
     }
   fi
 
