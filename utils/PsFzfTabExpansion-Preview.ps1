@@ -36,7 +36,7 @@ if (Test-Path $path -PathType Container) {
 
     if (Get-Command erd -ErrorAction SilentlyContinue) {
       if ($addspace) { Write-Output "" }
-      erd --layout inverted --color force --level 3 --suppress-size -- $path
+      erd --layout inverted --color force --level 3 -I --suppress-size -- $path
     } else {
       Get-ChildItem $path
     }
