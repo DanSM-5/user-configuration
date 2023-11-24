@@ -456,6 +456,24 @@ function getAllAppsInPort ([String] $port, [Switch] $help = $false) {
 }
 
 function makeSymLink ([String] $target, [String] $path) {
+  if (-not (Split-Path $target -IsAbsolute)) {
+    # Get absolute path for the requested symlink
+    $symlinkFinalPath = $executionContext.sessionState.path.getUnresolvedProviderPathFromPSPath($path)
+    # Get location where symlink will be located
+    $symlinkLocation = [System.IO.Path]::GetDirectoryName($symlinkFinalPath)
+    # Create temporal file
+    # [io.file]::create((expand $file)).close()
+    # $absolutePathToTarget = (Get-Item $target).FullName
+    $absolutePathToTarget = $executionContext.sessionState.path.getUnresolvedProviderPathFromPSPath($target)
+    Push-Location $symlinkLocation
+    $relativePathToTarget = $absolutePathToTarget | Resolve-Path -Relative
+    Pop-Location
+
+    New-Item -ItemType SymbolicLink -Target $relativePathToTarget -Path $path
+
+    return
+  }
+
   New-Item -ItemType SymbolicLink -Target $target -Path $path
 }
 
