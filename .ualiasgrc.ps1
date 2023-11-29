@@ -92,9 +92,22 @@ function gmerge { git merge $args }
 function gco { git checkout $args }
 function gck { git checkout $args }
 function grm { git checkout -- . }
-function gstatus { git status $args }
-function gs { git status $args }
-function gsv { git status -v $args }
+function gstatus {
+  git rev-parse HEAD *> $null
+
+  if (-not $?) {
+    Write-Host "Not in a git repository"
+    return
+  }
+
+  git status $args
+}
+
+if (Test-Path Alias:gs) { Remove-Item Alias:gs }
+Set-Alias -Name gs -Value gstatus
+
+# Shadowed by alias Get-Service
+# function gsv { gstatus -v @args }
 function gamend { git commit --amend }
 function gdif { git diff $args }
 function gstash { git stash $args }

@@ -114,9 +114,6 @@ alias gmerge="git merge"
 alias gco="git checkout"
 alias gck="git checkout"
 alias grm="git checkout -- ."
-alias gstatus="git status"
-alias gs="git status"
-alias gsv="git status -v"
 alias gamend="git commit --amend"
 alias gdif="git diff"
 alias gstash="git stash"
@@ -126,6 +123,20 @@ alias gspop="git stash pop"
 alias gsp="git stash push -m"
 alias gss="git stash show"
 alias gsd="git stash drop"
+
+gstatus () {
+  git rev-parse HEAD > /dev/null 2>&1 || return
+
+  git status "$@"
+}
+
+alias gs="gstatus"
+
+gsv () {
+  git rev-parse HEAD > /dev/null 2>&1 || return
+
+  git status -v "$@"
+}
 
 if command_exists delta; then
   alias gprev="git diff HEAD^..HEAD | delta"
