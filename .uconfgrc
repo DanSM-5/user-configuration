@@ -344,9 +344,13 @@ set_general_after () {
 
     if [ "$IS_TERMUX" = true ]; then
       export MANPAGER="$HOME/.local/bin/manpager-helper"
+      # Fix formatting problem for MANPAGER and bat
+      export MANROFFOPT="-c"
     else
       # TODO: Investigate manpager-helper not working on WSL
       export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+      # Fix formatting problem for MANPAGER and bat
+      export MANROFFOPT="-c"
     fi
 
   fi
