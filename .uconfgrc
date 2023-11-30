@@ -113,6 +113,7 @@ set_mac () {
     local nvm_path=$(brew --prefix nvm)
     [ -s $nvm_path/nvm.sh ] && source $nvm_path/nvm.sh
     [ -s $nvm_path/etc/bash_completion.d/nvm ] && source $nvm_path/etc/bash_completion.d/nvm
+    export PATH="/usr/local/sbin:$PATH"
   fi
 
   # Set color output
