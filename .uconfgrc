@@ -228,6 +228,11 @@ set_general_after () {
       # nix-env --query --available --attr-path ".*$@.*"
       nix-env --query --available --attr-path "$@"
     }
+
+    # Search using nix-locate
+    nxsp () {
+      nix-shell -p nix-index --run "nix-locate --at-root /bin/$1"
+    }
   fi
 
   # For envman. Do not edit.
