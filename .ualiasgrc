@@ -1132,12 +1132,15 @@ if [ "$IS_WSL" = true ]; then
 
     if [ -d "$linuxpath" ]; then
       windowspath="$(wslpath -aw "$linuxpath")"
+      # wslpath -aw "$linuxpath"
     elif [ -f "$linuxpath" ]; then
       windowspath="$(dirname "$linuxpath" | xargs -i wslpath -aw {})"
+      # dirname "$linuxpath" | xargs -i wslpath -aw {}
     fi
 
     # Return escaped string to allow \f \n \t directories
-    echo "$(printf "%q" "$windowspath" | sed 's/\\ / /g')"
+    # echo "$(printf "%q" "$windowspath" | sed 's/\\ / /g')"
+    sed -r -e 's/\\(f|t|u)/\\\\\1/g' <<< "$windowspath"
   }
 
   getPath () {

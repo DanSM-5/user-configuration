@@ -717,7 +717,7 @@ function dwv () {
 
   $video_url = $video_url.Trim()
   echo "Downloading: $video_url"
-  yt-dlp "$video_url" $args
+  yt-dlp "$video_url" @args
 }
 
 function dwi () {
@@ -726,7 +726,7 @@ function dwi () {
 
   $image_url = $image_url.Trim()
   echo "Downloading: $image_url"
-  gallery-dl "$image_url" $args
+  gallery-dl "$image_url" @args
 }
 
 function fed () {
