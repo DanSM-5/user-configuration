@@ -13,6 +13,8 @@ $env:EDITOR = 'nvim'
 $env:user_conf_path = "$user_conf_path"
 $env:user_scripts_path = "$user_scripts_path"
 $env:prj = "$prj"
+$env:WIN_ROOT = "C:\"
+$env:WIH_HOME = "$HOME"
 
 # Set true color support
 $env:COLORTERM = 'truecolor'
