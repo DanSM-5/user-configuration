@@ -115,6 +115,9 @@ function fgf () {
 
 function fgb () {
   if ($script:is_in_git_repo) { return }
+
+  $output_file = New-TemporaryFile
+
   # Use Start-Process to execute the command
   $proc = Start-Process -FilePath "$script:__gitenv__" -ArgumentList @(
     $script:GITBASH_ENVIRONMENT
@@ -122,14 +125,19 @@ function fgb () {
     "/usr/bin/bash"
     "-c"
     "`"source `$user_conf_path/utils/fzf-git.sh && PATH=\`"/mingw64/bin:/usr/local/bin:/usr/bin:/bin:`$PATH\`" fgb`""
-  ) -NoNewWindow -PassThru
-    # "`"printf '%q' `$user_conf_path/utils/fzf-git.sh`""
+  ) -NoNewWindow -PassThru -RedirectStandardOutput $output_file
 
-  # Wait for lf to exit
+  # Wait for process exit
   $proc.WaitForExit()
 
   # Clean process reference
   $proc = $null
+
+  try {
+    return Get-Content $output_file.FullName
+  } finally {
+    Remove-Item -Force $output_file.FullName
+  }
 
   # requires -l flag for sub-shell process
   # & "$script:__gitbash__" --norc -ilc $script:fgb_command
