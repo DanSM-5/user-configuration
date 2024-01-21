@@ -19,7 +19,7 @@ $GITBASH_ENVIRONMENT = @(
   # "MSYS2_ARG_CONV_EXCL='*'"
 )
 
-$__apend_path__ = "export PATH=`"/usr/bin:`$PATH`";"
+$__append_path__ = "export PATH=`"/usr/bin:`$PATH`";"
 
 function is_in_git_repo () {
   if (git rev-parse HEAD 2> $null) { return $true } else { return $false }
@@ -60,19 +60,19 @@ $fgt_command = @'
 '@
 
 # NOTE: Investigate why grep command args where escaped
-# --preview 'grep -o \"[a-f0-9]\{7,\}\" <<< {} | xargs git show --color=always 
+# --preview 'grep -o \"[a-f0-9]\{7,\}\" <<< {} | xargs git show --color=always
 $fgh_command = @'
   git log --date=short --format='%C(green)%C(bold)%cd %C(auto)%h%d %s (%an)' --graph --color=always |
 '@ + $script:fzf_down + @'
   --ansi --no-sort --reverse --multi --bind 'ctrl-s:toggle-sort' \
     --header 'Press CTRL-S to toggle sort' \
-    --preview 'grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show --color=always 
+    --preview 'grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show --color=always
 '@ + "$script:__pager_command__" + @'
     | bat -p --color=always' |
   grep -o '[a-f0-9]\{7,\}'
 '@
 
-# --preview 'grep -o \"[a-f0-9]\{7,\}\" <<< {} | xargs git show --color=always 
+# --preview 'grep -o \"[a-f0-9]\{7,\}\" <<< {} | xargs git show --color=always
 $fgha_command = @'
   git log --all --date=short --format='%C(green)%C(bold)%cd %C(auto)%h%d %s (%an)' --graph --color=always |
 '@ + $script:fzf_down + @'
@@ -104,7 +104,7 @@ $fgs_command = @'
 function fgf () {
   if ($script:is_in_git_repo) { return }
   # & "$script:__gitbash__" --norc -ilc $script:fgf_command
-  & "$script:__gitenv__" $script:GITBASH_ENVIRONMENT /usr/bin/bash -c "$script:__apend_path__ $script:fgf_command"
+  & "$script:__gitenv__" $script:GITBASH_ENVIRONMENT /usr/bin/bash -c "$script:__append_path__ $script:fgf_command"
   # & "$script:__gitbash__" -c @'
   #   git -c color.status=always status --short |
   #   fzf --height 50% --min-height 20 --border --bind ctrl-/:toggle-preview -m --ansi --nth 2..,.. \
@@ -115,9 +115,27 @@ function fgf () {
 
 function fgb () {
   if ($script:is_in_git_repo) { return }
+  # Use Start-Process to execute the command
+  $proc = Start-Process -FilePath "$script:__gitenv__" -ArgumentList @(
+    $script:GITBASH_ENVIRONMENT
+    "SHELL=/usr/bin/bash"
+    "/usr/bin/bash"
+    "-c"
+    "`"source `$user_conf_path/utils/fzf-git.sh && PATH=\`"/mingw64/bin:/usr/local/bin:/usr/bin:/bin:`$PATH\`" fgb`""
+  ) -NoNewWindow -PassThru
+    # "`"printf '%q' `$user_conf_path/utils/fzf-git.sh`""
+
+  # Wait for lf to exit
+  $proc.WaitForExit()
+
+  # Clean process reference
+  $proc = $null
+
   # requires -l flag for sub-shell process
   # & "$script:__gitbash__" --norc -ilc $script:fgb_command
-  & "$script:__gitenv__" $script:GITBASH_ENVIRONMENT /usr/bin/bash -c "$script:__apend_path__ $script:fgb_command"
+  #
+  # NOTE: Stopped working on parsing fgb_command
+  # & "$script:__gitenv__" $script:GITBASH_ENVIRONMENT /usr/bin/bash -c "$script:__append_path__ $script:fgb_command"
 
   # require to escape the string twice in pwsh and once in gitbash
   # iex $("& `"$__gitbash__`" -ilc `"git branch -a --color=always | grep -v '/HEAD\s' | sort | fzf --height 50% --min-height 20 --border --bind ctrl-/:toggle-preview --ansi --multi --tac --preview 'git log --oneline --graph --date=short --color=always --pretty=\```"format:%C(auto)%cd %h%d %s\```" ```$(sed s/^..// <<< {} | cut -d\```" \```" -f1)' | sed 's/^..//' | cut -d' ' -f1 | sed 's#^remotes##'`"")
@@ -139,7 +157,7 @@ function fgb () {
 function fgt () {
   if ($script:is_in_git_repo) { return }
   # & "$script:__gitbash__" --norc -ilc $script:fgt_command
-  & "$script:__gitenv__" $script:GITBASH_ENVIRONMENT /usr/bin/bash -c "$script:__apend_path__ $script:fgt_command"
+  & "$script:__gitenv__" $script:GITBASH_ENVIRONMENT /usr/bin/bash -c "$script:__append_path__ $script:fgt_command"
   # & "$script:__gitbash__" -c @'
   # git tag --sort -version:refname |
   # fzf --height 50% --min-height 20 --border --bind ctrl-/:toggle-preview --multi --preview-window right:70% \
@@ -150,7 +168,7 @@ function fgt () {
 function fgh () {
   if ($script:is_in_git_repo) { return }
   # & "$script:__gitbash__" --norc -ilc $script:fgh_command
-  & "$script:__gitenv__" $script:GITBASH_ENVIRONMENT /usr/bin/bash -c "$script:__apend_path__ $script:fgh_command"
+  & "$script:__gitenv__" $script:GITBASH_ENVIRONMENT /usr/bin/bash -c "$script:__append_path__ $script:fgh_command"
   # & "$script:__gitbash__" -ilc @'
   #   git log --date=short --format='%C(green)%C(bold)%cd %C(auto)%h%d %s (%an)' --graph --color=always |
   #   fzf --height 50% --min-height 20 --border --bind ctrl-/:toggle-preview --ansi --no-sort --reverse --multi --bind 'ctrl-s:toggle-sort' \
@@ -163,7 +181,7 @@ function fgh () {
 function fgha () {
   if ($script:is_in_git_repo) { return }
   # & "$script:__gitbash__" --norc -ilc $script:fgha_command
-  & "$script:__gitenv__" $script:GITBASH_ENVIRONMENT /usr/bin/bash -c "$script:__apend_path__ $script:fgha_command"
+  & "$script:__gitenv__" $script:GITBASH_ENVIRONMENT /usr/bin/bash -c "$script:__append_path__ $script:fgha_command"
   # & "$script:__gitbash__" -ilc @'
   #   git log --all --date=short --format='%C(green)%C(bold)%cd %C(auto)%h%d %s (%an)' --graph --color=always |
   #   fzf --height 50% --min-height 20 --border --bind ctrl-/:toggle-preview --ansi --no-sort --reverse --multi --bind 'ctrl-s:toggle-sort' \
@@ -176,7 +194,7 @@ function fgha () {
 function fgr () {
   if ($script:is_in_git_repo) { return }
   # & "$script:__gitbash__" --norc -ilc $script:fgr_command
-  & "$script:__gitenv__" $script:GITBASH_ENVIRONMENT /usr/bin/bash -c "$script:__apend_path__ $script:fgr_command"
+  & "$script:__gitenv__" $script:GITBASH_ENVIRONMENT /usr/bin/bash -c "$script:__append_path__ $script:fgr_command"
   # & "$script:__gitbash__" -c @'
   #   git remote -v | awk '{print $1 \"\t\" $2}' | uniq |
   #   fzf --height 50% --min-height 20 --border --bind ctrl-/:toggle-preview --tac \
@@ -188,7 +206,7 @@ function fgr () {
 function fgss () {
   if ($script:is_in_git_repo) { return }
   # & "$script:__gitbash__" --norc -ilc $script:fgs_command
-  & "$script:__gitenv__" $script:GITBASH_ENVIRONMENT /usr/bin/bash -c "$script:__apend_path__ $script:fgs_command"
+  & "$script:__gitenv__" $script:GITBASH_ENVIRONMENT /usr/bin/bash -c "$script:__append_path__ $script:fgs_command"
   # & "$script:__gitbash__" -c @'
   #   git stash list |
   #   fzf --height 50% --min-height 20 --border --bind ctrl-/:toggle-preview \
@@ -212,11 +230,11 @@ $fshow_command = @'
     shas=$(sed '1,2d;s/^[^a-z0-9]*//;/^$/d' <<< "$out" | awk '{print $1}')
     [ -z "$shas" ] && continue
     if [ "$k" = ctrl-d ]; then
-      git diff --color=always $shas | 
+      git diff --color=always $shas |
 '@ + $script:fshow_pager + @'
     ; else
       for sha in $shas; do
-        git show --color=always $sha | 
+        git show --color=always $sha |
 '@ + $script:fshow_pager + @'
     ; done
     fi
@@ -226,7 +244,7 @@ $fshow_command = @'
 
 function fshow () {
   if ($script:is_in_git_repo) { return }
-  & "$script:__gitenv__" $script:GITBASH_ENVIRONMENT /usr/bin/bash -c "$script:__apend_path__ $script:fshow_command"
+  & "$script:__gitenv__" $script:GITBASH_ENVIRONMENT /usr/bin/bash -c "$script:__append_path__ $script:fshow_command"
 }
 
 # Export-ModuleMember -Function fgb
