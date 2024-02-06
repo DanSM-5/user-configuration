@@ -103,7 +103,7 @@ fgr () {
   fzf-down --tac \
     --query "$INITIAL_QUERY" \
     --preview '
-      git log --oneline --graph --date=short --pretty="format:%C(auto)%cd %h%d %s" {1}' |
+      git log --color=always --oneline --graph --date=short --pretty="format:%C(auto)%cd %h%d %s" {1}' |
   cut -d$'\t' -f1
 }
 
