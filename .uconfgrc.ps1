@@ -157,6 +157,9 @@ if ($PSVersionTable.PSVersion -ge 7.1) {
   Set-PSReadLineOption -Colors @{ InlinePrediction = "#B3E5FF" }
 }
 
+# Allow to execute python scripts directly
+$env:PATHEXT += ";.py"
+
 if ((
   Test-Path -Path "${env:user_scripts_path}\bin" -ErrorAction SilentlyContinue
 ) -and (
