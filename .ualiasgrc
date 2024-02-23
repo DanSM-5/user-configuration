@@ -652,6 +652,14 @@ alias sgcf="source $user_conf_path/.uconfgrc"
 alias sals="source $user_conf_path/.ualiasrc"
 alias sgal="source $user_conf_path/.ualiasgrc"
 
+if [ "$IS_GITBASH" = true ]; then
+  if [ "$IS_ZSH" = true ]; then
+    alias refrenv="source $user_conf_path/utils/refrenvz.sh"
+  else
+    alias refrenv="source $user_conf_path/utils/refrenv.sh"
+  fi
+fi
+
 alias psh="powershell.exe"
 alias pwsh="pwsh.exe"
 alias cps="pwsh.exe -nolo -nopro -nonin -c"

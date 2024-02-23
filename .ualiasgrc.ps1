@@ -56,16 +56,19 @@ function spf {
   . $global:profile
 }
 function scfg {
-  . "$HOME\.usr_conf\.uconfrc.ps1"
+  . "$user_conf_path\.uconfrc.ps1"
 }
 function sgcf {
-  . "$HOME\.usr_conf\.uconfgrc.ps1"
+  . "$user_conf_path\.uconfgrc.ps1"
 }
 function sals {
-  . "$HOME\.usr_conf\.ualiasrc.ps1"
+  . "$user_conf_path\.ualiasrc.ps1"
 }
 function sgal {
-  . "$HOME\.usr_conf\.ualiasgrc.ps1"
+  . "$user_conf_path\.ualiasgrc.ps1"
+}
+function refrenv {
+  . "$user_conf_path\utils\refrenv.ps1"
 }
 
 # GIT
