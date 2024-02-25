@@ -95,7 +95,7 @@ function gmerge { git merge $args }
 function gco { git checkout $args }
 function gck { git checkout $args }
 function grm { git checkout -- . }
-function gstatus {
+function grepo {
   git rev-parse HEAD *> $null
 
   if (-not $?) {
@@ -103,11 +103,25 @@ function gstatus {
     return
   }
 
-  git status $args
+  git @args
+}
+
+
+if (Test-Path Alias:g) { Remove-Item Alias:g }
+Set-Alias -Name g -Value grepo
+
+function gstatus {
+  grepo status @args
 }
 
 if (Test-Path Alias:gs) { Remove-Item Alias:gs }
 Set-Alias -Name gs -Value gstatus
+
+# Git status short version
+function gsb { gstatus -sb @args }
+# Show cache
+function gdf { grepo diff }
+function gdc { grepo diff --cached }
 
 # Shadowed by alias Get-Service
 # function gsv { gstatus -v @args }

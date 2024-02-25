@@ -124,18 +124,35 @@ alias gsp="git stash push -m"
 alias gss="git stash show"
 alias gsd="git stash drop"
 
-gstatus () {
+grepo () {
   git rev-parse HEAD > /dev/null 2>&1 || return
 
-  git status "$@"
+  git "$@"
+}
+
+alias g="grepo"
+
+gstatus () {
+  grepo status "$@"
 }
 
 alias gs="gstatus"
 
 gsv () {
-  git rev-parse HEAD > /dev/null 2>&1 || return
+  gstatus -v "$@"
+}
 
-  git status -v "$@"
+# Git status short version
+gsb () {
+  gstatus -sb "$@"
+}
+
+# Show cache
+gdc () {
+  grepo diff --cached
+}
+gdf () {
+  grepo diff
 }
 
 if command_exists delta; then
