@@ -622,7 +622,7 @@ qed () {
 alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
 
 # Sys Alias
-alias aptup="sudo apt-get update && sudo apt-get upgrade" 
+alias aptup="sudo apt-get update && sudo apt-get upgrade"
 alias aptupd="sudo apt-get update"
 alias aptupg="sudo apt-get upgrade"
 alias aptin="sudo apt-get install"
@@ -739,7 +739,7 @@ ex () {
 
 archive () {
   atype="$1"
-  
+
   case atype in
     tar)   tar cvf "$2" "${@:3}";;
     tgz)   tar czvf "$2" "${@:3}";;
@@ -756,6 +756,7 @@ export clipboard_copy=""
 gallery_dl_commd="gallery-dl"
 yt_dlp_commd="yt-dlp"
 mpv_commd='mpv'
+toru_commd='toru'
 
 # Standard wrapper function names that should work on all platforms
 clipboard_pastew () {
@@ -792,6 +793,10 @@ mpvw () {
 
 webtorrentw () {
   webtorrent "$@"
+}
+
+toruw () {
+  "$toru_commd" "$@"
 }
 
 mpvp () {
@@ -886,7 +891,7 @@ yf () {
     selection="$(pages_start="$startpage" ytfzf -L "$@")"
 
     if [ -z "$selection" ]; then
-      return 1 
+      return 1
     fi
 
     mpvp "$selection"
@@ -907,14 +912,26 @@ play () {
     return 1
   fi
 
-  if [[ "$url" =~ ".torrent" ]] ||
-    [[ "$url" =~ "magnet:" ]] ||
-    [[ "$url" =~ "webtorrent://" ]] ||
-    [[ "$url" =~ "peerflix://" ]]; then
-    webtorrentw --mpv "$url" "$@"
-  else
-    mpvw "$url" "$@"
+  if [[ "$url" =~ ".torrent" ]]; then
+    toruw stream --torrent "$url" "$@"
+    return 0
   fi
+
+  if [[ "$url" =~ "magnet:" ]]; then
+    toruw stream --magnet "$url" "$@"
+    return 0
+  fi
+
+  # if [[ "$url" =~ ".torrent" ]] ||
+  # [[ "$url" =~ "magnet:" ]] ||
+  if [[ "$url" =~ "webtorrent://" ]] ||
+  [[ "$url" =~ "peerflix://" ]]; then
+    webtorrentw --mpv "$url" "$@"
+
+    return 0
+  fi
+
+  mpvw "$url" "$@"
 }
 
 plpp () {
@@ -933,8 +950,19 @@ tplay () {
     return 1
   fi
 
+  if [[ "$url" =~ ".torrent" ]]; then
+    toruw stream --torrent "$url" "$@"
+    return 0
+  fi
+
+  if [[ "$url" =~ "magnet:" ]]; then
+    toruw stream --magnet "$url" "$@"
+    return 0
+  fi
+
+
   if [ "$1" = '-l' ]; then
-    webtorrentw --mpv "$url" -u 1 "${@:2}" 
+    webtorrentw --mpv "$url" -u 1 "${@:2}"
   else
     webtorrentw --mpv "$url" "$@"
   fi
@@ -1015,6 +1043,18 @@ getTempDir () {
   echo "/tmp"
 }
 
+unset_if_function () {
+  local command_name="$1"
+
+  if command_exists "$command_name"; then
+    if [ "$IS_ZSH" = true ] && [[ $(type "$command_name") =~ function ]]; then
+      unset -f "$command_name"
+    elif [ "$IS_BASH" = true ] && [[ $(type -t "$command_name") == function ]]; then
+      unset -f "$command_name"
+    fi
+  fi
+}
+
 if [ "$IS_WSL" = true ]; then
   start () {
     file_explorer_open "$@"
@@ -1048,26 +1088,20 @@ if [ "$IS_WSL" = true ]; then
     file_explorer_open "$filepath"
   }
 
-  if command_exists mpv; then 
-    if [ "$IS_ZSH" = true ] && [[ $(type mpv) =~ function ]]; then
-      unset -f mpv
-    elif [ "$IS_BASH" = true ] && [[ $(type -t mpv) == function ]]; then
-      unset -f mpv
-    fi
-  fi
+  unset_if_function mpv
 
   # MPV wrapper for WSL
   if ! command_exists mpv; then
     if command_exists mpv.com; then
       mpv_commd="mpv.com"
       mpv () {
-        mpv.com "$@" 
+        mpv.com "$@"
       }
 
     elif command_exists mpv.exe; then
       mpv_commd="mpv.exe"
       mpv () {
-        mpv.exe "$@" 
+        mpv.exe "$@"
       }
     fi
   fi
@@ -1075,14 +1109,25 @@ if [ "$IS_WSL" = true ]; then
   # yt-dlp wrapper for WSL
   if ! command_exists yt-dlp; then
     yt-dlp () {
-      yt-dlp.exe "$@" 
+      yt-dlp.exe "$@"
     }
   fi
 
   # gallery-dl wrapper for WSL
   if ! command_exists gallery-dl; then
     gallery-dl () {
-      gallery-dl.exe "$@" 
+      gallery-dl.exe "$@"
+    }
+  fi
+
+  unset_if_function toru
+
+  # toru wrapper for WSL
+  if ! command_exists toru; then
+    toru_commd='toru.exe'
+
+    toru () {
+      toru.exe "$@"
     }
   fi
 
@@ -1117,7 +1162,7 @@ if [ "$IS_WSL" = true ]; then
     local selection="$(pages_start="$startpage" ytfzf -L "$@")"
 
     if [ -z "$selection" ]; then
-      return 1 
+      return 1
     fi
 
     if [[ "$linkOnly" = true ]]; then
@@ -1431,7 +1476,7 @@ ptc () {
   if [ -z "$selection" ]; then
     return 1
   fi
-  
+
   selection="$(realpath "$selection")"
 
   echo "$selection" | clipboard_copyw

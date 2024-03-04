@@ -671,18 +671,34 @@ function play () {
 
   if (
     "$url".contains('.torrent') -or
-    "$url".contains('magnet:') -or
+  ) {
+    toru stream --torrent "$url" @args
+    return
+  }
+
+  if (
+    "$url".contains('magnet:')
+  ) {
+    toru stream --magnet "$url" @args
+    return
+  }
+
+  if (
+    # "$url".contains('.torrent') -or
+    # "$url".contains('magnet:') -or
     "$url".contains('webtorrent://') -or
     "$url".contains('peerflix://')
   ) {
     if ($args) {
-      webtorrent --mpv "$url" $args
+      webtorrent --mpv "$url" @args
     } else {
       webtorrent --mpv "$url"
     }
-  } else {
-    mpv "$url" $args
+    return
   }
+
+  # Let mpv handle the url
+  mpv "$url" @args
 }
 
 function tplay ([Switch] $limit) {
@@ -696,6 +712,21 @@ function tplay ([Switch] $limit) {
   $url = $url.Trim()
   echo "Playing: $url"
 
+  if (
+    "$url".contains('.torrent') -or
+  ) {
+    toru stream --torrent "$url" @args
+    return
+  }
+
+  if (
+    "$url".contains('magnet:')
+  ) {
+    toru stream --magnet "$url" @args
+    return
+  }
+
+  # For webtorrent only
   $webtorrent_args = @()
 
   if ($limit) {
@@ -708,7 +739,7 @@ function tplay ([Switch] $limit) {
   }
 
   if ($webtorrent_args) {
-    webtorrent --mpv "$url" $webtorrent_args
+    webtorrent --mpv "$url" @webtorrent_args
   } else {
     webtorrent --mpv "$url"
   }
