@@ -90,6 +90,8 @@ if (Test-Command fzf) {
 $script:gsudoModule = "$(scoop prefix gsudo)/gsudoModule.psd1"
 if (Test-Path "$script:gsudoModule") {
   Import-Module "$script:gsudoModule"
+  if (Test-Path Alias:sudo) { Remove-Item Alias:sudo }
+  Set-Alias -Name sudo -Value gsudo
 }
 
 if (Test-Command fd) {
