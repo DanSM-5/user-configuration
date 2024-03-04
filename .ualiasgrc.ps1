@@ -670,7 +670,7 @@ function play () {
   echo "Playing: $url"
 
   if (
-    "$url".contains('.torrent') -or
+    "$url".contains('.torrent')
   ) {
     toru stream --torrent "$url" @args
     return
@@ -713,7 +713,7 @@ function tplay ([Switch] $limit) {
   echo "Playing: $url"
 
   if (
-    "$url".contains('.torrent') -or
+    "$url".contains('.torrent')
   ) {
     toru stream --torrent "$url" @args
     return
