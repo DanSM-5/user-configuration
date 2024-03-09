@@ -34,11 +34,14 @@ if (Test-Command Set-PsFzfOption) {
   $color_gruvbox = '--colot="bg+:#3c3836,bg:#32302f,spinner:#fb4934,hl:#928374,fg:#ebdbb2,header:#928374,info:#8ec07c,pointer:#fb4934,marker:#fb4934,fg+:#ebdbb2,prompt:#fb4934,hl+:#fb4934"'
   $env:FZF_DEFAULT_OPTS="--height 80% --layout=reverse --border"
   # replace 'Ctrl+t' and 'Ctrl+r' with your preferred bindings:
+  $altc = if ($IsMacOS) { 'ç' } else { 'Alt+c' }
+  $alta = if ($IsMacOS) { 'å' } else { 'Alt+a' }
+
   Set-PSFzfOption -EnableAliasFuzzyEdit `
     -PSReadlineChordProvider 'Ctrl+t' `
     -PSReadlineChordReverseHistory 'Ctrl+r' `
-    -PSReadlineChordSetLocation 'Alt+c' `
-    -PSReadlineChordReverseHistoryArgs 'Alt+a' `
+    -PSReadlineChordSetLocation $altc `
+    -PSReadlineChordReverseHistoryArgs $alta `
     -EnableAliasFuzzyFasd `
     -EnableAliasFuzzyHistory `
     -EnableAliasFuzzyKillProcess `
