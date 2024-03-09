@@ -137,6 +137,7 @@ if (Test-Command rg) {
 if ($PSVersionTable.PSVersion -ge 7.1) {
   Set-PSReadLineOption -PredictionSource History
   Set-PSReadLineOption -Colors @{ InlinePrediction = "#B3E5FF" }
+  Set-PSReadLineKeyHandler -Chord "Ctrl+RightArrow" -Function ForwardWord
 }
 
 # Windows only config
