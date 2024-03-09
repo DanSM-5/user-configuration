@@ -295,7 +295,7 @@ function fcde () {
   $options = getPsFzfOptions
 
   if ( -not (Test-Path $location) ) {
-    echo "Invalid location. Defaulting to cwd."
+    Write-Output "Invalid location. Defaulting to cwd."
     $location = "$(pwd)"
   }
 
@@ -322,7 +322,7 @@ function fcde () {
 }
 
 function info () {
-  # can also be piped into less.exe
+  # can also be piped into less
   Get-Help -Full $args[0] | bat -l man -p
 }
 
@@ -337,7 +337,7 @@ function up ([int] $val = 1) {
   try {
     cd "..${cmmd}"
   } catch {
-    echo "Couldn't go up $limit dirs."
+    Write-Output "Couldn't go up $limit dirs."
   }
 }
 
@@ -367,7 +367,7 @@ function nr { npm run $args }
 
 function fnr {
   if ( -not (Test-Path package.json) ) {
-    echo "No package.json in dir $(pwd)"
+    Write-Output "No package.json in dir $(pwd)"
     return
   }
 
@@ -385,7 +385,7 @@ function fnr {
 
 function fif () {
   if ($args.length -eq 0) {
-    echo 'Need a string to search for!'
+    Write-Output 'Need a string to search for!'
     return
   }
 
@@ -430,7 +430,7 @@ function fenv () {
   }
 
   Get-childItem -Path env: |
-    % { echo "$($_.key)=$($_.value.Trim() -Replace '\n', ' ')" } |
+    % { Write-Output "$($_.key)=$($_.value.Trim() -Replace '\n', ' ')" } |
     Invoke-Fzf `
       -PreviewWindow 'up:3:hidden:wrap' `
       @options |
@@ -442,13 +442,12 @@ function fenv () {
 
 function getAppPid ([String] $port, [Switch] $help = $false) {
   if ($help) {
-    echo ""
-    echo "  Print all connections where the given port is found"
-    echo "  Command syntax: [ getAppPid `"5500`" ]"
-    echo ""
-    echo "  Flags"
-    echo "  -help    Print this help"
-    echo ""
+    Write-Output "
+    Print all connections where the given port is found
+    Command syntax: [ getAppPid `"5500`" ]
+
+    Flags
+    -help    Print this help"
     return
   }
   if ( -not $port ) { return }
@@ -457,13 +456,13 @@ function getAppPid ([String] $port, [Switch] $help = $false) {
 
 function getTaskByPid ([String] $pidvalue, [Switch] $help = $false) {
   if ($help) {
-    echo ""
-    echo "  Find a process name by its PID"
-    echo "  Command syntax: [ getTaskByPid `"25641`" ]"
-    echo ""
-    echo "  Flags"
-    echo "  -help    Print this help"
-    echo ""
+    Write-Output "
+    Find a process name by its PID
+    Command syntax: [ getTaskByPid `"25641`" ]
+
+    Flags
+    -help    Print this help"
+
     return
   }
   if ( -not $pidvalue ) { return }
@@ -472,13 +471,13 @@ function getTaskByPid ([String] $pidvalue, [Switch] $help = $false) {
 
 function getAllAppsInPort ([String] $port, [Switch] $help = $false) {
   if ($help) {
-    echo ""
-    echo "  Find and print all the processes using a specific port"
-    echo "  Command syntax: [ getAllAppsInPort `"25641`" ]"
-    echo ""
-    echo "  Flags"
-    echo "  -help    Print this help"
-    echo ""
+    Write-Output "
+    Find and print all the processes using a specific port
+    Command syntax: [ getAllAppsInPort `"25641`" ]
+
+    Flags
+    -help    Print this help"
+
     return
   }
   if ( -not $port ) { return }
@@ -526,7 +525,7 @@ function mkdr { New-Item $args -ItemType Directory -ea 0 }
 
 function ll () { ls $args }
 
-function l () {  
+function l () {
   # $path = if($args[0]) { $args[0] } else { '.' }
   [CmdletBinding()]
   param(
@@ -574,13 +573,13 @@ function l () {
     $item.Content = $fileName
     return $item
   # } {
-  #   $acc.Dirs 
+  #   $acc.Dirs
   } | Format-Wide -Property Content |
     Out-HostColored $colorMap
 }
 
 function ntemp {
-  nvim "$env:temp/temp-$(New-Guid).txt"
+  nvim "$env:Temp/temp-$(New-Guid).txt"
 }
 
 # extract files
@@ -637,7 +636,7 @@ function mpvp () {
   $url = $args[0]
   $extra_args = $args[1..$args.length]
 
-  echo "Playing: $url"
+  Write-Output "Playing: $url"
 
   $yt_dlp_args = "-f bestvideo+bestaudio/best"
 
@@ -649,7 +648,7 @@ function plpp () {
   $url = "$(pbpaste)"
 
   if ( -not "$url" ) {
-    echo "Invalid url"
+    Write-Output "Invalid url"
     return
   }
 
@@ -662,12 +661,12 @@ function play () {
   $url = "$(pbpaste)"
 
   if ( -not "$url" ) {
-    echo "Invalid url"
+    Write-Output "Invalid url"
     return
   }
 
   $url = $url.Trim()
-  echo "Playing: $url"
+  Write-Output "Playing: $url"
 
   if (
     "$url".contains('.torrent')
@@ -705,12 +704,12 @@ function tplay ([Switch] $limit) {
   $url = "$(pbpaste)"
 
   if (-not $url) {
-    echo "No url"
+    Write-Output "No url"
     return
   }
 
   $url = $url.Trim()
-  echo "Playing: $url"
+  Write-Output "Playing: $url"
 
   if (
     "$url".contains('.torrent')
@@ -764,7 +763,7 @@ function dwv () {
   if ( -not $video_url) { return }
 
   $video_url = $video_url.Trim()
-  echo "Downloading: $video_url"
+  Write-Output "Downloading: $video_url"
   yt-dlp "$video_url" @args
 }
 
@@ -773,7 +772,7 @@ function dwi () {
   if ( -not $image_url ) { return }
 
   $image_url = $image_url.Trim()
-  echo "Downloading: $image_url"
+  Write-Output "Downloading: $image_url"
   gallery-dl "$image_url" @args
 }
 
@@ -878,7 +877,7 @@ function getClipboardPath {
 function ccd () {
   $filepath = getClipboardPath
   if ( -not "$filepath" ) {
-    echo "Invalid path"
+    Write-Output "Invalid path"
     return
   }
   cd "$filepath"
@@ -887,7 +886,7 @@ function ccd () {
 function ocd () {
   $filepath = getClipboardPath
   if ( -not "$filepath" ) {
-    echo "Invalid path"
+    Write-Output "Invalid path"
     return
   }
   Start-Process "$filepath"
@@ -923,7 +922,7 @@ function ptc () {
   }
 
   $selection = Get-Item "$selection" | Select-Object FullName | % { $_.FullName }
-  echo "$selection" | tr -d "\r\n" | pbcopy
+  Write-Output "$selection" | tr -d "\r\n" | pbcopy
 }
 
 function Count-Files (
@@ -1023,16 +1022,16 @@ function unmountDir ([string] $letter) {
 }
 
 function unshort ([string] $url) {
-  curl.exe --head --location "$url" | Select-String "Location"
+  curl --head --location "$url" | Select-String "Location"
 }
 
 
 function publicip {
-  curl.exe checkip.amazonaws.com
+  curl checkip.amazonaws.com
 }
 
 function qrcode ([String] $text) {
-  curl.exe "qrenco.de/$text"
+  curl "qrenco.de/$text"
 }
 
 function wifiList ([string] $wifiName = '') {
@@ -1086,14 +1085,7 @@ function bdif () {
     return
   }
 
-  bat --diff $changed_files 
-}
-
-if (Get-Command -Name "lf.exe" -ErrorAction SilentlyContinue) {
-  function lf () {
-    # Important to use @args and no $args to forward arguments
-    lf.ps1 @args
-  }
+  bat --diff $changed_files
 }
 
 # Matches both soft and hard link
@@ -1116,7 +1108,7 @@ function frm () {
   Invoke-Fzf `
     @options `
     -Multi `
-    -Query "$query" | ? { 
+    -Query "$query" | ? {
       # If item is a file or a SymbolicLink
       (
         Test-Path -PathType Leaf "$_" -ErrorAction SilentlyContinue
@@ -1135,7 +1127,7 @@ function frdr () {
   Invoke-Fzf `
     @options `
     -Multi `
-    -Query "$query" | ? { 
+    -Query "$query" | ? {
       # If item is a file or a SymbolicLink
       (
         Test-Path -PathType Container "$_" -ErrorAction SilentlyContinue

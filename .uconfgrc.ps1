@@ -13,21 +13,11 @@ $env:EDITOR = 'nvim'
 $env:user_conf_path = "$user_conf_path"
 $env:user_scripts_path = "$user_scripts_path"
 $env:prj = "$prj"
-$env:WIN_ROOT = "C:"
+$env:WIN_ROOT = if ($IsWindows) { "C:" } else { "/" }
 $env:WIH_HOME = "$HOME"
 
 # Set true color support
 $env:COLORTERM = 'truecolor'
-
-function Test-Command {
-  Param ($command)
-  $oldPreference = $ErrorActionPreference
-  $ErrorActionPreference = 'stop'
-  try {
-    if (Get-Command $command) { return $true }
-  } catch { return $false }
-  finally { $ErrorActionPreference = $oldPreference }
-}
 
 if ((Test-Command oh-my-posh) -and (Test-Path "${HOME}\omp-theme")) {
   # Import-Module oh-my-posh
@@ -65,7 +55,9 @@ if (Test-Command Set-PsFzfOption) {
   # if (Test-Path Alias:fcd) { Remove-Item Alias:fcd }
   # Set-Alias -Name fcd -Value Invoke-FuzzySetLocation
 
-  Import-module "$user_conf_path\utils\fzf-git.psm1"
+  if ($IsWindows) {
+    Import-module "$user_conf_path\utils\fzf-git.psm1"
+  }
 }
 
 if (Test-Command fzf) {
@@ -84,14 +76,6 @@ if (Test-Command fzf) {
     --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort'"
 
   $env:FZF_ALT_C_OPTS = $env:FZF_CTRL_T_OPTS
-}
-
-# Add gsudo !! command
-$script:gsudoModule = "$(scoop prefix gsudo)/gsudoModule.psd1"
-if (Test-Path "$script:gsudoModule") {
-  Import-Module "$script:gsudoModule"
-  if (Test-Path Alias:sudo) { Remove-Item Alias:sudo }
-  Set-Alias -Name sudo -Value gsudo
 }
 
 if (Test-Command fd) {
@@ -145,22 +129,54 @@ if (Test-Command rg) {
 # Set Emacs keybindings for readline
 # Set-PSReadLineOption -EditMode Emacs
 
-if (Test-Command 'lf.exe') {
-  Set-PSReadLineKeyHandler -Chord Ctrl+o -ScriptBlock {
-    [Microsoft.PowerShell.PSConsoleReadLine]::RevertLine()
-    [Microsoft.PowerShell.PSConsoleReadLine]::Insert('lfcd.ps1')
-    [Microsoft.PowerShell.PSConsoleReadLine]::AcceptLine()
-  }
-}
-
 # Set Prediction - PS 7.1 or above only
 if ($PSVersionTable.PSVersion -ge 7.1) {
   Set-PSReadLineOption -PredictionSource History
   Set-PSReadLineOption -Colors @{ InlinePrediction = "#B3E5FF" }
 }
 
-# Allow to execute python scripts directly
-$env:PATHEXT += ";.py"
+# Windows only config
+if ($IsWindows) {
+  # Allow to execute python scripts directly
+  $env:PATHEXT += ";.py"
+
+  # Import the Chocolatey Profile that contains the necessary code to enable
+  # tab-completions to function for `choco`.
+  # Be aware that if you are missing these lines from your profile, tab completion
+  # for `choco` will not function.
+  # See https://ch0.co/tab-completion for details.
+  $ChocolateyProfile = "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
+  if (Test-Path -Path $ChocolateyProfile -ErrorAction SilentlyContinue) {
+    Import-Module "$ChocolateyProfile"
+  }
+
+  if (Test-Command 'lf.exe') {
+    Set-PSReadLineKeyHandler -Chord Ctrl+o -ScriptBlock {
+      [Microsoft.PowerShell.PSConsoleReadLine]::RevertLine()
+      [Microsoft.PowerShell.PSConsoleReadLine]::Insert('lfcd.ps1')
+      [Microsoft.PowerShell.PSConsoleReadLine]::AcceptLine()
+    }
+
+    function lf () {
+      # Important to use @args and no $args to forward arguments
+      lf.ps1 @args
+    }
+  }
+
+# Commented test for scoop as it is unlikely to not be installed on windows
+# if (Test-Command scoop) {
+  # Add gsudo !! command
+  $script:gsudoModule = "$(scoop prefix gsudo)/gsudoModule.psd1"
+  if (Test-Path "$script:gsudoModule") {
+    Import-Module "$script:gsudoModule"
+    if (Test-Path Alias:sudo) { Remove-Item Alias:sudo }
+    Set-Alias -Name sudo -Value gsudo
+  }
+# }
+} elseif ($IsMacOS) {
+  # Polifyl for some functions
+  $env:TEMP = "/tmp"
+}
 
 if ((
   Test-Path -Path "${env:user_scripts_path}\bin" -ErrorAction SilentlyContinue
@@ -168,17 +184,6 @@ if ((
   -not (Test-Command 'path_end')
 )) {
   $env:PATH += ";${env:user_scripts_path}\bin"
-}
-
-
-# Import the Chocolatey Profile that contains the necessary code to enable
-# tab-completions to function for `choco`.
-# Be aware that if you are missing these lines from your profile, tab completion
-# for `choco` will not function.
-# See https://ch0.co/tab-completion for details.
-$ChocolateyProfile = "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
-if (Test-Path($ChocolateyProfile)) {
-  Import-Module "$ChocolateyProfile"
 }
 
 # Temporary hold the first entries in the path
