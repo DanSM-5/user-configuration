@@ -176,6 +176,9 @@ if ($IsWindows) {
 } elseif ($IsMacOS) {
   # Polifyl for some functions
   $env:TEMP = "/tmp"
+  function start () {
+    open @args
+  }
 }
 
 if ((

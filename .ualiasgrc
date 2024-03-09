@@ -677,10 +677,6 @@ if [ "$IS_GITBASH" = true ]; then
   fi
 fi
 
-alias psh="powershell.exe"
-alias pwsh="pwsh.exe"
-alias cps="pwsh.exe -nolo -nopro -nonin -c"
-
 # Trim utilities
 nospace () {
   tr -d "[:space:]"
@@ -1059,6 +1055,10 @@ if [ "$IS_WSL" = true ]; then
   start () {
     file_explorer_open "$@"
   }
+
+  alias psh="powershell.exe"
+  alias cps="pwsh.exe -nolo -nopro -nonin -c"
+  alias pwsh="pwsh.exe"
 
   export clipboard_paste="pbpaste.exe"
   export clipboard_copy="pbcopy.exe"
@@ -1440,6 +1440,12 @@ else
     dgl () {
       pwsh.exe -NoLogo -NonInteractive -Command "Download-Gdl $@"
     }
+
+    if [ "$IS_ZSH" = true ]; then
+      alias refrenv="source $user_conf_path/utils/refrenvz.sh"
+    else
+      alias refrenv="source $user_conf_path/utils/refrenv.sh"
+    fi
   fi
 fi
 
