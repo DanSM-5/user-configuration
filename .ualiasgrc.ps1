@@ -4,9 +4,9 @@
 ############################################
 
 # Follow structure conf folders and files
-$user_conf_path = "$HOME\.usr_conf"
-$user_scripts_path = "$HOME\user-scripts"
-$prj = "$HOME\prj"
+$user_conf_path = "${HOME}${dirsep}.usr_conf"
+$user_scripts_path = "${HOME}${dirsep}user-scripts"
+$prj = "${HOME}${dirsep}prj"
 
 $env:PREFERED_EDITOR = if ($env:PREFERED_EDITOR) { $env:PREFERED_EDITOR } else { "vim" }
 
@@ -20,22 +20,22 @@ $env:PREFERED_EDITOR = if ($env:PREFERED_EDITOR) { $env:PREFERED_EDITOR } else {
 # Script called from function
 function pimg () { & "$user_conf_path\utils\paste-image.ps1" $args }
 
-function gpr { cd $prj }
-function gus { cd $user_scripts_path }
-function guc { cd $user_conf_path }
-function gvc { cd "$HOME\.SpaceVim.d" }
-function goh { cd "$HOME"}
+function gpr { Set-Location $prj }
+function gus { Set-Location $user_scripts_path }
+function guc { Set-Location $user_conf_path }
+function gvc { Set-Location "$HOME\.SpaceVim.d" }
+function goh { Set-Location "$HOME"}
 
 function epf { nvim $PROFILE }
-function ecf { nvim "$user_conf_path\.uconfrc.ps1" }
-function egc { nvim "$user_conf_path\.uconfgrc.ps1" }
-function eal { nvim "$user_conf_path\.ualiasrc.ps1" }
-function ega { nvim "$user_conf_path\.ualiasgrc.ps1" }
-function evc { nvim "$HOME\.SpaceVim.d\init.toml" }
+function ecf { nvim "$(Join-Path -Path $user_conf_path -ChildPath .uconfrc.ps1)" }
+function egc { nvim "$(Join-Path -Path $user_conf_path -ChildPath .uconfgrc.ps1)" }
+function eal { nvim "$(Join-Path -Path $user_conf_path -ChildPath .ualiasrc.ps1)" }
+function ega { nvim "$(Join-Path -Path $user_conf_path -ChildPath .ualiasgrc.ps1)" }
+function evc { nvim "$(Join-Path -Path $HOME -ChildPath .SpaceVim.d\init.toml)" }
 
 function getPsFzfOptions {
   $path = $PWD.ProviderPath.Replace('\', '/')
-  $psFzfPreviewScript = "$user_conf_path\utils\PsFzfTabExpansion-Preview.ps1"
+  $psFzfPreviewScript = Join-Path -Path $user_conf_path -ChildPath utils\PsFzfTabExpansion-Preview.ps1
   $psFzfOptions = @{
     Preview = $("pwsh -NoProfile -NonInteractive -NoLogo -File \""$psFzfPreviewScript\"" \""" + $path + "\"" {}" );
     Bind = 'ctrl-/:change-preview-window(down|hidden|)','alt-up:preview-page-up','alt-down:preview-page-down','ctrl-s:toggle-sort'
@@ -56,19 +56,19 @@ function spf {
   . $global:profile
 }
 function scfg {
-  . "$user_conf_path\.uconfrc.ps1"
+  . "${user_conf_path}${dirsep}.uconfrc.ps1"
 }
 function sgcf {
-  . "$user_conf_path\.uconfgrc.ps1"
+  . "${user_conf_path}${dirsep}.uconfgrc.ps1"
 }
 function sals {
-  . "$user_conf_path\.ualiasrc.ps1"
+  . "${user_conf_path}${dirsep}.ualiasrc.ps1"
 }
 function sgal {
-  . "$user_conf_path\.ualiasgrc.ps1"
+  . "${user_conf_path}${dirsep}.ualiasgrc.ps1"
 }
 function refrenv {
-  . "$user_conf_path\utils\refrenv.ps1"
+  . "${user_conf_path}${dirsep}utils${dirsep}refrenv.ps1"
 }
 
 # GIT
@@ -208,7 +208,7 @@ function qnv () {
     Invoke-Fzf `
       -Header "(ctrl-/) Toggle preview" `
       @options |
-    % { cd "$_" }
+    % { Set-Location "$_" }
 }
 
 function qed ([string] $editor = 'nvim') {
@@ -262,7 +262,7 @@ function fcd () {
     return
   }
 
-  cd "$selection"
+  Set-Location "$selection"
 }
 
 function fcdd () {
@@ -285,7 +285,7 @@ function fcdd () {
     return
   }
 
-  cd "$selection"
+  Set-Location "$selection"
 }
 
 function fcde () {
@@ -296,7 +296,7 @@ function fcde () {
 
   if ( -not (Test-Path $location) ) {
     Write-Output "Invalid location. Defaulting to cwd."
-    $location = "$(pwd)"
+    $location = $PWD
   }
 
   $location = if ("$location" -eq "~") { "$HOME" } else { "$location" }
@@ -318,7 +318,7 @@ function fcde () {
     return
   }
 
-  cd "$selection"
+  Set-Location "$selection"
 }
 
 function info () {
@@ -335,7 +335,7 @@ function up ([int] $val = 1) {
     $cmmd = "/.." + $cmmd
   }
   try {
-    cd "..${cmmd}"
+    Set-Location "..${cmmd}"
   } catch {
     Write-Output "Couldn't go up $limit dirs."
   }
@@ -579,7 +579,7 @@ function l () {
 }
 
 function ntemp {
-  nvim "$env:Temp/temp-$(New-Guid).txt"
+  nvim "$env:TEMP/temp-$(New-Guid).txt"
 }
 
 # extract files
@@ -880,7 +880,7 @@ function ccd () {
     Write-Output "Invalid path"
     return
   }
-  cd "$filepath"
+  Set-Location "$filepath"
 }
 
 function ocd () {

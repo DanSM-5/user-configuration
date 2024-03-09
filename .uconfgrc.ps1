@@ -4,9 +4,9 @@
 ############################################
 
 # Follow structure conf folders and files
-$user_conf_path = "$HOME\.usr_conf"
-$user_scripts_path = "$HOME\user-scripts"
-$prj = "$HOME\prj"
+$user_conf_path = "${HOME}${dirsep}.usr_conf"
+$user_scripts_path = "${HOME}${dirsep}user-scripts"
+$prj = "${HOME}${dirsep}prj"
 
 $env:PREFERED_EDITOR = 'nvim'
 $env:EDITOR = 'nvim'
@@ -21,11 +21,11 @@ $env:COLORTERM = 'truecolor'
 
 if ((Test-Command oh-my-posh) -and (Test-Path "${HOME}\omp-theme")) {
   # Import-Module oh-my-posh
-  $env:POSH_THEMES_PATH = "${HOME}\omp-theme"
+  $env:POSH_THEMES_PATH = "${HOME}${dirsep}omp-theme"
   # $global:POSH_TRANSIENT=$false
 
   # oh-my-posh --init --shell pwsh --config $env:POSH_THEMES_PATH/jandedobbeleer.omp.json | Invoke-Expression
-  oh-my-posh init pwsh --config $env:POSH_THEMES_PATH/jandedobbeleer.omp.v2.json | Invoke-Expression
+  oh-my-posh init pwsh --config "${env:POSH_THEMES_PATH}${dirsep}jandedobbeleer.omp.v2.json" | Invoke-Expression
   # oh-my-posh --init --shell pwsh --config "$(scoop prefix oh-my-posh)/themes/jandedobbeleer.omp.json" | Invoke-Expression
 }
 
@@ -48,7 +48,7 @@ if (Test-Command Set-PsFzfOption) {
     -EnableAliasFuzzyScoop `
     -TabExpansion `
     -EnableFd
-    
+
     # -EnableAliasFuzzySetLocation `
   Set-PSReadLineKeyHandler -Key Tab -ScriptBlock { Invoke-FzfTabCompletion }
 
@@ -63,13 +63,13 @@ if (Test-Command Set-PsFzfOption) {
 if (Test-Command fzf) {
 
   $env:FZF_CTRL_R_OPTS = "
-    --preview 'pwsh -NoLogo -NonInteractive -NoProfile -File $user_conf_path\utils\log-helper.ps1 {}' --preview-window up:3:hidden:wrap
+    --preview 'pwsh -NoLogo -NonInteractive -NoProfile -File ${user_conf_path}${dirsep}utils${dirsep}log-helper.ps1 {}' --preview-window up:3:hidden:wrap
     --bind 'ctrl-/:toggle-preview,ctrl-s:toggle-sort'
-    --bind 'ctrl-y:execute-silent(pwsh -NoLogo -NonInteractive -NoProfile -File $user_conf_path\utils\copy-helper.ps1 {})+abort'
+    --bind 'ctrl-y:execute-silent(pwsh -NoLogo -NonInteractive -NoProfile -File ${user_conf_path}${dirsep}utils${dirsep}copy-helper.ps1 {})+abort'
     --color header:italic
     --header 'Press CTRL-Y to copy command into clipboard'"
 
-  $psFzfPreviewScript = "$user_conf_path\utils\PsFzfTabExpansion-Preview.ps1"
+  $psFzfPreviewScript = "${user_conf_path}${dirsep}utils${dirsep}PsFzfTabExpansion-Preview.ps1"
 
   $env:FZF_CTRL_T_OPTS = "
     --preview 'pwsh -NoProfile -NonInteractive -NoLogo -File $psFzfPreviewScript " + ". {}'
@@ -117,13 +117,17 @@ if (Test-Command fd) {
       '--exclude', '.bun'
     )
 
-  $FD_OPTIONS="$env:FD_SHOW_OPTIONS $env:FD_EXCLUDE_OPTIONS"
-  $env:FZF_CTRL_T_COMMAND="fd $FD_OPTIONS"
-  $env:FZF_ALT_C_COMMAND="fd --type d $FD_OPTIONS"
+  $FD_OPTIONS = "$env:FD_SHOW_OPTIONS $env:FD_EXCLUDE_OPTIONS"
+  $env:FZF_CTRL_T_COMMAND = "fd $FD_OPTIONS"
+  $env:FZF_ALT_C_COMMAND = "fd --type d $FD_OPTIONS"
 }
 
 if (Test-Command rg) {
-  $env:FZF_DEFAULT_COMMAND='rg --files --no-ignore --hidden --glob "!.git" --glob "!node_modules" --follow'
+  $env:FZF_DEFAULT_COMMAND = if ($IsWindows) {
+    'rg --files --no-ignore --hidden --glob "!.git" --glob "!node_modules" --follow'
+  } else {
+    'rg --files --no-ignore --hidden --glob !.git --glob !node_modules --follow'
+  }
 }
 
 # Set Emacs keybindings for readline
@@ -182,21 +186,21 @@ if ($IsWindows) {
 }
 
 if ((
-  Test-Path -Path "${env:user_scripts_path}\bin" -ErrorAction SilentlyContinue
+  Test-Path -Path "${env:user_scripts_path}${dirsep}bin" -ErrorAction SilentlyContinue
 ) -and (
   -not (Test-Command 'path_end')
 )) {
-  $env:PATH += ";${env:user_scripts_path}\bin"
+  $env:PATH += ";${env:user_scripts_path}${dirsep}bin"
 }
 
 # Temporary hold the first entries in the path
-$firstpathentries = "$($env:PATH -split ';' | Select -First 10)"
-if (-not ($firstpathentries -Match ([regex]::Escape("$HOME\bin")))) {
-  $env:PATH = "$HOME\bin;${env:PATH}"
+$firstpathentries = $env:PATH -split $pathsep | Select -First 10
+if (-not ($firstpathentries -Match ([regex]::Escape("${HOME}${dirsep}bin")))) {
+  $env:PATH = "${HOME}${dirsep}bin${pathsep}${env:PATH}"
 }
 
-if (-not ($firstpathentries -Match ([regex]::Escape("$HOME\.local\bin")))) {
-  $env:PATH = "$HOME\.local\bin;${env:PATH}"
+if (-not ($firstpathentries -Match ([regex]::Escape("${HOME}${dirsep}.local${dirsep}bin")))) {
+  $env:PATH = "${HOME}${dirsep}.local${dirsep}bin${pathsep}${env:PATH}"
 }
 # Remove firstpathentries
 Remove-Variable firstpathentries

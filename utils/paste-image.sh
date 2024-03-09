@@ -26,10 +26,10 @@ echo "Creating: $file"
 powershell.exe -nolo -nopro -nonin -sta "Add-Type -Assembly PresentationCore;" \
   '$img = [Windows.Clipboard]::GetImage();' \
   'if ($img -eq $null) {' \
-  'echo "Clipboard does not contain a image.";' \
+  'Write-Output "Clipboard does not contain a image.";' \
   'Exit;' \
   '} else {' \
-  'echo "Good";}' \
+  'Write-Output "Good";}' \
   '$fcb = new-object Windows.Media.Imaging.FormatConvertedBitmap($img, [Windows.Media.PixelFormats]::Rgb24, $null, 0);' \
   '$file = "' "$file" '";' \
   '$stream = [IO.File]::Open($file, "OpenOrCreate");' \

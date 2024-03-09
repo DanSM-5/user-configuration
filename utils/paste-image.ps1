@@ -3,17 +3,17 @@ param (
   [String] $filename
 )
 
-$location = "$(pwd)"
+$location = "$PWD"
 $file = "$location\$filename.png";
 
-echo "Creating: $file"
+Write-Output "Creating: $file"
 Add-Type -Assembly PresentationCore
 $img = [Windows.Clipboard]::GetImage()
 if ($img -eq $null) {
-  echo "Clipboard does not contain a image.";
+  Write-Output "Clipboard does not contain a image.";
   Exit;
 } else {
-  echo "Good"
+  Write-Output "Good"
 }
 
 $fcb = new-object Windows.Media.Imaging.FormatConvertedBitmap($img, [Windows.Media.PixelFormats]::Rgb24, $null, 0)

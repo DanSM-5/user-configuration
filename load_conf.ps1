@@ -15,6 +15,9 @@ $env:IS_MAC = if ($IsMacOS) { 'true' } else { 'false' }
 $env:IS_LINUX = if ($IsLinux) { 'true' } else { 'false' }
 $env:IS_POWERSHELL = 'true'
 
+$dirsep = if ($IsWindows) { '\' } else { '/' }
+$pathsep = if ($IsWindows) { ';' } else { ':' }
+
 # Needed for all scripts even if other fails
 function Test-Command {
   Param ($command)
