@@ -52,6 +52,8 @@ zle -N bracketed-paste bracketed-paste-magic
 autoload -Uz url-quote-magic
 zle -N self-insert url-quote-magic
 
+setopt interactive_comments
+
 # Keybinding for delete key
 bindkey "^[[3~" delete-char
 
