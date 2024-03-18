@@ -17,6 +17,7 @@ export IS_WINDOWS=false # PLATFORM IS WINDOWS
 export IS_POWERSHELL=false
 export IS_CMD=false
 export IS_WINSHELL=false # PWSH, GITBASH or CMD
+export IS_NIXONDROID="${IS_NIXONDROID:-false}" # Can only be true if set from home-manager
 
 # Detect if running WSL
 if command_exists /mnt/c/Windows/System32/cmd.exe; then

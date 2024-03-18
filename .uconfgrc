@@ -201,8 +201,10 @@ set_general_after () {
     source "$HOME/.usr_conf/utils/fzf-git.sh"
   fi
 
-  if command_exists starship && [ "$IS_TERMUX" = true ]; then
-    eval "$(starship init $SHELL_NAME)"
+  if command_exists starship; then
+    if [ "$IS_TERMUX" = true ] || [ "$IS_NIXONDROID" = true ]; then
+      eval "$(starship init $SHELL_NAME)"
+    fi
   fi
 
   # oh-my-posh requires brew
