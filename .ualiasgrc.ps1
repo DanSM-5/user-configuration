@@ -946,7 +946,7 @@ function ptc () {
     return
   }
 
-  $selection = Get-Item "$selection" | Select-Object FullName | % { $_.FullName }
+  $selection = Get-Item "$selection" -Force | Select-Object FullName | % { $_.FullName }
   Write-Output "$selection" | tr -d "\r\n" | pbcopy
 }
 
