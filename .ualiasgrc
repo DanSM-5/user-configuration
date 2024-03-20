@@ -1039,6 +1039,33 @@ getTempDir () {
   echo "/tmp"
 }
 
+ptc () {
+  local location="${1:-.}" # Current location
+  local query="${@:2}"
+  local pattern="."
+  local selection=""
+
+  if ! [ -d "$location" ]; then
+    pattern="$location"
+    location="$HOME"
+  fi
+
+  # old preview "ls --color=always -alhF {} | sed '1d;2d;3d'"
+  # NOTE: cat - <() is there to add '.' as an option in the pipe
+  selection=$(fd-defaults -tl -td -tf -L "$pattern" "$location" |
+    cat <(echo '.') - |
+    fzf-defaults --query "$query" \
+      --header "(ctrl-/) Search in: $location" \
+      --preview "$fzf_preview_normal")
+  if [ -z "$selection" ]; then
+    return 1
+  fi
+
+  selection="$(realpath "$selection")"
+
+  echo "$selection" | clipboard_copyw
+}
+
 unset_if_function () {
   local command_name="$1"
 
@@ -1050,6 +1077,36 @@ unset_if_function () {
     fi
   fi
 }
+
+if [ "$IS_WINDOWS" = true ]; then
+  ptc () {
+    local location="${1:-.}" # Current location
+    local query="${@:2}"
+    local pattern="."
+    local selection=""
+
+    if ! [ -d "$location" ]; then
+      pattern="$location"
+      location="$HOME"
+    fi
+
+    # old preview "ls --color=always -alhF {} | sed '1d;2d;3d'"
+    # NOTE: cat - <() is there to add '.' as an option in the pipe
+    selection=$(fd-defaults -tl -td -tf -L "$pattern" "$location" |
+      cat <(echo '.') - |
+      fzf-defaults --query "$query" \
+        --header "(ctrl-/) Search in: $location" \
+        --preview "$fzf_preview_normal")
+
+    if [ -z "$selection" ]; then
+      return 1
+    fi
+
+    selection="$(realpath "$selection")"
+
+    getHostPath "$selection" | tr '\\' '/' | clipboard_copyw
+  }
+fi
 
 if [ "$IS_WSL" = true ]; then
   start () {
@@ -1441,11 +1498,36 @@ else
       pwsh.exe -NoLogo -NonInteractive -Command "Download-Gdl $@"
     }
 
+    getClipboardPath () {
+      local filepath="$("$clipboard_paste" | tr -d "\r\n")"
+
+      if [ -z "$filepath" ]; then
+        echo ""
+        return
+      fi
+
+      if [[ -f "$filepath" ]]; then
+        filepath="$(dirname "$filepath")"
+      elif [[ -d "$filepath" ]]; then
+        :
+      else
+        echo ""
+        return
+      fi
+
+      if [[ "$filepath" =~ ^// ]]; then
+        printf "%s" "$filepath"
+      else
+        printf "%s" "$(realpath "$filepath")"
+      fi
+    }
+
     if [ "$IS_ZSH" = true ]; then
       alias refrenv="source $user_conf_path/utils/refrenvz.sh"
     else
       alias refrenv="source $user_conf_path/utils/refrenv.sh"
     fi
+
   fi
 fi
 
@@ -1459,33 +1541,6 @@ fmpv () {
   local quoted=$(echo $selection |
     awk '{ printf "\"""%s""\""" ", $0 }')
   bash -c "$mpv_commd $quoted"
-}
-
-ptc () {
-  local location="${1:-.}" # Current location
-  local query="${@:2}"
-  local pattern="."
-  local selection=""
-
-  if ! [ -d "$location" ]; then
-    pattern="$location"
-    location="$HOME"
-  fi
-
-  # old preview "ls --color=always -alhF {} | sed '1d;2d;3d'"
-  # NOTE: cat - <() is there to add '.' as an option in the pipe
-  selection=$(fd-defaults -tl -td -tf -L "$pattern" "$location" |
-    cat <(echo '.') - |
-    fzf-defaults --query "$query" \
-      --header "(ctrl-/) Search in: $location" \
-      --preview "$fzf_preview_normal")
-  if [ -z "$selection" ]; then
-    return 1
-  fi
-
-  selection="$(realpath "$selection")"
-
-  echo "$selection" | clipboard_copyw
 }
 
 # If path issues, add VS Code path manually
