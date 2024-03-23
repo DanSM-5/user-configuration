@@ -19,7 +19,7 @@ $env:WIH_HOME = "$HOME"
 # Set true color support
 $env:COLORTERM = 'truecolor'
 
-if ((Test-Command oh-my-posh) -and (Test-Path "${HOME}\omp-theme")) {
+if ((Test-Command oh-my-posh) -and (Test-Path "${HOME}${dirsep}omp-theme")) {
   # Import-Module oh-my-posh
   $env:POSH_THEMES_PATH = "${HOME}${dirsep}omp-theme"
   # $global:POSH_TRANSIENT=$false

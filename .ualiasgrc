@@ -286,6 +286,7 @@ alias la='ls -A '
 alias l='ls -ACF '
 alias fzfp="fzf-defaults --preview 'bat --color=always --style=numbers --line-range=:500 {}'"
 alias pvim="vim --clean"
+alias pnvim="nvim --clean"
 
 frm () {
   local selection=($(fd-defaults -tf -tl |

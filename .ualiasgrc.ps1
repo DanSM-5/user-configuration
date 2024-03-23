@@ -13,17 +13,17 @@ $env:PREFERED_EDITOR = if ($env:PREFERED_EDITOR) { $env:PREFERED_EDITOR } else {
 # Dot sourcing function scripts
 # TODO: Loop through files and source them
 # E.G. Get-ChildItem -Path utils | Where { $_.Name -Like 'function-*.ps1' }
-. "$user_conf_path\utils\function-Out-HostColored.ps1"
-. "$user_conf_path\utils\function-With-Env.ps1"
-. "$user_conf_path\utils\function-New-CommandWrapper.ps1"
+. "${user_conf_path}${dirsep}utils${dirsep}function-Out-HostColored.ps1"
+. "${user_conf_path}${dirsep}utils${dirsep}function-With-Env.ps1"
+. "${user_conf_path}${dirsep}utils${dirsep}function-New-CommandWrapper.ps1"
 
 # Script called from function
-function pimg () { & "$user_conf_path\utils\paste-image.ps1" $args }
+function pimg () { & "${user_conf_path}${dirsep}utils${dirsep}paste-image.ps1" @args }
 
 function gpr { Set-Location $prj }
 function gus { Set-Location $user_scripts_path }
 function guc { Set-Location $user_conf_path }
-function gvc { Set-Location "$HOME\.SpaceVim.d" }
+function gvc { Set-Location "${HOME}${dirsep}.SpaceVim.d" }
 function goh { Set-Location "$HOME"}
 
 function epf { nvim $PROFILE }
@@ -31,7 +31,7 @@ function ecf { nvim "$(Join-Path -Path $user_conf_path -ChildPath .uconfrc.ps1)"
 function egc { nvim "$(Join-Path -Path $user_conf_path -ChildPath .uconfgrc.ps1)" }
 function eal { nvim "$(Join-Path -Path $user_conf_path -ChildPath .ualiasrc.ps1)" }
 function ega { nvim "$(Join-Path -Path $user_conf_path -ChildPath .ualiasgrc.ps1)" }
-function evc { nvim "$(Join-Path -Path $HOME -ChildPath .SpaceVim.d\init.toml)" }
+function evc { nvim "$(Join-Path -Path $HOME -ChildPath ".SpaceVim.d${dirsep}init.toml")" }
 
 function getPsFzfOptions {
   $path = $PWD.ProviderPath.Replace('\', '/')
@@ -603,6 +603,9 @@ function l () {
   $filesFound | Sort-Object -Property Content | Format-Wide -Column $columns -Property Content | Out-HostColored $colorMap
 }
 
+function pvim() { vim --clean @args }
+function pnvim() { nvim --clean @args }
+
 function ntemp {
   nvim "$env:TEMP/temp-$(New-Guid).txt"
 }
@@ -1159,4 +1162,43 @@ function frdr () {
       ) -or ($_.LinkType)
     } | Remove-Item -recurse -force
 }
+
+function Print-MemoryUsage (
+  [Switch] $Sum = $false,
+  [ValidateSet('Name', 'Memory', 'name', 'memory')]
+  [String] $SortBy = 'Name'
+) {
+  $activeProcesses = Get-Process | Group-Object -Property ProcessName | % {
+    [PSCustomObject]@{
+      Name = $_.Name;
+      Size = (($_.Group | Measure-Object WorkingSet -Sum).Sum / 1KB)
+    }
+  }
+
+  if ($Sum) {
+    $total = ($activeProcesses | Measure-Object Size -Sum).Sum
+    # foreach ($process in $activeProcesses) {
+    #   $total += (($process.Group | Measure-Object WorkingSet -Sum).Sum / 1KB)
+    # }
+
+    return "$total KB"
+  }
+
+  if ($SortBy -Like '[Mm]emory') {
+    $activeProcesses = $activeProcesses | Sort-Object -Property Size -Descending
+  }
+
+  $activeProcesses |
+    Format-Table Name, @{
+      n = 'Mem (KB)';
+      e = {
+        # '{0:N0}' -f (($_.Group | Measure-Object WorkingSet -Sum).Sum / 1KB)
+        '{0:N0}' -f $_.Size
+      };
+      a = 'right'
+    }
+}
+
+if (Test-Path Alias:pmu) { Remove-Item Alias:pmu }
+Set-Alias -Name pmu -Value Print-MemoryUsage
 
