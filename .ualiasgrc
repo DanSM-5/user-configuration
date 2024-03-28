@@ -937,7 +937,7 @@ plpp () {
     echo "No url in clipboard"
     return 1
   fi
-  mpvp "$url"
+  mpvp "$url" "$@"
 }
 
 tplay () {
