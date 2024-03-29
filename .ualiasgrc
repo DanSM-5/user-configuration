@@ -130,7 +130,7 @@ grepo () {
   git "$@"
 }
 
-alias g="grepo"
+alias g="git"
 
 gstatus () {
   grepo status "$@"

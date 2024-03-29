@@ -106,9 +106,7 @@ function grepo {
   git @args
 }
 
-
-if (Test-Path Alias:g) { Remove-Item Alias:g }
-Set-Alias -Name g -Value grepo
+function g { git @args }
 
 function gstatus {
   grepo status @args
