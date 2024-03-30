@@ -523,12 +523,16 @@ function mkdr { New-Item $args -ItemType Directory -ea 0 }
 
 function ll () { Get-ChildItem @args }
 
+# Simple attempt to get a behavior like 'ls -ACF'
+# in powershell (including color output).
+# Not perfect but gets the job done.
 function l () {
-  # $path = if($args[0]) { $args[0] } else { '.' }
   [CmdletBinding()]
   param(
+    [String]
     $DirectoryName = '.',
     [Parameter(ValueFromPipeline = $true)]
+    [String]
     $PathFromPipe
   )
 
@@ -548,6 +552,7 @@ function l () {
   # } {
     $fileName = $_.Name
 
+    # Return filename as it, no need to format for pipeline
     if ($position -ne $length) {
       return $fileName
     }
@@ -555,18 +560,16 @@ function l () {
     $item = [PSCustomObject] @{ Content = '' }
 
     # if (Test-Path -PathType Leaf -Path f) {}
-    if ($_.Attributes -Band [Io.FileAttributes]::ReparsePoint) {
+    if ($_.Attributes -Band [IO.FileAttributes]::ReparsePoint) {
       $fileName = "$fileName@"
-    } elseif ($_.Attributes -Band [Io.FileAttributes]::Directory) {
+    } elseif ($_.Attributes -Band [IO.FileAttributes]::Directory) {
       $fileName = "$fileName/"
-    } elseif ($_.Attributes -Band [Io.FileAttributes]::Archive) {
+    } elseif ($_.Attributes -Band [IO.FileAttributes]::Archive) {
       $fileName = "$fileName*"
     }
 
     $item.Content = $fileName
     return $item
-  # } {
-  #   $acc.Dirs
   }
 
   # Return object as is if not in a pipeline
@@ -594,11 +597,13 @@ function l () {
     '\S+\.?\w+(?:\s\W*\w+)*@' = 'cyan'
   }
 
-  # $env:testfiles = $filesFound
+  # Set number of columns
   $columns = if ($filesFound.Length -gt 100) { 4 } elseif ($filesFound.Length -gt 20) { 3 } else { 2 }
   # Format output to be displayed
-  # $filesFound | Format-Wide -Property Content | Out-HostColored $colorMap
-  $filesFound | Sort-Object -Property Content | Format-Wide -Column $columns -Property Content | Out-HostColored $colorMap
+  $filesFound |
+    Sort-Object -Property Content |
+    Format-Wide -Column $columns -Property Content |
+    Out-HostColored -PatternColorMap $colorMap
 }
 
 function pvim() { vim --clean @args }
@@ -1162,7 +1167,7 @@ function frdr () {
 }
 
 function Print-MemoryUsage (
-  [Switch] $Sum = $false,
+  [Switch] $Total = $false,
   [ValidateSet('Name', 'Memory', 'name', 'memory')]
   [String] $SortBy = 'Name'
 ) {
@@ -1173,13 +1178,13 @@ function Print-MemoryUsage (
     }
   }
 
-  if ($Sum) {
-    $total = ($activeProcesses | Measure-Object Size -Sum).Sum
+  if ($Total) {
+    $memorySum = ($activeProcesses | Measure-Object Size -Sum).Sum
     # foreach ($process in $activeProcesses) {
     #   $total += (($process.Group | Measure-Object WorkingSet -Sum).Sum / 1KB)
     # }
 
-    return "$total KB"
+    return "$memorySum KB"
   }
 
   if ($SortBy -Like '[Mm]emory') {
