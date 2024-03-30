@@ -1408,6 +1408,8 @@ else
       xdg-open "$@" &
     }
 
+    alias start-docker="sudo service docker start"
+
   elif [ "$IS_MAC" = true ]; then
     export clipboard_copy="pbcopy"
     export clipboard_paste="pbpaste"
