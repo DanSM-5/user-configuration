@@ -315,6 +315,8 @@ set_general_after () {
       --exclude .vscode
       --exclude .vim
       --exclude .bun
+      --exclude .PlayOnLinux
+      --exclude "PlayOnLinux\'s\ virtual\ drives"
     )
 
     export FZF_CTRL_T_COMMAND="fd ${FD_SHOW_OPTIONS[@]} ${FD_EXCLUDE_OPTIONS[@]}"
