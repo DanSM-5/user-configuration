@@ -1692,3 +1692,15 @@ makeSymLink () {
 
 alias ln-s="makeSymLink"
 
+unshort () {
+  curl --head --location "$1" | grep "location"
+}
+
+publicip () {
+  curl checkip.amazonaws.com
+}
+
+qrcode () {
+  curl "qrenco.de/$@"
+}
+
