@@ -1,9 +1,10 @@
 [CmdletBinding()]
-param ($DirName, $Item)
+param ($DirName, $Item, $PreviewScript = "")
 
 # trim quote strings:
 $DirName = $DirName.Trim("'").Trim('"')
 $Item = $Item.Trim("'").Trim('"')
+$PreviewScript = $PreviewScript.Trim("'").Trim('"')
 
 $RunningInWindowsTerminal = [bool]($env:WT_Session)
 $IsWindowsCheck = ($PSVersionTable.PSVersion.Major -le 5) -or $IsWindows
@@ -55,7 +56,13 @@ elseif (Test-Path $path -PathType leaf) {
 elseif (($cmdResults = Get-Command $Item -ErrorAction SilentlyContinue)) {
     if ($cmdResults) {
         if ($cmdResults.CommandType -ne 'Application') {
-            Get-Help $Item
+            # use bat (https://github.com/sharkdp/bat) if it's available:
+            if ($ansiCompatible -and $(Get-Command bat -ErrorAction SilentlyContinue)) {
+                Get-Help $Item | bat -l man -p --color=always
+            }
+            else {
+                Get-Help $Item
+            }
         }
         else {
             # just output application location:
@@ -63,3 +70,8 @@ elseif (($cmdResults = Get-Command $Item -ErrorAction SilentlyContinue)) {
         }
     }
 }
+elseif ($PreviewScript) {
+    # Run custom preview script
+    Invoke-Command -ScriptBlock ([scriptblock]::Create((Get-Content "$PreviewScript"))) -ArgumentList $Item
+}
+
