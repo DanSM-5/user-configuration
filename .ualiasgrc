@@ -1563,6 +1563,8 @@ getShellAliasAndFunctions () {
     }
   else
     {
+      # NOTE: if using fast-syntax-highlighting the functions check won't work
+
       # Functions
       print -l ${(ok)functions} |
         awk '{ if ($1 !~ /^_.+/) { print $1 } }';
