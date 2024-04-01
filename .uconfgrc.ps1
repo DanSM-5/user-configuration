@@ -187,6 +187,11 @@ if ($IsWindows) {
   function start () {
     open @args
   }
+
+  # Macos won't let me usr ctrl for moving words
+  # It must be alt 🫠
+  Set-PSReadLineKeyHandler -Chord "Alt+RightArrow" -Function ForwardWord
+  Set-PSReadLineKeyHandler -Chord "Alt+LeftArrow" -Function BackwardWord
 }
 
 if ((
