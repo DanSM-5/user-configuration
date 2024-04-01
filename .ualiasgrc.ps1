@@ -35,7 +35,7 @@ function evc { nvim "$(Join-Path -Path $HOME -ChildPath ".SpaceVim.d${dirsep}ini
 
 function getPsFzfOptions {
   $path = $PWD.ProviderPath.Replace('\', '/')
-  $psFzfPreviewScript = Join-Path -Path $user_conf_path -ChildPath utils\PsFzfTabExpansion-Preview.ps1
+  $psFzfPreviewScript = Join-Path -Path $user_conf_path -ChildPath "utils${dirsep}PsFzfTabExpansion-Preview.ps1"
   $psFzfOptions = @{
     Preview = $("pwsh -NoProfile -NonInteractive -NoLogo -File \""$psFzfPreviewScript\"" \""" + $path + "\"" {}" );
     Bind = 'ctrl-/:change-preview-window(down|hidden|)','alt-up:preview-page-up','alt-down:preview-page-down','ctrl-s:toggle-sort'
@@ -436,6 +436,82 @@ function fenv () {
       $res = $($_ -Split '=')
       if ($showValue) { $res[1..$res.length] -Join '=' } else { $res[0] }
     }
+}
+
+function getShellAliasAndFunctions ([Switch] $GetTempFile) {
+  $outTempFile = New-TemporaryFile
+  $presortedFile = New-TemporaryFile
+
+  try {
+    # Get alias names
+    Get-Alias | % { $_.Name } >> $presortedFile.FullName
+    # Get function names
+    Get-ChildItem function:\ | % { $_.Name } >> $presortedFile.FullName
+
+    # Get sorted output
+    [System.IO.File]::ReadLines($presortedFile.FullName) | Sort -u | Out-File $outTempFile -encoding ascii
+
+    if (-not $GetTempFile) {
+      return (Get-Content $outTempFile.FullName)
+    } else {
+      return $outTempFile
+    }
+  } finally {
+    # Remove Unsorted file
+    if (Test-Path -Path $presortedFile.FullName -PathType leaf -ErrorAction SilentlyContinue) {
+      Remove-Item -Force -Path $presortedFile.FullName
+    }
+
+    # Remove Sorted file
+    if ((-not $GetTempFile) -and (Test-Path -Path $outTempFile.FullName -PathType leaf -ErrorAction SilentlyContinue)) {
+      Remove-Item -Force -Path $outTempFile.FullName
+    }
+  }
+}
+
+function fcmd () {
+  $commandFile = getShellAliasAndFunctions -GetTempFile
+  $definitionsFile = New-TemporaryFile
+  $previewFile = New-TemporaryFile
+
+  try {
+    # Get all function and alias definitions in a file for later reuse
+    foreach ($cmd in [System.IO.File]::ReadLines($commandFile.FullName)) {
+      $definition = (Get-Command -Name "$cmd").Definition
+
+      "`n$cmd`n$definition`n" >> $definitionsFile.FullName
+    }
+
+    # Create a script body pointing to the temporary file with the commands definitions
+    @"
+      Param(
+         [String]
+         `$PreviewItem = ""
+      )
+
+      rg -A 50 -B 1 -m 1 "^`$PreviewItem" "$($definitionsFile.FullName)" |
+        bat -l powershell --color=always -p -H 2
+"@ > $previewFile.FullName
+
+    $options = getPsFzfOptions
+    $options.Preview = $options.Preview + " " + $previewFile.FullName
+    [System.IO.File]::ReadLines($commandFile.FullName) | Invoke-Fzf @options
+  } finally {
+    # Remove Commands file
+    if (Test-Path -Path $commandFile.FullName -PathType leaf -ErrorAction SilentlyContinue) {
+      Remove-Item -Force -Path $commandFile.FullName
+    }
+
+    # Remove Definitions file
+    if (Test-Path -Path $definitionsFile.FullName -PathType leaf -ErrorAction SilentlyContinue) {
+      Remove-Item -Force -Path $definitionsFile.FullName
+    }
+
+    # Remove Preview file
+    if (Test-Path -Path $previewFile.FullName -PathType leaf -ErrorAction SilentlyContinue) {
+      Remove-Item -Force -Path $previewFile.FullName
+    }
+  }
 }
 
 function getAppPid ([String] $port, [Switch] $help = $false) {
