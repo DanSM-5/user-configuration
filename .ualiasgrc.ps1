@@ -479,7 +479,7 @@ function fcmd () {
     foreach ($cmd in [System.IO.File]::ReadLines($commandFile.FullName)) {
       $definition = (Get-Command -Name "$cmd").Definition
 
-      "`n$cmd`n$definition`n" >> $definitionsFile.FullName
+      "`n$cmd`n $definition`n" >> $definitionsFile.FullName
     }
 
     # Create a script body pointing to the temporary file with the commands definitions
@@ -1105,31 +1105,31 @@ function cfiles ([Switch] $Size) {
   Count-Files -Size:$Size -tf
 }
 
-function mountDir ([string] $letter, [string] $pathToMount) {
-  if (-Not (Test-Path -Path "$pathToMount" -ErrorAction SilentlyContinue)) {
-    Write-Output "Error, the path '$pathToMount' does not exist"
+function mountDir ([string] $Letter, [string] $PathToMount) {
+  if (-Not (Test-Path -Path "$PathToMount" -ErrorAction SilentlyContinue)) {
+    Write-Error "Error: the path '$PathToMount' does not exist"
     return
   }
 
-  if (-Not $letter) {
-    Write-Output "Mount letter required"
+  if (-Not $Letter) {
+    Write-Error "Mount letter required"
     return
   }
 
   subst "${letter}:" "$pathToMount"
 }
 
-function unmountDir ([string] $letter) {
-  if (-Not $letter) {
-    Write-Output "Mount letter required"
+function unmountDir ([string] $Letter) {
+  if (-Not $Letter) {
+    Write-Error "Mount letter required"
     return
   }
 
-  subst /d "${letter}:"
+  subst /d "${Letter}:"
 }
 
-function unshort ([string] $url) {
-  curl --head --location "$url" | Select-String "Location"
+function unshort ([string] $Url) {
+  curl --head --location "$Url" | Select-String "Location"
 }
 
 
@@ -1137,19 +1137,19 @@ function publicip {
   curl checkip.amazonaws.com
 }
 
-function qrcode ([String] $text) {
-  curl "qrenco.de/$text"
+function qrcode ([String] $Text) {
+  curl "qrenco.de/$Text"
 }
 
-function wifiList ([string] $wifiName = '') {
+function wifiList ([string] $WifiName = '') {
 
   function parseNetsh ([string] $line) {
     ($line -Split ':')[1].Trim()
   }
 
-  if ($wifiName) {
+  if ($WifiName) {
     $profilePass = "No Password"
-    $out_content = netsh wlan show profile "$wifiName" key=clear
+    $out_content = netsh wlan show profile "$WifiName" key=clear
 
     if (-Not $?) {
       Write-Output $out_content
@@ -1160,7 +1160,7 @@ function wifiList ([string] $wifiName = '') {
 
     $profilePass = parseNetsh "$out_content"
 
-    Write-Output "${wifiName}: $profilePass"
+    Write-Output "${WifiName}: $profilePass"
     return
   }
 
