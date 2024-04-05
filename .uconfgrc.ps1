@@ -58,14 +58,12 @@ if (Test-Command Set-PsFzfOption) {
   # if (Test-Path Alias:fcd) { Remove-Item Alias:fcd }
   # Set-Alias -Name fcd -Value Invoke-FuzzySetLocation
 
-  if ($IsWindows) {
-    Import-module "$user_conf_path\utils\fzf-git.psm1"
+  Import-module "$user_conf_path\utils\fzf-git.psm1"
 
-    # Remove alias fgs from PSFzf
-    if (Test-Path Alias:fgs) {
-      Remove-Item Alias:fgs
-      Set-Alias -Name fgst -Value Invoke-FuzzyGitStatus
-    }
+  # Remove alias fgs from PSFzf
+  if (Test-Path Alias:fgs) {
+    Remove-Item Alias:fgs
+    Set-Alias -Name fgst -Value Invoke-FuzzyGitStatus
   }
 }
 
