@@ -563,24 +563,24 @@ fnr () {
 }
 
 # Example quick_access
-# export quick_access=(\
-# "$HOME\n"\
-# # "/mnt/c\n"\
-# # "/mnt/c/Users/user\n"\
-# "$prj\n"\
-# "$user_conf_path\n"\
-# "$user_scripts_path\n"\
-# # "/tmp"\
+# export quick_access=(
+# "$HOME"
+# # "/mnt/c\n"
+# # "/mnt/c/Users/user"
+# "$prj"
+# "$user_conf_path"
+# "$user_scripts_path"
+# # "/tmp"
 # )
 
 # Example quick_edit
-# export quick_edit=(\
-# "$user_conf_path/.uconfgrc\n"\
-# "$user_conf_path/.uconfrc\n"\
-# "$user_conf_path/.ualiasgrc\n"\
-# "$user_conf_path/.ualiasrc\n"\
-# "$HOME/.SpaceVim.d/init.toml\n"\
-# "$HOME/.SpaceVim.d/autoload/config.vim"\
+# export quick_edit=(
+# "$user_conf_path/.uconfgrc"
+# "$user_conf_path/.uconfrc"
+# "$user_conf_path/.ualiasgrc"
+# "$user_conf_path/.ualiasrc"
+# "$HOME/.SpaceVim.d/init.toml"
+# "$HOME/.SpaceVim.d/autoload/config.vim"
 # )
 
 # List folders for quick navigation
@@ -695,9 +695,15 @@ trim () {
   ltrim | rtrim
 }
 
-# Open temp file on vim
-ntemp () {
-  "${PREFERED_EDITOR:-vim}" "/tmp/temp-$(uuidgen 2>/dev/null || date +%d-%m-%Y_%H-%M-%S).txt"
+# Open temp file on [n]vim
+ntmp () {
+  "${PREFERED_EDITOR:-vim}" "/tmp/tmp-$(uuidgen 2>/dev/null || date +%d-%m-%Y_%H-%M-%S).md"
+}
+
+ntxt () {
+  local filename="${@:-tmp-$(uuidgen 2>/dev/null || date +%d-%m-%Y_%H-%M-%S).md}"
+  mkdir -p "$prj/txt"
+  "${PREFERED_EDITOR:-vim}" "$prj/txt/$filename"
 }
 
 # extract files
