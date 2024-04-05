@@ -685,8 +685,16 @@ function l () {
 function pvim() { vim --clean @args }
 function pnvim() { nvim --clean @args }
 
-function ntemp {
-  nvim "$env:TEMP/temp-$(New-Guid).txt"
+function ntmp {
+  $temporary = if ($env:TEMP) { $env:$TEMP } else { "${HOME}${dirsep}tmp" }
+  $editor = if ($env:PREFERED_EDITOR) { $env:PREFERED_EDITOR } else { vim }
+  & $editor "$temporary/tmp-$(New-Guid).md"
+}
+
+function ntxt ([String] $filename = '') {
+  $filename = if ($filename) { $filename } else { "tmp-$(New-Guid).md" }
+  $editor = if ($env:PREFERED_EDITOR) { $env:PREFERED_EDITOR } else { vim }
+  & $editor $filename
 }
 
 # extract files
