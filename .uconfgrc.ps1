@@ -60,6 +60,12 @@ if (Test-Command Set-PsFzfOption) {
 
   if ($IsWindows) {
     Import-module "$user_conf_path\utils\fzf-git.psm1"
+
+    # Remove alias fgs from PSFzf
+    if (Test-Path Alias:fgs) {
+      Remove-Item Alias:fgs
+      Set-Alias -Name fgst -Value Invoke-FuzzyGitStatus
+    }
   }
 }
 
