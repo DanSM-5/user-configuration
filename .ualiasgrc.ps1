@@ -694,6 +694,7 @@ function ntmp {
 function ntxt ([String] $filename = '') {
   $filename = if ($filename) { $filename } else { "tmp-$(New-Guid).md" }
   $editor = if ($env:PREFERED_EDITOR) { $env:PREFERED_EDITOR } else { vim }
+  New-Item -Path "${prj}${dirsep}txt" -ItemType Directory -ea 0
   & $editor $filename
 }
 
