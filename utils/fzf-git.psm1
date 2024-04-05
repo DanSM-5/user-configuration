@@ -146,19 +146,13 @@ function fgt () {
 function fgh () {
   if ($script:is_in_git_repo) { return }
 
+  $content_file = New-Temporaryfile
   $preview_file = New-Temporaryfile
   @"
-    `$content_file = New-Temporaryfile;
-    `$args > `$content_file.FullName;
-    try {
-      `$hash = grep -o "[a-f0-9]\{7,\}" `$content_file.FullName;
+    `$args > $($content_file.FullName);
+      `$hash = grep -o -E "[a-f0-9]\{7,\}" $($content_file.FullName);
       git show --color=always `$hash |
         $script:__pager__ bat -p --color=always
-    } finally {
-      if (Test-Path -Path `$content_file.FullName -PathType Leaf -ErrorAction SilentlyContinue) {
-        Remove-Item -Force `$content_file.FullName
-      }
-    }
 "@ > $preview_file.FullName
   $preview_script = $preview_file.FullName.Replace('.tmp', '.ps1')
   Copy-Item $preview_file.FullName $preview_script
@@ -186,25 +180,22 @@ function fgh () {
     if (Test-Path -Path $preview_script -PathType Leaf -ErrorAction SilentlyContinue) {
       Remove-Item -Force $preview_script
     }
+    if (Test-Path -Path $content_file.FullName -PathType Leaf -ErrorAction SilentlyContinue) {
+      Remove-Item -Force $content_file.FullName
+    }
   }
 }
 
 function fgha () {
   if ($script:is_in_git_repo) { return }
 
+  $content_file = New-Temporaryfile
   $preview_file = New-Temporaryfile
   @"
-    `$content_file = New-Temporaryfile;
-    `$args > `$content_file.FullName;
-    try {
-      `$hash = grep -o "[a-f0-9]\{7,\}" `$content_file.FullName;
-      git show --color=always `$hash |
-        $script:__pager__ bat -p --color=always
-    } finally {
-      if (Test-Path -Path `$content_file.FullName -PathType Leaf -ErrorAction SilentlyContinue) {
-        Remove-Item -Force `$content_file.FullName
-      }
-    }
+    `$args > $($content_file.FullName);
+    `$hash = grep -o -E "[a-f0-9]\{7,\}" $($content_file.FullName);
+    git show --color=always `$hash |
+      $script:__pager__ bat -p --color=always
 "@ > $preview_file.FullName
   $preview_script = $preview_file.FullName.Replace('.tmp', '.ps1')
   Copy-Item $preview_file.FullName $preview_script
@@ -231,6 +222,9 @@ function fgha () {
     }
     if (Test-Path -Path $preview_script -PathType Leaf -ErrorAction SilentlyContinue) {
       Remove-Item -Force $preview_script
+    }
+    if (Test-Path -Path $content_file.FullName -PathType Leaf -ErrorAction SilentlyContinue) {
+      Remove-Item -Force $content_file.FullName
     }
   }
 }
