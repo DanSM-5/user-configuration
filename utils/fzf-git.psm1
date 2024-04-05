@@ -1,31 +1,14 @@
 # GIT heart FZF
 # -------------
-# A powershell support for fzf-git functions (using gitbash under the hood)
+# Powershell version (requires coreutils grep, sed, awk, cut, less)
+# because using pipes with cmdlets break string encoding for formatted output
 
 # Ref: https://gist.github.com/junegunn/8b572b8d4b5eddd8b85e5f4d40f17236
-
-# get git bash location
-# $__gitbash__ = $(where.exe bash | grep 'Git\\usr\\bin\\bash')
-$__gitenv__ = $(where.exe env | grep 'Git\\usr\\bin\\env')
-
-# Environment variables to setup bash from git for windows
-$GITBASH_ENVIRONMENT = @(
-  # Enable MINGW work as running gitbash directly
-  "MSYS='enable_pcon'"
-  "MSYSTEM='MINGW64'"
-  "enable_pcon='1'"
-  # Avoid POSIX to WINDOWS path conversions
-  # "MSYS_NO_PATHCONV='1'"
-  # "MSYS2_ARG_CONV_EXCL='*'"
-)
-
-$__append_path__ = "export PATH=`"/usr/bin:`$PATH`";"
 
 function is_in_git_repo () {
   if (git rev-parse HEAD 2> $null) { return $true } else { return $false }
 }
 
-$__pager_command__ = if (Test-Command delta) { ' | delta ' } else { '' }
 $__pager__ = if (Test-Command delta) { 'delta | ' } else { '' }
 
 function get_fzf_down_options() {
@@ -160,233 +143,206 @@ function fgt () {
   }
 }
 
-$fzf_down = ' SHELL="/bin/bash" fzf --height 50% --min-height 20 --layout=reverse --border --bind "ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort" '
-# $fzf_down = ' SHELL="/bin/bash" fzf --height 50% --min-height 20 --layout=reverse --border --bind \"ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down\" '
-
-      # --preview '(git diff --color=always -- {-1} | sed 1,4d | bat -p --color=always && bat --color=always {-1})' |
-# $fgf_command = @'
-#     git -c color.status=always status --short |
-# '@ + $script:fzf_down + @'
-#     -m --ansi --nth 2..,.. \
-#       --preview 'if \[ -f {-1} \]; then git diff --color=always -- {-1}
-# '@ + "$script:__pager_command__" + @'
-#     | sed 1,4d | bat -p --color=always; bat --color=always {-1}; else ls -AF --color=always {-1}; fi' |
-#     cut -c4- | sed 's/.* -> //'
-# '@
-
-# $fgb_command = @'
-#     git branch -a --color=always | grep -v '/HEAD\s' | sort |
-# '@ + $script:fzf_down + @'
-#       --ansi --multi --tac \
-#         --preview 'git log --oneline --graph --date=short --color=always --pretty=\"format:%C(auto)%cd %h%d %s\" $(sed s/^..// <<< {} | cut -d\" \" -f1)' |
-#       sed 's/^..//' | cut -d' ' -f1 |
-#       sed 's#^remotes##'
-# '@
-
-# $fgt_command = @'
-#   git tag --sort -version:refname |
-# '@ + $script:fzf_down + @'
-#   --multi --preview-window right:70% \
-#     --preview 'git show --color=always {}
-# '@ + "$script:__pager_command__" + @'
-#   | bat --color=always'
-# '@
-
-# NOTE: Investigate why grep command args where escaped
-# --preview 'grep -o \"[a-f0-9]\{7,\}\" <<< {} | xargs git show --color=always
-$fgh_command = @'
-  git log --date=short --format='%C(green)%C(bold)%cd %C(auto)%h%d %s (%an)' --graph --color=always |
-'@ + $script:fzf_down + @'
-  --ansi --no-sort --reverse --multi --bind 'ctrl-s:toggle-sort' \
-    --header 'Press CTRL-S to toggle sort' \
-    --preview 'grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show --color=always
-'@ + "$script:__pager_command__" + @'
-    | bat -p --color=always' |
-  grep -o '[a-f0-9]\{7,\}'
-'@
-
-# --preview 'grep -o \"[a-f0-9]\{7,\}\" <<< {} | xargs git show --color=always
-$fgha_command = @'
-  git log --all --date=short --format='%C(green)%C(bold)%cd %C(auto)%h%d %s (%an)' --graph --color=always |
-'@ + $script:fzf_down + @'
-  --ansi --no-sort --reverse --multi --bind 'ctrl-s:toggle-sort' \
-    --header 'Press CTRL-S to toggle sort' \
-    --preview 'grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show --color=always
-'@ + "$script:__pager_command__" + @'
-    | bat -p --color=always' |
-  grep -o '[a-f0-9]\{7,\}'
-'@
-
-$fgr_command = @'
-  git remote -v | awk '{print $1 "\t" $2}' | uniq |
-'@ + $script:fzf_down + @'
-  --tac \
-    --preview 'git log --oneline --graph --date=short --pretty=\"format:%C(auto)%cd %h%d %s\" {1}' |
-  cut -d$'\t' -f1
-'@
-
-$fgs_command = @'
-  git stash list |
-'@ + $script:fzf_down + @'
-  --reverse -d: --preview 'git show --color=always {1}
-'@ + "$script:__pager_command__" + @'
-  | bat -p --color=always' |
-  cut -d: -f1
-'@
-
-# function fgf_ () {
-#   if ($script:is_in_git_repo) { return }
-#   # & "$script:__gitbash__" --norc -ilc $script:fgf_command
-#   & "$script:__gitenv__" $script:GITBASH_ENVIRONMENT /usr/bin/bash -c "$script:__append_path__ $script:fgf_command"
-#   # & "$script:__gitbash__" -c @'
-#   #   git -c color.status=always status --short |
-#   #   fzf --height 50% --min-height 20 --border --bind ctrl-/:toggle-preview -m --ansi --nth 2..,.. \
-#   #     --preview '(git diff --color=always -- {-1} | sed 1,4d | bat -p --color=always; bat --color=always {-1})' |
-#   #   cut -c4- | sed 's/.* -> //'
-# # '@
-# }
-
-
-#function fgb_ () {
-#  if ($script:is_in_git_repo) { return }
-
-#  $output_file = New-TemporaryFile
-
-#  # Use Start-Process to execute the command
-#  $proc = Start-Process -FilePath "$script:__gitenv__" -ArgumentList @(
-#    $script:GITBASH_ENVIRONMENT
-#    "SHELL=/usr/bin/bash"
-#    "/usr/bin/bash"
-#    "-c"
-#    "`"source `$user_conf_path/utils/fzf-git.sh && PATH=\`"/mingw64/bin:/usr/local/bin:/usr/bin:/bin:`$PATH\`" fgb`""
-#  ) -NoNewWindow -PassThru -RedirectStandardOutput $output_file
-
-#  # Wait for process exit
-#  $proc.WaitForExit()
-
-#  # Clean process reference
-#  $proc = $null
-
-#  try {
-#    return Get-Content $output_file.FullName
-#  } finally {
-#    Remove-Item -Force $output_file.FullName
-#  }
-
-#  # requires -l flag for sub-shell process
-#  # & "$script:__gitbash__" --norc -ilc $script:fgb_command
-#  #
-#  # NOTE: Stopped working on parsing fgb_command
-#  # & "$script:__gitenv__" $script:GITBASH_ENVIRONMENT /usr/bin/bash -c "$script:__append_path__ $script:fgb_command"
-
-#  # require to escape the string twice in pwsh and once in gitbash
-#  # iex $("& `"$__gitbash__`" -ilc `"git branch -a --color=always | grep -v '/HEAD\s' | sort | fzf --height 50% --min-height 20 --border --bind ctrl-/:toggle-preview --ansi --multi --tac --preview 'git log --oneline --graph --date=short --color=always --pretty=\```"format:%C(auto)%cd %h%d %s\```" ```$(sed s/^..// <<< {} | cut -d\```" \```" -f1)' | sed 's/^..//' | cut -d' ' -f1 | sed 's#^remotes##'`"")
-
-#  # only one escape for pwsh and one for gitbash
-#  # & "$testbash" -ilc "git branch -a --color=always | grep -v '/HEAD\s' | sort | fzf --height 50% --min-height 20 --border --bind ctrl-/:toggle-preview --ansi --multi --tac --preview 'git log --oneline --graph --date=short --color=always --pretty=\`"format:%C(auto)%cd %h%d %s\`" `$(sed s/^..// <<< {} | cut -d\`" \`" -f1)' | sed 's/^..//' | cut -d' ' -f1 | sed 's#^remotes##'"
-
-#  # Final version
-#  # & "$script:__gitbash__" -ilc @'
-#  #   git branch -a --color=always | grep -v '/HEAD\s' | sort |
-#  #     fzf --height 50% --min-height 20 --border --bind ctrl-/:toggle-preview --ansi --multi --tac \
-#  #       --preview 'git log --oneline --graph --date=short --color=always --pretty=\"format:%C(auto)%cd %h%d %s\" $(sed s/^..// <<< {} | cut -d\" \" -f1)' |
-#  #     sed 's/^..//' | cut -d' ' -f1 |
-#  #     sed 's#^remotes##'
-## '@
-#}
-
-
-# function fgt_ () {
-#   if ($script:is_in_git_repo) { return }
-#   # & "$script:__gitbash__" --norc -ilc $script:fgt_command
-#   & "$script:__gitenv__" $script:GITBASH_ENVIRONMENT /usr/bin/bash -c "$script:__append_path__ $script:fgt_command"
-#   # & "$script:__gitbash__" -c @'
-#   # git tag --sort -version:refname |
-#   # fzf --height 50% --min-height 20 --border --bind ctrl-/:toggle-preview --multi --preview-window right:70% \
-#   #   --preview 'git show --color=always {} | bat --color=always'
-# # '@
-# }
-
 function fgh () {
   if ($script:is_in_git_repo) { return }
-  # & "$script:__gitbash__" --norc -ilc $script:fgh_command
-  & "$script:__gitenv__" $script:GITBASH_ENVIRONMENT /usr/bin/bash -c "$script:__append_path__ $script:fgh_command"
-  # & "$script:__gitbash__" -ilc @'
-  #   git log --date=short --format='%C(green)%C(bold)%cd %C(auto)%h%d %s (%an)' --graph --color=always |
-  #   fzf --height 50% --min-height 20 --border --bind ctrl-/:toggle-preview --ansi --no-sort --reverse --multi --bind 'ctrl-s:toggle-sort' \
-  #     --header 'Press CTRL-S to toggle sort' \
-  #     --preview 'grep -o \"[a-f0-9]\{7,\}\" <<< {} | xargs git show --color=always | bat -p --color=always' |
-  #   grep -o '[a-f0-9]\{7,\}'
-# '@
+
+  $preview_file = New-Temporaryfile
+  @"
+    `$content_file = New-Temporaryfile;
+    `$args > `$content_file.FullName;
+    try {
+      `$hash = grep -o "[a-f0-9]\{7,\}" `$content_file.FullName;
+      git show --color=always `$hash |
+        $script:__pager__ bat -p --color=always
+    } finally {
+      if (Test-Path -Path `$content_file.FullName -PathType Leaf -ErrorAction SilentlyContinue) {
+        Remove-Item -Force `$content_file.FullName
+      }
+    }
+"@ > $preview_file.FullName
+  $preview_script = $preview_file.FullName.Replace('.tmp', '.ps1')
+  Copy-Item $preview_file.FullName $preview_script
+
+  $preview = "pwsh -NoProfile -NoLogo -NonInteractive -File $preview_script '{}'"
+  $down_options = get_fzf_down_options
+  $cmd_options = @(
+    '--ansi',
+    '--no-sort',
+    '--reverse',
+    '--multi',
+    '--preview', $preview
+  )
+
+  try {
+    $selected = git log --date=short --format='%C(green)%C(bold)%cd %C(auto)%h%d %s (%an)' --graph --color=always |
+      fzf @down_options @cmd_options |
+      grep -o "[a-f0-9]\{7,\}"
+
+    return $selected
+  } finally {
+    if (Test-Path -Path $preview_file.FullName -PathType Leaf -ErrorAction SilentlyContinue) {
+      Remove-Item -Force $preview_file.FullName
+    }
+    if (Test-Path -Path $preview_script -PathType Leaf -ErrorAction SilentlyContinue) {
+      Remove-Item -Force $preview_script
+    }
+  }
 }
 
 function fgha () {
   if ($script:is_in_git_repo) { return }
-  # & "$script:__gitbash__" --norc -ilc $script:fgha_command
-  & "$script:__gitenv__" $script:GITBASH_ENVIRONMENT /usr/bin/bash -c "$script:__append_path__ $script:fgha_command"
-  # & "$script:__gitbash__" -ilc @'
-  #   git log --all --date=short --format='%C(green)%C(bold)%cd %C(auto)%h%d %s (%an)' --graph --color=always |
-  #   fzf --height 50% --min-height 20 --border --bind ctrl-/:toggle-preview --ansi --no-sort --reverse --multi --bind 'ctrl-s:toggle-sort' \
-  #     --header 'Press CTRL-S to toggle sort' \
-  #     --preview 'grep -o \"[a-f0-9]\{7,\}\" <<< {} | xargs git show --color=always | bat -p --color=always' |
-  #   grep -o '[a-f0-9]\{7,\}'
-# '@
+
+  $preview_file = New-Temporaryfile
+  @"
+    `$content_file = New-Temporaryfile;
+    `$args > `$content_file.FullName;
+    try {
+      `$hash = grep -o "[a-f0-9]\{7,\}" `$content_file.FullName;
+      git show --color=always `$hash |
+        $script:__pager__ bat -p --color=always
+    } finally {
+      if (Test-Path -Path `$content_file.FullName -PathType Leaf -ErrorAction SilentlyContinue) {
+        Remove-Item -Force `$content_file.FullName
+      }
+    }
+"@ > $preview_file.FullName
+  $preview_script = $preview_file.FullName.Replace('.tmp', '.ps1')
+  Copy-Item $preview_file.FullName $preview_script
+
+  $preview = "pwsh -NoProfile -NoLogo -NonInteractive -File $preview_script '{}'"
+  $down_options = get_fzf_down_options
+  $cmd_options = @(
+    '--ansi',
+    '--no-sort',
+    '--reverse',
+    '--multi',
+    '--preview', $preview
+  )
+
+  try {
+    $selected = git log --all --date=short --format='%C(green)%C(bold)%cd %C(auto)%h%d %s (%an)' --graph --color=always |
+      fzf @down_options @cmd_options |
+      grep -o "[a-f0-9]\{7,\}"
+
+    return $selected
+  } finally {
+    if (Test-Path -Path $preview_file.FullName -PathType Leaf -ErrorAction SilentlyContinue) {
+      Remove-Item -Force $preview_file.FullName
+    }
+    if (Test-Path -Path $preview_script -PathType Leaf -ErrorAction SilentlyContinue) {
+      Remove-Item -Force $preview_script
+    }
+  }
 }
 
 function fgr () {
   if ($script:is_in_git_repo) { return }
-  # & "$script:__gitbash__" --norc -ilc $script:fgr_command
-  & "$script:__gitenv__" $script:GITBASH_ENVIRONMENT /usr/bin/bash -c "$script:__append_path__ $script:fgr_command"
-  # & "$script:__gitbash__" -c @'
-  #   git remote -v | awk '{print $1 \"\t\" $2}' | uniq |
-  #   fzf --height 50% --min-height 20 --border --bind ctrl-/:toggle-preview --tac \
-  #     --preview 'git log --oneline --graph --date=short --pretty=\"format:%C(auto)%cd %h%d %s\" {1}' |
-  #   cut -d$'\t' -f1
-# '@
+
+  $preview = 'git log --color=always --oneline --graph --date=short --pretty="format:%C(auto)%cd %h%d %s" {1}'
+  $down_options = get_fzf_down_options
+  $cmd_options = @(
+    '--tac',
+    '--preview', $preview
+  )
+
+  # NOTE: not sure how to add tab delimiter for cut, so it is left without it
+  # because tab is the default delimiter
+  $selected = git remote -v | awk '{print $1 "\t" $2}' | uniq |
+    fzf @down_options @cmd_options |
+    cut -f1 # -d$'\t'
+
+  return $selected
 }
 
-function fgss () {
+function fgs () {
   if ($script:is_in_git_repo) { return }
-  # & "$script:__gitbash__" --norc -ilc $script:fgs_command
-  & "$script:__gitenv__" $script:GITBASH_ENVIRONMENT /usr/bin/bash -c "$script:__append_path__ $script:fgs_command"
-  # & "$script:__gitbash__" -c @'
-  #   git stash list |
-  #   fzf --height 50% --min-height 20 --border --bind ctrl-/:toggle-preview \
-  #     --reverse -d: --preview 'git show --color=always {1} | bat -p --color=always' |
-  #   cut -d: -f1
-# '@
-}
 
-# fshow - git commit browser (enter for show, ctrl-d for diff, ` toggles sort)
-$fshow_pager = if (Test-Command delta) { 'delta --paging=always' } else { 'less -R' }
-$fshow_command = @'
-  func () {
-  local out shas sha q k
-  while out=$(
-      git log --graph --color=always \
-          --format="%C(auto)%h%d %s %C(black)%C(bold)%cr" "$@" |
-      fzf --ansi --multi --no-sort --reverse --query="$q" \
-          --print-query --expect=ctrl-d --bind=ctrl-s:toggle-sort); do
-    q=$(head -1 <<< "$out")
-    k=$(head -2 <<< "$out" | tail -1)
-    shas=$(sed '1,2d;s/^[^a-z0-9]*//;/^$/d' <<< "$out" | awk '{print $1}')
-    [ -z "$shas" ] && continue
-    if [ "$k" = ctrl-d ]; then
-      git diff --color=always $shas |
-'@ + $script:fshow_pager + @'
-    ; else
-      for sha in $shas; do
-        git show --color=always $sha |
-'@ + $script:fshow_pager + @'
-    ; done
-    fi
-  done
-  }; func
-'@
+  $preview_file = New-Temporaryfile
+  @"
+    git show --color=always `$args |
+      $script:__pager__ bat -p --color=always
+"@ > $preview_file.FullName
+  # $preview_script = $preview_file.FullName.Replace('.tmp', '.ps1')
+  # Copy-Item $preview_file.FullName $preview_script
+
+  $preview = "pwsh -NoProfile -NoLogo -NonInteractive -Command Invoke-Command -ScriptBlock ([scriptblock]::Create((Get-Content '"+ $preview_file.FullName + "'))) -ArgumentList '{}'"
+  # $preview = "pwsh -NoProfile -NoLogo -NonInteractive -File $preview_script '{}'"
+  $down_options = get_fzf_down_options
+  $cmd_options = @(
+    '--reverse',
+    '--delimiter', ':',
+    '--preview', $preview
+  )
+
+  try {
+    $selected = git stash list |
+      fzf @down_options @cmd_options |
+      cut -d':' -f1
+
+    return $selected
+  } finally {
+    if (Test-Path -Path $preview_file.FullName -PathType Leaf -ErrorAction SilentlyContinue) {
+      Remove-Item -Force $preview_file.FullName
+    }
+    # if (Test-Path -Path $preview_script -PathType Leaf -ErrorAction SilentlyContinue) {
+    #   Remove-Item -Force $preview_script
+    # }
+  }
+}
 
 function fshow () {
   if ($script:is_in_git_repo) { return }
-  & "$script:__gitenv__" $script:GITBASH_ENVIRONMENT /usr/bin/bash -c "$script:__append_path__ $script:fshow_command"
+
+  $pager = if (Get-Command delta -ErrorAction SilentlyContinue) {
+    'delta --paging=always'
+  } else {
+    'less -R'
+  }
+  $content_file = New-Temporaryfile
+  $out = ''
+  $shas = ''
+  $q = ''
+  $k = ''
+
+  $down_options = get_fzf_down_options
+  $cmd_options = @(
+    '--query=',
+    '--ansi',
+    '--multi',
+    '--no-sort',
+    '--reverse',
+    '--print-query',
+    '--expect=ctrl-d'
+  )
+
+  try {
+    while ($true) {
+      $out = git log --graph --color=always `
+        --format="%C(auto)%h%d %s %C(black)%C(bold)%cr" @args |
+          fzf @down_options @cmd_options
+
+      if (-not $out) { break; }
+
+      $out > $content_file.FullName
+      $q = head -1 $content_file.FullName
+      $k = head -2 $content_file.FullName | tail -1
+      $shas = sed '1,2d;s/^[^a-z0-9]*//;/^$/d' $content_file.FullName | awk '{print $1}'
+
+      if (-not $shas) { continue; }
+      if ($q) { $cmd_options[0] = "--query=$q" }
+      if ($k -eq 'ctrl-d') {
+        pwsh -NoLogo -NonInteractive -NoProfile -Command "git show --color=always $shas | $pager"
+      } else {
+        foreach ($sha in $shas) {
+          pwsh -NoLogo -NonInteractive -NoProfile -Command "git show --color=always $sha | $pager"
+        }
+      }
+    }
+  } catch {
+    if (Test-Path -Path $content_file.FullName -PathType Leaf -ErrorAction SilentlyContinue) {
+      Remove-Item -Force $content_file.FullName
+    }
+  }
 }
 
 # Export-ModuleMember -Function fgb
