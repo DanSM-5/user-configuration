@@ -29,6 +29,7 @@ function get_fzf_down_options() {
 function fgf () {
   if ($script:is_in_git_repo) { return }
 
+  $query = "$args"
   $preview_file = New-TemporaryFile
   @"
     if (Test-Path -Path `$args -PathType Leaf -ErrorAction SilentlyContinue) {
@@ -53,6 +54,7 @@ function fgf () {
   # '--preview', 'pwsh -NoLogo -NonInteractive -NoProfile '
   $down_options = get_fzf_down_options
   $cmd_options = @(
+    "--query=$query",
     '--multi',
     '--ansi',
     '--nth', '2..,..',
@@ -75,6 +77,7 @@ function fgf () {
 function fgb () {
   if ($script:is_in_git_repo) { return }
 
+  $query = "$args"
   $preview_file = New-TemporaryFile
   @"
     `$content_file = New-TemporaryFile;
@@ -93,6 +96,7 @@ function fgb () {
   # '--preview', 'pwsh -NoLogo -NonInteractive -NoProfile '
   $down_options = get_fzf_down_options
   $cmd_options = @(
+    "--query=$query",
     '--multi',
     '--ansi',
     '--tac'
@@ -117,6 +121,7 @@ function fgb () {
 function fgt () {
   if ($script:is_in_git_repo) { return }
 
+  $query = "$args"
   $preview_file = New-TemporaryFile
   @"
     git show --color=always `$args |
@@ -126,6 +131,7 @@ function fgt () {
   $preview = "pwsh -NoProfile -NoLogo -NonInteractive -Command Invoke-Command -ScriptBlock ([scriptblock]::Create((Get-Content '"+ $preview_file.FullName + "'))) -ArgumentList '{}'"
   $down_options = get_fzf_down_options
   $cmd_options = @(
+    "--query=$query",
     '--multi',
     '--preview-window', 'right:70%',
     '--preview', $preview
@@ -146,6 +152,7 @@ function fgt () {
 function fgh () {
   if ($script:is_in_git_repo) { return }
 
+  $query = "$args"
   $content_file = New-Temporaryfile
   $preview_file = New-Temporaryfile
   @"
@@ -160,6 +167,7 @@ function fgh () {
   $preview = "pwsh -NoProfile -NoLogo -NonInteractive -File $preview_script '{}'"
   $down_options = get_fzf_down_options
   $cmd_options = @(
+    "--query=$query",
     '--ansi',
     '--no-sort',
     '--reverse',
@@ -189,6 +197,7 @@ function fgh () {
 function fgha () {
   if ($script:is_in_git_repo) { return }
 
+  $query = "$args"
   $content_file = New-Temporaryfile
   $preview_file = New-Temporaryfile
   @"
@@ -203,6 +212,7 @@ function fgha () {
   $preview = "pwsh -NoProfile -NoLogo -NonInteractive -File $preview_script '{}'"
   $down_options = get_fzf_down_options
   $cmd_options = @(
+    "--query=$query",
     '--ansi',
     '--no-sort',
     '--reverse',
@@ -235,6 +245,7 @@ function fgr () {
   $preview = 'git log --color=always --oneline --graph --date=short --pretty="format:%C(auto)%cd %h%d %s" {1}'
   $down_options = get_fzf_down_options
   $cmd_options = @(
+    "--query=$query",
     '--tac',
     '--preview', $preview
   )
@@ -251,6 +262,7 @@ function fgr () {
 function fgs () {
   if ($script:is_in_git_repo) { return }
 
+  $query = "$args"
   $preview_file = New-Temporaryfile
   @"
     git show --color=always `$args |
@@ -263,6 +275,7 @@ function fgs () {
   # $preview = "pwsh -NoProfile -NoLogo -NonInteractive -File $preview_script '{}'"
   $down_options = get_fzf_down_options
   $cmd_options = @(
+    "--query=$query",
     '--reverse',
     '--delimiter', ':',
     '--preview', $preview
