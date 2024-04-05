@@ -259,7 +259,7 @@ function fgs () {
   # $preview_script = $preview_file.FullName.Replace('.tmp', '.ps1')
   # Copy-Item $preview_file.FullName $preview_script
 
-  $preview = "pwsh -NoProfile -NoLogo -NonInteractive -Command Invoke-Command -ScriptBlock ([scriptblock]::Create((Get-Content '"+ $preview_file.FullName + "'))) -ArgumentList '{}'"
+  $preview = "pwsh -NoProfile -NoLogo -NonInteractive -Command Invoke-Command -ScriptBlock ([scriptblock]::Create((Get-Content '"+ $preview_file.FullName + "'))) -ArgumentList '{1}'"
   # $preview = "pwsh -NoProfile -NoLogo -NonInteractive -File $preview_script '{}'"
   $down_options = get_fzf_down_options
   $cmd_options = @(
