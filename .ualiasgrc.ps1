@@ -686,7 +686,7 @@ function pvim() { vim --clean @args }
 function pnvim() { nvim --clean @args }
 
 function ntmp {
-  $temporary = if ($env:TEMP) { $env:$TEMP } else { "${HOME}${dirsep}tmp" }
+  $temporary = if ($env:TEMP) { $env:TEMP } else { "${HOME}${dirsep}tmp" }
   $editor = if ($env:PREFERED_EDITOR) { $env:PREFERED_EDITOR } else { vim }
   & $editor "$temporary/tmp-$(New-Guid).md"
 }
