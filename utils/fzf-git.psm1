@@ -290,12 +290,6 @@ function fgr () {
 function fgs () {
   if ($script:is_in_git_repo) { return }
 
-  $placeholder = if ($IsWindows) {
-    "'{1}'"
-  } else {
-    '{1}'
-  }
-
   $query = "$args"
   $preview_file = New-Temporaryfile
   @"
@@ -305,7 +299,7 @@ function fgs () {
   $preview_script = $preview_file.FullName.Replace('.tmp', '.ps1')
   Copy-Item $preview_file.FullName $preview_script
 
-  $preview = "pwsh -NoProfile -NoLogo -NonInteractive -File `"$preview_script`" $placeholder"
+  $preview = "pwsh -NoProfile -NoLogo -NonInteractive -File `"$preview_script`" {1}"
   $down_options = get_fzf_down_options
   $cmd_options = @(
     "--query=$query",
