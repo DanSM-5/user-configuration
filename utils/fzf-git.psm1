@@ -81,12 +81,6 @@ function fgf () {
 function fgb () {
   if ($script:is_in_git_repo) { return }
 
-  $placeholder = if ($IsWindows) {
-    "'{}'"
-  } else {
-    '{}'
-  }
-
   $query = "$args"
   $preview_file = New-TemporaryFile
   @"
@@ -104,7 +98,7 @@ function fgb () {
   $preview_script = $preview_file.FullName.Replace('.tmp', '.ps1')
   Copy-Item $preview_file.FullName $preview_script
 
-  $preview = "pwsh -NoProfile -NoLogo -NonInteractive -File '$preview_script' $placeholder"
+  $preview = "pwsh -NoProfile -NoLogo -NonInteractive -File `"$preview_script`" {}"
   $down_options = get_fzf_down_options
   $cmd_options = @(
     "--query=$query",
@@ -143,7 +137,7 @@ function fgt () {
 "@ > $preview_file.FullName
 
   $preview = if ($IsWindows) {
-    "pwsh -NoProfile -NoLogo -NonInteractive -Command Invoke-Command -ScriptBlock ([scriptblock]::Create((Get-Content `""+ $preview_file.FullName + "`"))) -ArgumentList '{}'"
+    "pwsh -NoProfile -NoLogo -NonInteractive -Command Invoke-Command -ScriptBlock ([scriptblock]::Create((Get-Content `""+ $preview_file.FullName + "`"))) -ArgumentList {}"
   } else {
     "pwsh -NoProfile -NoLogo -NonInteractive -Command 'Invoke-Command -ScriptBlock ([scriptblock]::Create((Get-Content `""+ $preview_file.FullName + "`"))) -ArgumentList {}'"
   }
@@ -189,7 +183,7 @@ function fgh () {
   $preview_script = $preview_file.FullName.Replace('.tmp', '.ps1')
   Copy-Item $preview_file.FullName $preview_script
 
-  $preview = "pwsh -NoProfile -NoLogo -NonInteractive -File '$preview_script' $placeholder"
+  $preview = "pwsh -NoProfile -NoLogo -NonInteractive -File `"$preview_script`" $placeholder"
   $down_options = get_fzf_down_options
   $cmd_options = @(
     "--query=$query",
@@ -241,7 +235,7 @@ function fgha () {
   $preview_script = $preview_file.FullName.Replace('.tmp', '.ps1')
   Copy-Item $preview_file.FullName $preview_script
 
-  $preview = "pwsh -NoProfile -NoLogo -NonInteractive -File '$preview_script' $placeholder"
+  $preview = "pwsh -NoProfile -NoLogo -NonInteractive -File `"$preview_script`" $placeholder"
   $down_options = get_fzf_down_options
   $cmd_options = @(
     "--query=$query",
@@ -309,7 +303,7 @@ function fgs () {
   $preview_script = $preview_file.FullName.Replace('.tmp', '.ps1')
   Copy-Item $preview_file.FullName $preview_script
 
-  $preview = "pwsh -NoProfile -NoLogo -NonInteractive -File '$preview_script' $placeholder"
+  $preview = "pwsh -NoProfile -NoLogo -NonInteractive -File `"$preview_script`" $placeholder"
   $down_options = get_fzf_down_options
   $cmd_options = @(
     "--query=$query",
