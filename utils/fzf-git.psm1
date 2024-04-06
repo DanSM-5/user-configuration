@@ -50,8 +50,12 @@ function fgf () {
   # $script:__pager__ Select-Object -Skip 4 |
   # because powershell cmdlets break encoding
 
-  $preview = "pwsh -NoProfile -NoLogo -NonInteractive -Command Invoke-Command -ScriptBlock ([scriptblock]::Create((Get-Content '"+ $preview_file.FullName + "'))) -ArgumentList '{-1}'"
-  # '--preview', 'pwsh -NoLogo -NonInteractive -NoProfile '
+  $preview = if ($IsWindows) {
+    "pwsh -NoProfile -NoLogo -NonInteractive -Command Invoke-Command -ScriptBlock ([scriptblock]::Create((Get-Content `""+ $preview_file.FullName + "`"))) -ArgumentList '{-1}'"
+  } else {
+    "pwsh -NoProfile -NoLogo -NonInteractive -Command 'Invoke-Command -ScriptBlock ([scriptblock]::Create((Get-Content `""+ $preview_file.FullName + "`"))) -ArgumentList {-1}'"
+  }
+
   $down_options = get_fzf_down_options
   $cmd_options = @(
     "--query=$query",
@@ -77,6 +81,12 @@ function fgf () {
 function fgb () {
   if ($script:is_in_git_repo) { return }
 
+  $placeholder = if ($IsWindows) {
+    "'{}'"
+  } else {
+    '{}'
+  }
+
   $query = "$args"
   $preview_file = New-TemporaryFile
   @"
@@ -91,9 +101,10 @@ function fgb () {
       }
     }
 "@ > $preview_file.FullName
+  $preview_script = $preview_file.FullName.Replace('.tmp', '.ps1')
+  Copy-Item $preview_file.FullName $preview_script
 
-  $preview = "pwsh -NoProfile -NoLogo -NonInteractive -Command Invoke-Command -ScriptBlock ([scriptblock]::Create((Get-Content '"+ $preview_file.FullName + "'))) -ArgumentList '{}'"
-  # '--preview', 'pwsh -NoLogo -NonInteractive -NoProfile '
+  $preview = "pwsh -NoProfile -NoLogo -NonInteractive -File '$preview_script' $placeholder"
   $down_options = get_fzf_down_options
   $cmd_options = @(
     "--query=$query",
@@ -115,6 +126,9 @@ function fgb () {
     if (Test-Path -Path $preview_file.FullName -PathType Leaf -ErrorAction SilentlyContinue) {
       Remove-Item -Force $preview_file.FullName
     }
+    if (Test-Path -Path $preview_script -PathType Leaf -ErrorAction SilentlyContinue) {
+      Remove-Item -Force $preview_script
+    }
   }
 }
 
@@ -128,7 +142,11 @@ function fgt () {
     $script:__pager__ bat -p --color=always
 "@ > $preview_file.FullName
 
-  $preview = "pwsh -NoProfile -NoLogo -NonInteractive -Command Invoke-Command -ScriptBlock ([scriptblock]::Create((Get-Content '"+ $preview_file.FullName + "'))) -ArgumentList '{}'"
+  $preview = if ($IsWindows) {
+    "pwsh -NoProfile -NoLogo -NonInteractive -Command Invoke-Command -ScriptBlock ([scriptblock]::Create((Get-Content `""+ $preview_file.FullName + "`"))) -ArgumentList '{}'"
+  } else {
+    "pwsh -NoProfile -NoLogo -NonInteractive -Command 'Invoke-Command -ScriptBlock ([scriptblock]::Create((Get-Content `""+ $preview_file.FullName + "`"))) -ArgumentList {}'"
+  }
   $down_options = get_fzf_down_options
   $cmd_options = @(
     "--query=$query",
@@ -152,19 +170,26 @@ function fgt () {
 function fgh () {
   if ($script:is_in_git_repo) { return }
 
+  $placeholder = if ($IsWindows) {
+    "'{}'"
+  } else {
+    '{}'
+  }
+
   $query = "$args"
   $content_file = New-Temporaryfile
   $preview_file = New-Temporaryfile
   @"
     `$args > $($content_file.FullName);
-      `$hash = grep -o -E "[a-f0-9]\{7,\}" $($content_file.FullName);
+    `$`(Get-Content $($content_file.FullName)`) -match "[a-f0-9]{7,}" > `$null;
+    `$hash = `$matches[0];
       git show --color=always `$hash |
         $script:__pager__ bat -p --color=always
 "@ > $preview_file.FullName
   $preview_script = $preview_file.FullName.Replace('.tmp', '.ps1')
   Copy-Item $preview_file.FullName $preview_script
 
-  $preview = "pwsh -NoProfile -NoLogo -NonInteractive -File $preview_script '{}'"
+  $preview = "pwsh -NoProfile -NoLogo -NonInteractive -File '$preview_script' $placeholder"
   $down_options = get_fzf_down_options
   $cmd_options = @(
     "--query=$query",
@@ -197,19 +222,26 @@ function fgh () {
 function fgha () {
   if ($script:is_in_git_repo) { return }
 
+  $placeholder = if ($IsWindows) {
+    "'{}'"
+  } else {
+    '{}'
+  }
+
   $query = "$args"
   $content_file = New-Temporaryfile
   $preview_file = New-Temporaryfile
   @"
     `$args > $($content_file.FullName);
-    `$hash = grep -o -E "[a-f0-9]\{7,\}" $($content_file.FullName);
+    `$`(Get-Content $($content_file.FullName)`) -match "[a-f0-9]{7,}" > `$null;
+    `$hash = `$matches[0];
     git show --color=always `$hash |
       $script:__pager__ bat -p --color=always
 "@ > $preview_file.FullName
   $preview_script = $preview_file.FullName.Replace('.tmp', '.ps1')
   Copy-Item $preview_file.FullName $preview_script
 
-  $preview = "pwsh -NoProfile -NoLogo -NonInteractive -File $preview_script '{}'"
+  $preview = "pwsh -NoProfile -NoLogo -NonInteractive -File '$preview_script' $placeholder"
   $down_options = get_fzf_down_options
   $cmd_options = @(
     "--query=$query",
@@ -262,17 +294,22 @@ function fgr () {
 function fgs () {
   if ($script:is_in_git_repo) { return }
 
+  $placeholder = if ($IsWindows) {
+    "'{1}'"
+  } else {
+    '{1}'
+  }
+
   $query = "$args"
   $preview_file = New-Temporaryfile
   @"
     git show --color=always `$args |
       $script:__pager__ bat -p --color=always
 "@ > $preview_file.FullName
-  # $preview_script = $preview_file.FullName.Replace('.tmp', '.ps1')
-  # Copy-Item $preview_file.FullName $preview_script
+  $preview_script = $preview_file.FullName.Replace('.tmp', '.ps1')
+  Copy-Item $preview_file.FullName $preview_script
 
-  $preview = "pwsh -NoProfile -NoLogo -NonInteractive -Command Invoke-Command -ScriptBlock ([scriptblock]::Create((Get-Content '"+ $preview_file.FullName + "'))) -ArgumentList '{1}'"
-  # $preview = "pwsh -NoProfile -NoLogo -NonInteractive -File $preview_script '{}'"
+  $preview = "pwsh -NoProfile -NoLogo -NonInteractive -File '$preview_script' $placeholder"
   $down_options = get_fzf_down_options
   $cmd_options = @(
     "--query=$query",
@@ -291,9 +328,9 @@ function fgs () {
     if (Test-Path -Path $preview_file.FullName -PathType Leaf -ErrorAction SilentlyContinue) {
       Remove-Item -Force $preview_file.FullName
     }
-    # if (Test-Path -Path $preview_script -PathType Leaf -ErrorAction SilentlyContinue) {
-    #   Remove-Item -Force $preview_script
-    # }
+    if (Test-Path -Path $preview_script -PathType Leaf -ErrorAction SilentlyContinue) {
+      Remove-Item -Force $preview_script
+    }
   }
 }
 
