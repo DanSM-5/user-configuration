@@ -129,7 +129,7 @@ function gstash { git stash $args }
 function gsl { git stash list $args }
 function gsa { git stash apply $args }
 function gspop { git stash pop $args }
-function gsp { git stash push $args }
+function gsp { git stash push -m $args }
 function gss { git stash show $args }
 function gsd { git stash drop $args }
 function gprev { git diff HEAD^..HEAD }
