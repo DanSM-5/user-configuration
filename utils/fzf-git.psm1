@@ -175,10 +175,11 @@ function fgh () {
   $preview_file = New-Temporaryfile
   @"
     `$args > $($content_file.FullName);
-    `$`(Get-Content $($content_file.FullName)`) -match "[a-f0-9]{7,}" > `$null;
-    `$hash = `$matches[0];
-      git show --color=always `$hash |
-        $script:__pager__ bat -p --color=always
+    `$hash = if (`$`(Get-Content $($content_file.FullName)`) -match "[a-f0-9]{7,}") {
+      `$matches[0]
+    } else { @() }
+    git show --color=always `$hash |
+      $script:__pager__ bat -p --color=always
 "@ > $preview_file.FullName
   $preview_script = $preview_file.FullName.Replace('.tmp', '.ps1')
   Copy-Item $preview_file.FullName $preview_script
@@ -227,8 +228,9 @@ function fgha () {
   $preview_file = New-Temporaryfile
   @"
     `$args > $($content_file.FullName);
-    `$`(Get-Content $($content_file.FullName)`) -match "[a-f0-9]{7,}" > `$null;
-    `$hash = `$matches[0];
+    `$hash = if (`$`(Get-Content $($content_file.FullName)`) -match "[a-f0-9]{7,}") {
+      `$matches[0]
+    } else { @() }
     git show --color=always `$hash |
       $script:__pager__ bat -p --color=always
 "@ > $preview_file.FullName
