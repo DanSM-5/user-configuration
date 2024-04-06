@@ -143,32 +143,36 @@ function gprevr ([int] $first = 1, [int] $second = 0) {
 }
 
 function fadd () {
-  fgf | % { git add $_ }
+  fgf @args | % { git add $_ }
 }
 
 function fpad () {
   $files = @()
-  fgf | % { $files += "$_" }
+  fgf @args | % { $files += "$_" }
 
   if ($files) {
-    git add -p $files
+    git add -p @files
   }
 }
 
 function fco () {
-  fgb | % { git checkout "$($_ -replace 'origin/', '')" }
+  fgb @args | % { git checkout "$($_ -replace 'origin/', '')" }
 }
 
 function fck () {
-  fgb | % { git checkout "$($_ -replace 'origin/', '')" }
+  fgb @args | % { git checkout "$($_ -replace 'origin/', '')" }
 }
 
 function fgrm () {
-  fgf | % { git checkout -- "$_" }
+  fgf @args | % { git checkout -- "$_" }
 }
 
 function fsa () {
-  fgss | % { git stash apply $_ }
+  fgs @args | % { git stash apply $_ }
+}
+
+function fmerge () {
+  fgb @args | % { git merge "$_" }
 }
 
 # Example
