@@ -590,10 +590,8 @@ qnv () {
     return
   fi
   local selection=$(printf "%s\n" "${quick_access[@]}" |
-    fzf-defaults --preview "
-      echo \"Path: \$(realpath {} 2> /dev/null || echo 'Unable to display')\"
-      echo ''
-      ls --color=always -AFL {} 2> /dev/null || echo 'No preview available'")
+    fzf-defaults --preview "$fzf_preview_normal")
+
   if [ -n "$selection" ]; then
     cd $selection
   fi
