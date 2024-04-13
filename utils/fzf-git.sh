@@ -32,7 +32,10 @@ fgf () {
         sed 1,4d |
         bat -p --color=always
         bat --color=always {-1}
-        else ls -AF --color=always {-1}
+      else
+        if command -v erd &>/dev/null; then
+          erd --layout inverted --color force --level 3 -I --suppress-size -- {-1}
+        else ls -AF --color=always {-1}; fi
       fi' |
   cut -c4- | sed 's/.* -> //'
   # --preview '(git diff --color=always -- {-1} | sed 1,4d | bat -p --color=always; cat {-1})' |
