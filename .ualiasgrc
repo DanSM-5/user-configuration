@@ -1117,6 +1117,7 @@ if [ "$IS_WSL" = true ]; then
   alias psh="powershell.exe"
   alias cps="pwsh.exe -nolo -nopro -nonin -c"
   alias pwsh="pwsh.exe"
+  alias start-docker="sudo service docker start"
 
   export clipboard_paste="pbpaste.exe"
   export clipboard_copy="pbcopy.exe"
