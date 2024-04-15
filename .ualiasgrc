@@ -1137,7 +1137,7 @@ if [ "$IS_WSL" = true ]; then
   }
 
   file_explorer_open () {
-    pwsh.exe -nolo -nonin -nopro -c "Start-Process \"$@\""
+    pwsh.exe -nolo -nonin -nopro -c "Start-Process $@"
   }
 
   start () {
@@ -1439,7 +1439,7 @@ else
 
       location_path="$(printf "%q" "$location_path" | sed 's/\\ / /g')"
 
-      pwsh.exe -nolo -nonin -nopro -c Start-Process \""$location_path"\"
+      pwsh.exe -nolo -nonin -nopro -c "Start-Process $location_path"
     }
 
     getSystemClipboardPath () {
