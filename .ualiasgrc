@@ -1114,10 +1114,6 @@ if [ "$IS_WINDOWS" = true ]; then
 fi
 
 if [ "$IS_WSL" = true ]; then
-  start () {
-    file_explorer_open "$@"
-  }
-
   alias psh="powershell.exe"
   alias cps="pwsh.exe -nolo -nopro -nonin -c"
   alias pwsh="pwsh.exe"
@@ -1140,12 +1136,15 @@ if [ "$IS_WSL" = true ]; then
   }
 
   file_explorer_open () {
-    pwsh.exe -nolo -nonin -nopro -c Start-Process \""$@"\"
+    pwsh.exe -nolo -nonin -nopro -c "Start-Process \"$@\""
   }
 
   start () {
-    local trimmed_path="$(echo "$@" | trim)"
-    local filepath="$(getHostPath "$trimmed_path")"
+    local filepath="$(echo "$@" | trim)"
+    if [ -f "$filepath" ] || [ -d "$filepath" ]; then
+      # Convert path to host version
+      filepath="$(getHostPath "$filepath")"
+    fi
 
     file_explorer_open "$filepath"
   }
