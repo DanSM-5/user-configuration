@@ -518,6 +518,17 @@ function fcmd () {
   }
 }
 
+function fnvm () {
+  $nvm_version = nvm list | ? { $_ } | fzf | % {
+   $trimmed = $_.Trim()
+   return if ($trimmed -match '^[*-]') { ($trimmed.Split())[1].Trim() } else { $trimmed }
+  }
+
+  if ($nvm_version) {
+    nvm use $nvm_version
+  }
+}
+
 function getAppPid ([String] $port, [Switch] $help = $false) {
   if ($help) {
     Write-Output "

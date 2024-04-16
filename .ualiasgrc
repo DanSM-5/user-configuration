@@ -1601,6 +1601,14 @@ fcmd () {
       --bind 'ctrl-y:execute-silent(echo -n {} | $clipboard_copy)+abort' || return 0
 }
 
+fnvm () {
+  local nvm_version=$(nvm list | fzf --ansi | awk '{ if ($1 == "->") print $2; else print $1; }')
+
+  if [ -n "$nvm_version" ]; then
+    nvm use "$nvm_version"
+  fi
+}
+
 # TODO: Using `fd --hidden --follow -td -d 1`
 # has issues with file names with spaces.
 # Investigate if fixin the issue is faster
