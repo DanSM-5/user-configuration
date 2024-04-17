@@ -228,11 +228,7 @@ function qed ([string] $editor = 'nvim') {
 }
 
 function rfv {
-  if ($args) {
-    Invoke-PsFzfRipgrep "$args"
-  } else {
-    Invoke-PsFzfRipgrep
-  }
+  & "${user_conf_path}${dirsep}utils${dirsep}rgfzf.ps1" @args
 }
 
 function fcd () {

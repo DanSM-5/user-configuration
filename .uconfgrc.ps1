@@ -47,11 +47,11 @@ if (Test-Command Set-PsFzfOption) {
     -EnableAliasFuzzyKillProcess `
     -EnableAliasFuzzySetEverything `
     -EnableAliasFuzzyZLocation `
-    -EnableAliasFuzzyGitStatus `
     -EnableAliasFuzzyScoop `
     -TabExpansion `
     -EnableFd
 
+    # -EnableAliasFuzzyGitStatus `
     # -EnableAliasFuzzySetLocation `
   Set-PSReadLineKeyHandler -Key Tab -ScriptBlock { Invoke-FzfTabCompletion }
 
@@ -59,6 +59,7 @@ if (Test-Command Set-PsFzfOption) {
   # Set-Alias -Name fcd -Value Invoke-FuzzySetLocation
 
   Import-module "$user_conf_path\utils\fzf-git.psm1"
+  # Import-module "$user_conf_path\utils\rgfzf.psm1"
 
   # Remove alias fgs from PSFzf
   if (Test-Path Alias:fgs) {
