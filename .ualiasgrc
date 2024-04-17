@@ -199,6 +199,8 @@ gprevr () {
 
 # fshow - git commit browser (enter for show, ctrl-d for diff, ` toggles sort)
 fshow() {
+  git rev-parse HEAD > /dev/null 2>&1 || return
+
   local def_pager="less -R"
   local pager=""
   if [ -n "$__git_pager__" ]; then

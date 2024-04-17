@@ -27,7 +27,7 @@ function get_fzf_down_options() {
 }
 
 function fgf () {
-  if ($script:is_in_git_repo) { return }
+  if (-not (is_in_git_repo)) { return }
 
   $query = "$args"
   $preview_file = New-TemporaryFile
@@ -79,7 +79,7 @@ function fgf () {
 }
 
 function fgb () {
-  if ($script:is_in_git_repo) { return }
+  if (-not (is_in_git_repo)) { return }
 
   $query = "$args"
   $preview_file = New-TemporaryFile
@@ -127,7 +127,7 @@ function fgb () {
 }
 
 function fgt () {
-  if ($script:is_in_git_repo) { return }
+  if (-not (is_in_git_repo)) { return }
 
   $query = "$args"
   $preview_file = New-TemporaryFile
@@ -162,7 +162,7 @@ function fgt () {
 }
 
 function fgh () {
-  if ($script:is_in_git_repo) { return }
+  if (-not (is_in_git_repo)) { return }
 
   $placeholder = if ($IsWindows) {
     "'{}'"
@@ -215,7 +215,7 @@ function fgh () {
 }
 
 function fgha () {
-  if ($script:is_in_git_repo) { return }
+  if (-not (is_in_git_repo)) { return }
 
   $placeholder = if ($IsWindows) {
     "'{}'"
@@ -268,7 +268,7 @@ function fgha () {
 }
 
 function fgr () {
-  if ($script:is_in_git_repo) { return }
+  if (-not (is_in_git_repo)) { return }
 
   $preview = 'git log --color=always --oneline --graph --date=short --pretty="format:%C(auto)%cd %h%d %s" {1}'
   $down_options = get_fzf_down_options
@@ -288,7 +288,7 @@ function fgr () {
 }
 
 function fgs () {
-  if ($script:is_in_git_repo) { return }
+  if (-not (is_in_git_repo)) { return }
 
   $query = "$args"
   $preview_file = New-Temporaryfile
@@ -325,7 +325,7 @@ function fgs () {
 }
 
 function fshow () {
-  if ($script:is_in_git_repo) { return }
+  if (-not (is_in_git_repo)) { return }
 
   $pager = if (Get-Command delta -ErrorAction SilentlyContinue) {
     'delta --paging=always'
