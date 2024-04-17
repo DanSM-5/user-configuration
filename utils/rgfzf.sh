@@ -11,7 +11,7 @@
 editor="${PREFERED_EDITOR:-nvim}"
 
 # Switch between Ripgrep launcher mode (CTRL-R) and fzf filtering mode (CTRL-F)
-RG_PREFIX="rg --column --line-number --no-heading --color=always --smart-case --no-ignore --glob '!{.git,node_modules}' --hidden "
+RG_PREFIX="${RFV_PREFIX_COMMAND:-rg --column --line-number --no-heading --color=always --smart-case --no-ignore --glob '!{.git,node_modules}' --hidden} "
 INITIAL_QUERY="${*:-}"
 IFS=: read -ra selected < <(
   FZF_DEFAULT_COMMAND="$RG_PREFIX $(printf %q "$INITIAL_QUERY")" \
