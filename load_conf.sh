@@ -72,6 +72,12 @@ if [ "$VSCODE_NVIM" = true ]; then
   return 0
 fi
 
+# Handle Find it faster vscode extension
+if [ "$FIND_IT_FASTER_ACTIVE" = 1 ]; then
+  printf "No need to source from here"
+  return 0
+fi
+
 # Source User Scripts
 test -f "$HOME/.usr_conf/.uconfgrc" && \. "$HOME/.usr_conf/.uconfgrc"
 test -f "$HOME/.usr_conf/.ualiasgrc" && \. "$HOME/.usr_conf/.ualiasgrc"

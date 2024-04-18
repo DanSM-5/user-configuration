@@ -29,6 +29,11 @@ function Test-Command {
   finally { $ErrorActionPreference = $oldPreference }
 }
 
+# Handle Find it faster vscode extension
+if ($env:FIND_IT_FASTER_ACTIVE) {
+  Write-Output "No need to source from here"
+  exit
+}
 
 if (Test-Path -Path $HOME\.usr_conf\.uconfgrc.ps1 -PathType Leaf) {
   . $HOME\.usr_conf\.uconfgrc.ps1
@@ -42,3 +47,4 @@ if (Test-Path -Path $HOME\.usr_conf\.uconfrc.ps1 -PathType Leaf) {
 if (Test-Path -Path $HOME\.usr_conf\.ualiasrc.ps1 -PathType Leaf) {
   . $HOME\.usr_conf\.ualiasrc.ps1
 }
+
