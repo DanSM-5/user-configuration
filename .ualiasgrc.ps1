@@ -1060,10 +1060,26 @@ function fedd () {
   & "$editor" "$selection"
 }
 
-function fmpv {
-  $selection = $(fd -tf | Invoke-Fzf -m -q @args)
-  if ( -not $selection ) { return }
-  mpv $selection
+if (Test-Path Alias:utf8) { Remove-Item Alias:utf8 }
+Set-Alias -Name utf8 -Value With-UTF8
+
+function fmpv () {
+  $mpv_args = $args
+  $mpv_block = {
+    $selection = @($(
+      fd -tf | fzf --multi
+    ))
+
+    if ($selection.Length -eq 0) { return }
+
+    mpv @mpv_args -- @selection
+  }
+
+  if ($IsWindows) {
+    With-UTF8 $mpv_block
+  } else {
+    & $mpv_block
+  }
 }
 
 function getClipboardPath {
