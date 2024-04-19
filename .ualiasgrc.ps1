@@ -46,6 +46,46 @@ function getPsFzfOptions {
   return $psFzfOptions
 }
 
+function getFzfOptions () {
+  $path = $PWD.ProviderPath.Replace('\', '/')
+  $psFzfPreviewScript = Join-Path -Path $user_conf_path -ChildPath "utils${dirsep}PsFzfTabExpansion-Preview.ps1"
+  $preview = ("pwsh -NoProfile -NonInteractive -NoLogo -File \""$psFzfPreviewScript\"" \""" + $path + "\"" {}")
+
+  $options = @(
+    '--bind', 'ctrl-/:change-preview-window(down|hidden|)',
+    '--bind', 'alt-up:preview-page-up',
+    '--bind', 'alt-down:preview-page-down',
+    '--bind', 'ctrl-s:toggle-sort',
+    '--preview', $preview,
+    '--height', '80%',
+    '--min-height', '20',
+    '--border'
+  )
+
+  return $options
+}
+
+function getFzfPreview ([string] $ScriptContent = 'Get-Content $args') {
+  try {
+    $preview_file = New-Temporaryfile
+    $ScriptContent > $preview_file.FullName
+    $preview_script = $preview_file.FullName.Replace('.tmp', '.ps1')
+    $fzf_preview = "pwsh -NoProfile -NoLogo -NonInteractive -File `"$preview_script`""
+    Copy-Item $preview_file.FullName $preview_script
+
+    $preview_options = @{
+      preview = $fzf_preview
+      file = $preview_script
+    }
+
+    return $preview_options
+  } finally {
+    if (Test-Path -Path $preview_file.FullName -PathType Leaf -ErrorAction SilentlyContinue) {
+      Remove-Item -Force $preview_file.FullName
+    }
+  }
+}
+
 function fd-Excluded {
   $exclusionArr = @( $env:FD_SHOW_OPTIONS -Split ' ' )
   $exclusionArr += @( $env:FD_EXCLUDE_OPTIONS -Split ' ' )
@@ -709,6 +749,52 @@ function ntxt ([String] $filename = '') {
   & $editor $filename
 }
 
+function ftxt () {
+  $txt = "$prj${dirsep}txt"
+
+  if (-not (Test-Path -PathType Container -Path "$txt" -ErrorAction SilentlyContinue)) {
+    Write-Output "No $txt directory"
+    return
+  }
+
+  $selected = @()
+  $fzf_options = getFzfOptions
+  $txt_path = "$txt${dirsep}".Replace('\', '\\')
+  $script_content = @"
+    Param(
+       [String]
+       `$PreviewItem = ""
+    )
+
+    bat --color=always --style=numbers "$txt_path`$PreviewItem"
+"@
+  $fzf_preview_options = getFzfPreview $script_content
+  $fzf_preview = $fzf_preview_options.preview + " {}"
+
+  try {
+    $selected = @($(
+        fd -tf . "$txt" | % {
+          $_.Replace("$txt${dirsep}", '')
+        } |
+        fzf @fzf_options --multi --preview $fzf_preview | % {
+          "$txt${dirsep}$_"
+        }
+    ))
+  } finally {
+    if (Test-Path -Path $fzf_preview_options.file -PathType Leaf -ErrorAction SilentlyContinue) {
+      Remove-Item -Force $fzf_preview_options.file
+    }
+  }
+
+  if ($selected.Length -eq 0) {
+    return
+  }
+
+  $editor = if ($env:PREFERED_EDITOR) { $env:PREFERED_EDITOR } else { 'vim' }
+
+  & "$editor" @selected
+}
+
 # extract files
 function ex () {
   $filename = $args[0]
@@ -975,7 +1061,7 @@ function fedd () {
 }
 
 function fmpv {
-  $selection = $(fd -tf | Invoke-Fzf -m -q "$args")
+  $selection = $(fd -tf | Invoke-Fzf -m -q @args)
   if ( -not $selection ) { return }
   mpv $selection
 }

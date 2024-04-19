@@ -709,6 +709,26 @@ ntxt () {
   "${PREFERED_EDITOR:-vim}" "$prj/txt/$filename"
 }
 
+ftxt () {
+  txt="$prj/txt"
+
+  if ! [ -d "$txt" ]; then
+    printf "No $txt directory"
+    return 1
+  fi
+
+  selected=($(fd -tf . "$txt" |
+    sed "s|$txt/||" |
+    fzf-defaults --multi --preview "bat --color=always --style=numbers '$txt/'{}" |
+    sed "s|^|$txt/|"))
+
+  if [ -z "$selected" ]; then
+    return
+  fi
+
+  "${PREFERED_EDITOR:-vim}" "${selected[@]}"
+}
+
 # extract files
 ex () {
   # $1 must be file name
