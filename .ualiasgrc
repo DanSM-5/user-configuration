@@ -217,12 +217,12 @@ fshow() {
           --print-query --expect=ctrl-d --bind=ctrl-s:toggle-sort); do
     q=$(head -1 <<< "$out")
     k=$(head -2 <<< "$out" | tail -1)
-    shas=$(sed '1,2d;s/^[^a-z0-9]*//;/^$/d' <<< "$out" | awk '{print $1}')
+    shas=($(sed '1,2d;s/^[^a-z0-9]*//;/^$/d' <<< "$out" | awk '{print $1}'))
     [ -z "$shas" ] && continue
     if [ "$k" = ctrl-d ]; then
-      bash -c "git diff --color=always $shas | $pager"
+      bash -c "git diff --color=always ${shas[@]} | $pager"
     else
-      for sha in $shas; do
+      for sha in ${shas[@]}; do
         bash -c "git show --color=always $sha | $pager"
       done
     fi
@@ -551,17 +551,20 @@ fnr () {
     return 1
   fi
 
-  local query="${*}"
+  local runner="${1:-npm}"
+      # *.tbz)        tar xjvf "$1" "${@:2}";;
+  local query="${@:2}"
+  if [ "$runner" = "-" ]; then runner=npm; fi
   local selection="$(cat package.json |
     jq -r '.scripts | keys[]' |
     sort |
     fzf --query "$query" --height 50% --min-height 20 --border)"
 
   if [ -z "$selection" ]; then
-    return 1
+    return 0
   fi
 
-  npm run "$selection"
+  "$runner" run "$selection"
 }
 
 # Example quick_access
