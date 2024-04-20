@@ -23,11 +23,14 @@ Try {
       exit
     }
 
-    if(!($args[$i] -Match '^[^ ]+=[^ ]+$')) {
+    # Stop look  on first argument without '=' sign
+    # if(!($args[$i] -Match '^[^ ]+=[^ ]+$')) {
+    if(!($args[$i] -Match '.+=.*')) {
       break
     }
 
     $key, $val = $args[$i].Split("=")
+    # $val = if ($val) { $val } else { "" }
     $ori[$key] = if(Test-Path Env:\$key) { (Get-Item Env:\$key).Value } else { "" }
     New-Item -Name $key -Value $val -ItemType Variable -Path Env: -Force > $null
 
