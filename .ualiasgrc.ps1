@@ -277,27 +277,31 @@ function cprj () {
     return $expanded.Replace('\', $dirsep).Trim()
   }
 
-  # Get single directories
-  Get-Content "$user_conf_path/prj/locations" | % {
-    if ($_) {
-      if ($_.StartsWith('#')) { return }
-      $dir_path = expand_path $_
-      if (Test-Path -PathType Container -Path $dir_path -ErrorAction SilentlyContinue) {
-        $null = $directories.Add($dir_path)
+# Get single directories
+  if (Test-Path -PathType Leaf -Path "$user_conf_path/prj/locations" -ErrorAction SilentlyContinue) {
+    Get-Content "$user_conf_path/prj/locations" | % {
+      if ($_) {
+        if ($_.StartsWith('#')) { return }
+        $dir_path = expand_path $_
+        if (Test-Path -PathType Container -Path $dir_path -ErrorAction SilentlyContinue) {
+          $null = $directories.Add($dir_path)
+        }
       }
     }
   }
   
   # Get content from listed directories
-  Get-Content "$user_conf_path/prj/directories" | % {
-    if ($_) {
-      if ($_.StartsWith('#')) { return }
-      $dir_path = expand_path $_
-      if (-not (Test-Path -PathType Container -Path $dir_path -ErrorAction SilentlyContinue)) { return }
-      $locations = @( fd --type 'directory' --type 'symlink' --max-depth 1 . "$dir_path" )
-      foreach ($lock in $locations) {
-        if (Test-Path -PathType Container -Path $lock -ErrorAction SilentlyContinue) {
-          $null = $directories.Add($lock)
+  if (Test-Path -PathType Leaf -Path "$user_conf_path/prj/directories" -ErrorAction SilentlyContinue) {
+    Get-Content "$user_conf_path/prj/directories" | % {
+      if ($_) {
+        if ($_.StartsWith('#')) { return }
+        $dir_path = expand_path $_
+        if (-not (Test-Path -PathType Container -Path $dir_path -ErrorAction SilentlyContinue)) { return }
+        $locations = @( fd --type 'directory' --type 'symlink' --max-depth 1 . "$dir_path" )
+        foreach ($lock in $locations) {
+          if (Test-Path -PathType Container -Path $lock -ErrorAction SilentlyContinue) {
+            $null = $directories.Add($lock)
+          }
         }
       }
     }
