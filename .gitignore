@@ -4,3 +4,6 @@
 .uconfrc
 .ualiasrc.ps1
 .uconfrc.ps1
+
+# Directory to read files from
+prj
