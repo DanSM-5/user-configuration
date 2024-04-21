@@ -49,7 +49,7 @@ function getPsFzfOptions {
 function getFzfOptions () {
   $path = $PWD.ProviderPath.Replace('\', '/')
   $psFzfPreviewScript = Join-Path -Path $user_conf_path -ChildPath "utils${dirsep}PsFzfTabExpansion-Preview.ps1"
-  $preview = ("pwsh -NoProfile -NonInteractive -NoLogo -File \""$psFzfPreviewScript\"" \""" + $path + "\"" {}")
+  $preview = ("pwsh -NoProfile -NonInteractive -NoLogo -File `"$psFzfPreviewScript`"" + " \""" + $path + "\"" {}")
 
   $options = @(
     '--bind', 'ctrl-/:change-preview-window(down|hidden|)',
@@ -265,6 +265,65 @@ function qed ([string] $editor = 'nvim') {
       -Header "(ctrl-/) Toggle preview" `
       @options |
     % { & "$editor" "$_" }
+}
+
+function cprj () {
+  $directories = [System.Collections.ArrayList]::new()
+
+  function expand_path ([string] $string_path) {
+    $expanded = Invoke-Expression "Write-Output $string_path"
+    $expanded = $expanded.Replace('~', $HOME)
+    $expanded = $expanded.Replace('/', $dirsep)
+    return $expanded.Replace('\', $dirsep)
+  }
+
+  # Get single directories
+  Get-Content "$user_conf_path/prj/locations" | % {
+    if ($_) {
+      $dir_path = expand_path $_
+      if (Test-Path -PathType Container -Path $dir_path -ErrorAction SilentlyContinue) {
+        $null = $directories.Add($dir_path)
+      }
+    }
+  }
+  
+  # Get content from listed directories
+  Get-Content "$user_conf_path/prj/locations" | % {
+    if ($_) {
+      $dir_path = expand_path $_
+      if (Test-Path -PathType Container -Path $dir_path -ErrorAction SilentlyContinue) {
+        $null = $directories.Add($dir_path)
+      }
+    }
+  }
+  
+  Get-Content "$user_conf_path/prj/directories" | % {
+    if ($_) {
+      $dir_path = expand_path $_
+      $locations = @( fd --type 'directory' --type 'symlink' --max-depth 1 . "$dir_path" )
+      foreach ($lock in $locations) {
+        if (Test-Path -PathType Container -Path $lock -ErrorAction SilentlyContinue) {
+          $null = $directories.Add($lock)
+        }
+      }
+    }
+  }
+
+  if (!$directories) {
+    return
+  }
+
+  $options = getFzfOptions
+  $selection = $directories |
+    fzf @options `
+      --cycle `
+      --info=inline `
+      --header 'Select project directory: ' `
+      --prompt 'Prj> '
+
+  if (!$selection) { return }
+
+  Set-Location $selection
 }
 
 function rfv {
