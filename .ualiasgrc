@@ -639,7 +639,8 @@ cprj () {
   # Get single directories
   if [ -f "$user_conf_path/prj/locations" ]; then
     for dir in $(cat "$user_conf_path/prj/locations"); do
-      dir_path=$(eval "realpath $dir 2>/dev/null")
+      dir_path=$(eval "printf '%s' $dir 2>/dev/null" | sed -E 's/^[[:space:]]*//' | sed -E 's/[[:space:]]*$//')
+      dir_path=$(realpath "$dir_path" 2>/dev/null)
       [ -d "$dir_path" ] && directories+=("$dir_path")
     done
   fi
@@ -647,7 +648,8 @@ cprj () {
   # Get content from listed directories
   if [ -f "$user_conf_path/prj/directories" ]; then
     for dir in $(cat "$user_conf_path/prj/directories"); do
-      dir_path=$(eval "realpath $dir 2>/dev/null")
+      dir_path=$(eval "printf '%s' $dir 2>/dev/null" | sed -E 's/^[[:space:]]*//' | sed -E 's/[[:space:]]*$//')
+      dir_path=$(realpath "$dir_path" 2>/dev/null)
       if [ -d "$dir_path" ]; then
         locations=($(fd --type 'directory' --type 'symlink' --max-depth 1 . "$dir_path"))
         for lock in "${locations[@]}"; do
@@ -662,6 +664,7 @@ cprj () {
   fi
 
   local selection=$(printf "%s\n" "${directories[@]}" |
+    sort -u |
     fzf-defaults \
       --cycle \
       --info=inline \
@@ -677,8 +680,6 @@ cprj () {
   fi
 
   cd "$selection"
-  # sed -E 's/^[[:space:]]*//'
-  # sed -E 's/[[:space:]]*$//'
 }
 
 # Add an "alert" alias for long running commands.  Use like so:

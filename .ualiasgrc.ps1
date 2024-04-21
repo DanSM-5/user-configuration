@@ -274,7 +274,7 @@ function cprj () {
     $expanded = Invoke-Expression "Write-Output $string_path"
     $expanded = $expanded.Replace('~', $HOME)
     $expanded = $expanded.Replace('/', $dirsep)
-    return $expanded.Replace('\', $dirsep)
+    return $expanded.Replace('\', $dirsep).Trim()
   }
 
   # Get single directories
@@ -315,6 +315,7 @@ function cprj () {
 
   $options = getFzfOptions
   $selection = $directories |
+    Sort -Unique |
     fzf @options `
       --cycle `
       --info=inline `
