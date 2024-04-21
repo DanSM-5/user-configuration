@@ -292,7 +292,6 @@ function cprj () {
   Get-Content "$user_conf_path/prj/directories" | % {
     if ($_) {
       if ($_.StartsWith('#')) { return }
-      echo $_
       $dir_path = expand_path $_
       if (-not (Test-Path -PathType Container -Path $dir_path -ErrorAction SilentlyContinue)) { return }
       $locations = @( fd --type 'directory' --type 'symlink' --max-depth 1 . "$dir_path" )
