@@ -181,6 +181,14 @@ if ($IsWindows) {
     }
   }
 
+
+$alto = if ($IsMacOS) { 'ø' } else { 'Alt+o' }
+Set-PSReadLineKeyHandler -Chord $alto -ScriptBlock {
+  [Microsoft.PowerShell.PSConsoleReadLine]::RevertLine()
+  [Microsoft.PowerShell.PSConsoleReadLine]::Insert('cprj')
+  [Microsoft.PowerShell.PSConsoleReadLine]::AcceptLine()
+}
+
 # Commented test for scoop as it is unlikely to not be installed on windows
 # if (Test-Command scoop) {
   # Add gsudo !! command

@@ -115,7 +115,12 @@ precmd_functions+=(_fix_cursor)
 if [ "$IS_MAC" = true ]; then
   # Fix alt-c keybinding in macos
   bindkey "ç" fzf-cd-widget
+  # Alt+o to launch quick project cd
+  bindkey -s "ø" 'cprj\n'
 fi
+
+# Alt+o to launch quick project cd
+bindkey -s "^[o" 'cprj\n'
 
 # Add ctrl+o keybinding for lfcd
 # Add alternative for nix store

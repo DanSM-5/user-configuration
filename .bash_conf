@@ -94,10 +94,16 @@ elif [ "$IS_MAC" = true ]; then
   bind -m emacs-standard '"ç": " \C-b\C-k \C-u`__fzf_cd__`\e\C-e\er\C-m\C-y\C-h\e \C-y\ey\C-x\C-x\C-d"'
   bind -m vi-command '"ç": "\C-z\ec\C-z"'
   bind -m vi-insert '"ç": "\C-z\ec\C-z"'
+
+  # Alt+o to launch quick project cd
+  bind -m emacs-standard '"ø": " \C-b\C-k \C-u`cprj`\e\C-e\er\C-m\C-y\C-h\e \C-y\ey\C-x\C-x\C-d"'
 fi
 
 # Add ctrl+o keybinding for lfcd
 if command -v lf &> /dev/null; then
   bind '"\C-o":"lfcd\C-m"'
 fi
+
+# Alt+o to launch quick project cd
+bind '"\eo":"cprj\C-m"'
 
