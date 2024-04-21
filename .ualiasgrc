@@ -635,6 +635,7 @@ qed () {
 
 cprj () {
   local directories=()
+  local return_dir="$1"
 
   # Get single directories
   if [ -f "$user_conf_path/prj/locations" ]; then
@@ -678,6 +679,11 @@ cprj () {
   # --bind 'alt-a:select-all' \
   # --bind 'alt-d:deselect-all' \
   if [ -z "$selection" ]; then
+    return
+  fi
+
+  if [ "$return_dir" = '-r' ]; then
+    printf '%s' "$selection"
     return
   fi
 

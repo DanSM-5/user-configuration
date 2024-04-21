@@ -96,7 +96,10 @@ elif [ "$IS_MAC" = true ]; then
   bind -m vi-insert '"ç": "\C-z\ec\C-z"'
 
   # Alt+o to launch quick project cd
-  bind -m emacs-standard '"ø": " \C-b\C-k \C-u`cprj`\e\C-e\er\C-m\C-y\C-h\e \C-y\ey\C-x\C-x\C-d"'
+  __prjc__ () {
+    dir=$(cprj -r) && printf 'builtin cd -- %q' "$dir"
+  }
+  bind -m emacs-standard '"ø": " \C-b\C-k \C-u`__prjc__`\e\C-e\er\C-m\C-y\C-h\e \C-y\ey\C-x\C-x\C-d"'
 fi
 
 # Add ctrl+o keybinding for lfcd
