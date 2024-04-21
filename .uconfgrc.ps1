@@ -15,6 +15,7 @@ $env:user_scripts_path = "$user_scripts_path"
 $env:prj = "$prj"
 $env:WIN_ROOT = if ($IsWindows) { "C:" } else { "/" }
 $env:WIH_HOME = "$HOME"
+$env:HOME = if ($env:HOME) { $env:HOME } else { $HOME }
 
 # Set true color support
 $env:COLORTERM = 'truecolor'
