@@ -280,6 +280,7 @@ function cprj () {
   # Get single directories
   Get-Content "$user_conf_path/prj/locations" | % {
     if ($_) {
+      if ($_.StartsWith('#')) { return }
       $dir_path = expand_path $_
       if (Test-Path -PathType Container -Path $dir_path -ErrorAction SilentlyContinue) {
         $null = $directories.Add($dir_path)
@@ -288,18 +289,12 @@ function cprj () {
   }
   
   # Get content from listed directories
-  Get-Content "$user_conf_path/prj/locations" | % {
-    if ($_) {
-      $dir_path = expand_path $_
-      if (Test-Path -PathType Container -Path $dir_path -ErrorAction SilentlyContinue) {
-        $null = $directories.Add($dir_path)
-      }
-    }
-  }
-  
   Get-Content "$user_conf_path/prj/directories" | % {
     if ($_) {
+      if ($_.StartsWith('#')) { return }
+      echo $_
       $dir_path = expand_path $_
+      if (-not (Test-Path -PathType Container -Path $dir_path -ErrorAction SilentlyContinue)) { return }
       $locations = @( fd --type 'directory' --type 'symlink' --max-depth 1 . "$dir_path" )
       foreach ($lock in $locations) {
         if (Test-Path -PathType Container -Path $lock -ErrorAction SilentlyContinue) {

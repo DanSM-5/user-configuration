@@ -639,6 +639,7 @@ cprj () {
   # Get single directories
   if [ -f "$user_conf_path/prj/locations" ]; then
     for dir in $(cat "$user_conf_path/prj/locations"); do
+      [[ "$dir" =~ ^# ]] && continue
       dir_path=$(eval "printf '%s' $dir 2>/dev/null" | sed -E 's/^[[:space:]]*//' | sed -E 's/[[:space:]]*$//')
       dir_path=$(realpath "$dir_path" 2>/dev/null)
       [ -d "$dir_path" ] && directories+=("$dir_path")
@@ -648,6 +649,7 @@ cprj () {
   # Get content from listed directories
   if [ -f "$user_conf_path/prj/directories" ]; then
     for dir in $(cat "$user_conf_path/prj/directories"); do
+      [[ "$dir" =~ ^# ]] && continue
       dir_path=$(eval "printf '%s' $dir 2>/dev/null" | sed -E 's/^[[:space:]]*//' | sed -E 's/[[:space:]]*$//')
       dir_path=$(realpath "$dir_path" 2>/dev/null)
       if [ -d "$dir_path" ]; then
