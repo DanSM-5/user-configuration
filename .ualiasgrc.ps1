@@ -706,89 +706,93 @@ function makeShortCut ([string] $target, [string] $path, [string] $arguments = '
 
 function mkdr { New-Item $args -ItemType Directory -ea 0 }
 
-function ll () { Get-ChildItem @args }
+if (Get-Command -Name 'eza' -ErrorAction SilentlyContinue) {
+  function ll () { eza -Al @args }
+  function l () { eza -A @args }
+} else {
+  function ll () { Get-ChildItem @args }
+  # Simple attempt to get a behavior like 'ls -ACF'
+  # in powershell (including color output).
+  # Not perfect but gets the job done.
+  function l () {
+    [CmdletBinding()]
+    param(
+      [String]
+      $DirectoryName = '.',
+      [Parameter(ValueFromPipeline = $true)]
+      [String]
+      $PathFromPipe
+    )
 
-# Simple attempt to get a behavior like 'ls -ACF'
-# in powershell (including color output).
-# Not perfect but gets the job done.
-function l () {
-  [CmdletBinding()]
-  param(
-    [String]
-    $DirectoryName = '.',
-    [Parameter(ValueFromPipeline = $true)]
-    [String]
-    $PathFromPipe
-  )
+    $path = if ($PathFromPipe) { $PathFromPipe } else { $DirectoryName }
+    # Resolve path
+    $path = [IO.Path]::GetFullPath([IO.Path]::Combine((Get-Location -PSProvider FileSystem).ProviderPath, $path))
+    # $path = Join-Path -Path $path -ChildPath .
 
-  $path = if ($PathFromPipe) { $PathFromPipe } else { $DirectoryName }
-  # Resolve path
-  $path = [IO.Path]::GetFullPath([IO.Path]::Combine((Get-Location -PSProvider FileSystem).ProviderPath, $path))
-  # $path = Join-Path -Path $path -ChildPath .
+    $position = $PSCmdlet.MyInvocation.PipelinePosition
+    $length = $PSCmdlet.MyInvocation.PipelineLength
 
-  $position = $PSCmdlet.MyInvocation.PipelinePosition
-  $length = $PSCmdlet.MyInvocation.PipelineLength
+    # NOTE: Looks like -Force is better to get all files
+    # $filesFound = Get-ChildItem -Attributes Directory, Directory+Hidden, Hidden, Archive, Archive+Hidden -Path $path -Include * | % {
+    $filesFound = Get-ChildItem -Path $path -Force -ErrorAction SilentlyContinue | % {
+      # $acc = [PSCustomObject] @{ Dirs = '' }
+      # $acc = @()
+      # } {
+      $fileName = $_.Name
 
-  # NOTE: Looks like -Force is better to get all files
-  # $filesFound = Get-ChildItem -Attributes Directory, Directory+Hidden, Hidden, Archive, Archive+Hidden -Path $path -Include * | % {
-  $filesFound = Get-ChildItem -Path $path -Force -ErrorAction SilentlyContinue | % {
-    # $acc = [PSCustomObject] @{ Dirs = '' }
-    # $acc = @()
-  # } {
-    $fileName = $_.Name
+      # Return filename as it, no need to format for pipeline
+      if ($position -ne $length) {
+        return $fileName
+      }
 
-    # Return filename as it, no need to format for pipeline
+      $item = [PSCustomObject] @{ Content = '' }
+
+      # if (Test-Path -PathType Leaf -Path f) {}
+      if ($_.Attributes -Band [IO.FileAttributes]::ReparsePoint) {
+        $fileName = "$fileName@"
+      } elseif ($_.Attributes -Band [IO.FileAttributes]::Directory) {
+        $fileName = "$fileName/"
+      } elseif ($_.Attributes -Band [IO.FileAttributes]::Archive) {
+        $fileName = "$fileName*"
+      }
+
+      $item.Content = $fileName
+        return $item
+    }
+
+    # Return object as is if not in a pipeline
     if ($position -ne $length) {
-      return $fileName
+      return $filesFound
     }
 
-    $item = [PSCustomObject] @{ Content = '' }
-
-    # if (Test-Path -PathType Leaf -Path f) {}
-    if ($_.Attributes -Band [IO.FileAttributes]::ReparsePoint) {
-      $fileName = "$fileName@"
-    } elseif ($_.Attributes -Band [IO.FileAttributes]::Directory) {
-      $fileName = "$fileName/"
-    } elseif ($_.Attributes -Band [IO.FileAttributes]::Archive) {
-      $fileName = "$fileName*"
+    if ($filesFound.Length -eq 0) {
+      return $filesFound
     }
 
-    $item.Content = $fileName
-    return $item
-  }
+    # Regext for color output. Currently only Directories, Files and Links
+    $colorMap = @{
+      # Match names ending with '/' either that the start or end. => Directories
+      # ('^[\.]?\b[\w\W].*\b/(?= )', '(?<=  )[\.]?\b[\w\W].*\b\/') = 'white,darkblue'
+      # '\S+(?:\s?)\/' = 'white,darkblue' # Second attempt, doesn't accept spaces between words
+      '\S+\.?\w+(?:\s\W*\w+)*\/' = 'white,darkblue'
+      # Match names ending with '*' either that the start or end. => Files
+      # ('^[\.]?\b[\w\W].*\b\*(?= )', '(?<=  )[\.]?\b[\w\W].*\b\*') = 'green' # First attempt, doesn't work with multiple columns
+      # '\S+\*' = 'green' # Seconds attempt, doesn't accept spaces between words
+      '\S+\.?\w+(?:\s\W*\w+)*\*' = 'green'
+      # Match names ending with '@' either that the start or end. => Links
+      # ('^[\.]?\b[\w\W].*\b@(?= )', '(?<=  )[\.]?\b[\w\W].*\b@') = 'cyan' # First attempt, doesn't work with multiple columns
+      # '\S+@' = 'cyan' # Second attempt, doesn't accept spaces between words
+      '\S+\.?\w+(?:\s\W*\w+)*@' = 'cyan'
+    }
 
-  # Return object as is if not in a pipeline
-  if ($position -ne $length) {
-    return $filesFound
+    # Set number of columns
+    $columns = if ($filesFound.Length -gt 100) { 4 } elseif ($filesFound.Length -gt 20) { 3 } else { 2 }
+    # Format output to be displayed
+    $filesFound |
+      Sort-Object -Property Content |
+      Format-Wide -Column $columns -Property Content |
+      Out-HostColored -PatternColorMap $colorMap
   }
-
-  if ($filesFound.Length -eq 0) {
-    return $filesFound
-  }
-
-  # Regext for color output. Currently only Directories, Files and Links
-  $colorMap = @{
-    # Match names ending with '/' either that the start or end. => Directories
-    # ('^[\.]?\b[\w\W].*\b/(?= )', '(?<=  )[\.]?\b[\w\W].*\b\/') = 'white,darkblue'
-    # '\S+(?:\s?)\/' = 'white,darkblue' # Second attempt, doesn't accept spaces between words
-    '\S+\.?\w+(?:\s\W*\w+)*\/' = 'white,darkblue'
-    # Match names ending with '*' either that the start or end. => Files
-    # ('^[\.]?\b[\w\W].*\b\*(?= )', '(?<=  )[\.]?\b[\w\W].*\b\*') = 'green' # First attempt, doesn't work with multiple columns
-    # '\S+\*' = 'green' # Seconds attempt, doesn't accept spaces between words
-    '\S+\.?\w+(?:\s\W*\w+)*\*' = 'green'
-    # Match names ending with '@' either that the start or end. => Links
-    # ('^[\.]?\b[\w\W].*\b@(?= )', '(?<=  )[\.]?\b[\w\W].*\b@') = 'cyan' # First attempt, doesn't work with multiple columns
-    # '\S+@' = 'cyan' # Second attempt, doesn't accept spaces between words
-    '\S+\.?\w+(?:\s\W*\w+)*@' = 'cyan'
-  }
-
-  # Set number of columns
-  $columns = if ($filesFound.Length -gt 100) { 4 } elseif ($filesFound.Length -gt 20) { 3 } else { 2 }
-  # Format output to be displayed
-  $filesFound |
-    Sort-Object -Property Content |
-    Format-Wide -Column $columns -Property Content |
-    Out-HostColored -PatternColorMap $colorMap
 }
 
 function pvim() { vim --clean @args }
