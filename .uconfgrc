@@ -241,6 +241,69 @@ set_general_after () {
   # For envman. Do not edit.
   [ -s "$HOME/.config/envman/load.sh" ] && source "$HOME/.config/envman/load.sh"
 
+  # Flags to apply to fd commands
+  export FD_SHOW_OPTIONS=(
+    --follow
+    --hidden
+    --no-ignore
+  )
+
+  # Fixes to exclude from being find
+  export FD_EXCLUDE_OPTIONS=(
+    --exclude AppData
+    --exclude Android
+    --exclude node_modules
+    --exclude tizen-studio
+    --exclude Library
+    --exclude scoop
+    --exclude vimfiles
+    --exclude aws
+    --exclude nvim
+    --exclude .vscode-server
+    --exclude .vscode-server-server
+    --exclude .git
+    --exclude .gitbook
+    --exclude .gradle
+    --exclude .nix-defexpr
+    --exclude .azure
+    --exclude .SpaceVim
+    --exclude .cache
+    --exclude .jenv
+    --exclude .node-gyp
+    --exclude .npm
+    --exclude .nvm
+    --exclude .colima
+    --exclude .pyenv
+    --exclude .DS_Store
+    --exclude .vscode
+    --exclude .vim
+    --exclude .bun
+    --exclude .nuget
+    --exclude .dotnet
+    --exclude .pnpm-store
+    --exclude "'.pnpm*'"
+    --exclude "'.zsh_history.*'"
+    --exclude .android
+    --exclude .sony
+    --exclude .chocolatey
+    --exclude .gem
+    --exclude .jdks
+    --exclude .nix-profile
+    --exclude .sdkman
+    --exclude __pycache__
+    --exclude "'.local/pipx/*'"
+    --exclude "'.local/share/*'"
+    --exclude "'.local/state/*'"
+    --exclude "'.local/lib/*'"
+    --exclude cache
+    --exclude browser-data
+    --exclude go
+    --exclude nodejs
+    --exclude podman
+    --exclude "'PlayOnLinux*'"
+    --exclude .PlayOnLinux
+  )
+
   if command_exists fzf; then
     # CTRL-/ to toggle small preview window to see the full command
     # CTRL-Y to copy the command into clipboard using pbcopy
@@ -265,6 +328,21 @@ set_general_after () {
       --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort'"
 
     export FZF_CTRL_T_OPTS="
+      --multi
+      --ansi
+      --header 'ctrl-a: All | ctrl-d: Dirs | ctrl-f: Files | ctrl-y: Copy | ctrl-t: CWD | ctrl-o: Open'
+      --prompt 'All>'
+      --bind \"ctrl-a:change-prompt(All> )+reload(fd ${FD_SHOW_OPTIONS[@]} ${FD_EXCLUDE_OPTIONS[@]} --color=always)\"
+      --bind \"ctrl-f:change-prompt(Files> )+reload(fd ${FD_SHOW_OPTIONS[@]} ${FD_EXCLUDE_OPTIONS[@]} --color=always --type file)\"
+      --bind \"ctrl-d:change-prompt(Dirs> )+reload(fd ${FD_SHOW_OPTIONS[@]} ${FD_EXCLUDE_OPTIONS[@]} --color=always --type directory)\"
+      --bind 'ctrl-t:change-prompt(CWD> )+reload(eza --color=always --all --group-directories-first \$PWD)'
+      --bind 'ctrl-y:execute-silent(printf %s {} | \$clipboard_copy)+abort'
+      --bind 'ctrl-o:execute-silent($user_scripts_path/bin/start {})+abort'
+      --bind 'alt-a:select-all'
+      --bind 'alt-d:deselect-all'
+      --bind 'alt-f:first'
+      --bind 'alt-l:last'
+      --bind 'alt-c:clear-query'
       --preview 'if [ -f {} ]; then
           bat -pp --color=always --style=numbers {}
         else
@@ -281,45 +359,7 @@ set_general_after () {
   fi
 
   if command_exists fd; then
-    export FD_SHOW_OPTIONS=(
-      --follow
-      --hidden
-      --no-ignore
-    )
-
-    export FD_EXCLUDE_OPTIONS=(
-      --exclude AppData
-      --exclude Android
-      --exclude node_modules
-      --exclude tizen-studio
-      --exclude Library
-      --exclude scoop
-      --exclude vimfiles
-      --exclude aws
-      --exclude nvim
-      --exclude .vscode-server
-      --exclude .vscode-server-server
-      --exclude .git
-      --exclude .gitbook
-      --exclude .gradle
-      --exclude .nix-defexpr
-      --exclude .azure
-      --exclude .SpaceVim
-      --exclude .cache
-      --exclude .node-gyp
-      --exclude .npm
-      --exclude .nvm
-      --exclude .colima
-      --exclude .pyenv
-      --exclude .DS_Store
-      --exclude .vscode
-      --exclude .vim
-      --exclude .bun
-      --exclude .PlayOnLinux
-      --exclude "PlayOnLinux\'s\ virtual\ drives"
-    )
-
-    export FZF_CTRL_T_COMMAND="fd ${FD_SHOW_OPTIONS[@]} ${FD_EXCLUDE_OPTIONS[@]}"
+    export FZF_CTRL_T_COMMAND="fd --color=always ${FD_SHOW_OPTIONS[@]} ${FD_EXCLUDE_OPTIONS[@]}"
     export FZF_ALT_C_COMMAND="fd --type d ${FD_SHOW_OPTIONS[@]} ${FD_EXCLUDE_OPTIONS[@]}"
 
     # Use fd (https://github.com/sharkdp/fd) instead of the default find

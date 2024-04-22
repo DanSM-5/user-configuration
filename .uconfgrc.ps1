@@ -72,6 +72,71 @@ if (Test-Command Set-PsFzfOption) {
   }
 }
 
+  $env:FD_SHOW_OPTIONS = @(
+    '--follow',
+    '--hidden',
+    '--no-ignore'
+  )
+
+  $env:FD_EXCLUDE_OPTIONS = @(
+    '--exclude', 'AppData',
+    '--exclude', 'Android',
+    '--exclude', 'OneDrive',
+    '--exclude', 'Powershell',
+    '--exclude', 'node_modules',
+    '--exclude', 'tizen-studio',
+    '--exclude', 'Library',
+    '--exclude', 'scoop',
+    '--exclude', 'vimfiles',
+    '--exclude', 'aws',
+    '--exclude', 'pipx',
+    '--exclude', '.vscode-server',
+    '--exclude', '.vscode-server-server',
+    '--exclude', '.git',
+    '--exclude', '.gitbook',
+    '--exclude', '.gradle',
+    '--exclude', '.nix-defexpr',
+    '--exclude', '.azure',
+    '--exclude', '.SpaceVim',
+    '--exclude', '.cache',
+    '--exclude', '.jenv'
+    '--exclude', '.node-gyp',
+    '--exclude', '.npm',
+    '--exclude', '.nvm',
+    '--exclude', '.colima',
+    '--exclude', '.pyenv',
+    '--exclude', '.DS_Store',
+    '--exclude', '.vscode',
+    '--exclude', '.vim',
+    '--exclude', '.bun',
+    '--exclude', '.nuget',
+    '--exclude', '.dotnet',
+    '--exclude', '.pnpm-store',
+    '--exclude', '.pnpm*',
+    '--exclude', '.zsh_history.*',
+    '--exclude', '.android',
+    '--exclude', '.sony',
+    '--exclude', '.chocolatey',
+    '--exclude', '.gem',
+    '--exclude', '.jdks',
+    '--exclude', '.nix-profile',
+    '--exclude', '.sdkman',
+    '--exclude', '__pycache__',
+    '--exclude', '.local/pipx/*',
+    '--exclude', '.local/share/*',
+    '--exclude', '.local/state/*',
+    '--exclude', '.local/lib/*',
+    '--exclude', 'cache',
+    '--exclude', 'browser-data',
+    '--exclude', 'go',
+    '--exclude', 'nodejs',
+    '--exclude', 'podman',
+    '--exclude', 'PlayOnLinux*',
+    '--exclude', '.PlayOnLinux'
+  )
+
+$FD_OPTIONS = "$env:FD_SHOW_OPTIONS $env:FD_EXCLUDE_OPTIONS"
+
 if (Test-Command fzf) {
 
   $env:FZF_CTRL_R_OPTS = "
@@ -84,53 +149,31 @@ if (Test-Command fzf) {
   $psFzfPreviewScript = "${user_conf_path}${dirsep}utils${dirsep}PsFzfTabExpansion-Preview.ps1"
 
   $env:FZF_CTRL_T_OPTS = "
+    --multi
+    --ansi
+    --header 'ctrl-a: All | ctrl-d: Dirs | ctrl-f: Files | ctrl-y: Copy | ctrl-t: CWD'
+    --prompt 'All>'
+    --bind `"ctrl-a:change-prompt(All> )+reload(fd $FD_OPTIONS --color=always)`"
+    --bind `"ctrl-f:change-prompt(Files> )+reload(fd $FD_OPTIONS --color=always --type file)`"
+    --bind `"ctrl-d:change-prompt(Dirs> )+reload(fd $FD_OPTIONS --color=always --type directory)`"
+    --bind `"ctrl-t:change-prompt(CWD> )+reload(pwsh -NoLogo -NoProfile -NonInteractive -Command eza --color=always --all --group-directories-first `$PWD)`"
+    --bind `"ctrl-y:execute-silent(pwsh -NoLogo -NoProfile -NonInteractive -Command Set-Clipboard '{}')+abort`"
+    --bind `"ctrl-o:execute-silent(pwsh -NoLogo -NoProfile -NonInteractive -Command Start-Process '{}')+abort`"
+    --bind 'alt-a:select-all'
+    --bind 'alt-d:deselect-all'
+    --bind 'alt-f:first'
+    --bind 'alt-l:last'
+    --bind 'alt-c:clear-query'
     --preview 'pwsh -NoProfile -NonInteractive -NoLogo -File $psFzfPreviewScript " + ". {}'
     --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort'"
 
-  $env:FZF_ALT_C_OPTS = $env:FZF_CTRL_T_OPTS
+  $env:FZF_ALT_C_OPTS = "
+    --preview 'pwsh -NoProfile -NonInteractive -NoLogo -File $psFzfPreviewScript " + ". {}'
+    --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort'"
 }
 
 if (Test-Command fd) {
-    $env:FD_SHOW_OPTIONS = @(
-      '--follow',
-      '--hidden',
-      '--no-ignore'
-    )
-
-    $env:FD_EXCLUDE_OPTIONS = @(
-      '--exclude', 'AppData',
-      '--exclude', 'Android',
-      '--exclude', 'OneDrive',
-      '--exclude', 'Powershell',
-      '--exclude', 'node_modules',
-      '--exclude', 'tizen-studio',
-      '--exclude', 'Library',
-      '--exclude', 'scoop',
-      '--exclude', 'vimfiles',
-      '--exclude', 'aws',
-      '--exclude', 'pipx',
-      '--exclude', '.vscode-server',
-      '--exclude', '.vscode-server-server',
-      '--exclude', '.git',
-      '--exclude', '.gitbook',
-      '--exclude', '.gradle',
-      '--exclude', '.nix-defexpr',
-      '--exclude', '.azure',
-      '--exclude', '.SpaceVim',
-      '--exclude', '.cache',
-      '--exclude', '.node-gyp',
-      '--exclude', '.npm',
-      '--exclude', '.nvm',
-      '--exclude', '.colima',
-      '--exclude', '.pyenv',
-      '--exclude', '.DS_Store',
-      '--exclude', '.vscode',
-      '--exclude', '.vim',
-      '--exclude', '.bun'
-    )
-
-  $FD_OPTIONS = "$env:FD_SHOW_OPTIONS $env:FD_EXCLUDE_OPTIONS"
-  $env:FZF_CTRL_T_COMMAND = "fd $FD_OPTIONS"
+  $env:FZF_CTRL_T_COMMAND = "fd $FD_OPTIONS --color=always"
   $env:FZF_ALT_C_COMMAND = "fd --type d $FD_OPTIONS"
 }
 
