@@ -707,8 +707,9 @@ function makeShortCut ([string] $target, [string] $path, [string] $arguments = '
 function mkdr { New-Item $args -ItemType Directory -ea 0 }
 
 if (Get-Command -Name 'eza' -ErrorAction SilentlyContinue) {
-  function ll () { eza -Al @args }
-  function l () { eza -A @args }
+  function ll () { eza -AlF --icons --group-directories-first @args }
+  function la () { eza -AF --icons --group-directories-first @args }
+  function l () { eza -F --icons --group-directories-first @args }
 } else {
   function ll () { Get-ChildItem @args }
   # Simple attempt to get a behavior like 'ls -ACF'
