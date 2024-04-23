@@ -527,13 +527,13 @@ fenv () {
   # as first element if key is pressed
   local output=($(cat -v "$tmpfile" |
     fzf-defaults \
-      --preview 'printf "%q" {}' --preview-window up:3:hidden:wrap \
+      --preview 'printf "%q" {}' --preview-window 'up:50%:hidden:wrap' \
       --bind 'ctrl-/:toggle-preview' \
       --bind 'ctrl-s:toggle-sort' \
       --bind 'ctrl-y:execute-silent(echo -n {} | $clipboard_copy)+abort' \
       --expect 'ctrl-h,ctrl-v' \
       --color header:italic \
-      --header 'Press CTRL-Y to copy command into clipboard'))
+      --header 'CTRL-Y: Copy'))
 
   # Subshell to keep helper functions as local
   (

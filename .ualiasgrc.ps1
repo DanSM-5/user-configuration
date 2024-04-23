@@ -289,7 +289,7 @@ function cprj () {
       }
     }
   }
-  
+
   # Get content from listed directories
   if (Test-Path -PathType Leaf -Path "$user_conf_path/prj/directories" -ErrorAction SilentlyContinue) {
     Get-Content "$user_conf_path/prj/directories" | % {
@@ -512,27 +512,33 @@ function fenv () {
 
   if ($args[0] -eq '-v') { $showValue = $true }
 
-  $options = @{
-    Preview = $("pwsh -NoLogo -NonInteractive -NoProfile -File \""$($user_conf_path -Replace '\\', '/')/utils/log-helper.ps1\"" {}");
-    Bind = @(
-      'ctrl-/:toggle-preview'
-      # TODO: Investigate change-preview-window not working
-      # 'ctrl-/:change-preview-window(down|hidden|)'
-      'alt-up:preview-page-up'
-      'alt-down:preview-page-down'
-      'ctrl-s:toggle-sort'
-      "ctrl-y:execute-silent(pwsh -NoLogo -NonInteractive -NoProfile -File $user_conf_path\utils\copy-helper.ps1 {})+abort"
-    )
-  }
+  # TODO: Investigate change-preview-window not working
+  # '--bind', 'ctrl-/:change-preview-window(down|hidden|)',
+  $options = @(
+    '--preview', "pwsh -NoLogo -NonInteractive -NoProfile -File $user_conf_path${dirsep}utils${dirsep}log-helper.ps1 {}",
+    '--bind', 'ctrl-/:toggle-preview',
+    '--bind', 'alt-up:preview-page-up',
+    '--bind', 'alt-down:preview-page-down',
+    '--bind', 'ctrl-s:toggle-sort',
+    '--expect', 'ctrl-h,ctrl-v',
+    '--header', 'CTRL-Y: Copy',
+    '--bind', "ctrl-y:execute-silent(pwsh -NoLogo -NonInteractive -NoProfile -File '$user_conf_path${dirsep}utils${dirsep}copy-helper.ps1' {})+abort",
+    '--preview-window', 'up:50%:hidden:wrap'
+  )
 
-  Get-childItem -Path env: |
+  $output = @($(Get-childItem -Path env: |
     % { Write-Output "$($_.key)=$($_.value.Trim() -Replace '\n', ' ')" } |
-    Invoke-Fzf `
-      -PreviewWindow 'up:3:hidden:wrap' `
-      @options |
-    % {
-      $res = $($_ -Split '=')
-      if ($showValue) { $res[1..$res.length] -Join '=' } else { $res[0] }
+    fzf @options))
+
+    if ($output[0] -eq 'ctrl-h') {
+      $res = $output[1] -Split '='
+      $res[0]
+    } elseif ($output[0] -eq 'ctrl-v') {
+      $res = $output[1] -Split '='
+      $res[1..$res.length] -Join '='
+      # if ($showValue) { $res[1..$res.length] -Join '=' } else { $res[0] }
+    } else {
+      $output
     }
 }
 
