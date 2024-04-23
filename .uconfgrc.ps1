@@ -144,7 +144,7 @@ if (Test-Command fzf) {
     --bind 'ctrl-/:toggle-preview,ctrl-s:toggle-sort'
     --bind 'ctrl-y:execute-silent(pwsh -NoLogo -NonInteractive -NoProfile -File ${user_conf_path}${dirsep}utils${dirsep}copy-helper.ps1 {})+abort'
     --color header:italic
-    --header 'Press CTRL-Y to copy command into clipboard'"
+    --header 'ctrl-y: Copy'"
 
   $psFzfPreviewScript = "${user_conf_path}${dirsep}utils${dirsep}PsFzfTabExpansion-Preview.ps1"
 
@@ -157,7 +157,7 @@ if (Test-Command fzf) {
     --bind `"ctrl-f:change-prompt(Files> )+reload(fd $FD_OPTIONS --color=always --type file)`"
     --bind `"ctrl-d:change-prompt(Dirs> )+reload(fd $FD_OPTIONS --color=always --type directory)`"
     --bind `"ctrl-t:change-prompt(CWD> )+reload(pwsh -NoLogo -NoProfile -NonInteractive -Command eza --color=always --all --group-directories-first `$PWD)`"
-    --bind `"ctrl-y:execute-silent(pwsh -NoLogo -NoProfile -NonInteractive -Command Set-Clipboard '{}')+abort`"
+    --bind 'ctrl-y:execute-silent(pwsh -NoLogo -NonInteractive -NoProfile -File ${user_conf_path}${dirsep}utils${dirsep}copy-helper.ps1 {+f})+abort'
     --bind `"ctrl-o:execute-silent(pwsh -NoLogo -NoProfile -NonInteractive -Command Start-Process '{}')+abort`"
     --bind 'alt-a:select-all'
     --bind 'alt-d:deselect-all'
