@@ -1126,6 +1126,21 @@ function fedd () {
 if (Test-Path Alias:utf8) { Remove-Item Alias:utf8 }
 Set-Alias -Name utf8 -Value With-UTF8
 
+if (-not (Test-Path variable:OutputEncodingBackup)) {
+  $OutputEncodingBackup = $OutputEncoding
+}
+
+function Switch-Utf8 ([switch] $Enable = $false) {
+  if ($Enable) {
+    $OutputEncoding = [Console]::OutputEncoding = New-Object System.Text.Utf8Encoding
+  } else {
+    [Console]::OutputEncoding = $OutputEncoding = $OutputEncodingBackup
+  }
+}
+
+if (Test-Path Alias:sutf8) { Remove-Item Alias:sutf8 }
+Set-Alias -Name sutf8 -Value Switch-Utf8
+
 function fmpv () {
   $mpv_args = $args
   $mpv_block = {
