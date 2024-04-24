@@ -150,7 +150,7 @@ if (Test-Command fzf) {
 
   $env:FZF_CTRL_T_OPTS = "
     --multi
-    --ansi
+    --ansi --cycle
     --header 'ctrl-a: All | ctrl-d: Dirs | ctrl-f: Files | ctrl-y: Copy | ctrl-t: CWD'
     --prompt 'All>'
     --bind `"ctrl-a:change-prompt(All> )+reload(fd $FD_OPTIONS --color=always)`"

@@ -1084,6 +1084,7 @@ function fed () {
       "$pattern" "$location" |
     Invoke-Fzf `
       -Multi `
+      -Cycle `
       -Header "(ctrl-/) Search in: $location" `
       -Query "$query" `
       @options
@@ -1111,6 +1112,7 @@ function fedd () {
       $exclude `
       -tf |
     Invoke-Fzf `
+      -Cycle `
       -Header "(ctrl-/) Search in: $location" `
       -Query "$query" `
       @options

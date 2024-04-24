@@ -329,7 +329,7 @@ set_general_after () {
 
     export FZF_CTRL_T_OPTS="
       --multi
-      --ansi
+      --ansi --cycle
       --header 'ctrl-a: All | ctrl-d: Dirs | ctrl-f: Files | ctrl-y: Copy | ctrl-t: CWD | ctrl-o: Open'
       --prompt 'All>'
       --bind \"ctrl-a:change-prompt(All> )+reload(fd ${FD_SHOW_OPTIONS[@]} ${FD_EXCLUDE_OPTIONS[@]} --color=always)\"

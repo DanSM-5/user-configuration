@@ -31,7 +31,7 @@ fgf () {
         git diff --color=always -- {-1}'"$__page_command__"' |
         sed 1,4d |
         bat -p --color=always
-        bat --color=always {-1}
+        bat --color=always --style=numbers --style=numbers {-1}
       else
         if command -v erd &>/dev/null; then
           erd --layout inverted --color force --level 3 -I --suppress-size -- {-1}

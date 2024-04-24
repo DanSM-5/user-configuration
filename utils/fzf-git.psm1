@@ -36,7 +36,7 @@ function fgf () {
       git diff --color=always -- `$args |
         $script:__pager__ sed '1,4d' |
         bat -p --color=always;
-      bat -p --color=always `$args
+      bat -p --color=always --style=numbers `$args
     } else {
       if (Get-Command erd -ErrorAction SilentlyContinue) {
         erd --layout inverted --color force --level 3 -I --suppress-size -- `$args

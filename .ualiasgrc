@@ -74,8 +74,8 @@ fzf_preview_erd_ll='if [ -f {9..9} ]; then
     echo ""
     erd --layout inverted --color force --level 3 --suppress-size -I -- {9..9} 2> /dev/null || echo "Cannot access directory {9..9}"
   fi'
-fzf_preview_file='bat --color=always --style=numbers {}'
-fzf_preview_file_ll='bat --color=always --style=numbers {9..9}'
+fzf_preview_file='bat -p --color=always --style=numbers {}'
+fzf_preview_file_ll='bat -p --color=always --style=numbers {9..9}'
 fzf_preview_dir='echo "Path: $(realpath {} 2> /dev/null || echo {})"
 echo ""
 ls -AFL --color=always {} 2> /dev/null || echo "Cannot access directory {}"'
@@ -457,6 +457,7 @@ fed () {
 
   local selection=($(fd-defaults -L -tf "$pattern" "$location" |
     fzf-defaults \
+      --cycle \
       --multi \
       --preview "$fzf_preview_file" \
       --header "(ctrl-/) Search in: $location" \
@@ -475,7 +476,8 @@ fedd () {
   local query="${@:2}"
   local editor="${PREFERED_EDITOR:-vim}"
   local selection=$(fd-defaults -L -tf |
-    fzf-defaults --multi --preview "$fzf_preview_file" --query "$query")
+    fzf-defaults --multi --cycle \
+      --preview "$fzf_preview_file" --query "$query")
   if [ -z "$selection" ]; then
     return
   fi
