@@ -354,7 +354,7 @@ set_general_after () {
             echo "'""'"
           fi
           popd &>/dev/null;
-          erd --layout inverted --color force --level 3 --suppress-size -I -- {} 2> /dev/null || ls -AFL --color=always {} || echo "'"Cannot access directory {}"'"
+          erd --layout inverted --color force --level 3 --suppress-size -I -- {} 2> /dev/null || ls -AFL --color=always {} 2> /dev/null || echo "'"Cannot access directory {}"'"
       fi'
       --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort'"
   fi

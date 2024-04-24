@@ -35,11 +35,15 @@ if (Test-Path $path -PathType Container) {
     }
     Pop-Location
 
-    if (Get-Command erd -ErrorAction SilentlyContinue) {
-      if ($addspace) { Write-Output "" }
-      erd --layout inverted --color force --level 3 -I --suppress-size -- $path
-    } else {
-      Get-ChildItem $path
+    try {
+      if (Get-Command erd -ErrorAction SilentlyContinue) {
+        if ($addspace) { Write-Output "" }
+          erd --layout inverted --color force --level 3 -I --suppress-size -- $path || Get-ChildItem $path
+      } else {
+        Get-ChildItem $path
+      }
+    } catch {
+      Write-Error "Cannot access directory $path"
     }
 }
 # is file?
