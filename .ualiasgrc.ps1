@@ -268,44 +268,7 @@ function qed ([string] $editor = 'nvim') {
 }
 
 function cprj () {
-  $directories = [System.Collections.ArrayList]::new()
-
-  function expand_path ([string] $string_path) {
-    $expanded = Invoke-Expression "Write-Output $string_path"
-    $expanded = $expanded.Replace('~', $HOME)
-    $expanded = $expanded.Replace('/', $dirsep)
-    return $expanded.Replace('\', $dirsep).Trim()
-  }
-
-# Get single directories
-  if (Test-Path -PathType Leaf -Path "$user_conf_path/prj/locations" -ErrorAction SilentlyContinue) {
-    Get-Content "$user_conf_path/prj/locations" | % {
-      if ($_) {
-        if ($_.StartsWith('#')) { return }
-        $dir_path = expand_path $_
-        if (Test-Path -PathType Container -Path $dir_path -ErrorAction SilentlyContinue) {
-          $null = $directories.Add($dir_path)
-        }
-      }
-    }
-  }
-
-  # Get content from listed directories
-  if (Test-Path -PathType Leaf -Path "$user_conf_path/prj/directories" -ErrorAction SilentlyContinue) {
-    Get-Content "$user_conf_path/prj/directories" | % {
-      if ($_) {
-        if ($_.StartsWith('#')) { return }
-        $dir_path = expand_path $_
-        if (-not (Test-Path -PathType Container -Path $dir_path -ErrorAction SilentlyContinue)) { return }
-        $locations = @( fd --type 'directory' --type 'symlink' --max-depth 1 . "$dir_path" )
-        foreach ($lock in $locations) {
-          if (Test-Path -PathType Container -Path $lock -ErrorAction SilentlyContinue) {
-            $null = $directories.Add($lock)
-          }
-        }
-      }
-    }
-  }
+  $directories = & "$user_conf_path${dirsep}utils${dirsep}getprojects.ps1"
 
   if (!$directories) {
     return
@@ -313,7 +276,6 @@ function cprj () {
 
   $options = getFzfOptions
   $selection = $directories |
-    Sort -Unique |
     fzf @options `
       --cycle `
       --info=inline `
