@@ -1,0 +1,210 @@
+#!/usr/bin/env bash
+
+[[ -v debug ]] && set -x
+
+base_dir="$PROJECTS_LOCATION"
+if [ -z "$base_dir" ]; then
+  if [ -n "$user_conf_path" ]; then
+    # For personal use only. If you are interested in this script
+    # you may remove this part and reduce evetything to:
+    # base_dir="${PROJECTS_LOCATION:-$HOME}"
+    base_dir="$user_conf_path/prj"
+  else
+    base_dir="$HOME"
+  fi
+fi
+
+all_directories=()
+
+help () {
+  while IFS= read -r line; do
+		printf "  %s\n" "$line"
+	done <<-EOF
+
+  Get projects script
+
+	Usage:
+    ${0##*/}
+    ${0##*/} [-h|--help]
+    ${0##*/} [-l|--locations] [-d|--directories]
+    ${0##*/} [-f|--file-locations] [/path/to/file]
+    ${0##*/} [-b|--file-directories] [/path/to/file]
+    ${0##*/} [-i|--include] [/path/to/directory]
+    ${0##*/} [-p|--path] [/path/to/directory]
+    ${0##*/} [-s|--source] [/path/to/directory]
+    ${0##*/} [-u|--unique]
+
+	Options:
+    -h | --help                   Print this message
+    -l | --locations              Print the content from "locations" file
+    -d | --directories            Print the content from "directories" file
+    -f | --file-locations         Get "locations" from the specific file provided
+    -b | --file-directories       Get "directories" from the specific file provided
+    -i | --include                Return "location" in the list
+    -p | --path                   Get "directories" from specific path (using fd internally)
+    -s | --source                 Use source path as base directory to search for "locations" and "directories" files
+    -u | --unique                 Get a list of unique items
+
+  Arguments:
+    help                          Print this message
+
+  Environment variables:
+    PROJECTS_LOCATION             Path to use to search for "locations" and "directories" file
+
+EOF
+}
+
+get_locations () {
+  local locations_file="${1:-"$base_dir/locations"}"
+  # Get single directories
+  if [ -f "$locations_file" ]; then
+    for dir in $(cat "$locations_file"); do
+      [[ "$dir" =~ ^# ]] && continue
+      dir_path=$(eval "printf '%s' $dir 2>/dev/null" | sed -E 's/^[[:space:]]*//' | sed -E 's/[[:space:]]*$//')
+      dir_path=$(realpath "$dir_path" 2>/dev/null)
+      # [ -d "$dir_path" ] && printf "%s\n" "${dir_path%/}"
+      [ -d "$dir_path" ] && all_directories+=("${dir_path%/}")
+    done
+  fi
+}
+
+get_directories () {
+  local directories_file="${1:-"$base_dir/directories"}"
+  # Get content from listed directories
+  if [ -f "$directories_file" ]; then
+    for dir in $(cat "$directories_file"); do
+      [[ "$dir" =~ ^# ]] && continue
+      dir_path=$(eval "printf '%s' $dir 2>/dev/null" | sed -E 's/^[[:space:]]*//' | sed -E 's/[[:space:]]*$//')
+      dir_path=$(realpath "$dir_path" 2>/dev/null)
+      if [ -d "$dir_path" ]; then
+        locations=($(fd --type 'directory' --type 'symlink' --max-depth 1 . "$dir_path"))
+        for lock in "${locations[@]}"; do
+          # [ -d "$lock" ] && printf "%s\n" "${lock%/}"
+          [ -d "$lock" ] && all_directories+=("${lock%/}")
+        done
+      fi
+    done
+  fi
+}
+
+get_directories_from_path () {
+  [ ! -d "$1" ] && return
+  local locations=($(fd --type 'directory' --type 'symlink' --max-depth 1 . "$1"))
+  for lock in "${locations[@]}"; do
+    # [ -d "$lock" ] && printf "%s\n" "${lock%/}"
+    [ -d "$lock" ] && all_directories+=("${lock%/}")
+  done
+}
+
+# Default behavior - Unique list of items from files
+if [ "$#" = 0 ]; then
+  get_locations
+  get_directories
+
+  [ -z "$all_directories" ] && exit
+
+  printf "%s\n" "${all_directories[@]}" | sort -u
+  exit 0
+fi
+
+show_directories=false
+show_locations=false
+unique=false
+locations_to_get=()
+directories_to_get=()
+included=()
+paths=()
+
+# args parsing
+# ref: https://stackoverflow.com/a/14203146
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -d|-directories|--directories)
+      show_directories=true
+      shift # past argument
+      ;;
+    -l|-locations|--locations)
+      show_locations=true
+      shift # past argument
+      ;;
+    -s|-source|--source)
+      base_dir="$2"
+      shift # past argument
+      shift # past value
+      ;;
+    -f|-filelocations|--file-locations)
+      locations_to_get+=("$2")
+      shift # past argument
+      shift # past value
+      ;;
+    -b|-filedirectories|--file-directories)
+      directories_to_get+=("$2")
+      shift # past argument
+      shift # past value
+      ;;
+    -i|-include|--include)
+      included+=("$2")
+      shift # past argument
+      shift # past value
+      ;;
+    -p|-path|--path)
+      paths+=("$2")
+      shift # past argument
+      shift # past value
+      ;;
+    -u|-unique|--unique)
+      unique=true
+      shift # past argument
+      ;;
+    # Reset array to this point
+    +f) locations_to_get=();;
+    +b) directories_to_get=();;
+    +i) included=();;
+    +p) path=();;
+    +u) unique=false;;
+    -h|-help|--help|help)
+      help
+      exit 0
+      ;;
+    -*|--*)
+      echo "unknown option $1"
+      exit 1
+      ;;
+    *)
+      echo "unknown option $1"
+      exit 1
+      ;;
+  esac
+done
+
+if [ "$show_locations" = true ]; then
+  get_locations
+fi
+
+if [ "$show_directories" = true ]; then
+  get_directories
+fi
+
+for location in "${locations_to_get[@]}"; do
+  get_locations "$location"
+done
+
+for directory in "${directories_to_get[@]}"; do
+  get_directories "$directory"
+done
+
+for include in "${included[@]}"; do
+  # printf "%s\n" "${include%/}"
+  all_directories+=("${include%/}")
+done
+
+for path in "${paths[@]}"; do
+  get_directories_from_path "$path"
+done
+
+if [ "$unique" = true ]; then
+  printf "%s\n" "${all_directories[@]}" | sort -u
+else
+  printf "%s\n" "${all_directories[@]}"
+fi
+
