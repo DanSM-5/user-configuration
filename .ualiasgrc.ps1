@@ -35,9 +35,9 @@ function evc { nvim "$(Join-Path -Path $HOME -ChildPath ".SpaceVim.d${dirsep}ini
 
 function getPsFzfOptions {
   $path = $PWD.ProviderPath.Replace('\', '/')
-  $psFzfPreviewScript = Join-Path -Path $user_conf_path -ChildPath "utils${dirsep}PsFzfTabExpansion-Preview.ps1"
+  $fzfPreviewScript = Join-Path -Path $user_conf_path -ChildPath "utils${dirsep}fzf-preview.ps1"
   $psFzfOptions = @{
-    Preview = $("pwsh -NoProfile -NonInteractive -NoLogo -File \""$psFzfPreviewScript\"" \""" + $path + "\"" {}" );
+    Preview = $("pwsh -NoProfile -NonInteractive -NoLogo -File \""$fzfPreviewScript\"" \""" + $path + "\"" {}" );
     Bind = 'ctrl-/:change-preview-window(down|hidden|)','alt-up:preview-page-up','alt-down:preview-page-down','ctrl-s:toggle-sort'
     Height = '80%'
     MinHeight = 20
@@ -48,8 +48,8 @@ function getPsFzfOptions {
 
 function getFzfOptions () {
   $path = $PWD.ProviderPath.Replace('\', '/')
-  $psFzfPreviewScript = Join-Path -Path $user_conf_path -ChildPath "utils${dirsep}PsFzfTabExpansion-Preview.ps1"
-  $preview = ("pwsh -NoProfile -NonInteractive -NoLogo -File `"$psFzfPreviewScript`"" + " \""" + $path + "\"" {}")
+  $fzfPreviewScript = Join-Path -Path $user_conf_path -ChildPath "utils${dirsep}fzf-preview.ps1"
+  $preview = ("pwsh -NoProfile -NonInteractive -NoLogo -File `"$fzfPreviewScript`"" + " \""" + $path + "\"" {}")
 
   $options = @(
     '--bind', 'ctrl-/:change-preview-window(down|hidden|)',

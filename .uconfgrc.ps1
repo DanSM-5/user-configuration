@@ -146,7 +146,7 @@ if (Test-Command fzf) {
     --color header:italic
     --header 'ctrl-y: Copy'"
 
-  $psFzfPreviewScript = "${user_conf_path}${dirsep}utils${dirsep}PsFzfTabExpansion-Preview.ps1"
+  $fzfPreviewScript = "${user_conf_path}${dirsep}utils${dirsep}fzf-preview.ps1"
 
   $env:FZF_CTRL_T_OPTS = "
     --multi
@@ -164,11 +164,11 @@ if (Test-Command fzf) {
     --bind 'alt-f:first'
     --bind 'alt-l:last'
     --bind 'alt-c:clear-query'
-    --preview 'pwsh -NoProfile -NonInteractive -NoLogo -File $psFzfPreviewScript " + ". {}'
+    --preview 'pwsh -NoProfile -NonInteractive -NoLogo -File $fzfPreviewScript " + ". {}'
     --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort'"
 
   $env:FZF_ALT_C_OPTS = "
-    --preview 'pwsh -NoProfile -NonInteractive -NoLogo -File $psFzfPreviewScript " + ". {}'
+    --preview 'pwsh -NoProfile -NonInteractive -NoLogo -File $fzfPreviewScript " + ". {}'
     --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort'"
 }
 
