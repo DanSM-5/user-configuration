@@ -38,7 +38,15 @@ function getPsFzfOptions {
   $fzfPreviewScript = Join-Path -Path $user_conf_path -ChildPath "utils${dirsep}fzf-preview.ps1"
   $psFzfOptions = @{
     Preview = $("pwsh -NoProfile -NonInteractive -NoLogo -File \""$fzfPreviewScript\"" \""" + $path + "\"" {}" );
-    Bind = 'ctrl-/:change-preview-window(down|hidden|)','alt-up:preview-page-up','alt-down:preview-page-down','ctrl-s:toggle-sort'
+    Bind = @(
+      'ctrl-/:change-preview-window(down|hidden|)',
+      'alt-up:preview-page-up',
+      'alt-down:preview-page-down',
+      'ctrl-s:toggle-sort',
+      'alt-f:first',
+      'alt-l:last',
+      'alt-c:clear-query'
+    )
     Height = '80%'
     MinHeight = 20
     Border = $true
@@ -46,6 +54,7 @@ function getPsFzfOptions {
   return $psFzfOptions
 }
 
+$fzf_preview_normal = ("pwsh -NoProfile -NonInteractive -NoLogo -File `"$fzfPreviewScript`"" + " \""" + '.' + "\"" {}")
 function getFzfOptions () {
   $path = $PWD.ProviderPath.Replace('\', '/')
   $fzfPreviewScript = Join-Path -Path $user_conf_path -ChildPath "utils${dirsep}fzf-preview.ps1"
@@ -56,6 +65,9 @@ function getFzfOptions () {
     '--bind', 'alt-up:preview-page-up',
     '--bind', 'alt-down:preview-page-down',
     '--bind', 'ctrl-s:toggle-sort',
+    '--bind', 'alt-f:first',
+    '--bind', 'alt-l:last',
+    '--bind', 'alt-c:clear-query',
     '--preview', $preview,
     '--height', '80%',
     '--min-height', '20',
