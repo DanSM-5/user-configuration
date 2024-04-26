@@ -15,6 +15,7 @@ if ([System.IO.Path]::IsPathRooted($Item)) {
 }
 else {
     $path = Join-Path $DirName $Item
+    $path = [System.IO.Path]::GetFullPath($path)
 }
 # is directory?
 if (Test-Path $path -PathType Container) {
@@ -38,7 +39,10 @@ if (Test-Path $path -PathType Container) {
     try {
       if (Get-Command erd -ErrorAction SilentlyContinue) {
         if ($addspace) { Write-Output "" }
-          erd --layout inverted --color force --level 3 -I --suppress-size -- $path || Get-ChildItem $path
+        erd --layout inverted --color force --level 3 -I --suppress-size -- $path || Get-ChildItem $path
+      } elseif (Get-Command eza -ErrorAction SilentlyContinue) {
+        if ($addspace) { Write-Output "" }
+        eza -AF --oneline --color=always --icons --group-directories-first --dereference $path || Get-ChildItem $path
       } else {
         Get-ChildItem $path
       }
@@ -50,7 +54,7 @@ if (Test-Path $path -PathType Container) {
 elseif (Test-Path $path -PathType leaf) {
     # use bat (https://github.com/sharkdp/bat) if it's available:
     if ($ansiCompatible -and $(Get-Command bat -ErrorAction SilentlyContinue)) {
-        bat -p "--style=numbers,changes" --color always $path
+        bat -p "--style=numbers,changes,header" --color always $path
     }
     else {
         Get-Content $path
