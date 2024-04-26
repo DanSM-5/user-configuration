@@ -120,7 +120,7 @@ if [ "$IS_MAC" = true ]; then
 fi
 
 # Alt+o to launch quick project cd
-bindkey -s "^[o" 'cprj\n'
+bindkey -s '^[o' 'cprj\n'
 
 # Add ctrl+o keybinding for lfcd
 # Add alternative for nix store
