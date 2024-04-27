@@ -42,7 +42,8 @@ if (Test-Path $path -PathType Container) {
         erd --layout inverted --color force --level 3 -I --suppress-size -- $path || Get-ChildItem $path
       } elseif (Get-Command eza -ErrorAction SilentlyContinue) {
         if ($addspace) { Write-Output "" }
-        eza -AF --oneline --color=always --icons --group-directories-first --dereference $path || Get-ChildItem $path
+        eza -A --tree --level=3 --color=always --icons=always --dereference $path || Get-ChildItem $path
+        # eza -AF --oneline --color=always --icons --group-directories-first --dereference $path || Get-ChildItem $path
       } else {
         Get-ChildItem $path
       }

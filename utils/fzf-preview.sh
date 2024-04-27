@@ -36,10 +36,12 @@ elif [ -d "$entry_path" ]; then
   fi
   popd &> /dev/null
 
+  # eza -AF --oneline --color=always --icons --group-directories-first --dereference "$entry_path" 2> /dev/null ||
+
   # Preview directory
   # Try erd, then eza, then ls, then fallback message
   erd --layout inverted --color force --level 3 --suppress-size -I -- "$entry_path" 2> /dev/null ||
-    eza -AF --oneline --color=always --icons --group-directories-first --dereference "$entry_path" 2> /dev/null ||
+    eza -A --tree --level=3 --color=always --icons=always --dereference "$entry_path" 2> /dev/null ||
     ls -AFL --color=always "$entry_path" 2> /dev/null ||
     printf "\nCannot access directory $entry_path"
 else
