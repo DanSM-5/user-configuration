@@ -99,7 +99,7 @@ if (Test-Command Set-PsFzfOption) {
     '--exclude', '.azure',
     '--exclude', '.SpaceVim',
     '--exclude', '.cache',
-    '--exclude', '.jenv'
+    '--exclude', '.jenv',
     '--exclude', '.node-gyp',
     '--exclude', '.npm',
     '--exclude', '.nvm',
@@ -152,11 +152,11 @@ if (Test-Command fzf) {
     --multi
     --ansi --cycle
     --header 'ctrl-a: All | ctrl-d: Dirs | ctrl-f: Files | ctrl-y: Copy | ctrl-t: CWD'
-    --prompt 'All>'
+    --prompt 'All> '
     --bind `"ctrl-a:change-prompt(All> )+reload(fd $FD_OPTIONS --color=always)`"
     --bind `"ctrl-f:change-prompt(Files> )+reload(fd $FD_OPTIONS --color=always --type file)`"
     --bind `"ctrl-d:change-prompt(Dirs> )+reload(fd $FD_OPTIONS --color=always --type directory)`"
-    --bind `"ctrl-t:change-prompt(CWD> )+reload(pwsh -NoLogo -NoProfile -NonInteractive -Command eza --color=always --all --dereference --group-directories-first `$PWD)`"
+    --bind `"ctrl-t:change-prompt(CWD> )+reload(pwsh -NoLogo -NoProfile -NonInteractive -Command eza --color=always --all --dereference --oneline --group-directories-first `$PWD)`"
     --bind 'ctrl-y:execute-silent(pwsh -NoLogo -NonInteractive -NoProfile -File ${user_conf_path}${dirsep}utils${dirsep}copy-helper.ps1 {+f})+abort'
     --bind `"ctrl-o:execute-silent(pwsh -NoLogo -NoProfile -NonInteractive -Command Start-Process '{}')+abort`"
     --bind 'alt-a:select-all'
@@ -174,7 +174,7 @@ if (Test-Command fzf) {
 
 if (Test-Command fd) {
   $env:FZF_CTRL_T_COMMAND = "fd $FD_OPTIONS --color=always"
-  $env:FZF_ALT_C_COMMAND = "fd --type d $FD_OPTIONS"
+  $env:FZF_ALT_C_COMMAND = "fd --type directory --color=always $FD_OPTIONS"
 }
 
 if (Test-Command rg) {
