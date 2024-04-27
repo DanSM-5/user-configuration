@@ -325,7 +325,7 @@ set_general_after () {
       --multi
       --ansi --cycle
       --header 'ctrl-a: All | ctrl-d: Dirs | ctrl-f: Files | ctrl-y: Copy | ctrl-t: CWD | ctrl-o: Open'
-      --prompt 'All>'
+      --prompt 'All> '
       --bind \"ctrl-a:change-prompt(All> )+reload(fd ${FD_SHOW_OPTIONS[@]} ${FD_EXCLUDE_OPTIONS[@]} --color=always)\"
       --bind \"ctrl-f:change-prompt(Files> )+reload(fd ${FD_SHOW_OPTIONS[@]} ${FD_EXCLUDE_OPTIONS[@]} --color=always --type file)\"
       --bind \"ctrl-d:change-prompt(Dirs> )+reload(fd ${FD_SHOW_OPTIONS[@]} ${FD_EXCLUDE_OPTIONS[@]} --color=always --type directory)\"
