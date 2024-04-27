@@ -1,9 +1,27 @@
 #!/usr/bin/env bash
 
+# Dependencies
+# - bat
+# - erd
+# - eza
+# - pdftotext (poppler)
+# - gs (ghostscript)
+# - zipinfo
+# - unrar
+# - 7z
+# - chafa
+# - git
+
+# References
+# - https://github.com/slavistan/howto-lf-image-previews
+#   - https://github.com/slavistan/howto-lf-image-previews/blob/master/lf-previewer
+# - https://github.com/junegunn/fzf.vim
+#   - https://github.com/junegunn/fzf.vim/blob/master/bin/preview.sh
+
 entry_path="$@"
 
 # NOTE: Remove ' -> ' from symlins for eza until '-X' is fixed
-entry_path="$(printf "$entry_path" | sed 's| ->.*||')"
+entry_path="$(printf '%s' "$entry_path" | sed 's| ->.*||')"
 
 # Escape if any special character
 # entry_path="$(printf "%q" "$entry_path")"
@@ -22,11 +40,130 @@ case "$(uname -a)" in
 esac
 
 if [ -f "$entry_path" ]; then
-  # TODO: Add support for binary file types
-  bat --color=always --style="numbers,header,changes" $entry_path
+  # Variables
+  TEMP_DIR="/tmp/preview_files_script"
+  thumbnail="$TEMP_DIR/thumbnail.png"
+  MIME=$(file --dereference --mime -- "$entry_path")
+  FILE_LENGTH=$(( ${#entry_path} + 2 ))
+  CLEAN_MIME="${MIME:FILE_LENGTH}"
+  IMAGE_SIZE=75x75
+
+  case "$CLEAN_MIME" in
+    # Files
+    application/javascript*) ;&
+    application/json*) ;&
+    text/troff*charset=us-ascii) ;&
+    text/x-shellscript*) ;&
+    text/html*) ;&
+    text/plain*)
+      bat --color=always --style="numbers,header,changes" "$entry_path"
+      ;;
+    # SVG
+    image/svg+xml*)
+      mkdir -p "$TEMP_DIR"
+      magick convert "$entry_path" "$thumbnail"
+      chafa -s "$IMAGE_SIZE" "$thumbnail" || printf '%s\n' 'Error previewing the SVG'
+      ;;
+    # Images
+    image/*)
+      chafa -s "$IMAGE_SIZE" "$entry_path" || printf '%s\n' 'Error previewing the image'
+      ;;
+    # PDFs
+    application/pdf*)
+      mkdir -p "$TEMP_DIR"
+      printf '%s\n\n' "File: $entry_path"
+      # Using Ghostscript for image preview
+      gs -o "$thumbnail" -sDEVICE=pngalpha -dLastPage=1 "$entry_path" &>/dev/null
+      chafa -s "$IMAGE_SIZE" "$thumbnail" || printf '%s\n' 'Error previewing the PDF'
+
+      printf "\n\n"
+      # Pdftotext to get sample pages
+      set -o pipefail
+      pdftotext -f 1 -l 10 -simple "$entry_path" - | bat -p --style="header" || printf '%s\n' 'Error previewing content pdf file'
+      ;;
+    # Zip
+    application/zip*)
+      7z l "$entry_path" || unzip -l "$entry_path" || printf '%s\n' 'Error previewing zip archive'
+      ;;
+    # Rar
+    application/x-rar*)
+      7z l "$entry_path" || unrar l "$entry_path" || printf '%s\n' 'Error previewing rar archive'
+      ;;
+    # Iso
+    application/x-iso9660-image*)
+      7z l "$entry_path" || printf '%s\n' 'Error previewing iso archive'
+      ;;
+    # 7z
+    application/x-7z-compressed*)
+      7z l "$entry_path" || printf '%s\n' 'Error previewing 7z archive'
+      ;;
+    # Videos
+    video/x-matroska*) ;&
+    video/x-ms-asf*) ;&
+    video/webm*) ;&
+    video/mp4*)
+      mkdir -p "$TEMP_DIR"
+      ffmpeg -y -i "$entry_path" -vframes 1 "$thumbnail" &> /dev/null
+      chafa -s "$IMAGE_SIZE" "$thumbnail" || printf '%s\n' 'Error previewing the video'
+      ;;
+    *)
+      # If mime type fails then try by file extension
+      case "$entry_path" in
+        *.tar*|*.tgz)
+          7z l "$entry_path" || tar tf "$entry_path" || printf '%s\n' 'Error previewing tar archive'
+          ;;
+        *.zip)
+          # zipinfo "$entry_path"
+          7z l "$entry_path" || unzip -l "$entry_path" || printf '%s\n' 'Error previewing zip archive'
+          ;;
+        *.rar)
+          7z l "$entry_path" || unrar l "$entry_path" || printf '%s\n' 'Error previewing rar archive'
+          ;;
+        *.7z)
+          7z l "$entry_path" || printf '%s\n' 'Error previewing 7z archive'
+          ;;
+        *.iso)
+          7z l "$entry_path" || printf '%s\n' 'Error previewing iso archive'
+          ;;
+        *.avi|*.mp4|*.mkv)
+          mkdir -p "$TEMP_DIR"
+          ffmpeg -y -i "$entry_path" -vframes 1 "$thumbnail" &> /dev/null
+          chafa -s "$IMAGE_SIZE" "$thumbnail" || printf '%s\n' 'Error previewing the video'
+          ;;
+        *.pdf)
+            mkdir -p "$TEMP_DIR"
+            printf '%s\n\n' "File: $entry_path"
+            # Using Ghostscript for image preview
+            gs -o "$thumbnail" -sDEVICE=pngalpha -dLastPage=1 "$entry_path" &>/dev/null
+            chafa -s "$IMAGE_SIZE" "$thumbnail" || printf '%s\n' 'Error previewing the PDF'
+
+            printf "\n\n"
+            # Pdftotext to get sample pages
+            set -o pipefail
+            pdftotext -f 1 -l 10 -simple "$entry_path" - | bat -p --style="header" || printf '%s\n' 'Error previewing content pdf file'
+            ;;
+        *.jpg|*.jpeg|*.png|*.bmp)
+            chafa -s "$IMAGE_SIZE" "$entry_path" || printf '%s\n' 'Error previewing the image'
+            ;;
+        *.svg)
+          mkdir -p "$TEMP_DIR"
+          magick convert "$entry_path" "$thumbnail"
+          chafa -s "$IMAGE_SIZE" "$thumbnail" || printf '%s\n' 'Error previewing the SVG'
+          ;;
+        *.txt|*.md|*.htm*|*.js|*.jsx|*.ts|*.tsx|*.css|*.scss|*.sh|*.bat|*.ps?1|*.psm1|*.bash|*.zsh|*.cs|*.json|*.xml)
+          bat --color=always --style="numbers,header,changes" "$entry_path"
+          ;;
+        *)
+          # Fallback to bat
+          printf '%s\n' "Unkown MIME type:" "$CLEAN_MIME"
+          printf "\n\n"
+          bat --color=always --style="numbers,header" "$entry_path"
+          ;;
+      esac
+  esac
 elif [ -d "$entry_path" ]; then
   # Print filename
-  printf "Path: $(realpath "$entry_path" 2> /dev/null || printf "$entry_path")\n\n"
+  printf "Path: $(realpath "$entry_path" 2> /dev/null || printf '%s' "$entry_path")\n\n"
 
   # Detect if on git reposiry. If so, print last commit information
   pushd "$entry_path" &> /dev/null
@@ -45,6 +182,6 @@ elif [ -d "$entry_path" ]; then
     ls -AFL --color=always "$entry_path" 2> /dev/null ||
     printf "\nCannot access directory $entry_path"
 else
-  printf "Not identified: $entry_path"
+  printf '%s' "Not identified: $entry_path"
 fi
 
