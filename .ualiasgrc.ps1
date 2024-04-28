@@ -50,6 +50,7 @@ function getPsFzfOptions {
     Height = '80%'
     MinHeight = 20
     Border = $true
+    Info = 'inline'
   }
   return $psFzfOptions
 }
@@ -71,6 +72,7 @@ function getFzfOptions () {
     '--preview', $preview,
     '--height', '80%',
     '--min-height', '20',
+    '--info=inline',
     '--border'
   )
 
@@ -1125,9 +1127,12 @@ Set-Alias -Name sutf8 -Value Switch-Utf8
 
 function fmpv () {
   $mpv_args = $args
+  $fzf_options = getFzfOptions
   $mpv_block = {
     $selection = @($(
-      fd -tf | fzf --multi
+      fd -tf --color=always | fzf --multi --ansi --cycle `
+        @fzf_options `
+        --border
     ))
 
     if ($selection.Length -eq 0) { return }
