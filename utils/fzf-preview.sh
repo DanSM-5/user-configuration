@@ -18,6 +18,7 @@
 #   - https://github.com/slavistan/howto-lf-image-previews/blob/master/lf-previewer
 # - https://github.com/junegunn/fzf.vim
 #   - https://github.com/junegunn/fzf.vim/blob/master/bin/preview.sh
+#   - https://github.com/junegunn/fzf/blob/master/bin/fzf-preview.sh
 
 path="$@"
 
@@ -26,6 +27,41 @@ path="$(printf '%s' "$path" | sed 's| ->.*||')"
 
 # Escape if any special character
 # path="$(printf "%q" "$path")"
+
+# Expand HOME
+path=${path/#\~\//$HOME/}
+# type=$(file --dereference --mime -- "$path")
+# file -bL --mime-type "$path"
+
+# Global names unless changed otherwise
+TEMP_DIR="/tmp/preview_files_script"
+thumbnail="$TEMP_DIR/thumbnail.png"
+
+show_image () {
+  thumbnail="$1"
+  IMAGE_SIZE="${PREVIEW_IMAGE_SIZE:-75x75}"
+
+  if [[ -v KITTY_WINDOW_ID ]]; then
+  # if [[ "$TERM" =~ .+kitty ]]; then
+    # 1. 'memory' is the fastest option but if you want the image to be scrollable,
+    #    you have to use 'stream'.
+    #
+    # 2. The last line of the output is the ANSI reset code without newline.
+    #    This confuses fzf and makes it render scroll offset indicator.
+    #    So we remove the last line and append the reset code to its previous line.
+    kitty icat --clear --transfer-mode=stream \
+      --unicode-placeholder --stdin=no \
+      --place="$IMAGE_SIZE@0x0" "$thumbnail" |
+        sed '$d' | sed $'$s/$/\e[m/'
+  else
+    chafa -s "$IMAGE_SIZE" --clear "$thumbnail"
+  fi
+}
+
+show_7z () {
+  # p7zip and 7zip
+  7z l "$1" || 7zz l "$1"
+}
 
 case "$(uname -a)" in
   MINGW*|MSYS*|CYGWIN*|*NT*)
@@ -42,12 +78,9 @@ esac
 
 if [ -f "$path" ]; then
   # Variables
-  TEMP_DIR="/tmp/preview_files_script"
-  thumbnail="$TEMP_DIR/thumbnail.png"
   MIME=$(file --dereference --mime -- "$path")
   FILE_LENGTH=$(( ${#path} + 2 ))
   CLEAN_MIME="${MIME:FILE_LENGTH}"
-  IMAGE_SIZE="${PREVIEW_IMAGE_SIZE:-75x75}"
 
   case "$CLEAN_MIME" in
     # Files
@@ -63,11 +96,11 @@ if [ -f "$path" ]; then
     image/svg+xml*)
       mkdir -p "$TEMP_DIR"
       magick convert "$path" "$thumbnail"
-      chafa -s "$IMAGE_SIZE" "$thumbnail" || printf '%s\n' 'Error previewing the SVG'
+      show_image "$thumbnail" || printf '%s\n' 'Error previewing the SVG'
       ;;
     # Images
     image/*)
-      chafa -s "$IMAGE_SIZE" "$path" || printf '%s\n' 'Error previewing the image'
+      show_image "$path" || printf '%s\n' 'Error previewing the image'
       ;;
     # PDFs
     application/pdf*)
@@ -75,7 +108,7 @@ if [ -f "$path" ]; then
       printf '%s\n\n' "File: $path"
       # Using Ghostscript for image preview
       gs -o "$thumbnail" -sDEVICE=pngalpha -dLastPage=1 "$path" &>/dev/null
-      chafa -s "$IMAGE_SIZE" "$thumbnail" || printf '%s\n' 'Error previewing the PDF'
+      show_image "$thumbnail" || printf '%s\n' 'Error previewing the PDF'
 
       printf "\n\n"
       # Pdftotext to get sample pages
@@ -84,19 +117,19 @@ if [ -f "$path" ]; then
       ;;
     # Zip
     application/zip*)
-      7z l "$path" || unzip -l "$path" || printf '%s\n' 'Error previewing zip archive'
+      show_7z "$path" || unzip -l "$path" || printf '%s\n' 'Error previewing zip archive'
       ;;
     # Rar
     application/x-rar*)
-      7z l "$path" || unrar l "$path" || printf '%s\n' 'Error previewing rar archive'
+      show_7z "$path" || unrar l "$path" || printf '%s\n' 'Error previewing rar archive'
       ;;
     # Iso
     application/x-iso9660-image*)
-      7z l "$path" || printf '%s\n' 'Error previewing iso archive'
+      show_7z "$path" || printf '%s\n' 'Error previewing iso archive'
       ;;
     # 7z
     application/x-7z-compressed*)
-      7z l "$path" || printf '%s\n' 'Error previewing 7z archive'
+      show_7z "$path" || printf '%s\n' 'Error previewing 7z archive'
       ;;
     # Database sqlite3
     application/vnd.sqlite3*)
@@ -114,38 +147,38 @@ if [ -f "$path" ]; then
     video/mp4*)
       mkdir -p "$TEMP_DIR"
       ffmpeg -y -i "$path" -vframes 1 "$thumbnail" &> /dev/null
-      chafa -s "$IMAGE_SIZE" "$thumbnail" || printf '%s\n' 'Error previewing the video'
+      show_image "$thumbnail" || printf '%s\n' 'Error previewing the video'
       ;;
     *)
       # If mime type fails then try by file extension
       case "$path" in
         *.tar*|*.tgz|*.tbz|*.tbz2)
-          7z l "$path" || tar tf "$path" || printf '%s\n' 'Error previewing tar archive'
+          show_7z "$path" || tar tf "$path" || printf '%s\n' 'Error previewing tar archive'
           ;;
         *.zip)
           # zipinfo "$path"
-          7z l "$path" || unzip -l "$path" || printf '%s\n' 'Error previewing zip archive'
+          show_7z "$path" || unzip -l "$path" || printf '%s\n' 'Error previewing zip archive'
           ;;
         *.rar)
-          7z l "$path" || unrar l "$path" || printf '%s\n' 'Error previewing rar archive'
+          show_7z "$path" || unrar l "$path" || printf '%s\n' 'Error previewing rar archive'
           ;;
         *.7z)
-          7z l "$path" || printf '%s\n' 'Error previewing 7z archive'
+          show_7z "$path" || printf '%s\n' 'Error previewing 7z archive'
           ;;
         *.iso)
-          7z l "$path" || printf '%s\n' 'Error previewing iso archive'
+          show_7z "$path" || printf '%s\n' 'Error previewing iso archive'
           ;;
         *.avi|*.mp4|*.mkv|*.webm|*.wmv)
           mkdir -p "$TEMP_DIR"
           ffmpeg -y -i "$path" -vframes 1 "$thumbnail" &> /dev/null
-          chafa -s "$IMAGE_SIZE" "$thumbnail" || printf '%s\n' 'Error previewing the video'
+          show_image "$thumbnail" || printf '%s\n' 'Error previewing the video'
           ;;
         *.pdf)
             mkdir -p "$TEMP_DIR"
             printf '%s\n\n' "File: $path"
             # Using Ghostscript for image preview
             gs -o "$thumbnail" -sDEVICE=pngalpha -dLastPage=1 "$path" &>/dev/null
-            chafa -s "$IMAGE_SIZE" "$thumbnail" || printf '%s\n' 'Error previewing the PDF'
+            show_image "$thumbnail" || printf '%s\n' 'Error previewing the PDF'
 
             printf "\n\n"
             # Pdftotext to get sample pages
@@ -153,12 +186,12 @@ if [ -f "$path" ]; then
             pdftotext -f 1 -l 10 -simple "$path" - | bat -p --style="header" || printf '%s\n' 'Error previewing content pdf file'
             ;;
         *.jpg|*.jpeg|*.png|*.bmp)
-            chafa -s "$IMAGE_SIZE" "$path" || printf '%s\n' 'Error previewing the image'
+            show_image "$path" || printf '%s\n' 'Error previewing the image'
             ;;
         *.svg)
           mkdir -p "$TEMP_DIR"
           magick convert "$path" "$thumbnail"
-          chafa -s "$IMAGE_SIZE" "$thumbnail" || printf '%s\n' 'Error previewing the SVG'
+          show_image "$thumbnail" || printf '%s\n' 'Error previewing the SVG'
           ;;
         *.txt|*.md|*.htm*|*.js|*.jsx|*.ts|*.tsx|*.css|*.scss|*.sh|*.bat|*.ps1|*.psm1|*.bash|*.zsh|*.cs|*.json|*.xml)
           bat --color=always --style="numbers,header,changes" "$path"
