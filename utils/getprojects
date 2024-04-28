@@ -55,6 +55,7 @@ EOF
 }
 
 get_locations () {
+  [ -z "$1" ] && [ "$2" = true ] && return
   local locations_file="${1:-"$base_dir/locations"}"
   # Get single directories
   if [ -f "$locations_file" ]; then
@@ -62,13 +63,14 @@ get_locations () {
       [[ "$dir" =~ ^# ]] && continue
       dir_path=$(eval "printf '%s' $dir 2>/dev/null" | sed -E 's/^[[:space:]]*//' | sed -E 's/[[:space:]]*$//')
       dir_path=$(realpath "$dir_path" 2>/dev/null)
-      # [ -d "$dir_path" ] && printf "%s\n" "${dir_path%/}"
-      [ -d "$dir_path" ] && all_directories+=("${dir_path%/}")
+      [ -d "$dir_path" ] && printf "%s\n" "${dir_path%/}"
+      # [ -d "$dir_path" ] && all_directories+=("${dir_path%/}")
     done < "$locations_file"
   fi
 }
 
 get_directories () {
+  [ -z "$1" ] && [ "$2" = true ] && return
   local directories_file="${1:-"$base_dir/directories"}"
   # Get content from listed directories
   if [ -f "$directories_file" ]; then
@@ -79,8 +81,8 @@ get_directories () {
       if [ -d "$dir_path" ]; then
         locations=($(fd --type 'directory' --type 'symlink' --max-depth 1 . "$dir_path"))
         for lock in "${locations[@]}"; do
-          # [ -d "$lock" ] && printf "%s\n" "${lock%/}"
-          [ -d "$lock" ] && all_directories+=("${lock%/}")
+          [ -d "$lock" ] && printf "%s\n" "${lock%/}"
+          # [ -d "$lock" ] && all_directories+=("${lock%/}")
         done
       fi
     done < "$directories_file"
@@ -91,19 +93,21 @@ get_directories_from_path () {
   [ ! -d "$1" ] && return
   local locations=($(fd --type 'directory' --type 'symlink' --max-depth 1 . "$1"))
   for lock in "${locations[@]}"; do
-    # [ -d "$lock" ] && printf "%s\n" "${lock%/}"
-    [ -d "$lock" ] && all_directories+=("${lock%/}")
+    [ -d "$lock" ] && printf "%s\n" "${lock%/}"
+    # [ -d "$lock" ] && all_directories+=("${lock%/}")
   done
 }
 
 # Default behavior - Unique list of items from files
 if [ "$#" = 0 ]; then
-  get_locations
-  get_directories
+  {
+    get_locations &
+    get_directories &
+  } | sort -u
 
-  [ -z "$all_directories" ] && exit
+  # [ -z "$all_directories" ] && exit
 
-  printf "%s\n" "${all_directories[@]}" | sort -u
+  # printf "%s\n" "${all_directories[@]}" | sort -u
   exit 0
 fi
 
@@ -177,34 +181,38 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [ "$show_locations" = true ]; then
-  get_locations
-fi
+print_projects () {
+  if [ "$show_locations" = true ]; then
+    get_locations &
+  fi
 
-if [ "$show_directories" = true ]; then
-  get_directories
-fi
+  if [ "$show_directories" = true ]; then
+    get_directories &
+  fi
 
-for location in "${locations_to_get[@]}"; do
-  get_locations "$location"
-done
+  for location in "${locations_to_get[@]}"; do
+    get_locations "$location" true &
+  done
 
-for directory in "${directories_to_get[@]}"; do
-  get_directories "$directory"
-done
+  for directory in "${directories_to_get[@]}"; do
+    get_directories "$directory" true &
+  done
 
-for include in "${included[@]}"; do
-  # printf "%s\n" "${include%/}"
-  all_directories+=("${include%/}")
-done
+  for include in "${included[@]}"; do
+    printf "%s\n" "${include%/}" &
+    # all_directories+=("${include%/}")
+  done
 
-for path in "${paths[@]}"; do
-  get_directories_from_path "$path"
-done
+  for path in "${paths[@]}"; do
+    get_directories_from_path "$path" &
+  done
+}
 
 if [ "$unique" = true ]; then
-  printf "%s\n" "${all_directories[@]}" | sort -u
+  # printf "%s\n" "${all_directories[@]}" | sort -u
+  print_projects | sort -u
 else
-  printf "%s\n" "${all_directories[@]}"
+  # printf "%s\n" "${all_directories[@]}"
+  print_projects | cat
 fi
 

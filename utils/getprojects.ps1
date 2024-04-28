@@ -80,7 +80,8 @@ function expand_path ([string] $string_path) {
 }
 
 # Get single directories
-function get_locations ([String] $FilePath) {
+function get_locations ([String] $FilePath, [Switch] $RquiredPath) {
+  if ($RquiredPath -and (-not $FilePath)) { return }
   $locations_file = if ($FilePath) { $FilePath } else { "$base_dir/locations" }
   if (Test-Path -PathType Leaf -Path "$locations_file" -ErrorAction SilentlyContinue) {
     Get-Content "$locations_file" | % {
@@ -98,7 +99,8 @@ function get_locations ([String] $FilePath) {
 }
 
 # Get content from listed directories
-function get_directories ([String] $FilePath) {
+function get_directories ([String] $FilePath, [Switch] $RquiredPath) {
+  if ($RquiredPath -and (-not $FilePath)) { return }
   $directories_file = if ($FilePath) { $FilePath } else { "$base_dir/directories" }
   if (Test-Path -PathType Leaf -Path "$directories_file" -ErrorAction SilentlyContinue) {
     Get-Content "$directories_file" | % {
@@ -154,13 +156,13 @@ if ($Directories) {
 
 if ($FileLocations) {
   foreach ($location in $FileLocations) {
-    get_locations $location
+    get_locations $location -RquiredPath
   }
 }
 
 if ($FileDirectories) {
   foreach ($directory in $FileDirectories) {
-    get_directories $directory
+    get_directories $directory -RquiredPath
   }
 }
 
