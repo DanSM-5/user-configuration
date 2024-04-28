@@ -47,7 +47,7 @@ if [ -f "$path" ]; then
   MIME=$(file --dereference --mime -- "$path")
   FILE_LENGTH=$(( ${#path} + 2 ))
   CLEAN_MIME="${MIME:FILE_LENGTH}"
-  IMAGE_SIZE=75x75
+  IMAGE_SIZE="${PREVIEW_IMAGE_SIZE:-75x75}"
 
   case "$CLEAN_MIME" in
     # Files

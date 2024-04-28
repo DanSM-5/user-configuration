@@ -83,7 +83,7 @@ elseif ((Test-Path $path -PathType leaf) -or (eza -l $path *> $null && $true)) {
   $MIME = file --dereference --mime -- "$path"
   $FILE_LENGTH = $path.Length + 2
   $CLEAN_MIME =  $MIME.Substring($FILE_LENGTH)
-  $IMAGE_SIZE = '75x75'
+  $IMAGE_SIZE = if ($env:PREVIEW_IMAGE_SIZE) { $env:PREVIEW_IMAGE_SIZE } else { '75x75' }
 
   switch -Regex ($CLEAN_MIME) {
     # directory - It can match here due to the eza check
