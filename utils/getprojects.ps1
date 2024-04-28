@@ -67,6 +67,8 @@ function help () {
 "@
 }
 
+$dirsep = if ($IsWindows) { '\' } else { '/' }
+
 $base_dir = if ($Source) { $Source }
   elseif ($env:PROJECTS_LOCATION) { $env:PROJECTS_LOCATION }
   elseif ($user_conf_path) { "$user_conf_path/prj" }
@@ -122,8 +124,9 @@ function get_directories ([String] $FilePath, [Switch] $RquiredPath) {
 }
 
 function get_directories_from_path ([String] $DirPath) {
-  if (-not (Test-Path -PathType Container -Path $DirPath -ErrorAction SilentlyContinue)) { return }
-  $locations = @( fd --type 'directory' --type 'symlink' --max-depth 1 . "$DirPath" )
+  $target_path = $DirPath.Replace('~', $HOME).Replace('\\', $dirsep).Replace('/', $dirsep).Trim()
+  if (-not (Test-Path -PathType Container -Path $target_path -ErrorAction SilentlyContinue)) { return }
+  $locations = @( fd --type 'directory' --type 'symlink' --max-depth 1 . "$target_path" )
   foreach ($lock in $locations) {
     if (Test-Path -PathType Container -Path $lock -ErrorAction SilentlyContinue) {
       $lock = $lock -Replace '\\$', ''
