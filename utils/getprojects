@@ -58,13 +58,13 @@ get_locations () {
   local locations_file="${1:-"$base_dir/locations"}"
   # Get single directories
   if [ -f "$locations_file" ]; then
-    for dir in $(cat "$locations_file"); do
+    while IFS="" read -r dir || [ -n "$dir" ]; do
       [[ "$dir" =~ ^# ]] && continue
       dir_path=$(eval "printf '%s' $dir 2>/dev/null" | sed -E 's/^[[:space:]]*//' | sed -E 's/[[:space:]]*$//')
       dir_path=$(realpath "$dir_path" 2>/dev/null)
       # [ -d "$dir_path" ] && printf "%s\n" "${dir_path%/}"
       [ -d "$dir_path" ] && all_directories+=("${dir_path%/}")
-    done
+    done < "$locations_file"
   fi
 }
 
@@ -72,7 +72,7 @@ get_directories () {
   local directories_file="${1:-"$base_dir/directories"}"
   # Get content from listed directories
   if [ -f "$directories_file" ]; then
-    for dir in $(cat "$directories_file"); do
+    while IFS="" read -r dir || [ -n "$dir" ]; do
       [[ "$dir" =~ ^# ]] && continue
       dir_path=$(eval "printf '%s' $dir 2>/dev/null" | sed -E 's/^[[:space:]]*//' | sed -E 's/[[:space:]]*$//')
       dir_path=$(realpath "$dir_path" 2>/dev/null)
@@ -83,7 +83,7 @@ get_directories () {
           [ -d "$lock" ] && all_directories+=("${lock%/}")
         done
       fi
-    done
+    done < "$directories_file"
   fi
 }
 
