@@ -54,7 +54,7 @@ show_image () {
       --place="$IMAGE_SIZE@0x0" "$thumbnail" |
         sed '$d' | sed $'$s/$/\e[m/'
   else
-    chafa -s "$IMAGE_SIZE" --clear "$thumbnail"
+    chafa -s "$IMAGE_SIZE" "$thumbnail"
   fi
 }
 
