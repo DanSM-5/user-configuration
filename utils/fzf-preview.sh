@@ -6,6 +6,7 @@
 # - eza
 # - pdftotext (poppler)
 # - gs (ghostscript)
+# - tar
 # - zipinfo
 # - unrar
 # - 7z
@@ -18,13 +19,13 @@
 # - https://github.com/junegunn/fzf.vim
 #   - https://github.com/junegunn/fzf.vim/blob/master/bin/preview.sh
 
-entry_path="$@"
+path="$@"
 
 # NOTE: Remove ' -> ' from symlins for eza until '-X' is fixed
-entry_path="$(printf '%s' "$entry_path" | sed 's| ->.*||')"
+path="$(printf '%s' "$path" | sed 's| ->.*||')"
 
 # Escape if any special character
-# entry_path="$(printf "%q" "$entry_path")"
+# path="$(printf "%q" "$path")"
 
 case "$(uname -a)" in
   MINGW*|MSYS*|CYGWIN*|*NT*)
@@ -35,16 +36,16 @@ case "$(uname -a)" in
     # NOTE: cygwin/msys/gitbash require path
     # conversion from /c/ to C:/ to be picked
     # up correctly by native windows binaries
-    entry_path="$(cygpath -am "$entry_path")"
+    path="$(cygpath -am "$path")"
     ;;
 esac
 
-if [ -f "$entry_path" ]; then
+if [ -f "$path" ]; then
   # Variables
   TEMP_DIR="/tmp/preview_files_script"
   thumbnail="$TEMP_DIR/thumbnail.png"
-  MIME=$(file --dereference --mime -- "$entry_path")
-  FILE_LENGTH=$(( ${#entry_path} + 2 ))
+  MIME=$(file --dereference --mime -- "$path")
+  FILE_LENGTH=$(( ${#path} + 2 ))
   CLEAN_MIME="${MIME:FILE_LENGTH}"
   IMAGE_SIZE=75x75
 
@@ -56,46 +57,55 @@ if [ -f "$entry_path" ]; then
     text/x-shellscript*) ;&
     text/html*) ;&
     text/plain*)
-      bat --color=always --style="numbers,header,changes" "$entry_path"
+      bat --color=always --style="numbers,header,changes" "$path"
       ;;
     # SVG
     image/svg+xml*)
       mkdir -p "$TEMP_DIR"
-      magick convert "$entry_path" "$thumbnail"
+      magick convert "$path" "$thumbnail"
       chafa -s "$IMAGE_SIZE" "$thumbnail" || printf '%s\n' 'Error previewing the SVG'
       ;;
     # Images
     image/*)
-      chafa -s "$IMAGE_SIZE" "$entry_path" || printf '%s\n' 'Error previewing the image'
+      chafa -s "$IMAGE_SIZE" "$path" || printf '%s\n' 'Error previewing the image'
       ;;
     # PDFs
     application/pdf*)
       mkdir -p "$TEMP_DIR"
-      printf '%s\n\n' "File: $entry_path"
+      printf '%s\n\n' "File: $path"
       # Using Ghostscript for image preview
-      gs -o "$thumbnail" -sDEVICE=pngalpha -dLastPage=1 "$entry_path" &>/dev/null
+      gs -o "$thumbnail" -sDEVICE=pngalpha -dLastPage=1 "$path" &>/dev/null
       chafa -s "$IMAGE_SIZE" "$thumbnail" || printf '%s\n' 'Error previewing the PDF'
 
       printf "\n\n"
       # Pdftotext to get sample pages
       set -o pipefail
-      pdftotext -f 1 -l 10 -simple "$entry_path" - | bat -p --style="header" || printf '%s\n' 'Error previewing content pdf file'
+      pdftotext -f 1 -l 10 -simple "$path" - | bat -p --style="header" || printf '%s\n' 'Error previewing content pdf file'
       ;;
     # Zip
     application/zip*)
-      7z l "$entry_path" || unzip -l "$entry_path" || printf '%s\n' 'Error previewing zip archive'
+      7z l "$path" || unzip -l "$path" || printf '%s\n' 'Error previewing zip archive'
       ;;
     # Rar
     application/x-rar*)
-      7z l "$entry_path" || unrar l "$entry_path" || printf '%s\n' 'Error previewing rar archive'
+      7z l "$path" || unrar l "$path" || printf '%s\n' 'Error previewing rar archive'
       ;;
     # Iso
     application/x-iso9660-image*)
-      7z l "$entry_path" || printf '%s\n' 'Error previewing iso archive'
+      7z l "$path" || printf '%s\n' 'Error previewing iso archive'
       ;;
     # 7z
     application/x-7z-compressed*)
-      7z l "$entry_path" || printf '%s\n' 'Error previewing 7z archive'
+      7z l "$path" || printf '%s\n' 'Error previewing 7z archive'
+      ;;
+    # Database sqlite3
+    application/vnd.sqlite3*)
+      printf '%s\n' "File: $path"
+      printf '\n'
+      printf '%s' "Schema: "
+      sqlite3 "$path" .schema
+      printf '%s' "Tables: "
+      sqlite3 "$path" .table
       ;;
     # Videos
     video/x-matroska*) ;&
@@ -103,85 +113,85 @@ if [ -f "$entry_path" ]; then
     video/webm*) ;&
     video/mp4*)
       mkdir -p "$TEMP_DIR"
-      ffmpeg -y -i "$entry_path" -vframes 1 "$thumbnail" &> /dev/null
+      ffmpeg -y -i "$path" -vframes 1 "$thumbnail" &> /dev/null
       chafa -s "$IMAGE_SIZE" "$thumbnail" || printf '%s\n' 'Error previewing the video'
       ;;
     *)
       # If mime type fails then try by file extension
-      case "$entry_path" in
-        *.tar*|*.tgz)
-          7z l "$entry_path" || tar tf "$entry_path" || printf '%s\n' 'Error previewing tar archive'
+      case "$path" in
+        *.tar*|*.tgz|*.tbz|*.tbz2)
+          7z l "$path" || tar tf "$path" || printf '%s\n' 'Error previewing tar archive'
           ;;
         *.zip)
-          # zipinfo "$entry_path"
-          7z l "$entry_path" || unzip -l "$entry_path" || printf '%s\n' 'Error previewing zip archive'
+          # zipinfo "$path"
+          7z l "$path" || unzip -l "$path" || printf '%s\n' 'Error previewing zip archive'
           ;;
         *.rar)
-          7z l "$entry_path" || unrar l "$entry_path" || printf '%s\n' 'Error previewing rar archive'
+          7z l "$path" || unrar l "$path" || printf '%s\n' 'Error previewing rar archive'
           ;;
         *.7z)
-          7z l "$entry_path" || printf '%s\n' 'Error previewing 7z archive'
+          7z l "$path" || printf '%s\n' 'Error previewing 7z archive'
           ;;
         *.iso)
-          7z l "$entry_path" || printf '%s\n' 'Error previewing iso archive'
+          7z l "$path" || printf '%s\n' 'Error previewing iso archive'
           ;;
-        *.avi|*.mp4|*.mkv)
+        *.avi|*.mp4|*.mkv|*.webm|*.wmv)
           mkdir -p "$TEMP_DIR"
-          ffmpeg -y -i "$entry_path" -vframes 1 "$thumbnail" &> /dev/null
+          ffmpeg -y -i "$path" -vframes 1 "$thumbnail" &> /dev/null
           chafa -s "$IMAGE_SIZE" "$thumbnail" || printf '%s\n' 'Error previewing the video'
           ;;
         *.pdf)
             mkdir -p "$TEMP_DIR"
-            printf '%s\n\n' "File: $entry_path"
+            printf '%s\n\n' "File: $path"
             # Using Ghostscript for image preview
-            gs -o "$thumbnail" -sDEVICE=pngalpha -dLastPage=1 "$entry_path" &>/dev/null
+            gs -o "$thumbnail" -sDEVICE=pngalpha -dLastPage=1 "$path" &>/dev/null
             chafa -s "$IMAGE_SIZE" "$thumbnail" || printf '%s\n' 'Error previewing the PDF'
 
             printf "\n\n"
             # Pdftotext to get sample pages
             set -o pipefail
-            pdftotext -f 1 -l 10 -simple "$entry_path" - | bat -p --style="header" || printf '%s\n' 'Error previewing content pdf file'
+            pdftotext -f 1 -l 10 -simple "$path" - | bat -p --style="header" || printf '%s\n' 'Error previewing content pdf file'
             ;;
         *.jpg|*.jpeg|*.png|*.bmp)
-            chafa -s "$IMAGE_SIZE" "$entry_path" || printf '%s\n' 'Error previewing the image'
+            chafa -s "$IMAGE_SIZE" "$path" || printf '%s\n' 'Error previewing the image'
             ;;
         *.svg)
           mkdir -p "$TEMP_DIR"
-          magick convert "$entry_path" "$thumbnail"
+          magick convert "$path" "$thumbnail"
           chafa -s "$IMAGE_SIZE" "$thumbnail" || printf '%s\n' 'Error previewing the SVG'
           ;;
-        *.txt|*.md|*.htm*|*.js|*.jsx|*.ts|*.tsx|*.css|*.scss|*.sh|*.bat|*.ps?1|*.psm1|*.bash|*.zsh|*.cs|*.json|*.xml)
-          bat --color=always --style="numbers,header,changes" "$entry_path"
+        *.txt|*.md|*.htm*|*.js|*.jsx|*.ts|*.tsx|*.css|*.scss|*.sh|*.bat|*.ps1|*.psm1|*.bash|*.zsh|*.cs|*.json|*.xml)
+          bat --color=always --style="numbers,header,changes" "$path"
           ;;
         *)
           # Fallback to bat
           printf '%s\n' "Unkown MIME type:" "$CLEAN_MIME"
           printf "\n\n"
-          bat --color=always --style="numbers,header" "$entry_path"
+          bat --color=always --style="numbers,header" "$path"
           ;;
       esac
   esac
-elif [ -d "$entry_path" ]; then
+elif [ -d "$path" ]; then
   # Print filename
-  printf "Path: $(realpath "$entry_path" 2> /dev/null || printf '%s' "$entry_path")\n\n"
+  printf "Path: $(realpath "$path" 2> /dev/null || printf '%s' "$path")\n\n"
 
   # Detect if on git reposiry. If so, print last commit information
-  pushd "$entry_path" &> /dev/null
+  pushd "$path" &> /dev/null
   if (git rev-parse HEAD > /dev/null 2>&1); then
     git log --color=always -1 2> /dev/null
     printf "\n"
   fi
   popd &> /dev/null
 
-  # eza -AF --oneline --color=always --icons --group-directories-first --dereference "$entry_path" 2> /dev/null ||
+  # eza -AF --oneline --color=always --icons --group-directories-first --dereference "$path" 2> /dev/null ||
 
   # Preview directory
   # Try erd, then eza, then ls, then fallback message
-  erd --layout inverted --color force --level 3 --suppress-size -I -- "$entry_path" 2> /dev/null ||
-    eza -A --tree --level=3 --color=always --icons=always --dereference "$entry_path" 2> /dev/null ||
-    ls -AFL --color=always "$entry_path" 2> /dev/null ||
-    printf "\nCannot access directory $entry_path"
+  erd --layout inverted --color force --level 3 --suppress-size -I -- "$path" 2> /dev/null ||
+    eza -A --tree --level=3 --color=always --icons=always --dereference "$path" 2> /dev/null ||
+    ls -AFL --color=always "$path" 2> /dev/null ||
+    printf "\nCannot access directory $path"
 else
-  printf '%s' "Not identified: $entry_path"
+  printf '%s' "Not identified: $path"
 fi
 
