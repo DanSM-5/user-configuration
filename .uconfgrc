@@ -56,7 +56,16 @@ detect_shell () {
 }
 
 set_linux () {
-  # export IS_LINUX=true
+  # Empty as it is expected the next path section to add its own path separator
+  export WIN_ROOT=""
+  export WUSER="$USER"
+  export USERNAME="$USER"
+  export WIN_HOME="$HOME"
+  export APPDATA="$HOME/.config"
+  export LOCALAPPDATA="$HOME/.config"
+  export USERPROFILE="$HOME"
+  export TEMP=/tmp
+
   if command_exists "/home/linuxbrew/.linuxbrew/bin/brew"; then
     # Linux brew
     eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
@@ -84,6 +93,13 @@ set_linux () {
 set_wsl () {
   # Windows file system
   export WIN_ROOT="/mnt/c"
+  export WUSER="$(cmd.exe /c "echo %USERNAME%" 2>/dev/null)"
+  export USERNAME="$WUSER"
+  export WIN_HOME="$WIN_ROOT/Users/$WUSER"
+  export APPDATA="$WIN_HOME/AppData/Roaming"
+  export LOCALAPPDATA="$WIN_HOME/AppData/Local"
+  export USERPROFILE="$HOME"
+  export TEMP=/tmp
 }
 
 set_gitbash () {
@@ -98,15 +114,36 @@ set_gitbash () {
 
   # Windows file system
   export WIN_ROOT="/c"
+  export WUSER="$USERNAME"
+  export WIN_HOME="$HOME"
 }
 
 set_termux () {
-  :
+  export WIN_ROOT="${PREFIX%/usr}"
+  export USER="termux"
+  export WUSER="$USER"
+  export USERNAME="$USER"
+  export WIN_HOME="$HOME"
+  export APPDATA="$HOME/.config"
+  export LOCALAPPDATA="$HOME/.config"
+  export USERPROFILE="$HOME"
+  export TEMP="$HOME/tmp"
 }
 
 set_mac () {
-  # export IS_MAC=true
+  # Empty as it is expected the next path section to add its own path separator
+  export WIN_ROOT=""
+  export WUSER="$USER"
+  export USERNAME="$USER"
+  export WIN_HOME="$HOME"
+  export APPDATA="$HOME/.config"
+  export LOCALAPPDATA="$HOME/.config"
+  export USERPROFILE="$HOME"
+  export TEMP=/tmp
+
+  # Silence mac log
   export BASH_SILENCE_DEPRECATION_WARNING=1
+
   if command_exists brew; then
     # NVM configuration
     export NVM_DIR="$HOME/.nvm"
