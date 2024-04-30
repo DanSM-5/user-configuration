@@ -367,7 +367,7 @@ set_general_after () {
       --bind \"ctrl-f:change-prompt(Files> )+reload(fd ${FD_SHOW_OPTIONS[@]} ${FD_EXCLUDE_OPTIONS[@]} --color=always --type file)\"
       --bind \"ctrl-d:change-prompt(Dirs> )+reload(fd ${FD_SHOW_OPTIONS[@]} ${FD_EXCLUDE_OPTIONS[@]} --color=always --type directory)\"
       --bind 'ctrl-t:change-prompt(CWD> )+reload(eza --color=always --all --dereference --group-directories-first \$PWD)'
-      --bind 'ctrl-y:execute-silent(cat {+f} | xargs | \$clipboard_copy)+abort'
+      --bind 'ctrl-y:execute-silent(cat '{+f}' | xargs | \$clipboard_copy)+abort'
       --bind 'ctrl-o:execute-silent($user_scripts_path/bin/start {})+abort'
       --bind 'alt-a:select-all'
       --bind 'alt-d:deselect-all'
