@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+content="$@"
+
+if [ -f "$content" ]; then
+  # Surround each selected line with single quotes
+  # This requires double wrap the content in " then in ' so xargs don't remove both pairs
+  awk "NF { print \"\\\"\"  \"'\" \$0 \"'\" \"\\\"\" }" "$content" | xargs | clip-copy
+  exit 0
+fi
+
+# "$clipboard_copy"
+clip-copy "$content"
+
