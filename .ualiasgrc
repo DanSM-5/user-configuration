@@ -585,14 +585,26 @@ cprj () {
     return
   fi
 
-  local selection=$(printf "%s\n" "${directories[@]}" |
+  local fd_command="fd --color=always --type file ${FD_SHOW_OPTIONS[@]} ${FD_EXCLUDE_OPTIONS[@]} . {}"
+
+  if [ "$IS_WINSHELL" = true ]; then
+    local win_user_conf="$(cygpath -am "$user_conf_path")"
+    local reload_command="set user_conf_path=$win_user_conf; pwsh -NoLogo -NonInteractive -NoProfile -File $win_user_conf/utils/getprojects.ps1"
+  else
+    local reload_command="$user_conf_path/utils/getprojects"
+  fi
+
+  local selection=($(printf "%s\n" "${directories[@]}" |
     fzf-defaults \
-      --cycle \
+      --no-multi \
+      --ansi --cycle \
       --info=inline \
       --header 'Select project directory: ' \
-      --prompt 'Prj> ' \
+      --prompt 'Projs> ' \
+      --bind "ctrl-f:change-prompt(Files> )+reload($fd_command)+clear-query+change-multi+unbind(ctrl-f)" \
+      --bind "ctrl-r:change-prompt(Projs> )+reload($reload_command)+rebind(ctrl-f)+clear-query+change-multi(0)" \
       --preview "$fzf_preview_normal" \
-  )
+  ))
 
   # --bind 'alt-a:select-all' \
   # --bind 'alt-d:deselect-all' \
@@ -600,12 +612,17 @@ cprj () {
     return
   fi
 
-  if [ "$return_dir" = '-r' ]; then
-    printf '%s' "$selection"
+  if ! [ -d "$selection" ]; then
+    "$PREFERED_EDITOR" "${selection[@]}"
     return
   fi
 
-  cd "$selection"
+  if [ "$return_dir" = '-r' ]; then
+    printf '%s' "${selection[@]}"
+    return
+  fi
+
+  cd "${selection[@]}"
 }
 
 # Add an "alert" alias for long running commands.  Use like so:

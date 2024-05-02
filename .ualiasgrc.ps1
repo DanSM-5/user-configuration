@@ -288,17 +288,30 @@ function cprj () {
     return
   }
 
+  $fd_command = "fd --color=always --type file $FD_SHOW_OPTIONS $FD_EXCLUDE_OPTIONS . {}"
+  $reload_command = "pwsh -NoLogo -NonInteractive -NoProfile -File $user_conf_path/utils/getprojects.ps1"
+
   $options = getFzfOptions
-  $selection = $directories |
-    fzf @options `
-      --cycle `
-      --info=inline `
-      --header 'Select project directory: ' `
-      --prompt 'Prj> '
+  $selection = @(
+    $directories |
+      fzf @options `
+        --no-multi `
+        --ansi --cycle `
+        --info=inline `
+        --bind "ctrl-f:change-prompt(Files> )+reload($fd_command)+clear-query+change-multi+unbind(ctrl-f)" `
+        --bind "ctrl-r:change-prompt(Projs> )+reload($reload_command)+rebind(ctrl-f)+clear-query+change-multi(0)" `
+        --header 'Select project directory: ' `
+        --prompt 'Projs> '
+  )
 
   if (!$selection) { return }
 
-  Set-Location $selection
+  if (Test-Path -PathType Leaf -Path $selection[0] -ea 0) {
+    & "$env:PREFERED_EDITOR" @selection
+    return
+  }
+
+  Set-Location $selection[0]
 }
 
 function rfv {
