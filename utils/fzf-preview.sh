@@ -63,6 +63,34 @@ show_7z () {
   7z l "$1" || 7zz l "$1"
 }
 
+show_pdf () {
+  path="$1"
+  thumbnail="$2"
+
+  mkdir -p "$TEMP_DIR"
+  printf '%s\n\n' "File: $path"
+  # Using Ghostscript for image preview
+  gs -o "$thumbnail" -sDEVICE=pngalpha -dLastPage=1 "$path" &>/dev/null
+  show_image "$thumbnail" || printf '%s\n' 'Error previewing the PDF'
+
+  printf "\n\n"
+  # Pdftotext to get sample pages
+  set -o pipefail
+
+  pdftotext_flags=(
+    '-f'
+    '1'
+    '-l'
+    '10'
+  )
+
+  if [[ "$(uname -a)" =~ .*MSYS.*|.*MINGW.*|.*CYGWIN.*|.*NT.* ]]; then
+    pdftotext_flags+=('-simple')
+  fi
+
+  pdftotext "${pdftotext_flags[@]}" "$path" - | bat -p --style="header" || printf '%s\n' 'Error previewing content pdf file'
+}
+
 case "$(uname -a)" in
   MINGW*|MSYS*|CYGWIN*|*NT*)
     # You can arrive here from powershell
@@ -105,15 +133,7 @@ if [ -f "$path" ]; then
     # PDFs
     application/pdf*)
       mkdir -p "$TEMP_DIR"
-      printf '%s\n\n' "File: $path"
-      # Using Ghostscript for image preview
-      gs -o "$thumbnail" -sDEVICE=pngalpha -dLastPage=1 "$path" &>/dev/null
-      show_image "$thumbnail" || printf '%s\n' 'Error previewing the PDF'
-
-      printf "\n\n"
-      # Pdftotext to get sample pages
-      set -o pipefail
-      pdftotext -f 1 -l 10 -simple "$path" - | bat -p --style="header" || printf '%s\n' 'Error previewing content pdf file'
+      show_pdf "$path" "$thumbnail"
       ;;
     # Zip
     application/zip*)
@@ -175,15 +195,7 @@ if [ -f "$path" ]; then
           ;;
         *.pdf)
             mkdir -p "$TEMP_DIR"
-            printf '%s\n\n' "File: $path"
-            # Using Ghostscript for image preview
-            gs -o "$thumbnail" -sDEVICE=pngalpha -dLastPage=1 "$path" &>/dev/null
-            show_image "$thumbnail" || printf '%s\n' 'Error previewing the PDF'
-
-            printf "\n\n"
-            # Pdftotext to get sample pages
-            set -o pipefail
-            pdftotext -f 1 -l 10 -simple "$path" - | bat -p --style="header" || printf '%s\n' 'Error previewing content pdf file'
+            show_pdf "$path" "$thumbnail"
             ;;
         *.jpg|*.jpeg|*.png|*.bmp)
             show_image "$path" || printf '%s\n' 'Error previewing the image'
