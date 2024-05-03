@@ -289,7 +289,7 @@ function cprj () {
   }
 
   $fd_command = "fd --color=always --type file $FD_SHOW_OPTIONS $FD_EXCLUDE_OPTIONS . {}"
-  $reload_command = "pwsh -NoLogo -NonInteractive -NoProfile -File $user_conf_path/utils/getprojects.ps1 --source $user_conf_path/prj --locations --directories --unique"
+  $reload_command = "pwsh -NoLogo -NonInteractive -NoProfile -File $user_conf_path/utils/getprojects.ps1"
 
   $options = getFzfOptions
   $selection = @(
