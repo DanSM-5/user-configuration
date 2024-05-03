@@ -596,7 +596,7 @@ cprj () {
 
   if [ "$IS_WINSHELL" = true ]; then
     local win_user_conf="$(cygpath -am "$user_conf_path")"
-    local reload_command="set user_conf_path=$win_user_conf; pwsh -NoLogo -NonInteractive -NoProfile -File $win_user_conf/utils/getprojects.ps1"
+    local reload_command="pwsh -NoLogo -NonInteractive -NoProfile -File $win_user_conf/utils/getprojects.ps1 --source $win_user_conf/prj --unique --directories --locations"
   else
     local reload_command="$user_conf_path/utils/getprojects"
   fi
