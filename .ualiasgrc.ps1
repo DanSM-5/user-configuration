@@ -449,6 +449,7 @@ function npm-list {
 function nlg { npm list -g --dept=0 }
 
 function nr { npm run $args }
+function mr { npm run $args }
 
 function fnr {
   if ( -not (Test-Path package.json) ) {
@@ -456,15 +457,27 @@ function fnr {
     return
   }
 
-  $query = "$args"
+  $runner = if ($args[0]) { $args[0] } else { 'npm' }
+  $query = $args[1..$args.Length]
+  $runner_func = $null
 
-  $selection = "$(cat package.json |
+  switch -Regex ("$runner") {
+    "^(m|pnpm|mr)$" { 
+      $runner_func = { pnpm run @args }
+    }
+    "^(n|npm|nr|-)$" {
+      $runner_func = { npm run @args } 
+    }
+  } 
+
+  $selection = "$(Get-Content package.json |
     jq -r '.scripts | keys[]' |
     sort |
     Invoke-Fzf -Query "$query" -Height 50% -MinHeight 20 -Border)"
 
   if( -not $selection ) { return }
-  npm run $selection
+
+  Invoke-Command $runner_func -ArgumentList $selection
 }
 
 

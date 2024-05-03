@@ -508,19 +508,26 @@ fnr () {
   fi
 
   local runner="${1:-npm}"
-      # *.tbz)        tar xjvf "$1" "${@:2}";;
   local query="${@:2}"
-  if [ "$runner" = "-" ]; then runner=npm; fi
-  local selection="$(cat package.json |
-    jq -r '.scripts | keys[]' |
-    sort |
-    fzf --query "$query" --height 50% --min-height 20 --border)"
 
-  if [ -z "$selection" ]; then
-    return 0
-  fi
+  # Escope for local functions
+  (
+    case "$runner" in
+      m|pnpm|mr) runner_func () { pnpm run "$@"; };;
+      n|npm|nr|-) runner_func () { npm run "$@"; };;
+    esac
 
-  "$runner" run "$selection"
+    local selection="$(jq -r '.scripts | keys[]' < package.json |
+      sort |
+      fzf --no-multi --query "$query" \
+        --height 50% --min-height 20 --border)"
+
+    if [ -z "$selection" ]; then
+      return 0
+    fi
+
+    runner_func "$selection"
+  )
 }
 
 # Example quick_access
@@ -640,6 +647,7 @@ alias aptrm="sudo apt-get remove"
 alias npm-list="npm list -g --dept=0"
 alias nlg="npm list -g --dept=0"
 alias nr="npm run"
+alias mr="pnpm run"
 
 # Navigation
 # Nav up n directories
