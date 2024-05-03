@@ -71,7 +71,7 @@ $dirsep = if ($IsWindows) { '\' } else { '/' }
 
 $base_dir = if ($Source) { $Source }
   elseif ($env:PROJECTS_LOCATION) { $env:PROJECTS_LOCATION }
-  elseif ($user_conf_path) { "$user_conf_path/prj" }
+  elseif ($env:user_conf_path) { "$env:user_conf_path/prj" }
   else { $HOME }
 
 function expand_path ([string] $string_path) {
