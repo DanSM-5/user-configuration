@@ -32,7 +32,7 @@ fgf () {
           sed 1,4d |
           bat -p --color=always
         printf "\n"
-        bat --color=always --style="numbers,header,changes" --style=numbers {-1}
+        bat --color=always --style="numbers,header,changes" {-1}
       else
         if command -v erd &>/dev/null; then
           erd --layout inverted --color force --level 3 -I --suppress-size -- {-1}
