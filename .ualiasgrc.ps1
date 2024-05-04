@@ -289,7 +289,7 @@ function cprj () {
   }
 
   $fd_command = "fd --color=always --type file $FD_SHOW_OPTIONS $FD_EXCLUDE_OPTIONS . {}"
-  $reload_command = "pwsh -NoLogo -NonInteractive -NoProfile -File $user_conf_path/utils/getprojects.ps1"
+  $reload_command = "pwsh -NoLogo -NonInteractive -NoProfile -File $user_conf_path${dirsep}utils${dirsep}getprojects.ps1"
 
   $options = getFzfOptions
   $selection = @(
@@ -298,8 +298,16 @@ function cprj () {
         --no-multi `
         --ansi --cycle `
         --info=inline `
+        --header 'CTRL-R: Reload | CTRL-F: Files | CTRL-O: Open | CTRL-Y: Copy' `
         --bind "ctrl-f:change-prompt(Files> )+reload($fd_command)+clear-query+change-multi+unbind(ctrl-f)" `
         --bind "ctrl-r:change-prompt(Projs> )+reload($reload_command)+rebind(ctrl-f)+clear-query+change-multi(0)" `
+        --bind "ctrl-y:execute-silent(pwsh -NoLogo -NonInteractive -NoProfile -File ${user_conf_path}${dirsep}utils${dirsep}copy-helper.ps1 {+f})+abort" `
+        --bind "ctrl-o:execute-silent(pwsh -NoLogo -NoProfile -NonInteractive -Command Start-Process '{}')+abort" `
+        --bind 'alt-a:select-all' `
+        --bind 'alt-d:deselect-all' `
+        --bind 'alt-f:first' `
+        --bind 'alt-l:last' `
+        --bind 'alt-c:clear-query' `
         --header 'Select project directory: ' `
         --prompt 'Projs> '
   )

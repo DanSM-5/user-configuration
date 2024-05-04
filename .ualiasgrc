@@ -593,23 +593,31 @@ cprj () {
   fi
 
   local fd_command="fd --color=always --type file ${FD_SHOW_OPTIONS[@]} ${FD_EXCLUDE_OPTIONS[@]} . {}"
+  local reload_command="$user_conf_path/utils/getprojects"
 
-  if [ "$IS_WINSHELL" = true ]; then
-    local win_user_conf="$(cygpath -am "$user_conf_path")"
-    local reload_command="pwsh -NoLogo -NonInteractive -NoProfile -File $win_user_conf/utils/getprojects.ps1"
-  else
-    local reload_command="$user_conf_path/utils/getprojects"
-  fi
+  # if [ "$IS_WINSHELL" = true ]; then
+  #   local win_user_conf="$(cygpath -am "$user_conf_path")"
+  #   local reload_command="pwsh -NoLogo -NonInteractive -NoProfile -File $win_user_conf/utils/getprojects.ps1"
+  # else
+  #   local reload_command="$user_conf_path/utils/getprojects"
+  # fi
 
   local selection=($(printf "%s\n" "${directories[@]}" |
     fzf-defaults \
       --no-multi \
       --ansi --cycle \
       --info=inline \
-      --header 'Select project directory: ' \
+      --header 'CTRL-R: Reload | CTRL-F: Files | CTRL-O: Open | CTRL-Y: Copy' \
       --prompt 'Projs> ' \
       --bind "ctrl-f:change-prompt(Files> )+reload($fd_command)+clear-query+change-multi+unbind(ctrl-f)" \
       --bind "ctrl-r:change-prompt(Projs> )+reload($reload_command)+rebind(ctrl-f)+clear-query+change-multi(0)" \
+      --bind "ctrl-o:execute-silent(\"$user_scripts_path/bin/start\" {})+abort" \
+      --bind "ctrl-y:execute-silent(\"$user_conf_path/utils/copy-helper\" \"{+f}\")+abort" \
+      --bind 'alt-a:select-all' \
+      --bind 'alt-d:deselect-all' \
+      --bind 'alt-f:first' \
+      --bind 'alt-l:last' \
+      --bind 'alt-c:clear-query' \
       --preview "$fzf_preview_normal" \
   ))
 
@@ -1178,13 +1186,21 @@ if [ "$IS_WSL" = true ]; then
   }
 
   start () {
-    local filepath="$(echo "$@" | trim)"
-    if [ -f "$filepath" ] || [ -d "$filepath" ]; then
-      # Convert path to host version
-      filepath="$(getHostPath "$filepath")"
+    # local filepath="$(echo "$@" | trim)"
+    # if [ -f "$filepath" ] || [ -d "$filepath" ]; then
+    #   # Convert path to host version
+    #   filepath="$(getHostPath "$filepath")"
+    # fi
+
+    # file_explorer_open "$filepath"
+
+    local item="$(printf "%s" "$@" | sed -E 's/^[[:space:]]*//' | sed -E 's/[[:space:]]*$//')"
+
+    if [ -f "$item" ] || [ -d "$item" ]; then
+      item="$(sed "s|wslpath: ||g" <<< "$(wslpath -aw "$item" 2>&1)")"
     fi
 
-    file_explorer_open "$filepath"
+    pwsh.exe -NoLogo -NonInteractive -NoProfile -Command "Start-Process $item"
   }
 
   unset_if_function mpv
