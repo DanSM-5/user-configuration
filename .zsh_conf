@@ -117,6 +117,13 @@ if command -v lf &> /dev/null || command -v ~/.nix-profile/bin/lf &> /dev/null; 
   bindkey -s '^o' 'lfcd\n'
 fi
 
+
+fpath=(
+  ~/.zsh
+  "$user_config_cache/plugins"
+  ${fpath[@]}
+)
+
 # Load fzf support
 if [ -f ~/.fzf.zsh ]; then
   source ~/.fzf.zsh

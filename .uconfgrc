@@ -111,9 +111,6 @@ set_gitbash () {
 
   export MSYS="$MSYS winsymlinks:nativestrict"
 
-  if [ "$IS_ZSH" = true ]; then
-    fpath=(~/.zsh "$user_config_cache/plugins" ${fpath[@]})
-  fi
   # Load fzf helpers
   # [ -f "$HOME/.fzf.bash" ] && source "$HOME/.fzf.bash"
 
