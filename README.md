@@ -67,7 +67,7 @@ Same order happens with the equivalent ps1 scripts
 Clone the repository in your home directory as `.usr_conf` (could be other location and just symlink this file)
 
 ```bash
-git clone https://github.com/DanSM-5/user-configuration .usr_conf
+git clone https://github.com/DanSM-5/user-configuration "$HOME/.usr_conf"
 ```
 
 If using wsl this folder can be symlinked and shared between windows and wsl.
