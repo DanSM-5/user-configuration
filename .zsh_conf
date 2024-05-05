@@ -121,7 +121,7 @@ fi
 fpath=(
   ~/.zsh
   "$user_config_cache/plugins"
-  ${fpath[@]}
+  "${fpath[@]}"
 )
 
 # Load fzf support
