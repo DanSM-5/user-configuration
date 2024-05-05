@@ -62,6 +62,8 @@ get_locations () {
     while IFS="" read -r dir || [ -n "$dir" ]; do
       [[ "$dir" =~ ^# ]] && continue
       dir_path=$(eval "printf '%s' $dir 2>/dev/null" | sed -E 's/^[[:space:]]*//' | sed -E 's/[[:space:]]*$//')
+      # Resolving paths takes around 300ms in gitbash
+      # TODO: Investigate if this line can be safely removed
       dir_path=$(realpath "$dir_path" 2>/dev/null)
       [ -d "$dir_path" ] && printf "%s\n" "${dir_path%/}"
       # [ -d "$dir_path" ] && all_directories+=("${dir_path%/}")
