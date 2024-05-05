@@ -81,14 +81,13 @@ fi
 # Break word chars
 export WORDCHARS="${WORDCHARS//[-_;\~\.\/\\]}"
 
-
-if [ -f ~/.zsh/zsh-nvm/zsh-nvm.plugin.zsh ]; then
+if [ -f "$user_config_cache/plugins/zsh-nvm/zsh-nvm.plugin.zsh" ]; then
   export NVM_DIR="$HOME/.nvm"
   export NVM_LAZY_LOAD=true
   export NVM_COMPLETION=true
   export NVM_CACHE_LOAD=true
   export NVM_CACHE_PATH="$HOME/.cache/.zsh_nvm_cache"
-  source ~/.zsh/zsh-nvm/zsh-nvm.plugin.zsh
+  source "$user_config_cache/plugins/zsh-nvm/zsh-nvm.plugin.zsh"
 fi
 
 # run after cd
@@ -124,16 +123,16 @@ if [ -f ~/.fzf.zsh ]; then
 fi
 
 # Add fzf tab completions
-[ -f "$HOME/user-scripts/fzf-tab-completion/zsh/fzf-zsh-completion.sh" ] && \. "$HOME/user-scripts/fzf-tab-completion/zsh/fzf-zsh-completion.sh"
+[ -f "$user_config_cache/plugins/fzf-tab-completion/zsh/fzf-zsh-completion.sh" ] && \. "$user_config_cache/plugins/fzf-tab-completion/zsh/fzf-zsh-completion.sh"
 
 # Add auto suggestions
 # auto suggestions (Could be plugin of oh-my-zsh  but using oh-my-posh at the moment)
-test -f ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh && source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
+test -f "$user_config_cache/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh" && source "$user_config_cache/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh" 
 
 # Must be the last line of this file
-if [ -f "$HOME/.zsh/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh" ]; then
-  source "$HOME/.zsh/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh"
-elif [ -f "$HOME/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]; then
-  source "$HOME/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+if [ -f "$user_config_cache/plugins/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh" ]; then
+  source "$user_config_cache/plugins/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh"
+elif [ -f "$user_config_cache/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]; then
+  source "$user_config_cache/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 fi
 

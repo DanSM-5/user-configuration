@@ -7,6 +7,7 @@
 $user_conf_path = "${HOME}${dirsep}.usr_conf"
 $user_scripts_path = "${HOME}${dirsep}user-scripts"
 $prj = "${HOME}${dirsep}prj"
+$user_config_cache = "${HOME}${dirsep}.cache${dirsep}.user_config_cache"
 
 $env:PREFERED_EDITOR = 'nvim'
 $env:EDITOR = 'nvim'

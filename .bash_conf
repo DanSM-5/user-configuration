@@ -111,7 +111,7 @@ bind '"\eo":"cprj\C-m"'
 test -f ~/.fzf.bash && source ~/.fzf.bash
 
 # Add fzf tab completions
-if [ -f "$HOME/user-scripts/fzf-tab-completion/bash/fzf-bash-completion.sh" ]; then
+if [ -f "$user_config_cache/plugins/fzf-tab-completion/bash/fzf-bash-completion.sh" ]; then
   export FZF_COMPLETION_AUTO_COMMON_PREFIX=true
   export FZF_COMPLETION_AUTO_COMMON_PREFIX_PART=true
 
@@ -124,8 +124,7 @@ if [ -f "$HOME/user-scripts/fzf-tab-completion/bash/fzf-bash-completion.sh" ]; t
     }
   fi
 
-  \. "$HOME/user-scripts/fzf-tab-completion/bash/fzf-bash-completion.sh"
+  \. "$user_config_cache/plugins/fzf-tab-completion/bash/fzf-bash-completion.sh"
   bind -x '"\t": fzf_bash_completion'
 fi
-
 

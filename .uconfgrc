@@ -8,6 +8,7 @@
 export user_conf_path="$HOME/.usr_conf"
 export user_scripts_path="$HOME/user-scripts"
 export prj="$HOME/prj"
+export user_config_cache="$HOME/.cache/.user_config_cache"
 
 backup_path () {
   export PATH_BACKUP=$(echo -n $PATH | tr ":" "\n")
@@ -38,13 +39,15 @@ detect_shell () {
     export IS_ZSH=true
     export IS_BASH=false
     export SHELL_NAME=zsh
-    test -f "$user_conf_path/.zsh_conf" && source "$user_conf_path/.zsh_conf"
+    # test -f "$user_conf_path/.zsh_conf" && source "$user_conf_path/.zsh_conf"
+    source "$user_conf_path/.zsh_conf"
 
   elif [ -n "$BASH_VERSION" ]; then
     export IS_ZSH=false
     export IS_BASH=true
     export SHELL_NAME=bash
-    test -f "$user_conf_path/.bash_conf" && source "$user_conf_path/.bash_conf"
+    # test -f "$user_conf_path/.bash_conf" && source "$user_conf_path/.bash_conf"
+    source "$user_conf_path/.bash_conf"
 
   else
     echo "[WARNING]: NO VALID CONFIGURATION DETECTED!"
@@ -108,7 +111,9 @@ set_gitbash () {
 
   export MSYS="$MSYS winsymlinks:nativestrict"
 
-  [ "$IS_ZSH" = true ] && fpath=(~/.zsh $fpath)
+  if [ "$IS_ZSH" = true ]; then
+    fpath=(~/.zsh "$user_config_cache/plugins" ${fpath[@]})
+  fi
   # Load fzf helpers
   # [ -f "$HOME/.fzf.bash" ] && source "$HOME/.fzf.bash"
 
