@@ -81,11 +81,8 @@ if ! shopt -oq posix; then
   fi
 fi
 
-# ignore case for completions 
+# ignore case for completions
 bind 'set completion-ignore-case on'
-
-# Load fzf support
-test -f ~/.fzf.bash && source ~/.fzf.bash
 
 if [ "$IS_GITBASH" = true ]; then
   PROMPT_COMMAND='history -a'
@@ -109,4 +106,26 @@ fi
 
 # Alt+o to launch quick project cd
 bind '"\eo":"cprj\C-m"'
+
+# Load fzf support
+test -f ~/.fzf.bash && source ~/.fzf.bash
+
+# Add fzf tab completions
+if [ -f "$HOME/user-scripts/fzf-tab-completion/bash/fzf-bash-completion.sh" ]; then
+  export FZF_COMPLETION_AUTO_COMMON_PREFIX=true
+  export FZF_COMPLETION_AUTO_COMMON_PREFIX_PART=true
+
+  if [ "$IS_GITBASH" = true ]; then
+    # fzf-bash-completion.sh requires pgrep but it is not available in gitbash
+    # using this function as a polyfill for now
+    pgrep () {
+      # Ignore $1 which is always '-P'
+      awk -v ppid="$2" '{ if($3 == ppid) print $2 }' <(ps -ef)
+    }
+  fi
+
+  \. "$HOME/user-scripts/fzf-tab-completion/bash/fzf-bash-completion.sh"
+  bind -x '"\t": fzf_bash_completion'
+fi
+
 

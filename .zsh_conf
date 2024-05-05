@@ -81,10 +81,6 @@ fi
 # Break word chars
 export WORDCHARS="${WORDCHARS//[-_;\~\.\/\\]}"
 
-# Add auto suggestions
-# auto suggestions (Could be plugin of oh-my-zsh  but using oh-my-posh at the moment)
-test -f ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh && source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
-
 
 if [ -f ~/.zsh/zsh-nvm/zsh-nvm.plugin.zsh ]; then
   export NVM_DIR="$HOME/.nvm"
@@ -94,12 +90,6 @@ if [ -f ~/.zsh/zsh-nvm/zsh-nvm.plugin.zsh ]; then
   export NVM_CACHE_PATH="$HOME/.cache/.zsh_nvm_cache"
   source ~/.zsh/zsh-nvm/zsh-nvm.plugin.zsh
 fi
-
-# Load fzf support
-if [ -f ~/.fzf.zsh ]; then
-  source ~/.fzf.zsh
-fi
-
 
 # run after cd
 # chpwd () {
@@ -127,6 +117,18 @@ bindkey -s '^[o' 'cprj\n'
 if command -v lf &> /dev/null || command -v ~/.nix-profile/bin/lf &> /dev/null; then
   bindkey -s '^o' 'lfcd\n'
 fi
+
+# Load fzf support
+if [ -f ~/.fzf.zsh ]; then
+  source ~/.fzf.zsh
+fi
+
+# Add fzf tab completions
+[ -f "$HOME/user-scripts/fzf-tab-completion/zsh/fzf-zsh-completion.sh" ] && \. "$HOME/user-scripts/fzf-tab-completion/zsh/fzf-zsh-completion.sh"
+
+# Add auto suggestions
+# auto suggestions (Could be plugin of oh-my-zsh  but using oh-my-posh at the moment)
+test -f ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh && source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
 
 # Must be the last line of this file
 if [ -f "$HOME/.zsh/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh" ]; then
