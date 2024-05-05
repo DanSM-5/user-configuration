@@ -1128,6 +1128,30 @@ unset_if_function () {
   fi
 }
 
+# Small wrapper to emulate
+# python launcher from windows
+py () {
+  local first="$1"
+  local interpreter="python3"
+
+  case "$first" in
+    -0)
+      # Show all python versions
+      whereis python  | awk '{for (i=2; i<=NF; i++) print $i}'
+      whereis python2 | awk '{for (i=2; i<=NF; i++) print $i}'
+      whereis python3 | awk '{for (i=2; i<=NF; i++) print $i}'
+      return
+      ;;
+    -2*) ;&
+    -3*)
+      shift
+      interpreter="python${first:1}"
+      ;;
+  esac
+
+  "$interpreter" "$@"
+}
+
 if [ "$IS_WINDOWS" = true ]; then
   ptc () {
     local location="${1:-.}" # Current location
@@ -1482,6 +1506,10 @@ else
   elif [ "$IS_GITBASH" = true ]; then
     export clipboard_copy="pbcopy"
     export clipboard_paste="pbpaste"
+
+    # Gitbash should be able to use
+    # Window's python launcher
+    unset_if_function py
 
     file_explorer_open () {
       # Special parsing for windows paths
