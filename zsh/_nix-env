@@ -1,0 +1,12 @@
+#compdef nix-env
+
+# zsh completions for 'nix-env'
+# automatically generated with http://github.com/RobSis/zsh-completion-generator
+local arguments
+
+arguments=(
+  '-r--r--r--[root root 1402 Jan  1  1970 manifest.nix]'
+  '*:filename:_files'
+)
+
+_arguments -s $arguments

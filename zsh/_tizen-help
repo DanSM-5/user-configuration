@@ -1,0 +1,13 @@
+#compdef tizen-help
+
+# zsh completions for 'tizen-help'
+# automatically generated with http://github.com/RobSis/zsh-completion-generator
+local arguments
+
+arguments=(
+  {-h,--help}'[print this message]'
+  {-v,--version}'[print script version]'
+  '*:filename:_files'
+)
+
+_arguments -s $arguments

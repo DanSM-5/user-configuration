@@ -6,6 +6,8 @@ repos=(
   https://github.com/zsh-users/zsh-syntax-highlighting
   ssh://github-personal/DanSM-5/zsh-nvm
   https://github.com/lincheney/fzf-tab-completion
+  # https://github.com/RobSis/zsh-completion-generator.git
+  https://github.com/zsh-users/zsh-completions.git
 )
 
 # Get script location

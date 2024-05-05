@@ -1,0 +1,20 @@
+#compdef getprojects
+
+# zsh completions for 'getprojects'
+# automatically generated with http://github.com/RobSis/zsh-completion-generator
+local arguments
+
+arguments=(
+  {-h,--help}'[print this message]'
+  {-l,--locations}'[print the content from "locations" file]'
+  {-d,--directories}'[print the content from "directories" file]'
+  {-f,--file-locations}'[get "locations" from the specific file provided]'
+  {-b,--file-directories}'[get "directories" from the specific file provided]'
+  {-i,--include}'[return "location" in the list]'
+  {-p,--path}'[get "directories" from specific path (using fd internally)]'
+  {-s,--source}'[use source path as base directory to search for "locations" and "directories" files]'
+  {-u,--unique}'[get a list of unique items]'
+  '*:filename:_files'
+)
+
+_arguments -s $arguments

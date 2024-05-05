@@ -1,0 +1,12 @@
+#compdef nix
+
+# zsh completions for 'nix'
+# automatically generated with http://github.com/RobSis/zsh-completion-generator
+local arguments
+
+arguments=(
+  {--file,--expr}'[relative paths based on the]'
+  '*:filename:_files'
+)
+
+_arguments -s $arguments

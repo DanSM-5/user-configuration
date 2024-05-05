@@ -17,6 +17,12 @@ HISTSIZE=1000
 SAVEHIST=1000
 HISTFILE=~/.zsh_history
 
+
+# Must be sourced before compinit
+# source "$user_config_cache/plugins/zsh-completion-generator/zsh-completion-generator.plugin.zsh"
+# zstyle :plugin:zsh-completion-generator programs bat eza erd
+# Optionally call: gencomp program [help command]
+
 # Use modern completion system
 autoload -Uz compinit
 compinit
@@ -120,7 +126,9 @@ fi
 
 fpath=(
   ~/.zsh
+  "$user_conf_path/zsh"
   "$user_config_cache/plugins"
+  "$user_config_cache/plugins/zsh-completions/src"
   "${fpath[@]}"
 )
 

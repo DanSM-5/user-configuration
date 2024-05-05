@@ -1,0 +1,16 @@
+#compdef oh-my-posh
+
+# zsh completions for 'oh-my-posh'
+# automatically generated with http://github.com/RobSis/zsh-completion-generator
+local arguments
+
+arguments=(
+  {-c,--config}'[config file path]'
+  {-h,--help}'[help for oh-my-posh]'
+  {-i,--init}'[init (deprecated)]'
+  {-s,--shell}'[shell (deprecated)]'
+  '--version[version]'
+  '*:filename:_files'
+)
+
+_arguments -s $arguments

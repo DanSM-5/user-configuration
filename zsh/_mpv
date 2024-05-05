@@ -1,0 +1,19 @@
+#compdef mpv
+
+# zsh completions for 'mpv'
+# automatically generated with http://github.com/RobSis/zsh-completion-generator
+local arguments
+
+arguments=(
+  '--start[seek to given (percent, seconds, or hh:mm:ss) position]'
+  '--no-audio[do not play sound]'
+  '--no-video[do not play video]'
+  '--fs[fullscreen playback]'
+  '--sub-file[specify subtitle file to use]'
+  '--playlist[specify playlist file]'
+  '--list-options[list all mpv options]'
+  '--h[print options which contain the given string in their name]'
+  '*:filename:_files'
+)
+
+_arguments -s $arguments

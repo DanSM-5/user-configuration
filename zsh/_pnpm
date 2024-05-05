@@ -1,0 +1,12 @@
+#compdef pnpm
+
+# zsh completions for 'pnpm'
+# automatically generated with http://github.com/RobSis/zsh-completion-generator
+local arguments
+
+arguments=(
+  {-r,--recursive}'[run the command for each project in the workspace.]'
+  '*:filename:_files'
+)
+
+_arguments -s $arguments

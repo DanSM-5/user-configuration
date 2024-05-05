@@ -1,0 +1,20 @@
+#compdef dua
+
+# zsh completions for 'dua'
+# automatically generated with http://github.com/RobSis/zsh-completion-generator
+local arguments
+
+arguments=(
+  {-t,--threads}'[the amount of threads to use. Defaults to 0, indicating the amount of logical processors. Set to 1 to use only a single thread]'
+  {-f,--format}'[the format with which to print byte counts]'
+  {-A,--apparent-size}'[display apparent size instead of disk usage]'
+  {-l,--count-hard-links}'[count hard-linked files each time they are seen]'
+  {-x,--stay-on-filesystem}'[if set, we will not cross filesystems or traverse mount points]'
+  {-i,--ignore-dirs}'[one or more absolute directories to ignore. Note that these are not ignored if they are passed as input path.]'
+  '--log-file[write a log file with debug information, including panics]'
+  {-h,--help}'[print help (see a summary with -h)]'
+  {-V,--version}'[print version]'
+  '*:filename:_files'
+)
+
+_arguments -s $arguments

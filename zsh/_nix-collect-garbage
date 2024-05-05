@@ -1,0 +1,12 @@
+#compdef nix-collect-garbage
+
+# zsh completions for 'nix-collect-garbage'
+# automatically generated with http://github.com/RobSis/zsh-completion-generator
+local arguments
+
+arguments=(
+  '--argstr[i686-linux.]'
+  '*:filename:_files'
+)
+
+_arguments -s $arguments

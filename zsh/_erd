@@ -1,0 +1,46 @@
+#compdef erd
+
+# zsh completions for 'erd'
+# automatically generated with http://github.com/RobSis/zsh-completion-generator
+local arguments
+
+arguments=(
+  {-c,--config}'[use configuration of named table rather than the top-level table in .erdtree.toml]'
+  {-C,--color}'[mode of coloring output]'
+  {-d,--disk-usage}'[print physical or logical file size]'
+  {-f,--follow}'[follow symlinks]'
+  {-H,--human}'[print disk usage in human-readable format]'
+  {-i,--no-ignore}'[do not respect .gitignore files]'
+  {-I,--icons}'[display file icons]'
+  {-l,--long}'[show extended metadata and attributes]'
+  '--group[show files groups]'
+  '--ino[show each files ino]'
+  '--nlink[show the total number of hardlinks to the underlying inode]'
+  '--octal[show permissions in numeric octal format instead of symbolic]'
+  '--time[which kind of timestamp to use; modified by default]'
+  '--time-format[which format to use for the timestamp; default by default]'
+  {-L,--level}'[maximum depth to display]'
+  {-p,--pattern}'[regular expression (or glob if --glob or --iglob is used) used to match files]'
+  '--glob[enables glob based searching]'
+  '--iglob[enables case-insensitive glob based searching]'
+  {-t,--file-type}'[restrict regex or glob search to a particular file-type]'
+  {-P,--prune}'[remove empty directories from output]'
+  {-s,--sort}'[how to sort entries]'
+  '--dir-order[sort directories before or after all other file types]'
+  {-T,--threads}'[number of threads to use]'
+  {-u,--unit}'[report disk usage in binary or SI units]'
+  {-x,--one-file-system}'[prevent traversal into directories that are on different filesystems]'
+  {-y,--layout}'[which kind of layout to use when rendering the output]'
+  '--no-git[disable traversal of .git directory when traversing hidden files]'
+  '--completions[print completions for a given shell to stdout]'
+  '--dirs-only[only print directories]'
+  '--no-config[dont read configuration file]'
+  '--no-progress[hides the progress indicator]'
+  '--suppress-size[omit disk usage from output]'
+  '--truncate[truncate output to fit terminal emulator window]'
+  {-h,--help}'[print help (see a summary with -h)]'
+  {-V,--version}'[print version]'
+  '*:filename:_files'
+)
+
+_arguments -s $arguments

@@ -1,0 +1,19 @@
+#compdef glow
+
+# zsh completions for 'glow'
+# automatically generated with http://github.com/RobSis/zsh-completion-generator
+local arguments
+
+arguments=(
+  {-a,--all}'[show system files and directories (TUI-mode only)]'
+  '--config[config file (default /home/daniel/.config/glow/glow.yml)]'
+  {-h,--help}'[help for glow]'
+  {-l,--local}'[show local files only; no network (TUI-mode only)]'
+  {-p,--pager}'[display with pager]'
+  {-s,--style}'[style name or JSON path (default "auto")]'
+  {-v,--version}'[version for glow]'
+  {-w,--width}'[word-wrap at width]'
+  '*:filename:_files'
+)
+
+_arguments -s $arguments

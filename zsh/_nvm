@@ -1,0 +1,41 @@
+#compdef nvm
+
+# zsh completions for 'nvm'
+# automatically generated with http://github.com/RobSis/zsh-completion-generator
+local arguments
+
+arguments=(
+  '--no-colors[suppress colored output]'
+  '-s[skip binary download, install from source only.]'
+  '-b[skip source download, install from binary only.]'
+  '--reinstall-packages-from[when installing, reinstall packages installed in <node|iojs|node version number>]'
+  '--lts[when installing, only select from LTS (long-term support) versions]'
+  '--lts[name>                          When installing, only select from versions for a specific LTS line]'
+  '--skip-default-packages[when installing, skip the default-packages file if it exists]'
+  '--latest-npm[after installing, attempt to upgrade to the latest working npm on the given node version]'
+  '--no-progress[disable the progress bar on any downloads]'
+  '--alias[after installing, set the alias specified to the version specified. (same as: nvm alias <name> <version>)]'
+  '--default[after installing, set default alias to the version specified. (same as: nvm alias default <version>)]'
+  '--silent[silences stdout/stderr output]'
+  '--lts[uses automatic LTS (long-term support) alias `lts/*`, if available.]'
+  '--lts[name>                          Uses automatic alias for provided LTS line, if available.]'
+  '--silent[silences stdout/stderr output]'
+  '--lts[uses automatic LTS (long-term support) alias `lts/*`, if available.]'
+  '--lts[name>                          Uses automatic alias for provided LTS line, if available.]'
+  '--silent[silences stdout/stderr output]'
+  '--lts[uses automatic LTS (long-term support) alias `lts/*`, if available.]'
+  '--lts[name>                          Uses automatic alias for provided LTS line, if available.]'
+  '--no-colors[suppress colored output]'
+  '--no-alias[suppress `nvm alias` output]'
+  '--lts[when listing, only show LTS (long-term support) versions]'
+  '--lts[name>                          When listing, only show versions for a specific LTS line]'
+  '--no-colors[suppress colored output]'
+  '--lts[when listing, only select from LTS (long-term support) versions]'
+  '--lts[name>                          When listing, only select from versions for a specific LTS line]'
+  '--silent[silences stdout/stderr output]'
+  '--no-colors[suppress colored output]'
+  '--silent[silences stdout/stderr output when a version is omitted]'
+  '*:filename:_files'
+)
+
+_arguments -s $arguments

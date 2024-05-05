@@ -1,0 +1,36 @@
+#compdef pwsh
+
+# zsh completions for 'pwsh'
+# automatically generated with http://github.com/RobSis/zsh-completion-generator
+local arguments
+
+arguments=(
+  {-File,-f}'[]'
+  {-Command,-c}'[]'
+  {-CommandWithArgs,-cwa}'[]'
+  {-ConfigurationName,-config}'[]'
+  '-ConfigurationFile[]'
+  '-CustomPipeName[]'
+  {-EncodedCommand,-e,-ec}'[]'
+  {-ExecutionPolicy,-ex,-ep}'[]'
+  {-InputFormat,-inp,-if}'[]'
+  {-Interactive,-i}'[]'
+  {-Login,-l}'[]'
+  '-MTA[]'
+  {-NoExit,-noe}'[]'
+  {-NoLogo,-nol}'[]'
+  {-NonInteractive,-noni}'[]'
+  {-NoProfile,-nop}'[]'
+  '-NoProfileLoadTime[]'
+  {-OutputFormat,-o,-of}'[]'
+  {-SettingsFile,-settings}'[]'
+  {-SSHServerMode,-sshs}'[]'
+  '-STA[]'
+  {-Version,-v}'[]'
+  {-WindowStyle,-w}'[]'
+  {-WorkingDirectory,-wd}'[]'
+  '-Help[-?, /?]'
+  '*:filename:_files'
+)
+
+_arguments -s $arguments

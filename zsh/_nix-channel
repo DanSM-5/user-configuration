@@ -1,0 +1,14 @@
+#compdef nix-channel
+
+# zsh completions for 'nix-channel'
+# automatically generated with http://github.com/RobSis/zsh-completion-generator
+local arguments
+
+arguments=(
+  '--add[not automatically perform an update.  Use --update explicitly.]'
+  '--list-generations[]'
+  '--argstr[i686-linux.]'
+  '*:filename:_files'
+)
+
+_arguments -s $arguments
