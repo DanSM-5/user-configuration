@@ -191,7 +191,9 @@ fshow() {
 }
 
 fadd () {
-  local selection=($(fgf "${*:-}"))
+  local selection
+  IFS="
+" selection=( $(fgf "${*:-}" | sed 's/^\"//' | sed 's/\"$//') )
   echo "$selection"
   if [ -n "$selection" ]; then
     git add "${selection[@]}"
@@ -199,7 +201,9 @@ fadd () {
 }
 
 fpad () {
-  local selection=($(fgf "${*:-}"))
+  local selection
+  IFS="
+" selection=( $(fgf "${*:-}" | sed 's/^\"//' | sed 's/\"$//') )
   echo "$selection"
   if [ -n "$selection" ]; then
     git add -p "${selection[@]}"

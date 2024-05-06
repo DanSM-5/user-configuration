@@ -27,16 +27,17 @@ fgf () {
   git -c color.status=always status --short |
   fzf-down -m --ansi --nth 2..,.. \
     --query "$INITIAL_QUERY" \
-    --preview 'if [ -f {-1} ]; then
-        git diff --color=always -- {-1}'"$__page_command__"' |
+    --preview "selected=\$(printf '%s' {2..} | sed 's/^\"//' | sed 's/\"$//') ; if [ -f \"\$selected\" ]; then
+        git diff --color=always -- \"\$selected\"""$__page_command__"' |
           sed 1,4d |
           bat -p --color=always
         printf "\n"
-        bat --color=always --style="numbers,header,changes" {-1}
+        bat --color=always --style="numbers,header,changes" "$selected"
       else
-        if command -v erd &>/dev/null; then
-          erd --layout inverted --color force --level 3 -I --suppress-size -- {-1}
-        else ls -AF --color=always {-1}; fi
+        erd --layout inverted --color force --level 3 --suppress-size -I -- "$selected" 2> /dev/null ||
+          eza -A --tree --level=3 --color=always --icons=always --dereference "$selected" 2> /dev/null ||
+          ls -AFL --color=always "$selected" 2> /dev/null ||
+          printf "\nCannot access directory: $selected"
       fi' |
   cut -c4- | sed 's/.* -> //'
   # --preview '(git diff --color=always -- {-1} | sed 1,4d | bat -p --color=always; cat {-1})' |
