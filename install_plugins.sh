@@ -25,7 +25,8 @@ mkdir -p "$plugins"
 
 pushd "$plugins"
 for repo in "${repos[@]}"; do
-  dir_location="$plugins/${repo##*/}"
+  dir="${repo##*/}"
+  dir_location="$plugins/${dir%.*}"
   if ! [ -d "$dir_location" ]; then
     git clone "$repo"
   fi
