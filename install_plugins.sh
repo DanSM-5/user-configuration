@@ -19,9 +19,12 @@ repos=(
 # done
 # DIR=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
 
-plugins="$HOME/.cache/.user_config_cache/plugins"
+cache_dir="$HOME/.cache/.user_config_cache"
+plugins="$cache_dir/plugins"
+completions="$cache_dir/completions"
 
 mkdir -p "$plugins"
+mkdir -p "$completions"
 
 pushd "$plugins"
 for repo in "${repos[@]}"; do
@@ -34,6 +37,8 @@ done
 popd
 
 if [ -f /mingw64/share/git/completion/git-completion.zsh ] && [ ! -f "$plugins/_git"  ]; then
-  \cp /mingw64/share/git/completion/git-completion.zsh "$plugins/_git"
+  \cp /mingw64/share/git/completion/git-completion.zsh "$completions/_git"
 fi
+
+cp "$HOME/.usr_conf"/zsh/* "$completions"
 

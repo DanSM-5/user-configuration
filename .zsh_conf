@@ -28,7 +28,8 @@ HISTFILE=~/.zsh_history
 # fpath changes must happen before compinit
 fpath=(
   ~/.zsh
-  "$user_conf_path/zsh"
+  # "$user_conf_path/zsh"
+  "$user_config_cache/completions"
   "$user_config_cache/plugins"
   "$user_config_cache/plugins/zsh-completions/src"
   "${fpath[@]}"
