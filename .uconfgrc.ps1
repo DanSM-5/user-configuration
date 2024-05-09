@@ -13,6 +13,7 @@ $env:PREFERED_EDITOR = 'nvim'
 $env:EDITOR = 'nvim'
 $env:user_conf_path = "$user_conf_path"
 $env:user_scripts_path = "$user_scripts_path"
+$env:user_config_cache = $user_config_cache
 $env:prj = "$prj"
 $env:WIN_ROOT = if ($IsWindows) { "C:" } else { "" }
 $env:WIN_HOME = "$HOME"
@@ -23,6 +24,8 @@ $env:COLORTERM = 'truecolor'
 
 $WIN_HOME = $env:WIN_HOME
 $WIN_ROOT = $env:WIN_ROOT
+$EDITOR = $env:EDITOR
+$PREFERED_EDITOR = $env:PREFERED_EDITOR
 
 if ((Test-Command oh-my-posh) -and (Test-Path "${HOME}${dirsep}omp-theme")) {
   # Import-Module oh-my-posh
