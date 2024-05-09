@@ -521,9 +521,20 @@ fnr () {
       n|npm|nr|-) runner_func () { npm run "$@"; };;
     esac
 
+    local value_script="
+      val={};
+      jq -r \".scripts[\\\"\$val\\\"]\" < package.json
+    "
+    local copy_script="$value_script | clip-copy"
+
     local selection="$(jq -r '.scripts | keys[]' < package.json |
       sort |
       fzf --no-multi --query "$query" \
+        --preview-window 'up:3:hidden:wrap' \
+        --bind 'ctrl-/:toggle-preview,ctrl-s:toggle-sort' \
+        --bind "ctrl-y:execute-silent(clip-copy {})+abort" \
+        --bind "ctrl-u:execute-silent($copy_script)+abort" \
+        --preview "$value_script" \
         --height 50% --min-height 20 --border)"
 
     if [ -z "$selection" ]; then

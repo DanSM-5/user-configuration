@@ -470,18 +470,32 @@ function fnr {
   $runner_func = $null
 
   switch -Regex ("$runner") {
-    "^(m|pnpm|mr)$" { 
+    "^(m|pnpm|mr)$" {
       $runner_func = { pnpm run @args }
     }
     "^(n|npm|nr|-)$" {
-      $runner_func = { npm run @args } 
+      $runner_func = { npm run @args }
     }
-  } 
+  }
 
-  $selection = "$(Get-Content package.json |
+  $value_script = "
+    `$val = {};
+    `$val = `$val.Trim(`"'`").Trim('`"');
+    Get-Content package.json |
+      jq -r "".scripts[```"`$val```"]""
+  "
+  $copy_script = $value_script + " | Set-Clipboard"
+  $selection = Get-Content package.json |
     jq -r '.scripts | keys[]' |
-    sort |
-    Invoke-Fzf -Query "$query" -Height 50% -MinHeight 20 -Border)"
+    Sort |
+    fzf --query "$query" --height '50%' --min-height '20' `
+      --with-shell 'pwsh -nolo -nopro -nonin -c' `
+      --border --no-multi `
+      --bind "ctrl-y:execute-silent({} | Set-Clipboard)+abort" `
+      --bind "ctrl-u:execute-silent($copy_script)+abort" `
+      --preview-window 'up:3:hidden:wrap' `
+      --bind 'ctrl-/:toggle-preview,ctrl-s:toggle-sort' `
+      --preview $value_script
 
   if( -not $selection ) { return }
 
