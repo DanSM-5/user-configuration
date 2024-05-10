@@ -642,13 +642,13 @@ cprj () {
     return
   fi
 
-  if ! [ -d "$selection" ]; then
-    "$PREFERED_EDITOR" "${selection[@]}"
+  if [ "$return_dir" = '-r' ]; then
+    printf '%s\n' "${selection[@]}"
     return
   fi
 
-  if [ "$return_dir" = '-r' ]; then
-    printf '%s' "${selection[@]}"
+  if ! [ -d "$selection" ]; then
+    "$PREFERED_EDITOR" "${selection[@]}"
     return
   fi
 

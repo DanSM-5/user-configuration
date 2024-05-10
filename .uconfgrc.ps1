@@ -217,21 +217,33 @@ if ($IsWindows) {
   }
 
   if (Test-Command 'lf.exe') {
-    Set-PSReadLineKeyHandler -Chord Ctrl+o -ScriptBlock {
+    Set-PSReadLineKeyHandler -Chord 'ctrl+o,ctrl+l' -ScriptBlock {
       [Microsoft.PowerShell.PSConsoleReadLine]::RevertLine()
-      [Microsoft.PowerShell.PSConsoleReadLine]::Insert('lfcd.ps1')
+      [Microsoft.PowerShell.PSConsoleReadLine]::Insert('lfcd')
       [Microsoft.PowerShell.PSConsoleReadLine]::AcceptLine()
     }
 
-    function lf () {
-      # Important to use @args and no $args to forward arguments
-      lf.ps1 @args
+    function lfcd () {
+      $cdpath = & "$env:user_scripts_path${dirsep}bin${dirsep}lfcd.ps1" @args
+      if (Test-Path -Path $cdpath -PathType Container -ErrorAction SilentlyContinue) {
+        Set-Location $cdpath
+      } else {
+        $cdpath
+      }
+    }
+
+    if ($IsWindows) {
+      function lf () {
+        # Important to use @args and no $args to forward arguments
+        lf.ps1 @args
+      }
     }
   }
 
 
-$alto = if ($IsMacOS) { 'ø' } else { 'Alt+o' }
-Set-PSReadLineKeyHandler -Chord $alto -ScriptBlock {
+# $alto = if ($IsMacOS) { 'ø' } else { 'Alt+o' }
+# $ctrlo_p = @('ctrl+o', 'p')
+Set-PSReadLineKeyHandler -Chord 'ctrl+o,p' -ScriptBlock {
   [Microsoft.PowerShell.PSConsoleReadLine]::RevertLine()
   [Microsoft.PowerShell.PSConsoleReadLine]::Insert('cprj')
   [Microsoft.PowerShell.PSConsoleReadLine]::AcceptLine()

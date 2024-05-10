@@ -123,16 +123,46 @@ if [ "$IS_MAC" = true ]; then
   # Fix alt-c keybinding in macos
   bindkey "ç" fzf-cd-widget
   # Alt+o to launch quick project cd
-  bindkey -s "ø" 'cprj\n'
+  # bindkey -s "ø" 'cprj\n'
 fi
 
+__cprj__ () {
+  cprj
+  # Release prompt
+  zle accept-line
+  zle reset-prompt
+}
+
 # Alt+o to launch quick project cd
-bindkey -s '^[o' 'cprj\n'
+# bindkey -s '^[o' 'cprj\n'
+
+autoload -U __cprj__
+zle -N __cprj__
+bindkey -M emacs '^op' __cprj__
+bindkey -M vicmd '^op' __cprj__
+bindkey -M viins '^op' __cprj__
+
+# Edit current command in editor
+autoload -U edit-command-line
+zle -N edit-command-line
+bindkey '^oe' edit-command-line
+# Add bash bindkey as well
+bindkey '^x^e' edit-command-line
 
 # Add ctrl+o keybinding for lfcd
 # Add alternative for nix store
 if command -v lf &> /dev/null || command -v ~/.nix-profile/bin/lf &> /dev/null; then
-  bindkey -s '^o' 'lfcd\n'
+  __lfcd__ () {
+    lfcd
+    # Release prompt
+    zle accept-line
+    zle reset-prompt
+  }
+  autoload -U __lfcd__
+  zle -N __lfcd__
+  bindkey '^o^l' __lfcd__
+
+  # bindkey -s '^o' 'lfcd\n'
 fi
 
 # Load fzf support
@@ -145,7 +175,7 @@ fi
 
 # Add auto suggestions
 # auto suggestions (Could be plugin of oh-my-zsh  but using oh-my-posh at the moment)
-test -f "$user_config_cache/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh" && source "$user_config_cache/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh" 
+test -f "$user_config_cache/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh" && source "$user_config_cache/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh"
 
 # Must be the last line of this file
 if [ -f "$user_config_cache/plugins/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh" ]; then

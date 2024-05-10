@@ -84,6 +84,32 @@ fi
 # ignore case for completions
 bind 'set completion-ignore-case on'
 
+__cprj__ () {
+  local dir
+  IFS="
+" dir=($(cprj -r))
+  if [ -d "$dir" ]; then
+    printf 'builtin cd -- %q' "$dir"
+  elif [ -n "$dir" ]; then
+    printf '%s ' "${PREFERED_EDITOR:-${EDITOR:-vim}} ${dir[@]}"
+  else
+    printf ''
+  fi
+}
+
+# Alt+o to launch quick project cd
+# bind '"\eo":"cprj\C-m"'
+
+# Use bind -x to execute commands but it won't happen on the same
+# context, so cd won't work
+# bind -x '"\C-op":__prjc__'
+
+# Ctrl-o p to run cprj command
+bind -m emacs-standard '"\C-op": " \C-b\C-k \C-u`__cprj__`\e\C-e\er\C-m\C-y\C-h\e \C-y\ey\C-x\C-x\C-d"'
+bind -m vi-command '"\C-op": "\C-z\C-op\C-z"'
+bind -m vi-insert '"\C-op": "\C-z\C-op\C-z"'
+
+
 if [ "$IS_GITBASH" = true ]; then
   PROMPT_COMMAND='history -a'
 elif [ "$IS_MAC" = true ]; then
@@ -93,19 +119,25 @@ elif [ "$IS_MAC" = true ]; then
   bind -m vi-insert '"ç": "\C-z\ec\C-z"'
 
   # Alt+o to launch quick project cd
-  __prjc__ () {
-    dir=$(cprj -r) && printf 'builtin cd -- %q' "$dir"
-  }
   bind -m emacs-standard '"ø": " \C-b\C-k \C-u`__prjc__`\e\C-e\er\C-m\C-y\C-h\e \C-y\ey\C-x\C-x\C-d"'
 fi
 
 # Add ctrl+o keybinding for lfcd
 if command -v lf &> /dev/null; then
-  bind '"\C-o":"lfcd\C-m"'
+  bind '"\C-o\C-l":"lfcd\C-m"'
 fi
 
-# Alt+o to launch quick project cd
-bind '"\eo":"cprj\C-m"'
+# Edit current command in editor
+__edit-command-no-execute() {
+  local editor="${PREFERED_EDITOR:-${EDITOR:-vim}}"
+  tmpf="$(mktemp).sh"
+  printf '%s\n' "$READLINE_LINE" > "$tmpf"
+  $editor "$tmpf"
+  READLINE_LINE="$(<"$tmpf")"
+  READLINE_POINT="${#READLINE_LINE}"
+  rm "$tmpf"
+}
+bind -x '"\C-o\C-e":__edit-command-no-execute'
 
 # Load fzf support
 test -f ~/.fzf.bash && source ~/.fzf.bash

@@ -281,7 +281,7 @@ function qed ([string] $editor = 'nvim') {
     % { & "$editor" "$_" }
 }
 
-function cprj () {
+function cprj ([Switch] $Raw) {
   $directories = & "$user_conf_path${dirsep}utils${dirsep}getprojects.ps1"
 
   if (!$directories) {
@@ -313,6 +313,8 @@ function cprj () {
   )
 
   if (!$selection) { return }
+
+  if ($Raw) { return $selection }
 
   if (Test-Path -PathType Leaf -Path $selection[0] -ea 0) {
     & "$env:PREFERED_EDITOR" @selection
