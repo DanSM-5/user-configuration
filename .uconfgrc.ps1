@@ -201,6 +201,13 @@ if ($PSVersionTable.PSVersion -ge 7.1) {
   Set-PSReadLineKeyHandler -Chord "Ctrl+LeftArrow" -Function BackwardWord
 }
 
+# Keybinding for lfcd
+Set-PSReadLineKeyHandler -Chord 'ctrl+o,ctrl+l' -ScriptBlock {
+  [Microsoft.PowerShell.PSConsoleReadLine]::RevertLine()
+  [Microsoft.PowerShell.PSConsoleReadLine]::Insert('lfcd')
+  [Microsoft.PowerShell.PSConsoleReadLine]::AcceptLine()
+}
+
 # Windows only config
 if ($IsWindows) {
   # Allow to execute python scripts directly
@@ -217,12 +224,6 @@ if ($IsWindows) {
   }
 
   if (Test-Command 'lf.exe') {
-    Set-PSReadLineKeyHandler -Chord 'ctrl+o,ctrl+l' -ScriptBlock {
-      [Microsoft.PowerShell.PSConsoleReadLine]::RevertLine()
-      [Microsoft.PowerShell.PSConsoleReadLine]::Insert('lfcd')
-      [Microsoft.PowerShell.PSConsoleReadLine]::AcceptLine()
-    }
-
     function lfcd () {
       $cdpath = & "$env:user_scripts_path${dirsep}bin${dirsep}lfcd.ps1" @args
       if (Test-Path -Path $cdpath -PathType Container -ErrorAction SilentlyContinue) {
@@ -232,11 +233,9 @@ if ($IsWindows) {
       }
     }
 
-    if ($IsWindows) {
-      function lf () {
-        # Important to use @args and no $args to forward arguments
-        lf.ps1 @args
-      }
+    function lf () {
+      # Important to use @args and no $args to forward arguments
+      lf.ps1 @args
     }
   }
 
