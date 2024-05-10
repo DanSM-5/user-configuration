@@ -143,6 +143,7 @@ bindkey -M vicmd '^op' __cprj__
 bindkey -M viins '^op' __cprj__
 
 # Edit current command in editor
+# Ref: https://gist.github.com/raven-rock/4fc8152f91eedf663755b65432f48ce5
 autoload -U edit-command-line
 zle -N edit-command-line
 bindkey '^oe' edit-command-line

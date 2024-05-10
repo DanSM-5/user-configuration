@@ -128,16 +128,19 @@ if command -v lf &> /dev/null; then
 fi
 
 # Edit current command in editor
-__edit-command-no-execute() {
+# Ref: https://unix.stackexchange.com/questions/85391/where-is-the-bash-feature-to-open-a-command-in-editor-documented
+__edit_command_no_execute () {
   local editor="${PREFERED_EDITOR:-${EDITOR:-vim}}"
-  tmpf="$(mktemp).sh"
-  printf '%s\n' "$READLINE_LINE" > "$tmpf"
-  $editor "$tmpf"
-  READLINE_LINE="$(<"$tmpf")"
+  local tmpf="$(mktemp)"
+  printf '%s\n' "$READLINE_LINE" >| "$tmpf"
+  "$editor" "$tmpf"
+  READLINE_LINE="$(cat "$tmpf")"
   READLINE_POINT="${#READLINE_LINE}"
-  rm "$tmpf"
+  rm -f "$tmpf" &> /dev/null
 }
-bind -x '"\C-o\C-e":__edit-command-no-execute'
+bind -m emacs       -x '"\C-oe":__edit_command_no_execute'
+bind -m vi          -x '"\C-oe":__edit_command_no_execute'
+bind -m vi-insert   -x '"\C-oe":__edit_command_no_execute'
 
 # Load fzf support
 test -f ~/.fzf.bash && source ~/.fzf.bash
