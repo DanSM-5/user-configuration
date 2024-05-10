@@ -272,6 +272,50 @@ Set-PSReadLineKeyHandler -Chord 'ctrl+o,p' -ScriptBlock {
   Set-PSReadLineKeyHandler -Chord "Alt+LeftArrow" -Function BackwardWord
 }
 
+# Open content of prompt in editor
+# It mimics bash ctrl-x ctrl-e
+# Readline example: https://gist.github.com/mklement0/290ef7cdbdf0db274d6da64fade46929
+# PSReadline documentation: https://learn.microsoft.com/en-us/dotnet/api/microsoft.powershell.psconsolereadline?view=powershellsdk-1.1.0&viewFallbackFrom=powershellsdk-7.4.0
+Set-PSReadLineKeyHandler -Chord 'ctrl+o,e' -ScriptBlock {
+  $line = $cursor = $null
+  $editorArgs = @()
+  $editor = if ($env:PREFERED_EDITOR) { $env:PREFERED_EDITOR }
+    elseif ($env:EDITOR) { $env:EDITOR }
+    else { 'vim' }
+
+  try {
+    $tmpf = New-TemporaryFile
+    # Get current content
+    [Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref] $line, [ref] $cursor)
+    # If (n)vim, start at last line
+    if ( $editor -Like '*vim' ) {
+      $editorArgs += '+'
+    }
+    # Add current content of prompt to buffer
+    $line > $tmpf.FullName
+    $editorArgs += $tmpf.FullName
+    # Start editor and wait for it to close
+    $proc = Start-Process $editor -NoNewWindow -PassThru -ArgumentList $editorArgs
+    $proc.WaitForExit()
+    $proc = $null
+    # Clean prompt
+    [Microsoft.PowerShell.PSConsoleReadLine]::RevertLine()
+    # Get conent from temporal buffer and append it to prompt
+    $multiline = $false
+    Get-Content $tmpf.FullName | % {
+      if ($multiline) {
+        [Microsoft.PowerShell.PSConsoleReadLine]::Insert("`n")
+      } else {
+        $multiline = $true
+      }
+      [Microsoft.PowerShell.PSConsoleReadLine]::Insert($_)
+    }
+  } finally {
+    # Cleanup
+    Remove-Item -Force $tmpf.FullName
+  }
+}
+
 if ((
   Test-Path -Path "${env:user_scripts_path}${dirsep}bin" -ErrorAction SilentlyContinue
 ) -and (
