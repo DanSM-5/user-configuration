@@ -301,6 +301,7 @@ Set-PSReadLineKeyHandler -Chord 'ctrl+o,e' -ScriptBlock {
     [Microsoft.PowerShell.PSConsoleReadLine]::RevertLine()
     $content = (Get-Content -Path $tmpf.FullName -Raw -Encoding UTF8).Replace("`r","").Trim()
     [Microsoft.PowerShell.PSConsoleReadLine]::Insert($content)
+    # [Microsoft.PowerShell.PSConsoleReadLine]::AcceptLine()
   } finally {
     # Cleanup
     $proc = $null
