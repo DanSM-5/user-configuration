@@ -276,7 +276,7 @@ Set-PSReadLineKeyHandler -Chord 'ctrl+o,p' -ScriptBlock {
 # Readline example: https://gist.github.com/mklement0/290ef7cdbdf0db274d6da64fade46929
 # PSReadline documentation: https://learn.microsoft.com/en-us/dotnet/api/microsoft.powershell.psconsolereadline?view=powershellsdk-1.1.0&viewFallbackFrom=powershellsdk-7.4.0
 Set-PSReadLineKeyHandler -Chord 'ctrl+o,e' -ScriptBlock {
-  $line = $cursor = $null
+  $line = $cursor = $proc = $null
   $editorArgs = @()
   $editor = if ($env:PREFERED_EDITOR) { $env:PREFERED_EDITOR }
     elseif ($env:EDITOR) { $env:EDITOR }
@@ -299,18 +299,11 @@ Set-PSReadLineKeyHandler -Chord 'ctrl+o,e' -ScriptBlock {
     $proc = $null
     # Clean prompt
     [Microsoft.PowerShell.PSConsoleReadLine]::RevertLine()
-    # Get conent from temporal buffer and append it to prompt
-    $multiline = $false
-    Get-Content $tmpf.FullName | % {
-      if ($multiline) {
-        [Microsoft.PowerShell.PSConsoleReadLine]::Insert("`n")
-      } else {
-        $multiline = $true
-      }
-      [Microsoft.PowerShell.PSConsoleReadLine]::Insert($_)
-    }
+    $content = (Get-Content -Path $tmpf.FullName -Raw -Encoding UTF8).Replace("`r","").Trim()
+    [Microsoft.PowerShell.PSConsoleReadLine]::Insert($content)
   } finally {
     # Cleanup
+    $proc = $null
     Remove-Item -Force $tmpf.FullName
   }
 }
