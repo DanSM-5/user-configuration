@@ -329,3 +329,8 @@ if (-not ($firstpathentries -Match ([regex]::Escape("${HOME}${dirsep}.local${dir
 # Remove firstpathentries
 Remove-Variable firstpathentries
 
+# Add tab completions
+foreach ($file in (Get-ChildItem "$env:user_conf_path${dirsep}completions${dirsep}pwsh")) {
+  . $file
+}
+
