@@ -1,0 +1,134 @@
+_erd() {
+    local i cur prev opts cmd
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+    cmd=""
+    opts=""
+
+    for i in ${COMP_WORDS[@]}
+    do
+        case "${cmd},${i}" in
+            ",$1")
+                cmd="erd"
+                ;;
+            *)
+                ;;
+        esac
+    done
+
+    case "${cmd}" in
+        erd)
+            opts="-c -C -d -f -H -i -I -l -L -p -t -P -s -T -u -x -y -. -h -V --config --color --disk-usage --follow --human --no-ignore --icons --long --group --ino --nlink --octal --time --time-format --level --pattern --glob --iglob --file-type --prune --sort --dir-order --threads --unit --one-file-system --layout --hidden --no-git --completions --dirs-only --no-config --no-progress --suppress-size --truncate --help --version [DIR]"
+            if [[ ${cur} == -* || ${COMP_CWORD} -eq 1 ]] ; then
+                COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+                return 0
+            fi
+            case "${prev}" in
+                --config)
+                    COMPREPLY=($(compgen -f "${cur}"))
+                    return 0
+                    ;;
+                -c)
+                    COMPREPLY=($(compgen -f "${cur}"))
+                    return 0
+                    ;;
+                --color)
+                    COMPREPLY=($(compgen -W "none auto force" -- "${cur}"))
+                    return 0
+                    ;;
+                -C)
+                    COMPREPLY=($(compgen -W "none auto force" -- "${cur}"))
+                    return 0
+                    ;;
+                --disk-usage)
+                    COMPREPLY=($(compgen -W "logical physical line word block" -- "${cur}"))
+                    return 0
+                    ;;
+                -d)
+                    COMPREPLY=($(compgen -W "logical physical line word block" -- "${cur}"))
+                    return 0
+                    ;;
+                --time)
+                    COMPREPLY=($(compgen -W "create access mod" -- "${cur}"))
+                    return 0
+                    ;;
+                --time-format)
+                    COMPREPLY=($(compgen -W "iso iso-strict short default" -- "${cur}"))
+                    return 0
+                    ;;
+                --level)
+                    COMPREPLY=($(compgen -f "${cur}"))
+                    return 0
+                    ;;
+                -L)
+                    COMPREPLY=($(compgen -f "${cur}"))
+                    return 0
+                    ;;
+                --pattern)
+                    COMPREPLY=($(compgen -f "${cur}"))
+                    return 0
+                    ;;
+                -p)
+                    COMPREPLY=($(compgen -f "${cur}"))
+                    return 0
+                    ;;
+                --file-type)
+                    COMPREPLY=($(compgen -W "file dir link" -- "${cur}"))
+                    return 0
+                    ;;
+                -t)
+                    COMPREPLY=($(compgen -W "file dir link" -- "${cur}"))
+                    return 0
+                    ;;
+                --sort)
+                    COMPREPLY=($(compgen -W "name rname size rsize access raccess create rcreate mod rmod" -- "${cur}"))
+                    return 0
+                    ;;
+                -s)
+                    COMPREPLY=($(compgen -W "name rname size rsize access raccess create rcreate mod rmod" -- "${cur}"))
+                    return 0
+                    ;;
+                --dir-order)
+                    COMPREPLY=($(compgen -W "none first last" -- "${cur}"))
+                    return 0
+                    ;;
+                --threads)
+                    COMPREPLY=($(compgen -f "${cur}"))
+                    return 0
+                    ;;
+                -T)
+                    COMPREPLY=($(compgen -f "${cur}"))
+                    return 0
+                    ;;
+                --unit)
+                    COMPREPLY=($(compgen -W "bin si" -- "${cur}"))
+                    return 0
+                    ;;
+                -u)
+                    COMPREPLY=($(compgen -W "bin si" -- "${cur}"))
+                    return 0
+                    ;;
+                --layout)
+                    COMPREPLY=($(compgen -W "regular inverted flat iflat" -- "${cur}"))
+                    return 0
+                    ;;
+                -y)
+                    COMPREPLY=($(compgen -W "regular inverted flat iflat" -- "${cur}"))
+                    return 0
+                    ;;
+                --completions)
+                    COMPREPLY=($(compgen -W "bash elvish fish powershell zsh" -- "${cur}"))
+                    return 0
+                    ;;
+                *)
+                    COMPREPLY=()
+                    ;;
+            esac
+            COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+            return 0
+            ;;
+    esac
+}
+
+complete -F _erd -o bashdefault -o default erd
