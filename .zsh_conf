@@ -172,7 +172,32 @@ if [ -f ~/.fzf.zsh ]; then
 fi
 
 # Add fzf tab completions
-[ -f "$user_config_cache/plugins/fzf-tab-completion/zsh/fzf-zsh-completion.sh" ] && \. "$user_config_cache/plugins/fzf-tab-completion/zsh/fzf-zsh-completion.sh"
+if [ -f "$user_config_cache/plugins/fzf-tab-completion/zsh/fzf-zsh-completion.sh" ]; then
+  export FZF_COMPLETION_OPTS='--tiebreak=chunk'
+
+  # Load fzf tab completion
+  \. "$user_config_cache/plugins/fzf-tab-completion/zsh/fzf-zsh-completion.sh"
+
+  # Search display strings
+  # only for git
+  zstyle ':completion:*:*:git:*' fzf-search-display true
+  # or for everything
+  # zstyle ':completion:*' fzf-search-display true
+
+  # press ctrl-r to repeat completion *without* accepting i.e. reload the completion
+  # press right to accept the completion and retrigger it
+  # press alt-enter to accept the completion and run it
+  __fzf_tab_keys=(
+      ctrl-r:'repeat-fzf-completion'
+      right:accept:'repeat-fzf-completion'
+      alt-enter:accept:'zle accept-line'
+  )
+
+  zstyle ':completion:*' fzf-completion-keybindings "${__fzf_tab_keys[@]}"
+  # also accept and retrigger completion when pressing / when completing cd
+  zstyle ':completion::*:cd:*' fzf-completion-keybindings "${__fzf_tab_keys[@]}" /:accept:'repeat-fzf-completion'
+  unset __fzf_tab_keys
+fi
 
 # Add auto suggestions
 # auto suggestions (Could be plugin of oh-my-zsh  but using oh-my-posh at the moment)
