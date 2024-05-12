@@ -31,7 +31,7 @@ declare -A user_scripts=(
 declare -A mpv_plugins=(
   ["$mpv_location/scripts/mpv_sponsorblock"]="git@github-personal:DanSM-5/mpv_sponsorblock"
   ["$mpv_location/scripts/mpv-gif-generator"]="git@github-personal:DanSM-5/mpv-gif-generator"
-  ["$mpv_location/scripts/mpv-file-browser"]="https://github.com/CogentRedTester/mpv-file-browser"
+  ["$mpv_location/scripts/file-browser"]="https://github.com/CogentRedTester/mpv-file-browser"
 )
 
 try_clone () {
