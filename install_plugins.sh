@@ -8,6 +8,7 @@ repos=(
   https://github.com/lincheney/fzf-tab-completion
   # https://github.com/RobSis/zsh-completion-generator.git
   https://github.com/zsh-users/zsh-completions.git
+  https://github.com/scop/bash-completion
 )
 
 # Get script location
@@ -22,9 +23,13 @@ repos=(
 cache_dir="$HOME/.cache/.user_config_cache"
 plugins="$cache_dir/plugins"
 completions="$cache_dir/completions"
+zsh="$completions/zsh"
+bash="$completions/bash"
 
 mkdir -p "$plugins"
 mkdir -p "$completions"
+mkdir -p "$zsh"
+mkdir -p "$bash"
 
 pushd "$plugins"
 for repo in "${repos[@]}"; do
@@ -36,9 +41,11 @@ for repo in "${repos[@]}"; do
 done
 popd
 
-if [ -f /mingw64/share/git/completion/git-completion.zsh ] && [ ! -f "$plugins/_git"  ]; then
-  \cp /mingw64/share/git/completion/git-completion.zsh "$completions/_git"
-fi
+# Copy completions
+command cp -fr "$HOME/.usr_conf/completions" "$cache_dir"
 
-cp "$HOME/.usr_conf"/zsh/* "$completions"
+# Git completion for zsh in gitbash
+if [ -f /mingw64/share/git/completion/git-completion.zsh ]; then
+  command cp /mingw64/share/git/completion/git-completion.zsh "$zsh/_git"
+fi
 

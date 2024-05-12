@@ -29,7 +29,7 @@ HISTFILE=~/.zsh_history
 fpath=(
   ~/.zsh
   # "$user_conf_path/zsh"
-  "$user_config_cache/completions"
+  "$user_config_cache/completions/zsh"
   "$user_config_cache/plugins"
   "$user_config_cache/plugins/zsh-completions/src"
   "${fpath[@]}"

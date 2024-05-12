@@ -145,6 +145,18 @@ bind -m vi-insert   -x '"\C-oe":__edit_command_no_execute'
 # Load fzf support
 test -f ~/.fzf.bash && source ~/.fzf.bash
 
+# Add local completions
+if [ -d "$user_config_cache/completions/bash" ]; then
+  for completion in "$user_config_cache/completions"/bash/*; do
+    \. "$completion"
+  done
+fi
+
+# Load completions from plugin
+if [ -d "$user_config_cache/plugins/bash-completion" ]; then
+  \. "$user_config_cache/plugins/bash-completion/bash_completion"
+fi
+
 # Add fzf tab completions
 if [ -f "$user_config_cache/plugins/fzf-tab-completion/bash/fzf-bash-completion.sh" ]; then
   export FZF_COMPLETION_AUTO_COMMON_PREFIX=true
