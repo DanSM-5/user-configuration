@@ -165,15 +165,6 @@ if [ -f "$user_config_cache/plugins/fzf-tab-completion/bash/fzf-bash-completion.
   export FZF_COMPLETION_AUTO_COMMON_PREFIX=true
   export FZF_COMPLETION_AUTO_COMMON_PREFIX_PART=true
 
-  if [ "$IS_GITBASH" = true ]; then
-    # fzf-bash-completion.sh requires pgrep but it is not available in gitbash
-    # using this function as a polyfill for now
-    pgrep () {
-      # Ignore $1 which is always '-P'
-      awk -v ppid="$2" '{ if($3 == ppid) print $2 }' <(ps -ef)
-    }
-  fi
-
   \. "$user_config_cache/plugins/fzf-tab-completion/bash/fzf-bash-completion.sh"
   bind -x '"\t": fzf_bash_completion'
 fi
