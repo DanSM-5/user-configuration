@@ -1382,7 +1382,8 @@ function qrcode ([String] $Text) {
 function wifiList ([string] $WifiName = '') {
 
   function parseNetsh ([string] $line) {
-    ($line -Split ':')[1].Trim()
+    $content = $line -Split ':'
+    "$($content[1..$content.Length] -Join ':' )".Trim()
   }
 
   if ($WifiName) {
