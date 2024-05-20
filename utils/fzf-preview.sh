@@ -39,7 +39,7 @@ thumbnail="$TEMP_DIR/thumbnail.png"
 
 show_image () {
   thumbnail="$1"
-  IMAGE_SIZE="${PREVIEW_IMAGE_SIZE:-75x75}"
+  IMAGE_SIZE="${PREVIEW_IMAGE_SIZE:-50x50}"
 
   if [[ -v KITTY_WINDOW_ID ]]; then
   # if [[ "$TERM" =~ .+kitty ]]; then
