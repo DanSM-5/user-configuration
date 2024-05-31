@@ -135,6 +135,8 @@ fi
 __edit_command_no_execute () {
   local editor="${PREFERED_EDITOR:-${EDITOR:-vim}}"
   local tmpf="$(mktemp)"
+  mv "$tmpf" "$tmpf.bash"
+  tmpf="$tmpf.bash"
   printf '%s\n' "$READLINE_LINE" >| "$tmpf"
   "$editor" "$tmpf"
   READLINE_LINE="$(cat "$tmpf")"

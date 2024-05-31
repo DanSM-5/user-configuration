@@ -284,6 +284,8 @@ Set-PSReadLineKeyHandler -Chord 'ctrl+o,e' -ScriptBlock {
 
   try {
     $tmpf = New-TemporaryFile
+    $tmp_file = $tmpf.FullName.Replace('.tmp', '.ps1')
+    Move-Item $tmpf.FullName $tmp_file
     # Get current content
     [Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref] $line, [ref] $cursor)
     # If (n)vim, start at last line
@@ -291,21 +293,24 @@ Set-PSReadLineKeyHandler -Chord 'ctrl+o,e' -ScriptBlock {
       $editorArgs += '+'
     }
     # Add current content of prompt to buffer
-    $line > $tmpf.FullName
-    $editorArgs += $tmpf.FullName
+    $line > $tmp_file
+    $editorArgs += $tmp_file
     # Start editor and wait for it to close
     $proc = Start-Process $editor -NoNewWindow -PassThru -ArgumentList $editorArgs
     $proc.WaitForExit()
     $proc = $null
     # Clean prompt
     [Microsoft.PowerShell.PSConsoleReadLine]::RevertLine()
-    $content = (Get-Content -Path $tmpf.FullName -Raw -Encoding UTF8).Replace("`r","").Trim()
+    $content = (Get-Content -Path $tmp_file -Raw -Encoding UTF8).Replace("`r","").Trim()
     [Microsoft.PowerShell.PSConsoleReadLine]::Insert($content)
     # [Microsoft.PowerShell.PSConsoleReadLine]::AcceptLine()
   } finally {
     # Cleanup
     $proc = $null
-    Remove-Item -Force $tmpf.FullName
+    if (Test-Path -Path $tmpf.FullName -PathType Leaf -ErrorAction SilentlyContinue) {
+      Remove-Item -Force $tmpf.FullName
+    }
+    Remove-Item -Force $tmp_file
   }
 }
 
