@@ -4,6 +4,8 @@
 
 # Ref: https://gist.github.com/junegunn/8b572b8d4b5eddd8b85e5f4d40f17236
 
+path_preview_script="$user_conf_path/utils/fzf-preview.sh"
+
 is_in_git_repo() {
   git rev-parse HEAD > /dev/null 2>&1
 }
@@ -31,14 +33,10 @@ fgf () {
         git diff --color=always -- \"\$selected\"""$__page_command__"' |
           sed 1,4d |
           bat -p --color=always
-        printf "\n"
-        bat --color=always --style="numbers,header,changes" "$selected"
-      else
-        erd --layout inverted --color force --level 3 --suppress-size -I -- "$selected" 2> /dev/null ||
-          eza -A --tree --level=3 --color=always --icons=always --dereference "$selected" 2> /dev/null ||
-          ls -AFL --color=always "$selected" 2> /dev/null ||
-          printf "\nCannot access directory: $selected"
-      fi' |
+        printf "\n";
+        # bat --color=always --style="numbers,header,changes" "$selected"
+      fi
+      '"$path_preview_script"' "$selected"' |
   cut -c4- | sed 's/.* -> //'
   # --preview '(git diff --color=always -- {-1} | sed 1,4d | bat -p --color=always; cat {-1})' |
 }

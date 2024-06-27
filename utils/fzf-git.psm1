@@ -11,6 +11,8 @@ function is_in_git_repo () {
 
 $__pager__ = if (Test-Command delta) { 'delta | ' } else { '' }
 
+$path_preview_script = Join-Path $env:user_conf_path "utils/fzf-preview.ps1"
+
 function get_fzf_down_options() {
   $options = @(
     '--height', '50%',
@@ -37,14 +39,8 @@ function fgf () {
         $script:__pager__ sed '1,4d' |
         bat -p --color=always;
       Write-Output "";
-      bat --color=always --style="numbers,changes,header" `$args
-    } else {
-      if (Get-Command erd -ErrorAction SilentlyContinue) {
-        erd --layout inverted --color force --level 3 -I --suppress-size -- `$args
-      } else {
-        Get-ChildItem `$args
-      }
     }
+    $path_preview_script . `$args;
 "@ > $preview_file.FullName
 
   # NOTE: The above command uses sed '1,4d' instead of
