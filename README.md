@@ -3,6 +3,20 @@ User config
 
 Set of config files that provides the same developer experience in multiple platforms.
 
+## Quick Install
+
+Powershell:
+
+```powershell
+irm -Uri https://raw.githubusercontent.com/DanSM-5/user-configuration/master/setup.ps1 | iex
+```
+
+Bash/zsh:
+
+```bash
+curl -sSLf https://raw.githubusercontent.com/DanSM-5/user-configuration/master/setup.sh | bash
+```
+
 ## Supported shells
 
 - pwsh (do not confuse with windows powershell)
