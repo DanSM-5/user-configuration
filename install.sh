@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+# Set if not already
+user_conf_path="${user_conf_path:-$HOME/.usr_conf}"
+config_dir="${user_conf_path##*/}"
+# Do not expand HOME variable
+config_path="\$HOME/$config_dir"
+
 backup () {
   local file="$1"
   mv "$file" "$file.old"
@@ -22,7 +28,7 @@ printf "
 #       LOAD USER CONFIG       #
 ################################
 
-[ -f \"\$HOME/.usr_conf/load_conf.sh\" ] && \. \"\$HOME/.usr_conf/load_conf.sh\"
+[ -f \"$config_path/load_conf.sh\" ] && \. \"$config_path/load_conf.sh\"
 " >> "$HOME/.dotfilesrc"
 
   ln -s "$dotfiles" "$bashrc"
