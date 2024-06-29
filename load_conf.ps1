@@ -17,6 +17,8 @@ $env:IS_POWERSHELL = 'true'
 
 $dirsep = if ($IsWindows) { '\' } else { '/' }
 $pathsep = if ($IsWindows) { ';' } else { ':' }
+$env:dirsep = $dirsep
+$env:pathsep = $pathsep
 
 # Needed for all scripts even if other fails
 function Test-Command {
