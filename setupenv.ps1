@@ -3,7 +3,11 @@
 # Use forward slash '/' in all paths
 # for consistency
 $SHOME = $HOME.Replace('\', '/')
-$mpv_location = if ($IsWindows) { "$SHOME/AppData/Roaming/mpv" } else { "$SHOME/.config/mpv" }
+$mpv_location = "$SHOME/.config/mpv"
+
+try {
+  New-Item -Path "$SHOME/.config" -ItemType Directory -ErrorAction SilentlyContinue
+} catch {}
 
 # Required repos
 $repos = @{
@@ -11,6 +15,7 @@ $repos = @{
   "$SHOME/.SpaceVim.d" = "git@github-personal:DanSM-5/space-vim-config";
   "$SHOME/.config/vscode-nvim" = "git@github-personal:DanSM-5/vscode-nvim";
   "$SHOME/omp-theme" = "git@github-personal:DanSM-5/omp-theme";
+  "$mpv_location" = "git@github-personal:DanSM-5/mpv-conf";
 }
 
 # Repos that should be clonned within $HOME/user-scripts
@@ -45,4 +50,11 @@ function process_list ([HashTable] $array) {
 process_list $repos
 process_list $user_scripts
 process_list $mpv_plugins
+
+if ($IsWindows) {
+  # Windows mpv reads from AppData/Roaming
+  New-Item -ItemType SymbolicLink -Target "$mpv_location" -Path "$SHOME/AppData/Roaming/mpv"
+  # Scoop mpv reads from portable_config
+  New-Item -ItemType SymbolicLink -Target "$mpv_location" -Path "$SHOME/scoop/persist/mpv/portable_config"
+}
 
