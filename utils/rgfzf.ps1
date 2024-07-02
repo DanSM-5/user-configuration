@@ -216,7 +216,7 @@ function Invoke-PsFzfRipgrep() {
           --bind ("ctrl-f:unbind(change,ctrl-f)+change-prompt" + '(2. fzf> )' + "+enable-search+clear-query+rebind(ctrl-r)") `
           --bind 'alt-a:select-all,alt-d:deselect-all,ctrl-/:toggle-preview' `
           --delimiter : `
-          --preview 'printf "%s" "{+f}"; bat --style=full --color=always --highlight-line {2} {1}' `
+          --preview 'bat --style=full --color=always --highlight-line {2} {1}' `
           --preview-window '~4,+{2}+4/3,<80(up)' `
           --query "$INITIAL_QUERY"
 
