@@ -47,7 +47,7 @@ case "$(uname -a)" in
     ;;
 esac
 
-if [[ "$editor" =~ .*vim ]]; then
+if [[ "$editor" =~ .*vim? ]]; then
   OPENER="if [[ \$FZF_SELECT_COUNT -eq 0 ]]; then
             $editor {1} +{2}     # No selection. Open the current line in Vim.
           else
@@ -76,7 +76,7 @@ fzf \
   --bind "ctrl-f:unbind(change,ctrl-f)+change-prompt(2. fzf> )+enable-search+clear-query+rebind(ctrl-r)" \
   --bind 'alt-a:select-all,alt-d:deselect-all,ctrl-/:toggle-preview' \
   --delimiter : \
-  --preview 'printf "%s" "{+f}"; bat --style=full --color=always --highlight-line {2} {1}' \
+  --preview 'bat --style=full --color=always --highlight-line {2} {1}' \
   --preview-window '~4,+{2}+4/3,<80(up)' \
   --query "$*"
 
