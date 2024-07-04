@@ -347,7 +347,7 @@ set_general_after () {
     # CTRL-/ to toggle small preview window to see the full command
     # CTRL-Y to copy the command into clipboard using pbcopy
     export FZF_CTRL_R_OPTS="
-      --preview 'echo {}' --preview-window up:3:hidden:wrap
+      --preview 'bat --color=always -pp --language bash <<< {2..}' --preview-window up:3:hidden:wrap
       --bind 'ctrl-/:toggle-preview'
       --bind 'ctrl-s:toggle-sort'
       --bind 'ctrl-y:execute-silent(echo -n {2..} | \$clipboard_copy)+abort'

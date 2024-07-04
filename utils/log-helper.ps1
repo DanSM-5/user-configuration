@@ -2,4 +2,5 @@
 
 $content = "$args" || ""
 
-$content | bat -pp --color=always
+$content | bat -pp --color=always --language powershell
+
