@@ -11,6 +11,7 @@ $PreviewScript = $PreviewScript.Trim("'").Trim('"')
 $RunningInWindowsTerminal = [bool]($env:WT_Session)
 $IsWindowsCheck = ($PSVersionTable.PSVersion.Major -le 5) -or $IsWindows
 $ansiCompatible = $script:RunningInWindowsTerminal -or (-not $script:IsWindowsCheck)
+$TEMP_DIR = "$env:TEMP/preview_files_script"
 
 if ([System.IO.Path]::IsPathRooted($Item)) {
     $path = $Item
@@ -58,6 +59,48 @@ function preview_directory () {
   }
 }
 
+function show_image ([string] $thumbnail, [string] $ErrorMessage) {
+  $IMAGE_SIZE = if ($env:PREVIEW_IMAGE_SIZE) { $env:PREVIEW_IMAGE_SIZE } else { '50x50' }
+
+  if ($env:KITTY_WINDOW_ID) {
+    # if ($env:TERM -Match .+kitty) {
+    # 1. 'memory' is the fastest option but if you want the image to be scrollable,
+    #    you have to use 'stream'.
+    #
+    # 2. The last line of the output is the ANSI reset code without newline.
+    #    This confuses fzf and makes it render scroll offset indicator.
+    #    So we remove the last line and append the reset code to its previous line.
+    kitty icat --clear --transfer-mode=stream `
+      --unicode-placeholder --stdin=no `
+      --place="$IMAGE_SIZE@0x0" "$thumbnail" |
+        sed '$d' | sed $'$s/$/\e[m/' || Write-Host $ErrorMessage
+
+    return
+  }
+
+  if ($env:TERM_PROGRAM -eq 'vscode') {
+    chafa -f sixels -s "$IMAGE_SIZE" "$thumbnail" || Write-Host $ErrorMessage
+    return
+  }
+
+  chafa -s "$IMAGE_SIZE" "$thumbnail" || Write-Host $ErrorMessage
+  return
+}
+
+function show_pdf ([string] $path, [string] $thumbnail) {
+  New-Item $script:TEMP_DIR -ItemType Directory -ea 0
+  Write-Output "File: $path`n`n"
+  # Using Ghostscript for image preview
+  gs -o "$thumbnail" -sDEVICE=pngalpha -dLastPage=1 "$path" *> $null
+  show_image "$thumbnail" 'Error previewing the PDF'
+
+  $pdftotext_flags = @( '-f', '1', '-l', '10' )
+
+  Write-Output "`n`n"
+  # Pdftotext to get sample pages
+  pdftotext @pdftotext_flags "$path" - | bat -p --style="header" || Write-Output 'Error previewing content pdf file'
+}
+
 # is directory?
 if (Test-Path $path -PathType Container) {
   preview_directory
@@ -78,7 +121,6 @@ elseif ((Test-Path $path -PathType leaf) -or (eza -l $path *> $null && $true)) {
 
   # New-Item $args -ItemType Directory -ea 0
   # Variables
-  $TEMP_DIR = "$env:TEMP/preview_files_script"
   $thumbnail = "$TEMP_DIR/thumbnail.png"
   $MIME = file --dereference --mime -- "$path"
   $FILE_LENGTH = $path.Length + 2
@@ -99,25 +141,17 @@ elseif ((Test-Path $path -PathType leaf) -or (eza -l $path *> $null && $true)) {
     "^image\/svg\+xml.*" {
       New-Item $TEMP_DIR -ItemType Directory -ea 0
       magick convert "$path" "$thumbnail"
-      chafa -s "$IMAGE_SIZE" "$thumbnail" || Write-Output 'Error previewing the SVG'
+      show_image "$thumbnail" Write-Output 'Error previewing the SVG'
       break
     }
     # Images
     "^image\/.*" {
-      chafa -s "$IMAGE_SIZE" "$path" || Write-Output 'Error previewing the image'
+      show_image "$path" 'Error previewing the image'
       break
     }
     # PDFs
     "^application\/pdf.*" {
-      New-Item $TEMP_DIR -ItemType Directory -ea 0
-      Write-Output "File: $path`n`n"
-      # Using Ghostscript for image preview
-      gs -o "$thumbnail" -sDEVICE=pngalpha -dLastPage=1 "$path" *> $null
-      chafa -s "$IMAGE_SIZE" "$thumbnail" || Write-Output "Error previewing the PDF`n"
-
-      Write-Output "`n`n"
-      # Pdftotext to get sample pages
-      pdftotext -f 1 -l 10 "$path" - | bat -p --style="header" || Write-Output 'Error previewing content pdf file'
+      show_pdf $path $thumbnail
       break
     }
     # Zip
@@ -153,7 +187,7 @@ elseif ((Test-Path $path -PathType leaf) -or (eza -l $path *> $null && $true)) {
     "^video\/(x-matroska|x-ms-asf|webm|mp4).*" {
       New-Item $TEMP_DIR -ItemType Directory -ea 0
       ffmpeg -y -i "$path" -vframes 1 "$thumbnail" *> $null
-      chafa -s "$IMAGE_SIZE" "$thumbnail" || Write-Output 'Error previewing the video'
+      show_image "$thumbnail" 'Error previewing the video'
       break
     }
     default {
@@ -185,28 +219,22 @@ elseif ((Test-Path $path -PathType leaf) -or (eza -l $path *> $null && $true)) {
         ".*\.(avi|mp4|mkv|webm|wmv)$" {
           New-Item $TEMP_DIR -ItemType Directory -ea 0
           ffmpeg -y -i "$path" -vframes 1 "$thumbnail" *> $null
-          chafa -s "$IMAGE_SIZE" "$thumbnail" || Write-Output 'Error previewing the video'
+          show_image "$thumbnail" 'Error previewing the video'
           break
         }
         ".*\.pdf$" {
-          New-Item $TEMP_DIR -ItemType Directory -ea 0
-          Write-Output "File: $path`n`n"
-          # Using Ghostscript for image preview
-          gs -o "$thumbnail" -sDEVICE=pngalpha -dLastPage=1 "$path" *> $null
-          chafa -s "$IMAGE_SIZE" "$thumbnail" || Write-Output 'Error previewing the PDF'
-
-          Write-Output "`n`n"
-          # Pdftotext to get sample pages
-          pdftotext -f 1 -l 10 "$path" - | bat -p --style="header" || Write-Output 'Error previewing content pdf file'
+          show_pdf $path $thumbnail
+          break
         }
         ".*\.(jpg|jpeg|png|bmp)$" {
-          chafa -s "$IMAGE_SIZE" "$path" || Write-Output 'Error previewing the image'
+          show_image "$path" 'Error previewing the image'
           break
         }
         ".*\.svg$" {
           New-Item $TEMP_DIR -ItemType Directory -ea 0
           magick convert "$path" "$thumbnail"
-          chafa -s "$IMAGE_SIZE" "$thumbnail" || Write-Output 'Error previewing the SVG'
+          show_image "$thumbnail" 'Error previewing the SVG'
+          break
         }
         ".*\.(txt|md|htm|html|js|jsx|ts|tsx|css|scss|sh|bat|ps1|psm1|bash|zsh|cs|json|xml)$" {
           bat --color=always --style="numbers,header,changes" "$path"
