@@ -47,16 +47,16 @@ fd-defaults () {
     "$@"
 }
 
-PREFERED_EDITOR="${PREFERED_EDITOR:-vim}"
+PREFERRED_EDITOR="${PREFERRED_EDITOR:-vim}"
 
-alias epf="$PREFERED_EDITOR $HOME/.profile"
-alias ecf="$PREFERED_EDITOR $uconf"
-alias egc="$PREFERED_EDITOR $uconfg"
-alias eal="$PREFERED_EDITOR $ualias"
-alias ega="$PREFERED_EDITOR $ualiasg"
-alias evc="$PREFERED_EDITOR $HOME/.SpaceVim.d/init.toml"
-alias ezsh="$PREFERED_EDITOR $user_conf_path/.zsh_conf"
-alias ebash="$PREFERED_EDITOR $user_conf_path/.bash_conf"
+alias epf="$PREFERRED_EDITOR $HOME/.profile"
+alias ecf="$PREFERRED_EDITOR $uconf"
+alias egc="$PREFERRED_EDITOR $uconfg"
+alias eal="$PREFERRED_EDITOR $ualias"
+alias ega="$PREFERRED_EDITOR $ualiasg"
+alias evc="$PREFERRED_EDITOR $HOME/.SpaceVim.d/init.toml"
+alias ezsh="$PREFERRED_EDITOR $user_conf_path/.zsh_conf"
+alias ebash="$PREFERRED_EDITOR $user_conf_path/.bash_conf"
 
 # Git
 alias glg="git log --oneline --decorate --graph"
@@ -391,7 +391,7 @@ fed () {
   local location="${1:-.}"
   local query="${@:3}"
   local pattern="."
-  local editor="${PREFERED_EDITOR:-vim}"
+  local editor="${PREFERRED_EDITOR:-vim}"
 
   if ! [ -d "$location" ]; then
     pattern="$location"
@@ -417,7 +417,7 @@ fed () {
 
 fedd () {
   local query="${@:2}"
-  local editor="${PREFERED_EDITOR:-vim}"
+  local editor="${PREFERRED_EDITOR:-vim}"
   local selection=$(fd-defaults -L -tf |
     fzf-defaults --multi --cycle \
       --preview "$fzf_preview_normal" --query "$query")
@@ -598,7 +598,7 @@ qed () {
     return
   fi
   if [ -z "$editor" ]; then
-    editor="${PREFERED_EDITOR:-vim}"
+    editor="${PREFERRED_EDITOR:-vim}"
   fi
   $editor $selection
 }
@@ -652,7 +652,7 @@ cprj () {
   fi
 
   if ! [ -d "$selection" ]; then
-    "$PREFERED_EDITOR" "${selection[@]}"
+    "$PREFERRED_EDITOR" "${selection[@]}"
     return
   fi
 
@@ -739,13 +739,13 @@ trim () {
 
 # Open temp file on [n]vim
 ntmp () {
-  "${PREFERED_EDITOR:-vim}" "/tmp/tmp-$(uuidgen 2>/dev/null || date +%d-%m-%Y_%H-%M-%S).md"
+  "${PREFERRED_EDITOR:-vim}" "/tmp/tmp-$(uuidgen 2>/dev/null || date +%d-%m-%Y_%H-%M-%S).md"
 }
 
 ntxt () {
   local filename="${@:-tmp-$(uuidgen 2>/dev/null || date +%d-%m-%Y_%H-%M-%S).md}"
   mkdir -p "$prj/txt"
-  "${PREFERED_EDITOR:-vim}" "$prj/txt/$filename"
+  "${PREFERRED_EDITOR:-vim}" "$prj/txt/$filename"
 }
 
 ftxt () {
@@ -765,7 +765,7 @@ ftxt () {
     return
   fi
 
-  "${PREFERED_EDITOR:-vim}" "${selected[@]}"
+  "${PREFERRED_EDITOR:-vim}" "${selected[@]}"
 }
 
 # extract files

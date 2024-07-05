@@ -251,12 +251,12 @@ set_general_after () {
     eval "$(oh-my-posh --init --shell $SHELL_NAME --config ~/omp-theme/jandedobbeleer.omp.v2.json)"
   fi
 
-  export PREFERED_EDITOR='vim'
+  export PREFERRED_EDITOR='vim'
   if command_exists nvim; then
-    export PREFERED_EDITOR='nvim'
+    export PREFERRED_EDITOR='nvim'
   fi
 
-  export EDITOR="$PREFERED_EDITOR"
+  export EDITOR="$PREFERRED_EDITOR"
 
   # For nix package manager
   if command_exists nix-env; then

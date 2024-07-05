@@ -94,7 +94,7 @@ __cprj__ () {
   if [ -d "$dir" ]; then
     printf 'builtin cd -- %q' "$dir"
   elif [ -n "$dir" ]; then
-    printf '%s ' "${PREFERED_EDITOR:-${EDITOR:-vim}} ${dir[@]}"
+    printf '%s ' "${PREFERRED_EDITOR:-${EDITOR:-vim}} ${dir[@]}"
   else
     printf ''
   fi
@@ -133,7 +133,7 @@ fi
 # Edit current command in editor
 # Ref: https://unix.stackexchange.com/questions/85391/where-is-the-bash-feature-to-open-a-command-in-editor-documented
 __edit_command_no_execute () {
-  local editor="${PREFERED_EDITOR:-${EDITOR:-vim}}"
+  local editor="${PREFERRED_EDITOR:-${EDITOR:-vim}}"
   local tmpf="$(mktemp)"
   mv "$tmpf" "$tmpf.bash"
   tmpf="$tmpf.bash"

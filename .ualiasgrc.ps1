@@ -8,7 +8,7 @@ $user_conf_path = "${HOME}${dirsep}.usr_conf"
 $user_scripts_path = "${HOME}${dirsep}user-scripts"
 $prj = "${HOME}${dirsep}prj"
 
-$env:PREFERED_EDITOR = if ($env:PREFERED_EDITOR) { $env:PREFERED_EDITOR } else { "vim" }
+$env:PREFERRED_EDITOR = if ($env:PREFERRED_EDITOR) { $env:PREFERRED_EDITOR } else { "vim" }
 
 # Dot sourcing function scripts
 # TODO: Loop through files and source them
@@ -317,7 +317,7 @@ function cprj ([Switch] $Raw) {
   if ($Raw) { return $selection }
 
   if (Test-Path -PathType Leaf -Path $selection[0] -ea 0) {
-    & "$env:PREFERED_EDITOR" @selection
+    & "$env:PREFERRED_EDITOR" @selection
     return
   }
 
@@ -833,13 +833,13 @@ function pnvim() { nvim --clean @args }
 
 function ntmp {
   $temporary = if ($env:TEMP) { $env:TEMP } else { "${HOME}${dirsep}tmp" }
-  $editor = if ($env:PREFERED_EDITOR) { $env:PREFERED_EDITOR } else { vim }
+  $editor = if ($env:PREFERRED_EDITOR) { $env:PREFERRED_EDITOR } else { vim }
   & $editor "$temporary/tmp-$(New-Guid).md"
 }
 
 function ntxt ([String] $filename = '') {
   $filename = if ($filename) { $filename } else { "tmp-$(New-Guid).md" }
-  $editor = if ($env:PREFERED_EDITOR) { $env:PREFERED_EDITOR } else { vim }
+  $editor = if ($env:PREFERRED_EDITOR) { $env:PREFERRED_EDITOR } else { vim }
   $prj_dir = "${prj}${dirsep}txt"
   New-Item -Path $prj_dir -ItemType Directory -ea 0
   & $editor "$prj_dir${dirsep}$filename"
@@ -886,7 +886,7 @@ function ftxt () {
     return
   }
 
-  $editor = if ($env:PREFERED_EDITOR) { $env:PREFERED_EDITOR } else { 'vim' }
+  $editor = if ($env:PREFERRED_EDITOR) { $env:PREFERRED_EDITOR } else { 'vim' }
 
   & "$editor" @selected
 }
@@ -1089,7 +1089,7 @@ function fed () {
   $location = $args[0] ?? "."
   $query = $args[2..$args.length]
   $pattern = "."
-  $editor = "$env:PREFERED_EDITOR" ?? 'vim'
+  $editor = "$env:PREFERRED_EDITOR" ?? 'vim'
   $options = getPsFzfOptions
 
   if ( -not (Test-Path $location) ) {
@@ -1130,7 +1130,7 @@ function fed () {
 
 function fedd () {
   $query = $args[1..$args.length]
-  $editor = "$env:PREFERED_EDITOR" ?? 'vim'
+  $editor = "$env:PREFERRED_EDITOR" ?? 'vim'
   $options = getPsFzfOptions
   $exclude = fd-Excluded
 

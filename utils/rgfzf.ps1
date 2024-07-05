@@ -115,7 +115,7 @@ function Get-EditorLaunch() {
   }
   else {
     $editor = if ($ENV:VISUAL) { $ENV:VISUAL }
-      elseif ($ENV:PREFERED_EDITOR) { $ENV:PREFERED_EDITOR }
+      elseif ($ENV:PREFERRED_EDITOR) { $ENV:PREFERRED_EDITOR }
       elseif ($ENV:EDITOR) { $ENV:EDITOR }
       else { nvim }
     # if ($null -eq $editor) {
@@ -183,7 +183,7 @@ function Invoke-PsFzfRipgrep() {
     $INITIAL_QUERY = $SearchString
     $results = ''
     $originalFzfDefaultCommand = $env:FZF_DEFAULT_COMMAND
-    # $editor = if ($PREFERED_EDITOR) { $PREFERED_EDITOR } elseif ($EDITOR) { $EDITOR } else { nvim }
+    # $editor = if ($PREFERRED_EDITOR) { $PREFERRED_EDITOR } elseif ($EDITOR) { $EDITOR } else { nvim }
 
     try {
         if ($script:IsWindows) {

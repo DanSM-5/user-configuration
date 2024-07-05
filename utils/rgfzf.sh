@@ -10,7 +10,7 @@
 
 # Old implementation
 # # Use env variable to setup an editor or default to nvim
-# editor="${PREFERED_EDITOR:-nvim}"
+# editor="${PREFERRED_EDITOR:-nvim}"
 
 # # Switch between Ripgrep launcher mode (CTRL-R) and fzf filtering mode (CTRL-F)
 # RG_PREFIX="${RFV_PREFIX_COMMAND:-rg --column --line-number --no-heading --color=always --smart-case --no-ignore --glob '!{.git,node_modules}' --hidden} "
@@ -35,7 +35,7 @@
 # New implementation has support for multiple selection
 # and will list the files on quickfix list
 
-editor="${PREFERED_EDITOR:-nvim}"
+editor="${PREFERRED_EDITOR:-nvim}"
 RG_PREFIX="${RFV_PREFIX_COMMAND:-rg --column --line-number --no-heading --color=always --smart-case --no-ignore --glob '!.git' --glob '!node_modules' --hidden} "
 RELOAD="reload:$RG_PREFIX {q} || :"
 TEMP_FILE='{+f}'

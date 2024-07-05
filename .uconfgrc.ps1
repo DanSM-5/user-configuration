@@ -9,7 +9,7 @@ $user_scripts_path = "${HOME}${dirsep}user-scripts"
 $prj = "${HOME}${dirsep}prj"
 $user_config_cache = "${HOME}${dirsep}.cache${dirsep}.user_config_cache"
 
-$env:PREFERED_EDITOR = 'nvim'
+$env:PREFERRED_EDITOR = 'nvim'
 $env:EDITOR = 'nvim'
 $env:user_conf_path = "$user_conf_path"
 $env:user_scripts_path = "$user_scripts_path"
@@ -25,7 +25,7 @@ $env:COLORTERM = 'truecolor'
 $WIN_HOME = $env:WIN_HOME
 $WIN_ROOT = $env:WIN_ROOT
 $EDITOR = $env:EDITOR
-$PREFERED_EDITOR = $env:PREFERED_EDITOR
+$PREFERRED_EDITOR = $env:PREFERRED_EDITOR
 
 if ((Test-Command oh-my-posh) -and (Test-Path "${HOME}${dirsep}omp-theme")) {
   # Import-Module oh-my-posh
@@ -278,7 +278,7 @@ Set-PSReadLineKeyHandler -Chord 'ctrl+o,p' -ScriptBlock {
 Set-PSReadLineKeyHandler -Chord 'ctrl+o,e' -ScriptBlock {
   $line = $cursor = $proc = $null
   $editorArgs = @()
-  $editor = if ($env:PREFERED_EDITOR) { $env:PREFERED_EDITOR }
+  $editor = if ($env:PREFERRED_EDITOR) { $env:PREFERRED_EDITOR }
     elseif ($env:EDITOR) { $env:EDITOR }
     else { 'vim' }
 
