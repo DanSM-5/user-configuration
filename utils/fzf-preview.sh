@@ -53,9 +53,16 @@ show_image () {
       --unicode-placeholder --stdin=no \
       --place="$IMAGE_SIZE@0x0" "$thumbnail" |
         sed '$d' | sed $'$s/$/\e[m/'
-  else
-    chafa -s "$IMAGE_SIZE" "$thumbnail"
+
+    return
   fi
+
+  if [ "$TERM_PROGRAM" = 'vscode' ]; then
+    chafa -f sixels -s "$IMAGE_SIZE" "$thumbnail"
+    return
+  fi
+
+  chafa -s "$IMAGE_SIZE" "$thumbnail"
 }
 
 show_7z () {
@@ -85,6 +92,8 @@ show_pdf () {
   )
 
   if [[ "$(uname -a)" =~ .*MSYS.*|.*MINGW.*|.*CYGWIN.*|.*NT.* ]]; then
+    # MSYS version requires to add '-simple' formatter
+    # for its built-in pdftotext. Other binaries do not have that option
     pdftotext_flags+=('-simple')
   fi
 
