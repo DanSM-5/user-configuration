@@ -1422,6 +1422,12 @@ if (Test-Command Download-Gdl) {
   Set-Alias -Name dgl -Value Download-Gdl
 }
 
+if (Test-Command Download-Ydl) {
+  # Alias to Set-Env
+  if (Test-Path Alias:dyl) { Remove-Item Alias:dyl }
+  Set-Alias -Name dyl -Value Download-Ydl
+}
+
 function bdif () {
   if (git rev-parse HEAD) { } else { return }
 
