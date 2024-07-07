@@ -921,7 +921,15 @@ dwv () {
   "$yt_dlp_commd" "$vid_url"
 }
 
-# Wrapper for ytfzf to launch on windows mpv player
+dgl () {
+  Download-Gdl "$@"
+}
+
+dyl () {
+  Download-Ydl "$@"
+}
+
+# Wrapper for ytfzf to launch mpv player
 mpvl () {
   local selection=$(ytfzf -L "$@")
   if [ -n "$selection" ]; then
@@ -1215,8 +1223,10 @@ if [ "$IS_WSL" = true ]; then
   mpv_commd='mpv'
 
   dgl () {
+    # Setting location to windows to avoid
+    # issues launching gallery-dl if using windows binary
     pushd "$WIN_HOME"
-    pwsh.exe -NoLogo -NonInteractive -Command "Download-Gdl $@"
+    Download-Gdl "$@"
     popd
   }
 
@@ -1599,10 +1609,6 @@ else
 
     cmd () {
       cmd.exe //c "$@"
-    }
-
-    dgl () {
-      pwsh.exe -NoLogo -NonInteractive -Command "Download-Gdl $@"
     }
 
     getClipboardPath () {
