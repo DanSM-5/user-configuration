@@ -1526,3 +1526,15 @@ function Print-MemoryUsage (
 if (Test-Path Alias:pmu) { Remove-Item Alias:pmu }
 Set-Alias -Name pmu -Value Print-MemoryUsage
 
+function grc () {
+  Push-Location $env:user_conf_path
+  & "${user_conf_path}${dirsep}utils${dirsep}rgfzf.ps1" @args
+  Pop-Location
+}
+
+function grs () {
+  Push-Location $env:user_scripts_path
+  & "${user_conf_path}${dirsep}utils${dirsep}rgfzf.ps1" @args
+  Pop-Location
+}
+

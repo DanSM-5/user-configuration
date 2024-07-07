@@ -1824,3 +1824,15 @@ qrcode () {
   curl "qrenco.de/$@"
 }
 
+grc () {
+  pushd "$user_conf_path"
+  "$user_conf_path/utils/rgfzf.sh" "$@"
+  popd
+}
+
+grs () {
+  pushd "$user_scripts_path"
+  "$user_conf_path/utils/rgfzf.sh" "$@"
+  popd
+}
+
