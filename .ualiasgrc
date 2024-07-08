@@ -1671,6 +1671,18 @@ fmpv () {
 # export PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
 getShellAliasAndFunctions () {
+
+  # compgen -a # will list all the aliases you could run.
+  # compgen -A function # will list all the functions you could run.
+  # compgen -A variable # will list all the variables defined.
+  #
+  # For bash but will work in zsh if enable
+  # > autoload -U bashcompinit
+  # > bashcompinit
+  # in zshrc
+  #
+  # Ref: https://unix.stackexchange.com/questions/292903/list-names-of-aliases-functions-and-variables-in-zsh
+
   if [ "$IS_BASH" = true ]; then
     {
       # Functions
@@ -1681,13 +1693,21 @@ getShellAliasAndFunctions () {
     }
   else
     {
-      # NOTE: if using fast-syntax-highlighting the functions check won't work
 
       # Functions
-      print -l ${(ok)functions} |
-        awk '{ if ($1 !~ /^_.+/) { print $1 } }';
+      # NOTE: if using fast-syntax-highlighting the functions check won't work
+      # print -l ${(ok)functions} |
+      #   awk '{ if ($1 !~ /^_.+/) { print $1 } }';
       # Aliases
       # alias | cut -d '=' -f 1
+      # print -rl -- ${(k)aliases} ${(k)functions} ${(k)parameters}
+
+      # TODO: remove '→' character as it is adding completion functions in zsh
+
+      # Functions
+      compgen -A function |
+        awk '{ if ($1 !~ /^[_.-].+/) { print $1 } }';
+      # Aliases
       compgen -a
     }
   fi
@@ -1713,6 +1733,12 @@ fcmd () {
           bat -l bash --color=always -p -H 2" \
       --preview-window right:70% \
       --bind 'ctrl-y:execute-silent(echo -n {} | $clipboard_copy)+abort' || return 0
+}
+
+pfn () {
+  declare -f | perl -0777 -pe 's/^}\n/}\0/gm' |
+    bat --plain --language bash --color always |
+    fzf --read0 --ansi --reverse --multi --highlight-line
 }
 
 fnvm () {
