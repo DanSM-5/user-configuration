@@ -3,12 +3,13 @@
 # Add more plugins here
 repos=(
   https://github.com/zsh-users/zsh-autosuggestions
-  https://github.com/zsh-users/zsh-syntax-highlighting
+  # https://github.com/zsh-users/zsh-syntax-highlighting
   ssh://github-personal/DanSM-5/zsh-nvm
   https://github.com/lincheney/fzf-tab-completion
   # https://github.com/RobSis/zsh-completion-generator.git
   https://github.com/zsh-users/zsh-completions.git
   https://github.com/scop/bash-completion
+  https://github.com/zdharma-continuum/fast-syntax-highlighting
 )
 
 # Get script location
