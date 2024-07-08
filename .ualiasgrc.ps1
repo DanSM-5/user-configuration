@@ -568,6 +568,37 @@ function fenv () {
     }
 }
 
+function getFunctionsDefinitions ([switch] $NullTerminated) {
+  $end_of_function = if ($NullTerminated) { "`0" } else { "" }
+  $sb = [System.Text.StringBuilder]::new()
+
+  foreach ($func_info in (Get-ChildItem function:\)) {
+    if ($func_info.Name -match '^[A-Z]:$') {
+      continue
+    }
+
+    $name = $func_info.Name
+    $definition = $func_info.Definition
+
+    $func_str = @"
+function $name () {
+    $definition
+}$end_of_function
+"@
+
+    # $func_str.Replace("`r", '')
+    [void] $sb.Append($func_str)
+  }
+
+  return $sb.ToString().Replace("`r", '')
+}
+
+function pfn () {
+  getFunctionsDefinitions -NullTerminated |
+    bat --plain --language powershell --color always |
+    fzf --read0 --ansi --reverse --multi --highlight-line
+}
+
 function getShellAliasAndFunctions ([Switch] $GetTempFile) {
   $outTempFile = New-TemporaryFile
   $presortedFile = New-TemporaryFile
@@ -575,8 +606,20 @@ function getShellAliasAndFunctions ([Switch] $GetTempFile) {
   try {
     # Get alias names
     Get-Alias | % { $_.Name } >> $presortedFile.FullName
+
     # Get function names
-    Get-ChildItem function:\ | % { $_.Name } >> $presortedFile.FullName
+    $sb_functions = [System.Text.StringBuilder]::new()
+    foreach ($func_info in (Get-ChildItem function:\)) {
+      if ($func_info.Name -match '^[A-Z]:$') {
+        continue
+      }
+
+      $name = $func_info.Name
+      [void] $sb_functions.Append("$name`n")
+    }
+
+    $function_names = $sb_functions.ToString().Trim()
+    $function_names >> $presortedFile.FullName
 
     # Get sorted output
     [System.IO.File]::ReadLines($presortedFile.FullName) | Sort -u | Out-File $outTempFile -encoding ascii
