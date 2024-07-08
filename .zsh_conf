@@ -220,7 +220,7 @@ if [ -f "$user_config_cache/plugins/fzf-tab-completion/zsh/fzf-zsh-completion.sh
     fzf-completion-opts --preview='eval eval echo {1}'
   zstyle ':completion:*' fzf-completion-keybindings "${__fzf_tab_keys[@]}"
   # also accept and retrigger completion when pressing / when completing cd
-  zstyle ':completion::*:(cd|cat|bash|cp|rm|mv|ln|bat|fd|rg|fzf):*' fzf-completion-keybindings "${__fzf_tab_keys[@]}" /:accept:'repeat-fzf-completion'
+  zstyle ':completion::*:(cd|cat|bash|cp|rm|mv|ls|ln|bat|fd|rg|fzf):*' fzf-completion-keybindings "${__fzf_tab_keys[@]}" /:accept:'repeat-fzf-completion'
   unset __fzf_tab_keys
   unset FZF_COMP_OPTS
 fi
