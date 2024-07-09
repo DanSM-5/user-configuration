@@ -55,7 +55,7 @@ function make_gif (
   $FLAGS = $EnvTable['FLAGS']
 
   $id = New-Guid
-  $tmp_location = "$("$env:Temp" -Replace "\\", "/")/$id"
+  $tmp_location = "$("$env:TEMP" -Replace "\\", "/")/$id"
   $palette = "gif-maker_palette.png"
   $segment = "gif-maker_segment"
   $out_name = ""
