@@ -96,7 +96,7 @@ set_linux () {
 set_wsl () {
   # Windows file system
   export WIN_ROOT="/mnt/c"
-  export WUSER="$(cmd.exe /c "echo %USERNAME%" 2>/dev/null)"
+  export WUSER="$(cmd.exe /c "echo %USERNAME%" 2>/dev/null | sed -E 's/[[:space:]]*$//')"
   export USERNAME="$WUSER"
   export WIN_HOME="$WIN_ROOT/Users/$WUSER"
   export APPDATA="$WIN_HOME/AppData/Roaming"
