@@ -69,3 +69,9 @@ if [ "$windows" = true ]; then
   ln -s "$mpv_location" "$HOME/scoop/persist/mpv/portable_config"
 fi
 
+if command -v termux-setup-storage &> /dev/null; then
+  export user_conf_path="${user_conf_path:-$HOME/.usr_conf}"
+  mkdir -p "$HOME/.termux"
+  cp -r "$user_conf_path/.termux"/* "$HOME/.termux"
+fi
+
