@@ -14,8 +14,12 @@ $env:PREFERRED_EDITOR = if ($env:PREFERRED_EDITOR) { $env:PREFERRED_EDITOR } els
 # TODO: Loop through files and source them
 # E.G. Get-ChildItem -Path utils | Where { $_.Name -Like 'function-*.ps1' }
 . "${user_conf_path}${dirsep}utils${dirsep}function-Out-HostColored.ps1"
-. "${user_conf_path}${dirsep}utils${dirsep}function-With-Env.ps1"
+# . "${user_conf_path}${dirsep}utils${dirsep}function-With-Env.ps1"
 . "${user_conf_path}${dirsep}utils${dirsep}function-New-CommandWrapper.ps1"
+
+
+if (Test-Path Alias:wenv) { Remove-Item Alias:wenv }
+Set-Alias -Name wenv -Value With-Env
 
 # Script called from function
 function pimg () { & "${user_conf_path}${dirsep}utils${dirsep}paste-image.ps1" @args }
