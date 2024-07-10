@@ -193,8 +193,8 @@ if (Test-Command rg) {
 # Set Emacs keybindings for readline
 # Set-PSReadLineOption -EditMode Emacs
 
-# Set Prediction - PS 7.1 or above only
-if ($PSVersionTable.PSVersion -ge 7.1) {
+# Set Prediction if PSReadLine 2.2 or above only
+if ((Get-Module PSReadLine).Version -ge '2.2') {
   Set-PSReadLineOption -PredictionSource History
   Set-PSReadLineOption -Colors @{ InlinePrediction = "#B3E5FF" }
   Set-PSReadLineKeyHandler -Chord "Ctrl+RightArrow" -Function ForwardWord
