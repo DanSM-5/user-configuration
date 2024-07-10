@@ -1,4 +1,4 @@
-# Minimal config for Windows Powershell
+# Minimal config for Windows Powershell v5
 
 $user_conf_path = "${HOME}\.usr_conf"
 $user_scripts_path = "${HOME}\user-scripts"
@@ -92,6 +92,68 @@ if (Get-Command -Name 'eza' -ErrorAction SilentlyContinue) {
   function ll () { eza -AlF --icons --group-directories-first @args }
   function la () { eza -AF --icons --group-directories-first @args }
   function l () { eza -F --icons --group-directories-first @args }
+} else {
+  function listFiles () {
+    [CmdletBinding()]
+    param(
+      [String]
+      $DirectoryName = '.',
+      [String]
+      [Parameter(ValueFromPipeline = $true)]
+      $PathFromPipe,
+      [Switch]
+      $All
+    )
+
+    $path = if ($PathFromPipe) { $PathFromPipe } else { $DirectoryName }
+    $path = [IO.Path]::GetFullPath([IO.Path]::Combine((Get-Location -PSProvider FileSystem).ProviderPath, $path))
+
+    # $position = $PSCmdlet.MyInvocation.PipelinePosition
+    # $length = $PSCmdlet.MyInvocation.PipelineLength
+
+    $filesFound = Get-ChildItem -Path $path -Force:$All -ErrorAction SilentlyContinue | % {
+      $fileName = $_.Name
+
+      # Return filename as it, no need to format for pipeline
+      if ($position -ne $length) {
+        return $fileName
+      }
+
+      $item = [PSCustomObject] @{ Content = '' }
+
+      # if (Test-Path -PathType Leaf -Path f) {}
+      if ($_.Attributes -Band [IO.FileAttributes]::ReparsePoint) {
+        $fileName = "$fileName@"
+      } elseif ($_.Attributes -Band [IO.FileAttributes]::Directory) {
+        $fileName = "$fileName/"
+      } elseif ($_.Attributes -Band [IO.FileAttributes]::Archive) {
+        $fileName = "$fileName*"
+      }
+
+      $item.Content = $fileName
+        return $item
+    }
+
+    # Return object as is if not in a pipeline
+    # if ($position -ne $length) {
+    #   return $filesFound
+    # }
+
+    if ($filesFound.Length -eq 0) {
+      return $filesFound
+    }
+
+    # Set number of columns
+    $columns = if ($filesFound.Length -gt 100) { 4 } elseif ($filesFound.Length -gt 20) { 3 } else { 2 }
+    # Format output to be displayed
+    $filesFound |
+      Sort-Object -Property Content |
+      Format-Wide -Column $columns -Property Content
+  }
+
+  function ll () { Get-ChildItem @args }
+  function la () { listFiles @args -All }
+  function l () { listFiles @args }
 }
 
 function up ([int] $val = 1) {
