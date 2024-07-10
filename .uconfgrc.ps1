@@ -314,25 +314,48 @@ Set-PSReadLineKeyHandler -Chord 'ctrl+o,e' -ScriptBlock {
   }
 }
 
+$addlast = ""
+$addfirst = ""
+$userscriptbin = "${env:user_scripts_path}${dirsep}bin"
+$userbin = "${HOME}${dirsep}bin"
+$userlocalbin = "${HOME}${dirsep}.local${dirsep}bin"
+[System.Collections.Generic.List[string]] $pathlist = foreach ($pathentry in ($env:PATH -Split $pathsep)) {
+  if (!$pathentry) { continue }
+  $pathentry
+}
+
+# Ensure userscriptbin is last entry
 if ((
-  Test-Path -Path "${env:user_scripts_path}${dirsep}bin" -ErrorAction SilentlyContinue
+  Test-Path -Path $userscriptbin -ErrorAction SilentlyContinue
 ) -and (
-  -not (Test-Command 'path_end')
+  -not ($pathlist.LastIndexOf($userscriptbin) -eq ($pathentry.Count - 1))
 )) {
-  $env:PATH += ";${env:user_scripts_path}${dirsep}bin"
+  # Remove $HOME/user-scripts/bin from list
+  while ($pathlist.Remove($userscriptbin)) { continue }
+  $addlast = "${pathsep}${userscriptbin}"
 }
 
-# Temporary hold the first entries in the path
-$firstpathentries = $env:PATH -split $pathsep | Select -First 10
-if (-not ($firstpathentries -Match ([regex]::Escape("${HOME}${dirsep}bin")))) {
-  $env:PATH = "${HOME}${dirsep}bin${pathsep}${env:PATH}"
+# Ensure userbin is first entry
+if ($pathlist[0] -ne $userbin) {
+  # Remove $HOME/bin from list
+  while ($pathlist.Remove($userbin)) { continue }
+  # Remove $HOME/.local/bin from list
+  while ($pathlist.Remove($userlocalbin)) { continue }
+  # First paths that should appear in PATH
+  $addfirst = "${userbin}${pathsep}${userlocalbin}${pathsep}"
 }
 
-if (-not ($firstpathentries -Match ([regex]::Escape("${HOME}${dirsep}.local${dirsep}bin")))) {
-  $env:PATH = "${HOME}${dirsep}.local${dirsep}bin${pathsep}${env:PATH}"
-}
-# Remove firstpathentries
-Remove-Variable firstpathentries
+$env:PATH = "${addfirst}$($pathlist -Join $pathsep)${addlast}"
+
+# if (-not ($firstpathentries -Match ([regex]::Escape("${HOME}${dirsep}bin")))) {
+
+# Remove temporary variables
+Remove-Variable userscriptbin
+Remove-Variable userbin
+Remove-Variable userlocalbin
+Remove-Variable addfirst
+Remove-Variable addlast
+Remove-Variable pathlist
 
 # Add tab completions
 foreach ($file in (Get-ChildItem "$env:user_conf_path${dirsep}completions${dirsep}pwsh")) {
