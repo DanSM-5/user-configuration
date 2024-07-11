@@ -227,7 +227,10 @@ fi
 
 # Add auto suggestions
 # auto suggestions (Could be plugin of oh-my-zsh  but using oh-my-posh at the moment)
-test -f "$user_config_cache/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh" && source "$user_config_cache/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh"
+if [ -f "$user_config_cache/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh" ]; then
+  source "$user_config_cache/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh"
+  export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#b3e5ff"
+fi
 
 # Must be the last line of this file
 if [ -f "$user_config_cache/plugins/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh" ]; then
