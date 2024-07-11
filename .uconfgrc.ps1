@@ -190,6 +190,16 @@ if (Test-Command rg) {
   }
 }
 
+# For PowerShellRun
+if (Get-Command -Name Enable-PSRunEntry -ErrorAction SilentlyContinue) {
+  Enable-PSRunEntry -Category All
+  Set-PSReadLineKeyHandler -Chord 'ctrl+o,r' -ScriptBlock {
+    [Microsoft.PowerShell.PSConsoleReadLine]::RevertLine()
+    [Microsoft.PowerShell.PSConsoleReadLine]::Insert('Invoke-PSRun')
+    [Microsoft.PowerShell.PSConsoleReadLine]::AcceptLine()
+  }
+}
+
 # Set Emacs keybindings for readline
 # Set-PSReadLineOption -EditMode Emacs
 
@@ -205,7 +215,7 @@ if ((Get-Module PSReadLine).Version -ge '2.2') {
 # LS_COLORS string generated with vivid
 $env:LS_COLORS = Get-Content "$user_conf_path${dirsep}.ls_colors" | Select-Object -Skip 1
 
-Import-Module DirColors
+Import-Module DirColors -ErrorAction SilentlyContinue
 if (Get-Module DirColors -ErrorAction SilentlyContinue) {
   $null = ConvertFrom-LSColors -LSColors "$env:LS_COLORS"
 }
