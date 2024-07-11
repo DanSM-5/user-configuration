@@ -201,6 +201,15 @@ if ((Get-Module PSReadLine).Version -ge '2.2') {
   Set-PSReadLineKeyHandler -Chord "Ctrl+LeftArrow" -Function BackwardWord
 }
 
+# Set colors as if gnu utils for consistency
+# LS_COLORS string generated with vivid
+$env:LS_COLORS = Get-Content "$user_conf_path${dirsep}.ls_colors" | Select-Object -Skip 1
+
+Import-Module DirColors
+if (Get-Module DirColors -ErrorAction SilentlyContinue) {
+  $null = ConvertFrom-LSColors -LSColors "$env:LS_COLORS"
+}
+
 # Keybinding for lfcd
 Set-PSReadLineKeyHandler -Chord 'ctrl+o,ctrl+l' -ScriptBlock {
   [Microsoft.PowerShell.PSConsoleReadLine]::RevertLine()
