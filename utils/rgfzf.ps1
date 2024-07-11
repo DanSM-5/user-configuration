@@ -212,9 +212,10 @@ function Invoke-PsFzfRipgrep() {
           --bind "change:$RELOAD" `
           --bind "enter:become:$OPENER" `
           --bind "ctrl-o:execute:$OPENER" `
-          --bind ("ctrl-r:unbind(ctrl-r)+change-prompt" + '(1. ripgrep> )' + "+disable-search+reload($RG_PREFIX {q} || $trueCmd)+rebind(change,ctrl-f)") `
-          --bind ("ctrl-f:unbind(change,ctrl-f)+change-prompt" + '(2. fzf> )' + "+enable-search+clear-query+rebind(ctrl-r)") `
+          --bind ("ctrl-r:unbind(ctrl-r)+change-prompt" + '(1. 🔎 ripgrep> )' + "+disable-search+reload($RG_PREFIX {q} || $trueCmd)+rebind(change,ctrl-f)") `
+          --bind ("ctrl-f:unbind(change,ctrl-f)+change-prompt" + '(2. ✅ fzf> )' + "+enable-search+clear-query+rebind(ctrl-r)") `
           --bind 'alt-a:select-all,alt-d:deselect-all,ctrl-/:toggle-preview' `
+          --prompt '1. 🔎 ripgrep> ' `
           --delimiter : `
           --preview 'bat --style=full --color=always --highlight-line {2} {1}' `
           --preview-window '~4,+{2}+4/3,<80(up)' `
