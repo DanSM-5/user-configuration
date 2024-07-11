@@ -1871,3 +1871,10 @@ grs () {
   popd
 }
 
+padd () {
+  mkdr "$HOME/projects"
+  pushd "$HOME/projects"
+  git clone "$@"
+  popd
+}
+

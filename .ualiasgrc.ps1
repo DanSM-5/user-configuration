@@ -1585,3 +1585,10 @@ function grs () {
   Pop-Location
 }
 
+function padd () {
+  mkdr "$HOME/projects"
+  Push-Location "$HOME/projects"
+  git clone $args
+  Pop-Location
+}
+
