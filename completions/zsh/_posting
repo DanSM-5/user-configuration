@@ -1,0 +1,15 @@
+#compdef posting
+
+# zsh completions for 'posting'
+# automatically generated with https://raw.githubusercontent.com/DanSM-5/user-scripts/master/bin/zshgencomp
+local arguments
+
+arguments=(
+    '--help[Show this message and exit.]'
+    {-e,--env}'[Path to the .env environment file(s)]'
+    '--collection[Path to the collection directory]'
+    {-o,--output}'[Path to save the imported collection]'
+    '*:filename:_files'
+)
+
+_arguments -s $arguments
