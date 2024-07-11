@@ -312,7 +312,9 @@ Set-PSReadLineKeyHandler -Chord 'ctrl+o,e' -ScriptBlock {
       $editorArgs += '+'
     }
     # Add current content of prompt to buffer
-    $line > $tmp_file
+    $line = $line.Replace("`r", "").Trim()
+    [System.IO.File]::WriteAllLines($tmp_file, $line, [System.Text.UTF8Encoding]($false))
+
     $editorArgs += $tmp_file
     # Start editor and wait for it to close
     $proc = Start-Process $editor -NoNewWindow -PassThru -ArgumentList $editorArgs
@@ -320,7 +322,7 @@ Set-PSReadLineKeyHandler -Chord 'ctrl+o,e' -ScriptBlock {
     $proc = $null
     # Clean prompt
     [Microsoft.PowerShell.PSConsoleReadLine]::RevertLine()
-    $content = (Get-Content -Path $tmp_file -Raw -Encoding UTF8).Replace("`r","").Trim()
+    $content = (Get-Content -Path $tmp_file -Raw -Encoding UTF8).Replace("`r","").Replace("`t", "  ").Trim()
     [Microsoft.PowerShell.PSConsoleReadLine]::Insert($content)
     # [Microsoft.PowerShell.PSConsoleReadLine]::AcceptLine()
   } finally {
