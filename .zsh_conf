@@ -25,6 +25,9 @@ HISTFILE=~/.zsh_history
 # zstyle :plugin:zsh-completion-generator programs bat eza erd
 # Optionally call: gencomp program [help command]
 
+# For zshcompgen
+export ZSHGENCOMP_SAVE_LOCATION="$user_conf_path/completions/zsh"
+
 # fpath changes must happen before compinit
 fpath=(
   ~/.zsh
