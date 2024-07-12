@@ -1,10 +1,16 @@
 #!/usr/bin/env bash
 
+# Enable ssh remote
+remote_url="https://github.com/DanSM-5"
+if [ "$USE_SSH_REMOTE" = 'true' ]; then
+  remote_url="git@github-personal:DanSM-5"
+fi
+
 # Add more plugins here
 repos=(
   https://github.com/zsh-users/zsh-autosuggestions
   # https://github.com/zsh-users/zsh-syntax-highlighting
-  ssh://github-personal/DanSM-5/zsh-nvm
+  "$remote_url/zsh-nvm"
   https://github.com/lincheney/fzf-tab-completion
   # https://github.com/RobSis/zsh-completion-generator.git
   https://github.com/zsh-users/zsh-completions.git
