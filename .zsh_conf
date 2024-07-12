@@ -17,6 +17,9 @@ HISTSIZE=1000
 SAVEHIST=1000
 HISTFILE=~/.zsh_history
 
+# Set language for some plugins
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
 
 # Must be sourced before compinit
 # GENCOMPL_FPATH=$user_conf_path/zsh
