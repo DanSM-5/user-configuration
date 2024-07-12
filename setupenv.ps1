@@ -4,6 +4,7 @@
 # for consistency
 $SHOME = $HOME.Replace('\', '/')
 $mpv_location = "$SHOME/.config/mpv"
+$setup_terminal = $env:SETUP_TERMINAL -eq 'true'
 
 try {
   New-Item -Path "$SHOME/.config" -ItemType Directory -ErrorAction SilentlyContinue
@@ -56,5 +57,37 @@ if ($IsWindows) {
   New-Item -ItemType SymbolicLink -Target "$mpv_location" -Path "$SHOME/AppData/Roaming/mpv"
   # Scoop mpv reads from portable_config
   New-Item -ItemType SymbolicLink -Target "$mpv_location" -Path "$SHOME/scoop/persist/mpv/portable_config"
+
+  # Set Windows Terminal config
+  if ($setup_terminal -and (Test-Path -Path "$SHOME/user-scripts/windows-terminal/settings.json" -PathType Leaf -ErrorAction SilentlyContinue)) {
+    $terminal_paths = @(
+      # MS Store
+      "$env:LOCALAPPDATA/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/settins.json"
+      "$env:LOCALAPPDATA/Packages/Microsoft.WindowsTerminalPreview_8wekyb3d8bbwe/LocalState/settins.json"
+      # Binary installer
+      "$env:LOCALAPPDATA/Microsoft/Windows Terminal/settings.json"
+      "$env:APPDATA/Microsoft/Windows Terminal/settings.json"
+    )
+
+    foreach ($tp in $terminal_paths) {
+      # Skip if file does not exist
+      $settings_location = [System.IO.Path]::GetDirectoryName($tp)
+      if (!(Test-Path -Path $settings_location -PathType Leaf -ErrorAction SilentlyContinue)) {
+        New-Item $settings_location -ItemType Directory -ErrorAction 0
+      }
+
+      if (Test-Path -Path $tp -PathType Leaf -ErrorAction SilentlyContinue) {
+        Remove-Item -Path $tp -Force -ErrorAction SilentlyContinue *> $null
+      }
+
+      Copy-Item -Path "$HOME/user-scripts/windows-terminal/settings.json" -Destination $tp
+
+      # Check if it is symlink
+      # if (Get-Item $tp).Attributes -Band [IO.FileAttributes]::ReparsePoint) {
+      #   continue
+      # }
+      # New-Item -ItemType SymbolicLink -Target "$HOME/user-scripts/windows-terminal/settings.json" -Path $tp
+    }
+  }
 }
 

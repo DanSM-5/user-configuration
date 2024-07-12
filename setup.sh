@@ -7,6 +7,7 @@
 # Config repo + default location
 export user_conf_path="${user_conf_path:-$HOME/.usr_conf}"
 config_repo="git@github-personal:DanSM-5/user-configuration"
+export SETUP_TERMINAL="true"
 
 # Start from HOME
 cd "$HOME"

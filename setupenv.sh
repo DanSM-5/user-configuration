@@ -69,6 +69,15 @@ if [ "$windows" = true ]; then
   ln -s "$mpv_location" "$HOME/scoop/persist/mpv/portable_config"
 fi
 
+if [ "$SETUP_TERMINAL" = 'true' ] && [[ -v KITTY_WINDOW_ID ]]; then
+  if ! [ -L "$HOME/.config/kitty" ]; then
+    ln -s "$user_scripts_path/kitty" "$HOME/.config/kitty"
+    pushd "$HOME/.config/kitty"
+    git clone https://github.com/yurikhan/kitty_grab.git
+    popd
+  fi
+fi
+
 if command -v termux-setup-storage &> /dev/null; then
   export user_conf_path="${user_conf_path:-$HOME/.usr_conf}"
   mkdir -p "$HOME/.termux"
