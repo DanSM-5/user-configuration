@@ -3,6 +3,7 @@
 # Detection to handle correct paths per platform
 mpv_location=''
 windows=false
+remote_url="https://github.com/DanSM-5"
 
 mkdir -p "$HOME/.config"
 
@@ -10,26 +11,30 @@ if [[ "$(uname)" =~ MSYS.+|MINGW.+|CYGWIN.+|.+NT.+ ]]; then
   windows=true
 fi
 
+if [ "$USE_SSH_REMOTE" = 'true' ]; then
+  remote_url="git@github-personal:DanSM-5"
+fi
+
 mpv_location="$HOME/.config/mpv"
 
 # Required repos
 declare -A repos=(
-  ["$HOME/user-scripts"]="git@github-personal:DanSM-5/user-scripts"
-  ["$HOME/.SpaceVim.d"]="git@github-personal:DanSM-5/space-vim-config"
-  ["$HOME/.config/vscode-nvim"]="git@github-personal:DanSM-5/vscode-nvim"
-  ["$HOME/omp-theme"]="git@github-personal:DanSM-5/omp-theme"
-  ["$mpv_location"]="git@github-personal:DanSM-5/mpv-conf"
+  ["$HOME/user-scripts"]="$remote_url/user-scripts"
+  ["$HOME/.SpaceVim.d"]="$remote_url/space-vim-config"
+  ["$HOME/.config/vscode-nvim"]="$remote_url/vscode-nvim"
+  ["$HOME/omp-theme"]="$remote_url/omp-theme"
+  ["$mpv_location"]="$remote_url/mpv-conf"
 )
 
 # Repos that should be clonned within $HOME/user-scripts
 declare -A user_scripts=(
-  ["$HOME/user-scripts/ff2mpv"]="git@github-personal:DanSM-5/ff2mpv"
+  ["$HOME/user-scripts/ff2mpv"]="$remote_url/ff2mpv"
 )
 
 # Repos that should be clonned within mpv/scripts
 declare -A mpv_plugins=(
-  ["$mpv_location/scripts/mpv_sponsorblock"]="git@github-personal:DanSM-5/mpv_sponsorblock"
-  ["$mpv_location/scripts/mpv-gif-generator"]="git@github-personal:DanSM-5/mpv-gif-generator"
+  ["$mpv_location/scripts/mpv_sponsorblock"]="$remote_url/mpv_sponsorblock"
+  ["$mpv_location/scripts/mpv-gif-generator"]="$remote_url/mpv-gif-generator"
   ["$mpv_location/scripts/file-browser"]="https://github.com/CogentRedTester/mpv-file-browser"
 )
 
@@ -67,6 +72,31 @@ if [ "$windows" = true ]; then
   ln -s "$mpv_location" "$HOME/AppData/Roaming/mpv"
   # Scoop mpv reads from portable_config
   ln -s "$mpv_location" "$HOME/scoop/persist/mpv/portable_config"
+
+  if [ "$SETUP_TERMINAL" = 'true' ] && [ -f "$HOME/user-scripts/windows-terminal/settings.json" ]; then
+    terminal_paths=(
+      # MS Store
+      "$LOCALAPPDATA/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/settins.json"
+      "$LOCALAPPDATA/Packages/Microsoft.WindowsTerminalPreview_8wekyb3d8bbwe/LocalState/settins.json"
+      # Binary installer
+      "$LOCALAPPDATA/Microsoft/Windows Terminal/settings.json"
+      "$APPDATA/Microsoft/Windows Terminal/settings.json"
+    )
+
+    for tp in "${terminal_paths[@]}"; do
+      # Skip if file does not exist
+      settings_location="${tp%/*}"
+      if ! [ -d "$settings_location" ]; then
+        mkdir -p "$settings_location"
+      fi
+
+      if [ -f "$tp" ]; then
+        rm -f "$tp" 2>/dev/null
+      fi
+
+      cp "$HOME/user-scripts/windows-terminal/settings.json" "$tp"
+    done
+  fi
 fi
 
 if [ "$SETUP_TERMINAL" = 'true' ] && [[ -v KITTY_WINDOW_ID ]]; then

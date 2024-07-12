@@ -4,10 +4,19 @@
 # Download with curl and pipe into bash
 # curl -sSLf https://raw.githubusercontent.com/DanSM-5/user-configuration/master/setup.sh | bash
 
+# Environment variables
+# - user_conf_path: Path for the user-configuration repository
+# - SETUP_TERMINAL: Setup terminal configuration Windows Terminal or Kitty
+# - USE_SSH_REMOTE: Use ssh key from config
+
 # Config repo + default location
 export user_conf_path="${user_conf_path:-$HOME/.usr_conf}"
-config_repo="git@github-personal:DanSM-5/user-configuration"
-export SETUP_TERMINAL="true"
+config_repo="https://github.com/DanSM-5/user-configuration"
+export SETUP_TERMINAL="${SETUP_TERMINAL:-true}"
+
+if [ "$USE_SSH_REMOTE" = 'true' ]; then
+  config_repo="git@github-personal:DanSM-5/user-configuration"
+fi
 
 # Start from HOME
 cd "$HOME"

@@ -5,6 +5,7 @@
 $SHOME = $HOME.Replace('\', '/')
 $mpv_location = "$SHOME/.config/mpv"
 $setup_terminal = $env:SETUP_TERMINAL -eq 'true'
+$remote_url = if ($env:USE_SSH_REMOTE -eq 'true') { 'git@github-personal:DanSM-5' } else { 'https://github.com/DanSM-5' }
 
 try {
   New-Item -Path "$SHOME/.config" -ItemType Directory -ErrorAction SilentlyContinue
@@ -12,22 +13,22 @@ try {
 
 # Required repos
 $repos = @{
-  "$SHOME/user-scripts" = "git@github-personal:DanSM-5/user-scripts";
-  "$SHOME/.SpaceVim.d" = "git@github-personal:DanSM-5/space-vim-config";
-  "$SHOME/.config/vscode-nvim" = "git@github-personal:DanSM-5/vscode-nvim";
-  "$SHOME/omp-theme" = "git@github-personal:DanSM-5/omp-theme";
-  "$mpv_location" = "git@github-personal:DanSM-5/mpv-conf";
+  "$SHOME/user-scripts" = "$remote_url/user-scripts";
+  "$SHOME/.SpaceVim.d" = "$remote_url/space-vim-config";
+  "$SHOME/.config/vscode-nvim" = "$remote_url/vscode-nvim";
+  "$SHOME/omp-theme" = "$remote_url/omp-theme";
+  "$mpv_location" = "$remote_url/mpv-conf";
 }
 
 # Repos that should be clonned within $HOME/user-scripts
 $user_scripts = @{
-  "$SHOME/user-scripts/ff2mpv" = "git@github-personal:DanSM-5/ff2mpv";
+  "$SHOME/user-scripts/ff2mpv" = "$remote_url/ff2mpv";
 }
 
 # Repos that should be clonned within mpv/scripts
 $mpv_plugins = @{
-  "$mpv_location/scripts/mpv_sponsorblock" = "git@github-personal:DanSM-5/mpv_sponsorblock";
-  "$mpv_location/scripts/mpv-gif-generator" = "git@github-personal:DanSM-5/mpv-gif-generator";
+  "$mpv_location/scripts/mpv_sponsorblock" = "$remote_url/mpv_sponsorblock";
+  "$mpv_location/scripts/mpv-gif-generator" = "$remote_url/mpv-gif-generator";
   "$mpv_location/scripts/file-browser" = "https://github.com/CogentRedTester/mpv-file-browser";
 }
 
@@ -83,11 +84,17 @@ if ($IsWindows) {
       Copy-Item -Path "$HOME/user-scripts/windows-terminal/settings.json" -Destination $tp
 
       # Check if it is symlink
-      # if (Get-Item $tp).Attributes -Band [IO.FileAttributes]::ReparsePoint) {
+      # if ((Get-Item $tp).Attributes -Band [IO.FileAttributes]::ReparsePoint) {
       #   continue
       # }
       # New-Item -ItemType SymbolicLink -Target "$HOME/user-scripts/windows-terminal/settings.json" -Path $tp
     }
   }
+} else {
+  if ($setup_terminal -and $env:KITTY_WINDOW_ID -and (!((Get-Item "$SHOME/.config/kitty").Attributes -Band [IO.FileAttributes]::ReparsePoint))) {
+    New-Item -ItemType SymbolicLink -Target "$user_scripts_path/kitty" -Path "$SHOME/.config/kitty"
+    Push-Location "$SHOME/.config/kitty"
+    git clone 'https://github.com/yurikhan/kitty_grab.git'
+    Pop-Location
 }
 
