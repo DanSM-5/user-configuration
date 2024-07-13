@@ -1,14 +1,14 @@
 # Minimal config for Windows Powershell v5
 
-$user_conf_path = "${HOME}\.usr_conf"
-$user_scripts_path = "${HOME}\user-scripts"
-$prj = "${HOME}\prj"
-$user_config_cache = "${HOME}\.cache\.user_config_cache"
+$user_conf_path = if ($env:user_conf_path) { $env:user_conf_path } else { "$HOME\.usr_conf" }
+$user_scripts_path = if ($env:user_scripts_path) { $env:user_scripts_path } else { "$HOME\user-scripts" }
+$prj = if ($env:prj) { $env:prj } else { "$HOME\prj" }
+$user_config_cache = "$HOME\.cache\.user_config_cache"
 
 $env:PREFERRED_EDITOR = 'nvim'
 $env:EDITOR = 'nvim'
-$env:user_conf_path = "$user_conf_path"
-$env:user_scripts_path = "$user_scripts_path"
+$env:user_conf_path = $user_conf_path
+$env:user_scripts_path = $user_scripts_path
 $env:user_config_cache = $user_config_cache
 $env:prj = "$prj"
 $env:WIN_ROOT = "C:"
@@ -47,7 +47,7 @@ if (Get-Command -Name 'Set-PsFzfOption' -ErrorAction SilentlyContinue) {
 
   Set-PSReadLineKeyHandler -Key Tab -ScriptBlock { Invoke-FzfTabCompletion }
 
-  # Import-module "$user_conf_path\utils\fzf-git.psm1"
+  Import-module "$user_conf_path\utils\fzf-git.psm1"
 
   # Remove alias fgs from PSFzf
   if (Test-Path Alias:fgs) {
