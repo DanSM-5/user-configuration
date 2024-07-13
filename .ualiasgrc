@@ -5,9 +5,10 @@
 ######################################
 
 # Follow structure conf folders and files
-export user_conf_path="$HOME/.usr_conf"
-export user_scripts_path="$HOME/user-scripts"
-export prj="$HOME/prj"
+export user_conf_path="${user_conf_path:-"$HOME/.usr_conf"}"
+export user_scripts_path="${user_scripts_path:-"$HOME/user-scripts"}"
+export prj="${prj:-"$HOME/prj"}"
+export user_config_cache="${user_config_cache:-"$HOME/.cache/.user_config_cache"}"
 
 alias gpr="cd $prj"
 alias gus="cd $user_scripts_path"

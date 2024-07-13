@@ -4,9 +4,10 @@
 ############################################
 
 # Follow structure conf folders and files
-$user_conf_path = "${HOME}${dirsep}.usr_conf"
-$user_scripts_path = "${HOME}${dirsep}user-scripts"
-$prj = "${HOME}${dirsep}prj"
+$user_conf_path = if ($env:user_conf_path) { $env:user_conf_path } else { "${HOME}${dirsep}.usr_conf" }
+$user_scripts_path = if ($env:user_scripts_path) { $env:user_scripts_path } else { "${HOME}${dirsep}user-scripts" }
+$prj = if ($env:prj) { $env:prj } else { "${HOME}${dirsep}prj" }
+$user_config_cache = if ($env:user_config_cache) { $env:user_config_cache } else { "${HOME}${dirsep}.cache${dirsep}.user_config_cache" }
 
 $env:PREFERRED_EDITOR = if ($env:PREFERRED_EDITOR) { $env:PREFERRED_EDITOR } else { "vim" }
 
