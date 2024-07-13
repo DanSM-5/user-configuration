@@ -4,6 +4,8 @@
 mpv_location=''
 windows=false
 remote_url="https://github.com/DanSM-5"
+SETUP_TERMINAL="${SETUP_TERMINAL:-false}"
+USE_SSH_REMOTE="${USE_SSH_REMOTE:-true}"
 
 mkdir -p "$HOME/.config"
 

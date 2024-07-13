@@ -4,6 +4,8 @@
 # for consistency
 $SHOME = $HOME.Replace('\', '/')
 $mpv_location = "$SHOME/.config/mpv"
+$env:SETUP_TERMINAL = if ($env:SETUP_TERMINAL) { $env:SETUP_TERMINAL } else { 'false' }
+$env:USE_SSH_REMOTE = if ($env:USE_SSH_REMOTE) { $env:USE_SSH_REMOTE } else { 'true' }
 $setup_terminal = $env:SETUP_TERMINAL -eq 'true'
 $remote_url = if ($env:USE_SSH_REMOTE -eq 'true') { 'git@github-personal:DanSM-5' } else { 'https://github.com/DanSM-5' }
 

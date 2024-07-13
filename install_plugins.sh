@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 # Enable ssh remote
+USE_SSH_REMOTE="${USE_SSH_REMOTE:-true}"
 remote_url="https://github.com/DanSM-5"
 if [ "$USE_SSH_REMOTE" = 'true' ]; then
   remote_url="git@github-personal:DanSM-5"

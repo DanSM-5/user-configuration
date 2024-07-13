@@ -13,6 +13,7 @@
 export user_conf_path="${user_conf_path:-$HOME/.usr_conf}"
 config_repo="https://github.com/DanSM-5/user-configuration"
 export SETUP_TERMINAL="${SETUP_TERMINAL:-true}"
+export USE_SSH_REMOTE="${USE_SSH_REMOTE:-true}"
 
 if [ "$USE_SSH_REMOTE" = 'true' ]; then
   config_repo="git@github-personal:DanSM-5/user-configuration"

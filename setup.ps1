@@ -15,9 +15,9 @@ $env:dirsep = $dirsep
 # Config repo + default location
 $user_conf_path = if ($env:user_conf_path) { $env:user_conf_path } else { "$HOME${env:dirsep}.usr_conf" }
 $env:user_conf_path = $user_conf_path
-$config_repo = if ($env:USE_SSH_REMOTE -eq 'true') { 'git@github-personal:DanSM-5/user-configuration' } else { 'https://github.com/DanSM-5/user-configuration' }
-# For terminal setup
 $env:SETUP_TERMINAL = if ($env:SETUP_TERMINAL) { $env:SETUP_TERMINAL } else { 'true' }
+$env:USE_SSH_REMOTE = if ($env:USE_SSH_REMOTE) { $env:USE_SSH_REMOTE } else { 'true' }
+$config_repo = if ($env:USE_SSH_REMOTE -eq 'true') { 'git@github-personal:DanSM-5/user-configuration' } else { 'https://github.com/DanSM-5/user-configuration' }
 
 # Start from HOME
 Set-Location $HOME
