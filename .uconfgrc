@@ -170,6 +170,7 @@ set_general () {
   # Experimental
   # export PAGER='bat -p --paging=always'
   export COLORTERM='truecolor'
+  export TERM="${TERM:-xterm-256color}"
   export BAT_THEME='Dracula'
 
   # LS_COLORS string generated with vivid
