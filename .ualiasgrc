@@ -1165,10 +1165,12 @@ py () {
     -0)
       {
         # Show all python versions
-        (whereis python  | awk '{for (i=2; i<=NF; i++) print $i}' &)
-        (whereis python2 | awk '{for (i=2; i<=NF; i++) print $i}' &)
-        (whereis python3 | awk '{for (i=2; i<=NF; i++) print $i}' &)
-      ((printf "%s\n" /usr/bin/python*) 2> /dev/null &)
+        (whereis python  | awk '{for (i=2; i<=NF; i++) print $i}' &) 2> /dev/null
+        (whereis python2 | awk '{for (i=2; i<=NF; i++) print $i}' &) 2> /dev/null
+        (whereis python3 | awk '{for (i=2; i<=NF; i++) print $i}' &) 2> /dev/null
+        ((printf "%s\n" /usr/bin/python*) 2> /dev/null &)
+        (which python 2> /dev/null &)
+        (which python3 2> /dev/null &)
       } | sort -u
       return
       ;;
