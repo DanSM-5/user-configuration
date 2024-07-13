@@ -17,11 +17,22 @@ Bash/zsh:
 curl -sSLf https://raw.githubusercontent.com/DanSM-5/user-configuration/master/setup.sh | bash
 ```
 
+or try it in Docker
+
+```bash
+docker pull edsm5/shell-config:latest
+docker run -it edsm5/shell-config
+```
+
+Docker files can be found in [this repository](https://github.com/DanSM-5/docker-shell)
+
 ## Supported shells
 
 - pwsh (do not confuse with windows powershell)
 - bash (linux, mac, WSL1, WSL2, git bash)
 - zsh (linux, mac, WSL1, WSL2, git bash)
+
+For windows powershell you can check the [minimal config](./utils/minimal_ps_conf.ps1) which adds few configurations tested to work fine in windows powershell.
 
 ## Usage
 
