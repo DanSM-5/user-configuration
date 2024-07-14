@@ -78,9 +78,14 @@ if [ "$FIND_IT_FASTER_ACTIVE" = 1 ]; then
   return 0
 fi
 
+# Store the path as it comes before modifying it
+export ORIGINAL_PATH="${ORIGINAL_PATH:-"$PATH"}"
+# Restore path as it originally starts if modified
+export PATH="${ORIGINAL_PATH:-"$PATH"}"
+
 # Source User Scripts
-test -f "$HOME/.usr_conf/.uconfgrc" && \. "$HOME/.usr_conf/.uconfgrc"
-test -f "$HOME/.usr_conf/.ualiasgrc" && \. "$HOME/.usr_conf/.ualiasgrc"
-test -f "$HOME/.usr_conf/.uconfrc" && \. "$HOME/.usr_conf/.uconfrc"
-test -f "$HOME/.usr_conf/.ualiasrc" && \. "$HOME/.usr_conf/.ualiasrc"
+test -f "$HOME/.usr_conf/.uconfgrc" && \. "$HOME/.usr_conf/.uconfgrc" || true
+test -f "$HOME/.usr_conf/.ualiasgrc" && \. "$HOME/.usr_conf/.ualiasgrc" || true
+test -f "$HOME/.usr_conf/.uconfrc" && \. "$HOME/.usr_conf/.uconfrc" || true
+test -f "$HOME/.usr_conf/.ualiasrc" && \. "$HOME/.usr_conf/.ualiasrc" || true
 

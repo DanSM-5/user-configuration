@@ -37,16 +37,22 @@ if ($env:FIND_IT_FASTER_ACTIVE) {
   exit
 }
 
-if (Test-Path -Path $HOME\.usr_conf\.uconfgrc.ps1 -PathType Leaf) {
+# Store the path as it comes before modifying it
+$env:ORIGINAL_PATH = if ($env:ORIGINAL_PATH) { $env:ORIGINAL_PATH } else { $env:PATH }
+# Restore path as it originally starts if modified
+$env:PATH = if ($env:ORIGINAL_PATH) { $env:ORIGINAL_PATH } else { $env:PATH }
+
+# Source User Scripts
+if (Test-Path -Path "$HOME${dirsep}.usr_conf${dirsep}.uconfgrc.ps1" -PathType Leaf) {
   . $HOME\.usr_conf\.uconfgrc.ps1
 }
-if (Test-Path -Path $HOME\.usr_conf\.ualiasgrc.ps1 -PathType Leaf) {
+if (Test-Path -Path "$HOME${dirsep}.usr_conf${dirsep}.ualiasgrc.ps1" -PathType Leaf) {
   . $HOME\.usr_conf\.ualiasgrc.ps1
 }
-if (Test-Path -Path $HOME\.usr_conf\.uconfrc.ps1 -PathType Leaf) {
+if (Test-Path -Path "$HOME${dirsep}.usr_conf${dirsep}.uconfrc.ps1" -PathType Leaf) {
   . $HOME\.usr_conf\.uconfrc.ps1
 }
-if (Test-Path -Path $HOME\.usr_conf\.ualiasrc.ps1 -PathType Leaf) {
+if (Test-Path -Path "$HOME${dirsep}.usr_conf${dirsep}.ualiasrc.ps1" -PathType Leaf) {
   . $HOME\.usr_conf\.ualiasrc.ps1
 }
 
