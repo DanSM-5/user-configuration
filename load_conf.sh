@@ -12,12 +12,15 @@ export IS_WSL2=false
 export IS_TERMUX=false
 export IS_LINUX=false
 export IS_MAC=false
-export IS_GITBASH=false
 export IS_WINDOWS=false # PLATFORM IS WINDOWS
-export IS_POWERSHELL=false
-export IS_CMD=false
+export IS_GITBASH=false
 export IS_WINSHELL=false # PWSH, GITBASH or CMD
+export IS_CMD=false
+export IS_ZSH=false # Will change in global config
+export IS_BAHS=false # Will change in global config
+export IS_POWERSHELL=false
 export IS_NIXONDROID="${IS_NIXONDROID:-false}" # Can only be true if set from home-manager
+export IS_FROM_CONTAINER="${IS_FROM_CONTAINER:-false}" # Can only be true if running inside a container
 
 # Other posible case
 # case "$(bat /proc/version 2> /dev/null)" in

@@ -4,16 +4,20 @@
 ###############################
 
 $env:IS_WSL = 'false'
+$env:IS_WSL1 = 'false'
 $env:IS_WSL2 = 'false'
 $env:IS_TERMUX = 'false'
-$env:IS_GITBASH = 'false'
-$env:IS_CMD = 'false'
-$env:IS_WINSHELL = if ($IsWindows) { 'true' } else { 'false' }
-
-$env:IS_WINDOWS = if ($IsWindows) { 'true' } else { 'false' }
-$env:IS_MAC = if ($IsMacOS) { 'true' } else { 'false' }
 $env:IS_LINUX = if ($IsLinux) { 'true' } else { 'false' }
+$env:IS_MAC = if ($IsMacOS) { 'true' } else { 'false' }
+$env:IS_WINDOWS = if ($IsWindows) { 'true' } else { 'false' }
+$env:IS_GITBASH = 'false'
+$env:IS_WINSHELL = if ($IsWindows) { 'true' } else { 'false' }
+$env:IS_CMD = 'false'
+$env:IS_BASH = 'false'
+$env:IS_ZSH = 'false'
 $env:IS_POWERSHELL = 'true'
+$env:IS_NIXONDROID = if ($env:IS_NIXONDROID) { $env:IS_FROM_CONTAINER } { 'false' } # Can only be true if running inside a container
+$env:IS_FROM_CONTAINER = if ($env:IS_FROM_CONTAINER) { $env:IS_FROM_CONTAINER } { 'false' } # Can only be true if running inside a container
 
 $dirsep = if ($IsWindows) { '\' } else { '/' }
 $pathsep = if ($IsWindows) { ';' } else { ':' }
