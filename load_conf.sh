@@ -79,9 +79,8 @@ if [ "$FIND_IT_FASTER_ACTIVE" = 1 ]; then
 fi
 
 # Store the path as it comes before modifying it
-export ORIGINAL_PATH="${ORIGINAL_PATH:-"$PATH"}"
-# Restore path as it originally starts if modified
-export PATH="${ORIGINAL_PATH:-"$PATH"}"
+export userconf_initial_path="${userconf_initial_path:-"$PATH"}"
+export PATH="${userconf_initial_path:-"$PATH"}"
 
 # Source User Scripts
 test -f "$HOME/.usr_conf/.uconfgrc" && \. "$HOME/.usr_conf/.uconfgrc" || true

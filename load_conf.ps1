@@ -38,9 +38,9 @@ if ($env:FIND_IT_FASTER_ACTIVE) {
 }
 
 # Store the path as it comes before modifying it
-$env:ORIGINAL_PATH = if ($env:ORIGINAL_PATH) { $env:ORIGINAL_PATH } else { $env:PATH }
-# Restore path as it originally starts if modified
-$env:PATH = if ($env:ORIGINAL_PATH) { $env:ORIGINAL_PATH } else { $env:PATH }
+$env:userconf_initial_path = if ($env:userconf_initial_path) { $env:userconf_initial_path } else { $env:PATH }
+$env:PATH = if ($env:userconf_initial_path) { $env:userconf_initial_path } else { $env:PATH }
+
 
 # Source User Scripts
 if (Test-Path -Path "$HOME${dirsep}.usr_conf${dirsep}.uconfgrc.ps1" -PathType Leaf) {
