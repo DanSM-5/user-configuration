@@ -231,6 +231,11 @@ if [ -f "$user_config_cache/plugins/fzf-tab-completion/zsh/fzf-zsh-completion.sh
   unset FZF_COMP_OPTS
 fi
 
+# F*ck base 1 index. All my homies use base 0 index for arrays
+# It breaks zsh-autosuggestions e.e
+# Will have base 1 index for now ... 😓
+# setopt KSH_ARRAYS
+
 # Add auto suggestions
 # auto suggestions (Could be plugin of oh-my-zsh  but using oh-my-posh at the moment)
 if [ -f "$user_config_cache/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh" ]; then
@@ -244,8 +249,4 @@ if [ -f "$user_config_cache/plugins/fast-syntax-highlighting/fast-syntax-highlig
 elif [ -f "$user_config_cache/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]; then
   source "$user_config_cache/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 fi
-
-# F*ck base 1 index. All my homies use base 0 index for arrays
-# Set to the end to avoid issues with plugins that may relay in this behavior
-setopt KSH_ARRAYS
 
