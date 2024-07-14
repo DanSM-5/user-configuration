@@ -1881,3 +1881,24 @@ padd () {
   popd
 }
 
+rupdate () {
+  # Navigate to important repos and pull the changes
+  local repositories=(
+    "$user_conf_path"
+    "$user_scripts_path"
+    "$HOME/.SpaceVim.d"
+    "$HOME/.config/vscode-nvim"
+    "$HOME/omp-theme"
+  )
+
+  for repo in "${repositories[@]}"; do
+    if ! [ -d "$repo" ]; then
+      continue
+    fi
+
+    pushd "$repo"
+    git fetch && git pull --rebase
+    popd
+  done
+}
+

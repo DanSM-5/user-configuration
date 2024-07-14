@@ -1593,3 +1593,25 @@ function padd () {
   Pop-Location
 }
 
+
+function rupdate () {
+  # Navigate to important repos and pull the changes
+  $repositories = @(
+    "$user_conf_path"
+    "$user_scripts_path"
+    "$HOME${dirsep}.SpaceVim.d"
+    "$HOME${dirsep}.config${dirsep}vscode-nvim"
+    "$HOME${dirsep}omp-theme"
+  )
+
+  foreach ($repo in $repositories) {
+    if (!(Test-Path -Path "$repo" -PathType Container -ErrorAction SilentlyContinue)) {
+      continue
+    }
+
+    Push-Location "$repo"
+    git fetch && git pull --rebase
+    Pop-Location
+  }
+}
+
