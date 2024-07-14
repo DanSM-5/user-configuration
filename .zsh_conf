@@ -245,3 +245,7 @@ elif [ -f "$user_config_cache/plugins/zsh-syntax-highlighting/zsh-syntax-highlig
   source "$user_config_cache/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 fi
 
+# F*ck base 1 index. All my homies use base 0 index for arrays
+# Set to the end to avoid issues with plugins that may relay in this behavior
+setopt KSH_ARRAYS
+
