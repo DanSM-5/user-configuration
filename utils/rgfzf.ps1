@@ -47,7 +47,7 @@ function Get-EditorLaunchOld() {
         $editorOptions += ' --reuse-window'
     }
     else {
-        $editor = if ($ENV:VISUAL) { $ENV:VISUAL }elseif ($ENV:EDITOR) { $ENV:EDITOR }
+        $editor = if ($env:VISUAL) { $env:VISUAL }elseif ($env:EDITOR) { $env:EDITOR }
         if ($null -eq $editor) {
             if (!$IsWindows) {
                 $editor = 'vim'
@@ -103,6 +103,7 @@ function Get-EditorLaunchOld() {
 }
 
 function Get-EditorLaunch() {
+  # Windows temporary file requires additional quotes around template for '+f'
   $TEMP_FILE = if ($IsWindows) { '"{+f}"' } else { '{+f}' }
   $editor = $null
   $editorOptions = ''
@@ -114,13 +115,10 @@ function Get-EditorLaunch() {
     $editorOptions += ' --reuse-window'
   }
   else {
-    $editor = if ($ENV:VISUAL) { $ENV:VISUAL }
-      elseif ($ENV:PREFERRED_EDITOR) { $ENV:PREFERRED_EDITOR }
-      elseif ($ENV:EDITOR) { $ENV:EDITOR }
-      else { nvim }
-    # if ($null -eq $editor) {
-    #     $editor = if (!$IsWindows) { 'vim' } else { 'code' }
-    # }
+    $editor = if ($env:PREFERRED_EDITOR) { $env:PREFERRED_EDITOR }
+      elseif ($env:VISUAL) { $env:VISUAL }
+      elseif ($env:EDITOR) { $env:EDITOR }
+      else { 'nvim' }
   }
   if (-not [string]::IsNullOrEmpty($env:PSFZF_EDITOR_OPTIONS)) {
     $editorOptions += ' ' + $env:PSFZF_EDITOR_OPTIONS
@@ -142,7 +140,20 @@ function Get-EditorLaunch() {
         `$line = {2};
         $editor $editorOptions --goto """`${file}:`${line}"""
       } else {
-        `$FileList = Get-Content $TEMP_FILE | % {
+        # Not possible to open multiple files on a specific line
+        # so call them one by one with --goto
+        Get-Content $TEMP_FILE | ForEach-Object {
+          `$file, `$line, `$ignore = `$_ -Split ':';
+          $editor $editorOptions --goto """`${file}:`${line}"""
+        }
+      }
+"@
+  } elseif ($editor -eq 'nano') {
+    return @"
+      if (`$env:FZF_SELECT_COUNT -eq 0) {
+        $editor $editorOptions +{2} {1}    # Lanunch nano on current line
+      } else {
+        `$FileList = Get-Content $TEMP_FILE | ForEach-Object {
           `$files = [System.Collections.Generic.List[string]]::new()
         } {
           `$file, `$ignore = `$_ -Split ':';
@@ -157,7 +168,7 @@ function Get-EditorLaunch() {
       if (`$env:FZF_SELECT_COUNT -eq 0) {
         $editor $editorOptions {1}
       } else {
-        `$FirstFile = Get-Content -TotalCount 1 $TEMP_FILE | % {
+        `$FirstFile = Get-Content -TotalCount 1 $TEMP_FILE | ForEach-Object {
           `$file, `$ignore = `$_ -Split ':';
           """`$file"""
         }
