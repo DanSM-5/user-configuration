@@ -14,33 +14,33 @@ $env:PREFERRED_EDITOR = if ($env:PREFERRED_EDITOR) { $env:PREFERRED_EDITOR } els
 # Dot sourcing function scripts
 # TODO: Loop through files and source them
 # E.G. Get-ChildItem -Path utils | Where { $_.Name -Like 'function-*.ps1' }
-. "${user_conf_path}${dirsep}utils${dirsep}function-Out-HostColored.ps1"
-# . "${user_conf_path}${dirsep}utils${dirsep}function-With-Env.ps1"
-. "${user_conf_path}${dirsep}utils${dirsep}function-New-CommandWrapper.ps1"
+. "${env:user_conf_path}${dirsep}utils${dirsep}function-Out-HostColored.ps1"
+# . "${env:user_conf_path}${dirsep}utils${dirsep}function-With-Env.ps1"
+. "${env:user_conf_path}${dirsep}utils${dirsep}function-New-CommandWrapper.ps1"
 
 
 if (Test-Path Alias:wenv) { Remove-Item Alias:wenv }
 Set-Alias -Name wenv -Value With-Env
 
 # Script called from function
-function pimg () { & "${user_conf_path}${dirsep}utils${dirsep}paste-image.ps1" @args }
+function pimg () { & "${env:user_conf_path}${dirsep}utils${dirsep}paste-image.ps1" @args }
 
-function gpr { Set-Location $prj }
-function gus { Set-Location $user_scripts_path }
-function guc { Set-Location $user_conf_path }
+function gpr { Set-Location $env:prj }
+function gus { Set-Location $env:user_scripts_path }
+function guc { Set-Location $env:user_conf_path }
 function gvc { Set-Location "${HOME}${dirsep}.SpaceVim.d" }
 function goh { Set-Location "$HOME"}
 
 function epf { nvim $PROFILE }
-function ecf { nvim "$(Join-Path -Path $user_conf_path -ChildPath .uconfrc.ps1)" }
-function egc { nvim "$(Join-Path -Path $user_conf_path -ChildPath .uconfgrc.ps1)" }
-function eal { nvim "$(Join-Path -Path $user_conf_path -ChildPath .ualiasrc.ps1)" }
-function ega { nvim "$(Join-Path -Path $user_conf_path -ChildPath .ualiasgrc.ps1)" }
+function ecf { nvim "$(Join-Path -Path $env:user_conf_path -ChildPath .uconfrc.ps1)" }
+function egc { nvim "$(Join-Path -Path $env:user_conf_path -ChildPath .uconfgrc.ps1)" }
+function eal { nvim "$(Join-Path -Path $env:user_conf_path -ChildPath .ualiasrc.ps1)" }
+function ega { nvim "$(Join-Path -Path $env:user_conf_path -ChildPath .ualiasgrc.ps1)" }
 function evc { nvim "$(Join-Path -Path $HOME -ChildPath ".SpaceVim.d${dirsep}init.toml")" }
 
 function getPsFzfOptions {
   $path = $PWD.ProviderPath.Replace('\', '/')
-  $fzfPreviewScript = Join-Path -Path $user_conf_path -ChildPath "utils${dirsep}fzf-preview.ps1"
+  $fzfPreviewScript = Join-Path -Path $env:user_conf_path -ChildPath "utils${dirsep}fzf-preview.ps1"
   $psFzfOptions = @{
     Preview = $("pwsh -NoProfile -NonInteractive -NoLogo -File \""$fzfPreviewScript\"" \""" + $path + "\"" {}" );
     Bind = @(
@@ -63,7 +63,7 @@ function getPsFzfOptions {
 $fzf_preview_normal = ("pwsh -NoProfile -NonInteractive -NoLogo -File `"$fzfPreviewScript`"" + " \""" + '.' + "\"" {}")
 function getFzfOptions () {
   $path = $PWD.ProviderPath.Replace('\', '/')
-  $fzfPreviewScript = Join-Path -Path $user_conf_path -ChildPath "utils${dirsep}fzf-preview.ps1"
+  $fzfPreviewScript = Join-Path -Path $env:user_conf_path -ChildPath "utils${dirsep}fzf-preview.ps1"
   $preview = ("pwsh -NoProfile -NonInteractive -NoLogo -File `"$fzfPreviewScript`"" + " \""" + $path + "\"" {}")
 
   $options = @(
@@ -115,19 +115,19 @@ function spf {
   . $global:profile
 }
 function scfg {
-  . "${user_conf_path}${dirsep}.uconfrc.ps1"
+  . "${env:user_conf_path}${dirsep}.uconfrc.ps1"
 }
 function sgcf {
-  . "${user_conf_path}${dirsep}.uconfgrc.ps1"
+  . "${env:user_conf_path}${dirsep}.uconfgrc.ps1"
 }
 function sals {
-  . "${user_conf_path}${dirsep}.ualiasrc.ps1"
+  . "${env:user_conf_path}${dirsep}.ualiasrc.ps1"
 }
 function sgal {
-  . "${user_conf_path}${dirsep}.ualiasgrc.ps1"
+  . "${env:user_conf_path}${dirsep}.ualiasgrc.ps1"
 }
 function refrenv {
-  . "${user_conf_path}${dirsep}utils${dirsep}refrenv.ps1"
+  . "${env:user_conf_path}${dirsep}utils${dirsep}refrenv.ps1"
 }
 
 # GIT
@@ -237,10 +237,10 @@ function fmerge () {
 # Example
 # $quick_access = @(
 #   "$HOME"
-#   "$prj"
-#   "$prj\txt"
-#   "$user_conf_path"
-#   "$user_scripts_path"
+#   "$env:prj"
+#   "$env:prj\txt"
+#   "$env:user_conf_path"
+#   "$env:user_scripts_path"
 #   "$HOME\.SpaceVim.d"
 #   "$HOME\.SpaceVim.d\autoload"
 #   "$env:AppData"
@@ -250,10 +250,10 @@ function fmerge () {
 # )
 
 # $quick_edit = @(
-#   "$user_conf_path\.uconfgrc.ps1"
-#   "$user_conf_path\.ualiasgrc.ps1"
-#   "$user_conf_path\.uconfrc.ps1"
-#   "$user_conf_path\.ualiasrc.ps1"
+#   "$env:user_conf_path\.uconfgrc.ps1"
+#   "$env:user_conf_path\.ualiasgrc.ps1"
+#   "$env:user_conf_path\.uconfrc.ps1"
+#   "$env:user_conf_path\.ualiasrc.ps1"
 #   "$HOME\.SpaceVim.d\init.toml"
 #   "$HOME\.SpaceVim.d\autoload\config.vim"
 # )
@@ -287,14 +287,14 @@ function qed ([string] $editor = 'nvim') {
 }
 
 function cprj ([Switch] $Raw) {
-  $directories = & "$user_conf_path${dirsep}utils${dirsep}getprojects.ps1"
+  $directories = & "${env:user_conf_path}${dirsep}utils${dirsep}getprojects.ps1"
 
   if (!$directories) {
     return
   }
 
   $fd_command = "fd --color=always --type file $FD_SHOW_OPTIONS $FD_EXCLUDE_OPTIONS . {}"
-  $reload_command = "pwsh -NoLogo -NonInteractive -NoProfile -File $user_conf_path${dirsep}utils${dirsep}getprojects.ps1"
+  $reload_command = "pwsh -NoLogo -NonInteractive -NoProfile -File ${env:user_conf_path}${dirsep}utils${dirsep}getprojects.ps1"
 
   $options = getFzfOptions
   $selection = @(
@@ -306,7 +306,7 @@ function cprj ([Switch] $Raw) {
         --header 'CTRL-R: Reload | CTRL-F: Files | CTRL-O: Open | CTRL-Y: Copy' `
         --bind "ctrl-f:change-prompt(Files> )+reload($fd_command)+clear-query+change-multi+unbind(ctrl-f)" `
         --bind "ctrl-r:change-prompt(Projs> )+reload($reload_command)+rebind(ctrl-f)+clear-query+change-multi(0)" `
-        --bind "ctrl-y:execute-silent(pwsh -NoLogo -NonInteractive -NoProfile -File ${user_conf_path}${dirsep}utils${dirsep}copy-helper.ps1 {+f})+abort" `
+        --bind "ctrl-y:execute-silent(pwsh -NoLogo -NonInteractive -NoProfile -File ${env:user_conf_path}${dirsep}utils${dirsep}copy-helper.ps1 {+f})+abort" `
         --bind "ctrl-o:execute-silent(pwsh -NoLogo -NoProfile -NonInteractive -Command Start-Process '{}')+abort" `
         --bind 'alt-a:select-all' `
         --bind 'alt-d:deselect-all' `
@@ -330,7 +330,7 @@ function cprj ([Switch] $Raw) {
 }
 
 function rfv {
-  & "${user_conf_path}${dirsep}utils${dirsep}rgfzf.ps1" @args
+  & "${env:user_conf_path}${dirsep}utils${dirsep}rgfzf.ps1" @args
 }
 
 function fcd () {
@@ -523,7 +523,7 @@ function fif () {
     Invoke-Fzf `
       -Height $options.Height -MinHeight $options.MinHeight -Border `
       -Bind $options.Bind `
-      -Preview "pwsh -NoLogo -NonInteractive -NoProfile -File $user_conf_path/utils/highlight.ps1 \`"$single\`" {}"
+      -Preview "pwsh -NoLogo -NonInteractive -NoProfile -File $env:user_conf_path/utils/highlight.ps1 \`"$single\`" {}"
 }
 
 function fdirs () {
@@ -546,14 +546,14 @@ function fenv () {
   # TODO: Investigate change-preview-window not working
   # '--bind', 'ctrl-/:change-preview-window(down|hidden|)',
   $options = @(
-    '--preview', "pwsh -NoLogo -NonInteractive -NoProfile -File $user_conf_path${dirsep}utils${dirsep}log-helper.ps1 {}",
+    '--preview', "pwsh -NoLogo -NonInteractive -NoProfile -File $env:user_conf_path${dirsep}utils${dirsep}log-helper.ps1 {}",
     '--bind', 'ctrl-/:toggle-preview',
     '--bind', 'alt-up:preview-page-up',
     '--bind', 'alt-down:preview-page-down',
     '--bind', 'ctrl-s:toggle-sort',
     '--expect', 'ctrl-h,ctrl-v',
     '--header', 'CTRL-Y: Copy',
-    '--bind', "ctrl-y:execute-silent(pwsh -NoLogo -NonInteractive -NoProfile -File '$user_conf_path${dirsep}utils${dirsep}copy-helper.ps1' {})+abort",
+    '--bind', "ctrl-y:execute-silent(pwsh -NoLogo -NonInteractive -NoProfile -File '${env:user_conf_path}${dirsep}utils${dirsep}copy-helper.ps1' {})+abort",
     '--preview-window', 'up:50%:hidden:wrap'
   )
 
@@ -888,13 +888,13 @@ function ntmp {
 function ntxt ([String] $filename = '') {
   $filename = if ($filename) { $filename } else { "tmp-$(New-Guid).md" }
   $editor = if ($env:PREFERRED_EDITOR) { $env:PREFERRED_EDITOR } else { vim }
-  $prj_dir = "${prj}${dirsep}txt"
+  $prj_dir = "${env:prj}${dirsep}txt"
   New-Item -Path $prj_dir -ItemType Directory -ea 0
   & $editor "$prj_dir${dirsep}$filename"
 }
 
 function ftxt () {
-  $txt = "$prj${dirsep}txt"
+  $txt = "${env:prj}${dirsep}txt"
 
   if (-not (Test-Path -PathType Container -Path "$txt" -ErrorAction SilentlyContinue)) {
     Write-Output "No $txt directory"
@@ -1576,13 +1576,13 @@ Set-Alias -Name pmu -Value Print-MemoryUsage
 
 function grc () {
   Push-Location $env:user_conf_path
-  & "${user_conf_path}${dirsep}utils${dirsep}rgfzf.ps1" @args
+  & "${env:user_conf_path}${dirsep}utils${dirsep}rgfzf.ps1" @args
   Pop-Location
 }
 
 function grs () {
   Push-Location $env:user_scripts_path
-  & "${user_conf_path}${dirsep}utils${dirsep}rgfzf.ps1" @args
+  & "${env:user_conf_path}${dirsep}utils${dirsep}rgfzf.ps1" @args
   Pop-Location
 }
 
@@ -1597,8 +1597,8 @@ function padd () {
 function rupdate () {
   # Navigate to important repos and pull the changes
   $repositories = @(
-    "$user_conf_path"
-    "$user_scripts_path"
+    "$env:user_conf_path"
+    "$env:user_scripts_path"
     "$HOME${dirsep}.SpaceVim.d"
     "$HOME${dirsep}.config${dirsep}vscode-nvim"
     "$HOME${dirsep}omp-theme"
