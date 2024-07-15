@@ -16,8 +16,8 @@ $env:IS_CMD = 'false'
 $env:IS_BASH = 'false'
 $env:IS_ZSH = 'false'
 $env:IS_POWERSHELL = 'true'
-$env:IS_NIXONDROID = if ($env:IS_NIXONDROID) { $env:IS_FROM_CONTAINER } { 'false' } # Can only be true if running inside a container
-$env:IS_FROM_CONTAINER = if ($env:IS_FROM_CONTAINER) { $env:IS_FROM_CONTAINER } { 'false' } # Can only be true if running inside a container
+$env:IS_NIXONDROID = if ($env:IS_NIXONDROID) { $env:IS_NIXONDROID } else { 'false' }
+$env:IS_FROM_CONTAINER = if ($env:IS_FROM_CONTAINER) { $env:IS_FROM_CONTAINER } else { 'false' } # Can only be true if running inside a container
 
 $dirsep = if ($IsWindows) { '\' } else { '/' }
 $pathsep = if ($IsWindows) { ';' } else { ':' }
