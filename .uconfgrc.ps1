@@ -68,8 +68,8 @@ if (Test-Command Set-PsFzfOption) {
   # if (Test-Path Alias:fcd) { Remove-Item Alias:fcd }
   # Set-Alias -Name fcd -Value Invoke-FuzzySetLocation
 
-  Import-module "$user_conf_path\utils\fzf-git.psm1"
-  # Import-module "$user_conf_path\utils\rgfzf.psm1"
+  Import-module "$env:user_conf_path\utils\fzf-git.psm1"
+  # Import-module "$env:user_conf_path\utils\rgfzf.psm1"
 
   # Remove alias fgs from PSFzf
   if (Test-Path Alias:fgs) {
@@ -146,13 +146,13 @@ $FD_OPTIONS = "$env:FD_SHOW_OPTIONS $env:FD_EXCLUDE_OPTIONS"
 if (Test-Command fzf) {
 
   $env:FZF_CTRL_R_OPTS = "
-    --preview 'pwsh -NoLogo -NonInteractive -NoProfile -File ${user_conf_path}${dirsep}utils${dirsep}log-helper.ps1 {}' --preview-window up:3:hidden:wrap
+    --preview 'pwsh -NoLogo -NonInteractive -NoProfile -File ${env:user_conf_path}${dirsep}utils${dirsep}log-helper.ps1 {}' --preview-window up:3:hidden:wrap
     --bind 'ctrl-/:toggle-preview,ctrl-s:toggle-sort'
-    --bind 'ctrl-y:execute-silent(pwsh -NoLogo -NonInteractive -NoProfile -File ${user_conf_path}${dirsep}utils${dirsep}copy-helper.ps1 {})+abort'
+    --bind 'ctrl-y:execute-silent(pwsh -NoLogo -NonInteractive -NoProfile -File ${env:user_conf_path}${dirsep}utils${dirsep}copy-helper.ps1 {})+abort'
     --color header:italic
     --header 'ctrl-y: Copy'"
 
-  $fzfPreviewScript = "${user_conf_path}${dirsep}utils${dirsep}fzf-preview.ps1"
+  $fzfPreviewScript = "${env:user_conf_path}${dirsep}utils${dirsep}fzf-preview.ps1"
 
   $env:FZF_CTRL_T_OPTS = "
     --multi
@@ -163,7 +163,7 @@ if (Test-Command fzf) {
     --bind `"ctrl-f:change-prompt(Files> )+reload(fd $FD_OPTIONS --color=always --type file)`"
     --bind `"ctrl-d:change-prompt(Dirs> )+reload(fd $FD_OPTIONS --color=always --type directory)`"
     --bind `"ctrl-t:change-prompt(CWD> )+reload(pwsh -NoLogo -NoProfile -NonInteractive -Command eza --color=always --all --dereference --oneline --group-directories-first `$PWD)`"
-    --bind 'ctrl-y:execute-silent(pwsh -NoLogo -NonInteractive -NoProfile -File ${user_conf_path}${dirsep}utils${dirsep}copy-helper.ps1 {+f})+abort'
+    --bind 'ctrl-y:execute-silent(pwsh -NoLogo -NonInteractive -NoProfile -File ${env:user_conf_path}${dirsep}utils${dirsep}copy-helper.ps1 {+f})+abort'
     --bind `"ctrl-o:execute-silent(pwsh -NoLogo -NoProfile -NonInteractive -Command Start-Process '{}')+abort`"
     --bind 'alt-a:select-all'
     --bind 'alt-d:deselect-all'
@@ -215,7 +215,7 @@ if ((Get-Module PSReadLine).Version -ge '2.2') {
 
 # Set colors as if gnu utils for consistency
 # LS_COLORS string generated with vivid
-$env:LS_COLORS = Get-Content "$user_conf_path${dirsep}.ls_colors" | Select-Object -Skip 1
+$env:LS_COLORS = Get-Content "${env:user_conf_path}${dirsep}.ls_colors" | Select-Object -Skip 1
 
 Import-Module DirColors -ErrorAction SilentlyContinue
 if (Get-Module DirColors -ErrorAction SilentlyContinue) {
