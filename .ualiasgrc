@@ -1897,8 +1897,53 @@ rupdate () {
     fi
 
     pushd "$repo"
+    printf "%s\n" "Updating repo: $repo"
     git fetch && git pull --rebase
     popd
   done
+}
+
+themes_bat () {
+  # Get other themes like tokio night
+  # Ref: https://github.com/folke/tokyonight.nvim/issues/23
+  if ! [ -f "$1" ]; then
+    printf "%s\n" "You need to provide a file to show the themes"
+    return 1
+  fi
+
+  filename="$1"
+  selected_theme="$(bat --list-themes |
+    fzf-defaults \
+      --cycle \
+      --preview-window right:80% \
+      --preview "bat --theme={} --color=always $filename")"
+
+  if [ -z "$selected_theme" ]; then
+    return
+  fi
+
+  printf "%s\n" "The theme '$selected_theme' has been set temporary on 'BAT_THEME' environment variable"
+  export BAT_THEME="$selected_theme"
+}
+
+themes_vivid () {
+  selected_theme=$(vivid themes |
+    fzf-defaults \
+      --cycle \
+      --preview-window 'right:70%' \
+      --preview '
+      printf "%s\n\n" "Theme: {}";
+      LS_COLORS=$(vivid generate {});
+      LS_COLORS="$LS_COLORS" eza --color=always --icons=always;
+      printf "\n";
+      LS_COLORS="$LS_COLORS" eza -AlF --color=always --icons=always;
+      ')
+
+  if [ -z "$selected_theme" ]; then
+    return
+  fi
+
+  printf "%s\n" "The theme '$selected_theme' has been set temporary on 'LS_COLORS' environment variable"
+  export LS_COLORS="$(vivid generate $selected_theme)"
 }
 

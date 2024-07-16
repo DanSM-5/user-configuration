@@ -1610,8 +1610,56 @@ function rupdate () {
     }
 
     Push-Location "$repo"
+    Write-Output "Updating repo: $repo"
     git fetch && git pull --rebase
     Pop-Location
   }
+}
+
+function themes_bat ([string] $filename) {
+  # Get other themes like tokio night
+  # Ref: https://github.com/folke/tokyonight.nvim/issues/23
+  if ((!$filename) -or !(Test-Path -Path $filename -PathType Leaf -ErrorAction SilentlyContinue)) {
+    Write-Output "You need to provide a file to show the themes"
+    return
+  }
+
+  $fzf_options = getFzfOptions
+  $selected_theme = bat --list-themes |
+    fzf @fzf_options `
+      --cycle `
+      --preview-window 'right:80%' `
+      --preview "bat --theme={} --color=always $filename"
+
+  if (!$selected_theme) {
+    return
+  }
+
+  Write-Output "The theme '$selected_theme' has been set temporary on 'env:BAT_THEME' environment variable"
+  $env:BAT_THEME = $selected_theme
+}
+
+function themes_vivid () {
+  $fzf_options = getFzfOptions
+  $selected_theme = vivid themes |
+    fzf @fzf_options `
+      --cycle `
+      --preview-window 'right:70%' `
+      --with-shell 'pwsh --NoLogo -NoProfile -NonInteractive -Command'`
+      --preview '
+      Write-Output "Theme: {}";
+      Write-Output "";
+      $env:LS_COLORS = vivid generate {};
+      eza --color=always --icons=always;
+      Write-Output "";
+      eza -AlF --color=always --icons=always;
+      '
+
+  if (!$selected_theme) {
+    return
+  }
+
+  Write-Output "The theme '$selected_theme' has been set temporary on 'env:LS_COLORS' environment variable"
+  $env:LS_COLORS = "$(vivid generate $selected_theme)"
 }
 
