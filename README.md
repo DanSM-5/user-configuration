@@ -21,10 +21,10 @@ or try it in Docker
 
 ```bash
 docker pull edsm5/shell-config:latest
-docker run -it edsm5/shell-config
+docker run -e LC_ALL=C.UTF-8 -e COLORTERM -e TERM -w /root -it edsm5/shell-config # Defaults to zsh
 ```
 
-Docker files can be found in [this repository](https://github.com/DanSM-5/docker-shell)
+Docker files and more information can be found in [this repository](https://github.com/DanSM-5/docker-shell)
 
 ## Supported shells
 
