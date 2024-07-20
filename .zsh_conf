@@ -234,15 +234,15 @@ if [ -f "$user_config_cache/plugins/fzf-tab-completion/zsh/fzf-zsh-completion.sh
   )
 
   # basic file preview for ls (you can replace with something more sophisticated than head)
-  zstyle ':completion::*:(ls|eza)::*' \
-    fzf-completion-opts --preview='eval $HOME/.usr_conf/utils/fzf-preview.sh {1}'
+  zstyle ':completion::*:(ls|eza|cd|rm|ln|fd|rg|mv|cp|cat|bat|erd)::*' \
+    fzf-completion-opts --preview='eval $user_conf_path/utils/fzf-preview.sh {1}'
   # preview when completing env vars (note: only works for exported variables)
   # eval twice, first to unescape the string, second to expand the $variable
   zstyle ':completion::*:(-command-|-parameter-|-brace-parameter-|export|unset|expand):*' \
     fzf-completion-opts --preview='eval eval echo {1}'
   zstyle ':completion:*' fzf-completion-keybindings "${__fzf_tab_keys[@]}"
   # also accept and retrigger completion when pressing / when completing cd
-  zstyle ':completion::*:(cd|cat|bash|cp|rm|mv|ls|ln|bat|fd|rg|fzf):*' fzf-completion-keybindings "${__fzf_tab_keys[@]}" /:accept:'repeat-fzf-completion'
+  zstyle ':completion::*:(cd|cat|bash|cp|rm|mv|ls|ln|bat|eza|fd|rg|erd):*' fzf-completion-keybindings "${__fzf_tab_keys[@]}" /:accept:'repeat-fzf-completion'
   unset __fzf_tab_keys
   unset FZF_COMP_OPTS
 fi
