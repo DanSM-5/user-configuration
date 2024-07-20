@@ -106,8 +106,10 @@ function getFzfPreview ([string] $ScriptContent = 'Get-Content $args') {
 }
 
 function fd-Excluded {
-  $exclusionArr = @( $env:FD_SHOW_OPTIONS -Split ' ' )
-  $exclusionArr += @( $env:FD_EXCLUDE_OPTIONS -Split ' ' )
+  $exclusionArr = @(
+    $env:FD_SHOW_OPTIONS -Split ' '
+    $env:FD_EXCLUDE_OPTIONS -Split ' '
+  )
   return $exclusionArr
 }
 
@@ -350,9 +352,12 @@ function fcd () {
   $selection = "$(
     fd `
       @exclude `
+      --path-separator '/' `
+      --color=always `
       -tl -td `
       "$pattern" "$location" |
     Invoke-Fzf `
+      -Ansi -Cycle `
       -Header "(ctrl-/) Search in: $location" `
       -Query "$query" `
       @options
@@ -373,9 +378,12 @@ function fcdd () {
 
   $selection = "$(
     fd `
-      $exclude `
+      @exclude `
+      --path-separator '/' `
+      --color=always `
       -tl -td "$pattern" |
     Invoke-Fzf `
+      -Ansi -Cycle `
       -Header 'Press CTRL-/ to toggle preview' `
       -Query "$query" `
       @options
@@ -404,7 +412,7 @@ function fcde () {
 
   $selection = "$(
     fd `
-      $exclude `
+      @exclude `
       -L -tf "$pattern" "$location" |
     % { Split-Path "$_" } |
     Sort-Object -Unique |
@@ -519,8 +527,9 @@ function fif () {
   $single = "$args"
   $options = getPsFzfOptions
 
-  rg --files-with-matches --no-messages "$single" |
+  rg --color=always --files-with-matches --no-messages "$single" |
     Invoke-Fzf `
+      -Ansi -Cycle `
       -Height $options.Height -MinHeight $options.MinHeight -Border `
       -Bind $options.Bind `
       -Preview "pwsh -NoLogo -NonInteractive -NoProfile -File $env:user_conf_path/utils/highlight.ps1 \`"$single\`" {}"
@@ -531,6 +540,7 @@ function fdirs () {
 
   $selection = $($(Get-Location -Stack) |
     Invoke-Fzf `
+      -Cycle `
       @options)
 
   if ($selection) {
@@ -903,40 +913,27 @@ function ftxt () {
 
   $selected = @()
   $fzf_options = getFzfOptions
-  $txt_path = "$txt${dirsep}".Replace('\', '\\')
-  $script_content = @"
-    Param(
-       [String]
-       `$PreviewItem = ""
-    )
 
-    bat --color=always --style=numbers "$txt_path`$PreviewItem"
-"@
-  $fzf_preview_options = getFzfPreview $script_content
-  $fzf_preview = $fzf_preview_options.preview + " {}"
-
-  try {
-    $selected = @($(
-        fd -tf . "$txt" | % {
-          $_.Replace("$txt${dirsep}", '')
-        } |
-        fzf @fzf_options --multi --preview $fzf_preview | % {
-          "$txt${dirsep}$_"
-        }
-    ))
-  } finally {
-    if (Test-Path -Path $fzf_preview_options.file -PathType Leaf -ErrorAction SilentlyContinue) {
-      Remove-Item -Force $fzf_preview_options.file
-    }
-  }
+  Push-Location "$txt" *> $null
+  $selected = @($(
+    fd --color=always -tf . |
+      fzf @fzf_options --ansi --cycle --multi `
+      --with-shell 'pwsh -NoLogo -NonInteractive -NoProfile -Command' `
+      --preview 'bat --color=always --style=numbers {}'
+  ))
 
   if ($selected.Length -eq 0) {
+    Pop-Location *> $null
     return
   }
 
   $editor = if ($env:PREFERRED_EDITOR) { $env:PREFERRED_EDITOR } else { 'vim' }
 
-  & "$editor" @selected
+  try {
+    & "$editor" @selected
+  } finally {
+    Pop-Location *> $null
+  }
 }
 
 # extract files
@@ -1154,11 +1151,14 @@ function fed () {
 
   $selection = @($(
     fd `
-      $exclude `
+      @exclude `
+      --path-separator '/' `
+      --color=always `
       -tf `
       "$pattern" "$location" |
     Invoke-Fzf `
       -Multi `
+      -Ansi `
       -Cycle `
       -Header "(ctrl-/) Search in: $location" `
       -Query "$query" `
@@ -1184,9 +1184,12 @@ function fedd () {
 
   $selection = "$(
     fd `
-      $exclude `
+      @exclude `
+      --path-separator '/' `
+      --color=always `
       -tf |
     Invoke-Fzf `
+      -Multi `
       -Cycle `
       -Header "(ctrl-/) Search in: $location" `
       -Query "$query" `
@@ -1299,12 +1302,16 @@ function ptc () {
   $exclude = fd-Excluded
 
   $selection = "$(
-    fd `
-      $exclude `
-      -tl -td -tf `
-      "$pattern" "$location" |
-    % -Begin { '.' } { "$_" } |
+    &{
+      Write-Output '.';
+      fd `
+        @exclude `
+        --path-separator '/' `
+        --color=always `
+        -tl -td -tf `
+        "$pattern" "$location" } |
     Invoke-Fzf `
+      -Ansi -Cycle `
       -Header "(ctrl-/) Search in: $location" `
       -Query "$query" `
       @options
@@ -1504,9 +1511,12 @@ function frm () {
 
   fd `
     @exclude `
+    --path-separator '/' `
+    --color=always `
     -tf -tl |
   Invoke-Fzf `
     @options `
+    -Ansi -Cycle `
     -Multi `
     -Query "$query" | ? {
       # If item is a file or a SymbolicLink
@@ -1523,9 +1533,12 @@ function frdr () {
 
   fd `
     @exclude `
+    --path-separator '/' `
+    --color=always `
     -td -d 1 |
   Invoke-Fzf `
     @options `
+    -Ansi -Cycle `
     -Multi `
     -Query "$query" | ? {
       # If item is a file or a SymbolicLink
@@ -1627,7 +1640,7 @@ function themes_bat ([string] $filename) {
   $fzf_options = getFzfOptions
   $selected_theme = bat --list-themes |
     fzf @fzf_options `
-      --cycle `
+      --cycle --cycle `
       --preview-window 'right:80%' `
       --preview "bat --theme={} --color=always $filename"
 

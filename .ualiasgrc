@@ -268,8 +268,8 @@ alias pvim="vim --clean"
 alias pnvim="nvim --clean"
 
 frm () {
-  local selection=($(fd-defaults -tf -tl |
-    fzf-defaults --multi --preview "$fzf_preview_normal"))
+  local selection=($(fd-defaults --color=always -tf -tl |
+    fzf-defaults --ansi --cycle --multi --preview "$fzf_preview_normal"))
 
   if [ -z "$selection" ]; then
     return
@@ -279,8 +279,8 @@ frm () {
 }
 
 frdr () {
-  local selection=($(fd-defaults -td -d 1 |
-    fzf-defaults --preview "$fzf_preview_normal"))
+  local selection=($(fd-defaults --color=always -td -d 1 |
+    fzf-defaults --ansi --cycle --preview "$fzf_preview_normal"))
 
   if [ -z "$selection" ]; then
     return
@@ -294,8 +294,8 @@ rfv () {
 }
 
 fll () {
-  local selection=$(fd-defaults -td |
-    fzf-defaults \
+  local selection=$(fd-defaults --color=always -td |
+    fzf-defaults --ansi --cycle \
       --preview "$fzf_preview_normal")
   if [ -n "$selection" ]; then
     \ls -alhF  --color=always "$selection"
@@ -303,14 +303,14 @@ fll () {
 }
 
 lfd () {
-  fd-defaults |
-    fzf-defaults --preview "$fzf_preview_normal"
+  fd-defaults --color=always |
+    fzf-defaults --ansi --cycle --preview "$fzf_preview_normal"
 }
 
 # experimental
 lfa () {
-  local selection=$(cd "/" && fd-defaults |
-    fzf-defaults --preview "$fzf_preview_normal")
+  local selection=$(cd "/" && fd-defaults --color=always |
+    fzf-defaults --ansi --cycle --preview "$fzf_preview_normal")
   echo "$selection"
 }
 
@@ -326,8 +326,8 @@ fcd () {
   fi
 
   # old preview "ls --color=always -alhF {} | sed '1d;2d;3d'"
-  selection=$(fd-defaults -tl -td "$pattern" "$location" |
-    fzf-defaults --query "$query" \
+  selection=$(fd-defaults --color=always -tl -td "$pattern" "$location" |
+    fzf-defaults --ansi --cycle --query "$query" \
       --header "(ctrl-/) Search in: $location" \
       --preview "$fzf_preview_normal")
   if [ -z "$selection" ]; then
@@ -342,8 +342,8 @@ fcdd () {
   local query="$@"
   local selection=""
 
-  selection=$(fd-defaults -tl -td |
-    fzf-defaults \
+  selection=$(fd-defaults --color=always -tl -td |
+    fzf-defaults --ansi --cycle \
       --query "$query" \
       --preview "$fzf_preview_normal")
 
@@ -361,7 +361,7 @@ fcde () {
 
   if ! [ -d "$location" ]; then
     echo "Invalid location. Defaulting to cwd."
-    location="$(pwd)"
+    location="."
   fi
 
   local selection=$(
@@ -399,8 +399,9 @@ fed () {
     location="$HOME"
   fi
 
-  local selection=($(fd-defaults -L -tf "$pattern" "$location" |
+  local selection=($(fd-defaults --color=always -L -tf "$pattern" "$location" |
     fzf-defaults \
+      --ansi \
       --cycle \
       --multi \
       --preview "$fzf_preview_normal" \
@@ -419,8 +420,8 @@ fed () {
 fedd () {
   local query="${@:2}"
   local editor="${PREFERRED_EDITOR:-vim}"
-  local selection=$(fd-defaults -L -tf |
-    fzf-defaults --multi --cycle \
+  local selection=$(fd-defaults --color=always -L -tf |
+    fzf-defaults --multi --ansi --cycle \
       --preview "$fzf_preview_normal" --query "$query")
   if [ -z "$selection" ]; then
     return
@@ -437,8 +438,9 @@ fif () {
     return 1;
   fi
 
-  rg --files-with-matches --no-messages "$*" |
+  rg --color=always --files-with-matches --no-messages "$*" |
     fzf-defaults \
+      --ansi --cycle \
       --preview "
         highlight -O ansi -l {} 2> /dev/null |
         rg --colors 'match:bg:yellow' --ignore-case --pretty --context 10 '$*' || rg --ignore-case --pretty --context 10 '$*' {}"
@@ -447,10 +449,11 @@ fif () {
 fdirs () {
   local selection="$(dirs -v |
     fzf-defaults \
-    --preview '
-      echo "Path: {2..}"
-      echo ''
-      ls -AFL --color=always $(bash -c "echo "{2..})' |
+      --cycle \
+      --preview '
+        echo "Path: {2..}"
+        echo ''
+        ls -AFL --color=always $(bash -c "echo "{2..})' |
     awk '{print $1}')"
 
   if [ -n "$selection" ]; then
@@ -757,16 +760,17 @@ ftxt () {
     return 1
   fi
 
-  selected=($(fd -tf . "$txt" |
-    sed "s|$txt/||" |
-    fzf-defaults --multi --preview "bat --color=always --style=numbers '$txt/'{}" |
-    sed "s|^|$txt/|"))
+  pushd "$txt" &>/dev/null
+  selected=($(fd --color=always -tf . |
+    fzf-defaults --ansi --cycle --multi --preview "bat --color=always --style=numbers {}"))
 
   if [ -z "$selected" ]; then
+    popd &>/dev/null
     return
   fi
 
   "${PREFERRED_EDITOR:-vim}" "${selected[@]}"
+  popd &>/dev/null
 }
 
 # extract files
@@ -1129,10 +1133,9 @@ ptc () {
   fi
 
   # old preview "ls --color=always -alhF {} | sed '1d;2d;3d'"
-  # NOTE: cat - <() is there to add '.' as an option in the pipe
-  selection=$(fd-defaults -tl -td -tf -L "$pattern" "$location" |
-    cat <(echo '.') - |
+  selection=$({ echo '.'; fd-defaults --color=always -tl -td -tf -L "$pattern" "$location" } |
     fzf-defaults --query "$query" \
+      --ansi --cycle \
       --header "(ctrl-/) Search in: $location" \
       --preview "$fzf_preview_normal")
   if [ -z "$selection" ]; then
@@ -1198,10 +1201,8 @@ if [ "$IS_WINDOWS" = true ]; then
     fi
 
     # old preview "ls --color=always -alhF {} | sed '1d;2d;3d'"
-    # NOTE: cat - <() is there to add '.' as an option in the pipe
-    selection=$(fd-defaults -tl -td -tf -L "$pattern" "$location" |
-      cat <(echo '.') - |
-      fzf-defaults --query "$query" \
+    selection=$({ echo '.'; fd-defaults --color=always -tl -td -tf -L "$pattern" "$location" } |
+      fzf-defaults --ansi --cycle --query "$query" \
         --header "(ctrl-/) Search in: $location" \
         --preview "$fzf_preview_normal")
 
