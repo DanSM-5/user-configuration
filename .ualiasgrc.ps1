@@ -1602,15 +1602,18 @@ function grs () {
 function padd () {
   mkdr "$HOME/projects"
   Push-Location "$HOME/projects"
-  git clone $args
+  git clone @args
   Pop-Location
 }
 
 function padb () {
   mkdr "$HOME/projects"
   Push-Location "$HOME/projects"
-  git clone --bare $args
-  Pop-Location
+  try {
+    clone-bare @args
+  } finally {
+    Pop-Location
+  }
 }
 
 function rupdate () {

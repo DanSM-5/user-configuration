@@ -1885,8 +1885,10 @@ padd () {
 padb () {
   mkdr "$HOME/projects"
   pushd "$HOME/projects"
-  git clone --bare "$@"
+  clone-bare "$@"
+  local ret=$?
   popd
+  return $ret
 }
 
 rupdate () {
