@@ -90,6 +90,17 @@ fi
 # ignore case for completions
 bind 'set completion-ignore-case on'
 
+
+__emoji__ () {
+  local selected="$(emoji | tr -d '\n')"
+  READLINE_LINE="${READLINE_LINE:0:$READLINE_POINT}$selected${READLINE_LINE:$READLINE_POINT}"
+  READLINE_POINT=$(( READLINE_POINT + ${#selected} ))
+}
+
+bind -m emacs-standard -x '"\C-o\C-i": __emoji__'
+bind -m vi-command -x '"\C-o\C-i": __emoji__'
+bind -m vi-insert -x '"\C-o\C-i": __emoji__'
+
 __cprj__ () {
   local dir
   IFS="
