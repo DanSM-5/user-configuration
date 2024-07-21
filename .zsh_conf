@@ -148,6 +148,17 @@ if [ "$IS_MAC" = true ]; then
   # bindkey -s "ø" 'cprj\n'
 fi
 
+__emoji__ () {
+  # Call emoji and append content after cursor
+  LBUFFER="${LBUFFER}$(emoji | tr -d '\n')"
+  zle reset-prompt
+}
+
+zle -N __emoji__
+bindkey -M emacs '^o^i' __emoji__
+bindkey -M vicmd '^o^i' __emoji__
+bindkey -M viins '^o^i' __emoji__
+
 __cprj__ () {
   # Store current typed content
   local current="$BUFFER"
