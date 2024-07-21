@@ -236,6 +236,76 @@ function fmerge () {
   fgb @args | % { git merge "$_" }
 }
 
+
+# Bare repo checkout
+function gwc () {
+  $current_directory = $PWD
+  $is_bare_repository = $false
+  $toplevel = ''
+  $bare_root = ''
+  $branch_name = ''
+
+  while ($PWD -ne "/") {
+    # Check if is a bare repo
+    if ("$(git rev-parse --is-bare-repository 2>/dev/null)" -eq 'true') {
+      $is_bare_repository = $true
+      break
+    }
+    # If error, it means we are no longer under a git repository
+    if (!$?) { break }
+    # Move up a directory
+    cd ..
+  }
+
+  if ($is_bare_repository -eq $false) {
+    Write-Output "Not in a bare repository"
+    return
+  }
+
+  # Recover location
+  cd "$current_directory"
+
+  $toplevel = git rev-parse --show-toplevel
+  if (!(Test-Path -Path "$toplevel/.git" -PathType Leaf -ErrorAction SilentlyContinue)) {
+    Write-Output "Cannot find .git file"
+    return
+  }
+
+  $bare_root = ((Get-Content "$toplevel/.git") -Split ' ')[1]
+  Push-Location "$bare_root"
+
+  if ( $args[0] -eq "-b" ) {
+    $branch_name = $args[1]
+    if (!(Test-Path -Path "$branch_name" -PathType Container -ErrorAction SilentlyContinue)) {
+      git worktree add -b "$branch_name" "$branch_name"
+    }
+  else
+    $branch_name = $args[0]
+    if (!(Test-Path -Path "$branch_name" -PathType Container -ErrorAction SilentlyContinue)) {
+      git worktree add -b "$branch_name" "$branch_name"
+    }
+  }
+
+  Pop-Location
+
+  # Attempt to cd into new worktree
+  cd "$bare_root/$branch_name" *> $null
+}
+
+function fwt () {
+  $branch_name = fgb @args | % {
+    # Clean branch name
+    $_ -replace 'origin/', ''
+  }
+  $branch_name = "$branch_name"
+
+  if (!$branch_name) {
+    return
+  }
+
+  gwc "$branch_name"
+}
+
 # Example
 # $quick_access = @(
 #   "$HOME"

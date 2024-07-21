@@ -117,6 +117,73 @@ gdf () {
   grepo diff
 }
 
+# Bare repo checkout
+gwc () {
+  local current_directory="$PWD"
+  local is_bare_repository=false
+  local toplevel bare_root branch_name
+
+  while ! [ "$PWD" = "/" ]; do
+    # Check if is a bare repo
+    if [ "$(git rev-parse --is-bare-repository 2>/dev/null)" = true ]; then
+      is_bare_repository=true
+      break
+    fi
+    # If error, it means we are no longer under a git repository
+    if ! $?; then
+      break
+    fi
+    # Move up a directory
+    cd ..
+  done
+
+  if [ "$is_bare_repository" = false ]; then
+    printf "%s\n" "Not in a bare repository"
+    return
+  fi
+
+  # Recover location
+  cd "$current_directory"
+
+  toplevel="$(git rev-parse --show-toplevel)"
+  if ! [ -f "$toplevel/.git" ]; then
+    printf "%s\n" "Cannot find .git file"
+    return
+  fi
+
+  bare_root="$(awk '{ print $2 }' "$toplevel/.git")"
+  pushd "$bare_root"
+
+  if [ "$1" = "-b" ]; then
+    branch_name="$2"
+    [ ! -d "$branch_name" ] &&
+      git worktree add -b "$branch_name" "$branch_name"
+  else
+    branch_name="$1"
+    [ ! -d "$branch_name" ] &&
+      git worktree add "$branch_name" "$branch_name"
+  fi
+
+  popd
+
+  # Attempt to cd into new worktree
+  cd "$bare_root/$branch_name" 2>/dev/null
+}
+
+fwt () {
+  local selection branch_name
+
+  selection=$(fgb "${*:-}")
+  if [ -z "$selection" ]; then
+    return
+  fi
+
+  # Clean branch name
+  branch_name="${selection//origin\//}"
+
+  gwc "$branch_name"
+}
+
 if command_exists delta; then
   alias gprev="git diff HEAD^..HEAD | delta"
 else
