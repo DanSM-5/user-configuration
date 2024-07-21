@@ -264,9 +264,18 @@ if ($IsWindows) {
 # $alto = if ($IsMacOS) { 'ø' } else { 'Alt+o' }
 # $ctrlo_p = @('ctrl+o', 'p')
 Set-PSReadLineKeyHandler -Chord 'ctrl+o,p' -ScriptBlock {
+  $line = $cursor = $null
+  # Get current content
+  [Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref] $line, [ref] $cursor)
+  # Clean line
   [Microsoft.PowerShell.PSConsoleReadLine]::RevertLine()
+  # Add call to cprj
   [Microsoft.PowerShell.PSConsoleReadLine]::Insert('cprj')
   [Microsoft.PowerShell.PSConsoleReadLine]::AcceptLine()
+  # Ensure line is clean after dir change
+  [Microsoft.PowerShell.PSConsoleReadLine]::RevertLine()
+  $content = $line.Replace("`r", "").Replace("`t", "  ").Trim()
+  [Microsoft.PowerShell.PSConsoleReadLine]::Insert($content)
 }
 
 # Commented test for scoop as it is unlikely to not be installed on windows

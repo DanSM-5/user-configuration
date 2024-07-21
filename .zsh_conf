@@ -149,10 +149,18 @@ if [ "$IS_MAC" = true ]; then
 fi
 
 __cprj__ () {
+  # Store current typed content
+  local current="$BUFFER"
+  BUFFER=""
+  # Clean prompt
+  zle reset-prompt
+  # call cproj
   cprj
   # Release prompt
   zle accept-line
-  zle reset-prompt
+  # Restore content of line
+  # Ref: https://gist.github.com/YumaInaura/a9fce6dbc9949f7cb1fd9efba0d42d0e
+  print -z "$current"
 }
 
 # Alt+o to launch quick project cd
