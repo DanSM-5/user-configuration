@@ -130,20 +130,20 @@ gwc () {
       break
     fi
     # If error, it means we are no longer under a git repository
-    if ! $?; then
+    if [ "$?" -ne 0 ]; then
       break
     fi
     # Move up a directory
     cd ..
   done
 
+  # Recover location
+  cd "$current_directory"
+
   if [ "$is_bare_repository" = false ]; then
     printf "%s\n" "Not in a bare repository"
     return
   fi
-
-  # Recover location
-  cd "$current_directory"
 
   toplevel="$(git rev-parse --show-toplevel)"
   if ! [ -f "$toplevel/.git" ]; then

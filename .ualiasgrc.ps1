@@ -257,13 +257,13 @@ function gwc () {
     cd ..
   }
 
+  # Recover location
+  cd "$current_directory"
+
   if ($is_bare_repository -eq $false) {
     Write-Output "Not in a bare repository"
     return
   }
-
-  # Recover location
-  cd "$current_directory"
 
   $toplevel = git rev-parse --show-toplevel
   if (!(Test-Path -Path "$toplevel/.git" -PathType Leaf -ErrorAction SilentlyContinue)) {
