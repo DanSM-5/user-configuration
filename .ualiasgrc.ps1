@@ -292,7 +292,7 @@ function gwc () {
   cd "$bare_root/$branch_name" *> $null
 }
 
-function fwt () {
+function fwc () {
   $branch_name = fgb @args | % {
     # Clean branch name
     $_ -replace 'origin/', ''

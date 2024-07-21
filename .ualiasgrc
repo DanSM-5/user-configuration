@@ -170,7 +170,7 @@ gwc () {
   cd "$bare_root/$branch_name" 2>/dev/null
 }
 
-fwt () {
+fwc () {
   local selection branch_name
 
   selection=$(fgb "${*:-}")
