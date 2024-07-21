@@ -350,6 +350,43 @@ Set-PSReadLineKeyHandler -Chord 'ctrl+o,e' -ScriptBlock {
   }
 }
 
+# From PsFzf
+# HACK: workaround for fact that PSReadLine seems to clear screen
+# after keyboard shortcut action is executed, and to work around a UTF8
+# PSReadLine issue (GitHub PSFZF issue #71)
+function InvokePromptHack()
+{
+	$previousOutputEncoding = [Console]::OutputEncoding
+	[Console]::OutputEncoding = [Text.Encoding]::UTF8
+
+	try {
+		[Microsoft.PowerShell.PSConsoleReadLine]::InvokePrompt()
+	} finally {
+		[Console]::OutputEncoding = $previousOutputEncoding
+	}
+}
+
+Set-PSReadLineKeyHandler -Chord 'ctrl+o,ctrl+i' -ScriptBlock {
+  $line = $cursor = $proc = $null
+  # Get current content
+  [Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref] $line, [ref] $cursor)
+  $selected = emoji
+  if (!$selected) { return }
+
+  InvokePromptHack
+
+  $emojis = if ($selected -is [system.array]) { $selected -Join '' } else { $selected }
+  if ($line.Length -eq 0) {
+    [Microsoft.PowerShell.PSConsoleReadLine]::Insert($emojis)
+  } else {
+    [Microsoft.PowerShell.PSConsoleReadLine]::Replace(
+      $cursor, # Position to start replacing
+      0,       # How many characters to replace
+      $emojis  # Content to add for replacement
+    )
+  }
+}
+
 $addlast = ""
 $addfirst = ""
 $userscriptbin = "${env:user_scripts_path}${dirsep}bin"
