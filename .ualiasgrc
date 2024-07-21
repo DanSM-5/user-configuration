@@ -123,49 +123,57 @@ gwc () {
   local is_bare_repository=false
   local toplevel bare_root branch_name
 
-  while ! [ "$PWD" = "/" ]; do
-    # Check if is a bare repo
-    if [ "$(git rev-parse --is-bare-repository 2>/dev/null)" = true ]; then
-      is_bare_repository=true
-      break
+  # Check if already on bare repository root
+  if [ "$(git rev-parse --is-bare-repository 2>/dev/null)" = true ] && [ -f config ]; then
+    bare_root="$PWD"
+  else
+    while ! [ "$PWD" = "/" ]; do
+      # Check if is a bare repo
+      if [ "$(git rev-parse --is-bare-repository 2>/dev/null)" = true ]; then
+        is_bare_repository=true
+        break
+      fi
+      # If error, it means we are no longer under a git repository
+      if [ "$?" -ne 0 ]; then
+        break
+      fi
+      # Move up a directory
+      cd ..
+    done
+
+    # Recover location
+    cd "$current_directory"
+
+    if [ "$is_bare_repository" = false ]; then
+      printf "%s\n" "Not in a bare repository"
+      return
     fi
-    # If error, it means we are no longer under a git repository
-    if [ "$?" -ne 0 ]; then
-      break
+
+    toplevel="$(git rev-parse --show-toplevel)"
+    if ! [ -f "$toplevel/.git" ]; then
+      printf "%s\n" "Cannot find .git file"
+      return
     fi
-    # Move up a directory
-    cd ..
-  done
 
-  # Recover location
-  cd "$current_directory"
+    bare_root="$(awk '{ print $2 }' "$toplevel/.git")"
+    bare_root="${bare_root%/worktrees*}"
 
-  if [ "$is_bare_repository" = false ]; then
-    printf "%s\n" "Not in a bare repository"
-    return
-  fi
+    if ! [ -d "$bare_root" ]; then
+      printf "%s\n" "Cannot find location of bare repository"
+      return
+    fi
 
-  toplevel="$(git rev-parse --show-toplevel)"
-  if ! [ -f "$toplevel/.git" ]; then
-    printf "%s\n" "Cannot find .git file"
-    return
-  fi
-
-  bare_root="$(awk '{ print $2 }' "$toplevel/.git")"
-  bare_root="${bare_root%/worktrees*}"
-
-  if ! [ -d "$bare_root" ]; then
-    printf "%s\n" "Cannot find location of bare repository"
-    return
+    # Test if detected directory is bare repository
+    pushd "$bare_root"
+    if ! [ "$(git rev-parse --is-bare-repository 2>/dev/null)" = true ]; then
+      printf "%s\n" "Wrongly detecting '$bare_root' as root of bare repository"
+      popd
+      return
+    fi
+    popd
   fi
 
   pushd "$bare_root"
-
-  if ! [ "$(git rev-parse --is-bare-repository 2>/dev/null)" = true ]; then
-    printf "%s\n" "Wrongly detecting '$bare_root' as root of bare repository"
-    popd
-    return
-  fi
 
   if [ "$1" = "-b" ]; then
     branch_name="$2"

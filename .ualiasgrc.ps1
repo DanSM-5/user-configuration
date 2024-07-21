@@ -245,46 +245,53 @@ function gwc () {
   $bare_root = ''
   $branch_name = ''
 
-  while ($PWD -ne "/") {
-    # Check if is a bare repo
-    if ("$(git rev-parse --is-bare-repository 2>/dev/null)" -eq 'true') {
-      $is_bare_repository = $true
-      break
+  if (("$(git rev-parse --is-bare-repository 2>/dev/null)" -eq 'true') -and (Test-Path -Path 'config' -PathType Leaf -ErrorAction SilentlyContinue)) {
+    $bare_root = $PWD
+  } else {
+    while ($PWD -ne "/") {
+      # Check if is a bare repo
+      if ("$(git rev-parse --is-bare-repository 2>/dev/null)" -eq 'true') {
+        $is_bare_repository = $true
+        break
+      }
+      # If error, it means we are no longer under a git repository
+      if (!$?) { break }
+      # Move up a directory
+      cd ..
     }
-    # If error, it means we are no longer under a git repository
-    if (!$?) { break }
-    # Move up a directory
-    cd ..
-  }
 
-  # Recover location
-  cd "$current_directory"
+    # Recover location
+    cd "$current_directory"
 
-  if ($is_bare_repository -eq $false) {
-    Write-Output "Not in a bare repository"
-    return
-  }
+    if ($is_bare_repository -eq $false) {
+      Write-Output "Not in a bare repository"
+      return
+    }
 
-  $toplevel = git rev-parse --show-toplevel
-  if (!(Test-Path -Path "$toplevel/.git" -PathType Leaf -ErrorAction SilentlyContinue)) {
-    Write-Output "Cannot find .git file"
-    return
-  }
+    $toplevel = git rev-parse --show-toplevel
+    if (!(Test-Path -Path "$toplevel/.git" -PathType Leaf -ErrorAction SilentlyContinue)) {
+      Write-Output "Cannot find .git file"
+      return
+    }
 
-  $bare_root = ((((Get-Content "$toplevel/.git") -Split ' ')[1]) -Split '/worktrees')[0]
+    $bare_root = ((((Get-Content "$toplevel/.git") -Split ' ')[1]) -Split '/worktrees')[0]
 
-  if (!(Test-Path -Path "$bare_root" -PathType Container -ErrorAction SilentlyContinue)) {
-    Write-Output "Cannot find location of bare repository"
-    return
+    if (!(Test-Path -Path "$bare_root" -PathType Container -ErrorAction SilentlyContinue)) {
+      Write-Output "Cannot find location of bare repository"
+      return
+    }
+
+    # Test if detected directory is bare repository
+    Push-Location "$bare_root"
+    if ("$(git rev-parse --is-bare-repository 2>/dev/null)" -ne 'true') {
+      Write-Output "Wrongly detecting '$bare_root' as root of bare repository"
+      Pop-Location
+      return
+    }
+    Pop-Location
   }
 
   Push-Location "$bare_root"
-
-  if ("$(git rev-parse --is-bare-repository 2>/dev/null)" -ne 'true') {
-    Write-Output "Wrongly detecting '$bare_root' as root of bare repository"
-    Push-Location
-    return
-  }
 
   if ( $args[0] -eq "-b" ) {
     $branch_name = $args[1]
