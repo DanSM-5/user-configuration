@@ -1133,7 +1133,7 @@ ptc () {
   fi
 
   # old preview "ls --color=always -alhF {} | sed '1d;2d;3d'"
-  selection=$({ echo '.'; fd-defaults --color=always -tl -td -tf -L "$pattern" "$location" } |
+  selection=$({ echo '.'; fd-defaults --color=always -tl -td -tf -L "$pattern" "$location"; } |
     fzf-defaults --query "$query" \
       --ansi --cycle \
       --header "(ctrl-/) Search in: $location" \
@@ -1201,7 +1201,7 @@ if [ "$IS_WINDOWS" = true ]; then
     fi
 
     # old preview "ls --color=always -alhF {} | sed '1d;2d;3d'"
-    selection=$({ echo '.'; fd-defaults --color=always -tl -td -tf -L "$pattern" "$location" } |
+    selection=$({ echo '.'; fd-defaults --color=always -tl -td -tf -L "$pattern" "$location"; } |
       fzf-defaults --ansi --cycle --query "$query" \
         --header "(ctrl-/) Search in: $location" \
         --preview "$fzf_preview_normal")
