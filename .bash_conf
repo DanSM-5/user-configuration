@@ -173,7 +173,30 @@ fi
 
 # Load completions from plugin
 if [ -d "$user_config_cache/plugins/bash-completion" ]; then
+  if ! _have have; then
+    # Some completions rely on "have" function which is now deprecated
+    # and it is unset by the end of /usr/share/bash-completion/bash_completion
+    # Sourcing the bash_completion plugin may call a completion that needs "have"
+    # so add it back if it is gone in the same way it is usually defined now.
+    have () {
+       unset -v have
+       _have $1 && have=yes
+     }
+    export -f have
+    have_added=true
+  fi
+
+  # Add completions for bash
   \. "$user_config_cache/plugins/bash-completion/bash_completion"
+
+  # Remove "have" if it is still here and was added by us
+  if _have have && [ "$have_added" = true ]; then
+    unset -f have
+    unset have
+    unset have_added
+  elif [ -n "$have_added" ]; then
+    unset have_added
+  fi
 fi
 
 # Add fzf tab completions
