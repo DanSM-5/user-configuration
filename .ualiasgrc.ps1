@@ -271,8 +271,20 @@ function gwc () {
     return
   }
 
-  $bare_root = ((Get-Content "$toplevel/.git") -Split ' ')[1]
+  $bare_root = ((((Get-Content "$toplevel/.git") -Split ' ')[1]) -Split '/worktrees')[0]
+
+  if (!(Test-Path -Path "$bare_root" -PathType Container -ErrorAction SilentlyContinue)) {
+    Write-Output "Cannot find location of bare repository"
+    return
+  }
+
   Push-Location "$bare_root"
+
+  if ("$(git rev-parse --is-bare-repository 2>/dev/null)" -ne 'true') {
+    Write-Output "Wrongly detecting '$bare_root' as root of bare repository"
+    Push-Location
+    return
+  }
 
   if ( $args[0] -eq "-b" ) {
     $branch_name = $args[1]

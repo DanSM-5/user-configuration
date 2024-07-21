@@ -152,7 +152,20 @@ gwc () {
   fi
 
   bare_root="$(awk '{ print $2 }' "$toplevel/.git")"
+  bare_root="${bare_root%/worktrees*}"
+
+  if ! [ -d "$bare_root" ]; then
+    printf "%s\n" "Cannot find location of bare repository"
+    return
+  fi
+
   pushd "$bare_root"
+
+  if ! [ "$(git rev-parse --is-bare-repository 2>/dev/null)" = true ]; then
+    printf "%s\n" "Wrongly detecting '$bare_root' as root of bare repository"
+    popd
+    return
+  fi
 
   if [ "$1" = "-b" ]; then
     branch_name="$2"
