@@ -1606,6 +1606,12 @@ function padd () {
   Pop-Location
 }
 
+function padb () {
+  mkdr "$HOME/projects"
+  Push-Location "$HOME/projects"
+  git clone --bare $args
+  Pop-Location
+}
 
 function rupdate () {
   # Navigate to important repos and pull the changes

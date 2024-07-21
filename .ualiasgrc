@@ -1882,6 +1882,13 @@ padd () {
   popd
 }
 
+padb () {
+  mkdr "$HOME/projects"
+  pushd "$HOME/projects"
+  git clone --bare "$@"
+  popd
+}
+
 rupdate () {
   # Navigate to important repos and pull the changes
   local repositories=(
