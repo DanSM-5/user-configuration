@@ -211,6 +211,8 @@ if ((Get-Module PSReadLine).Version -ge '2.2') {
   Set-PSReadLineOption -Colors @{ InlinePrediction = "#B3E5FF" }
   Set-PSReadLineKeyHandler -Chord "Ctrl+RightArrow" -Function ForwardWord
   Set-PSReadLineKeyHandler -Chord "Ctrl+LeftArrow" -Function BackwardWord
+  Set-PSReadLineKeyHandler -Chord "Ctrl+n" -Function HistorySearchForward
+  Set-PSReadLineKeyHandler -Chord "Ctrl+p" -Function HistorySearchBackward
 }
 
 # Set colors as if gnu utils for consistency
