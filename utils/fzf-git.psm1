@@ -9,7 +9,7 @@ function is_in_git_repo () {
   if (git rev-parse HEAD 2> $null) { return $true } else { return $false }
 }
 
-$__pager__ = if (Test-Command delta) { 'delta | ' } else { '' }
+$__pager__ = if (Get-Command -Name delta -All -ErrorAction 0) { 'delta | ' } else { '' }
 
 $path_preview_script = Join-Path $env:user_conf_path "utils/fzf-preview.ps1"
 
