@@ -298,7 +298,7 @@ function gwc () {
     if (!(Test-Path -Path "$branch_name" -PathType Container -ErrorAction SilentlyContinue)) {
       git worktree add -b "$branch_name" "$branch_name"
     }
-  else
+  } else {
     $branch_name = $args[0]
     if (!(Test-Path -Path "$branch_name" -PathType Container -ErrorAction SilentlyContinue)) {
       git worktree add -b "$branch_name" "$branch_name"
