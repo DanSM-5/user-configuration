@@ -296,12 +296,14 @@ function gwc () {
   if ( $args[0] -eq "-b" ) {
     $branch_name = $args[1]
     if (!(Test-Path -Path "$branch_name" -PathType Container -ErrorAction SilentlyContinue)) {
-      git worktree add -b "$branch_name" "$branch_name"
+      $git_args = $args[2..$args.Count]
+      git worktree add -b "$branch_name" "$branch_name" @git_args
     }
   } else {
     $branch_name = $args[0]
     if (!(Test-Path -Path "$branch_name" -PathType Container -ErrorAction SilentlyContinue)) {
-      git worktree add -b "$branch_name" "$branch_name"
+      $git_args = $args[1..$args.Count]
+      git worktree add "$branch_name" "$branch_name" @git_args
     }
   }
 
