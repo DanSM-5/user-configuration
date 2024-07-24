@@ -1301,6 +1301,39 @@ py () {
   "$interpreter" "$@"
 }
 
+if command -v apt &>/dev/null; then
+  show_packages () {
+    dpkg-query -W -f='${Package}\n' |
+      fzf-defaults \
+        --preview-window '60%' \
+        --preview 'apt-cache show {} | bat --style=plain --color=always --language yml' \
+        --layout=reverse \
+        --cycle \
+        --bind 'enter:execute(apt-cache show {} | bat --style=plain --color=always --paging=always --language yml)'
+  }
+elif command -v pacman &>/dev/null; then
+  show_packages () {
+    # For all explicitly installed packages:
+    # pacman -Qqe | fzf --preview 'pacman -Qil {}' --layout=reverse --bind 'enter:execute(pacman -Qil {} | less)'
+    #
+    # Additionally, this displays explicitly installed packages that are not currently required by any other package:
+    # pacman -Qqet | fzf --preview 'pacman -Qil {}' --layout=reverse --bind 'enter:execute(pacman -Qil {} | less)'
+    #
+    # This shows explicitly installed packages from official Arch repos only:
+    # pacman -Qqen | fzf --preview 'pacman -Qil {}' --layout=reverse --bind 'enter:execute(pacman -Qil {} | less)'
+    #
+    # This shows explicitly installed packages from foreign repos only (AUR, Chaotic AUR, etc)
+    # pacman -Qqem | fzf --preview 'pacman -Qil {}' --layout=reverse --bind 'enter:execute(pacman -Qil {} | less)'
+
+    pacman -Qq | fzf-defaults \
+      --layout=reverse \
+      --preview-window '60%' \
+      --preview 'pacman -Qil {} | bat --style=plain --color=always' \
+      --cycle \
+      --bind 'enter:execute(pacman -Qil {} | bat --style=plain --color=always)'
+  }
+fi
+
 if [ "$IS_WINDOWS" = true ]; then
   ptc () {
     local location="${1:-.}" # Current location
@@ -1660,6 +1693,27 @@ else
     # Gitbash should be able to use
     # Window's python launcher
     unset_if_function py
+
+    # Show scoop packages on gitbash
+    show_packages () {
+      local selection
+      local packages=($(scoop list | awk 'NR>4 {print $1}'))
+
+      while true; do
+        selection="$(printf "%s\n" "${packages[@]}" | fzf-defaults \
+          --cycle \
+          --preview-window '60%' \
+          --preview 'scoop info {}' \
+        )"
+
+        if [ -z "$selection" ]; then
+          break
+        fi
+
+        scoop info "$selection" | bat --color=always --paging=always --style=plain
+        selection=
+      done
+    }
 
     file_explorer_open () {
       # Special parsing for windows paths
@@ -2071,15 +2125,4 @@ themes_vivid () {
   printf "%s\n" "The theme '$selected_theme' has been set temporary on 'LS_COLORS' environment variable"
   export LS_COLORS="$(vivid generate $selected_theme)"
 }
-
-if command -v apt &>/dev/null; then
-  show_packages () {
-    dpkg-query -W -f='${Package}\n' |
-      fzf-defaults \
-        --preview-window '60%' \
-        --preview 'apt-cache show {}' \
-        --layout=reverse \
-        --bind 'enter:execute(apt-cache show {} | less)'
-  }
-fi
 

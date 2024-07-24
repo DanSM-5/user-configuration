@@ -1779,12 +1779,44 @@ function themes_vivid () {
   $env:LS_COLORS = "$(vivid generate $selected_theme)"
 }
 
-function show_package () {
-  Get-WinGetPackage | ForEach-Object {
-    "$($_.Name)`t$($_.Id)"
-  } |
-    fzf --delimiter "`t" --with-nth=1 `
-      --preview-window '80%' `
-      --preview 'winget show {2}'
-}
+if ($IsWindows) {
+  # If we have pwsh winget module, then show winget packages
+  if (Get-Module Microsoft.WinGet.Client -ErrorAction SilentlyContinue) {
+    function show_packages () {
+      $selected = ''
+      $fzf_options = getFzfOptions
+      $packages = Get-WinGetPackage | ForEach-Object {
+        "$($_.Name)`t$($_.Id)"
+      }
 
+      while ($true) {
+        $selected = $packages | fzf @fzf_options `
+          --cycle `
+          --delimiter "`t" --with-nth=1 `
+          --preview 'winget show {2} | bat --style=plain --color=always --language yml' | % {
+            ($_ -Split "`t")[1]
+          }
+
+        if (!$selected) { break }
+        winget show $selected | bat --style=plain --color=always --paging=always --language 'yml'
+        $selected = ''
+      }
+    }
+  } else {
+    function show_packages () {
+      $selected = ''
+      $fzf_options = getFzfOptions
+      $packages = scoop list | ForEach-Object { $_.Name }
+
+      while ($true) {
+        $selected = $packages | fzf @fzf_options `
+          --cycle `
+          --preview 'scoop info {}'
+          
+        if (!$selected) { break }
+        scoop info $selected | bat --style=plain --color=always --paging=always
+        $selected = ''
+      }
+    }
+  }
+}
