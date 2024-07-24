@@ -27,7 +27,8 @@ cmd () {
 }
 
 fzf-defaults () {
-# --bind ctrl-/:toggle-preview \
+  # --bind ctrl-/:toggle-preview \
+  # --preview-window '~4,+{2}+4/3,<80(up)'
   fzf --height 80% --min-height 20 --border \
     --info=inline \
     --bind "ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort" \
@@ -351,13 +352,15 @@ fi
 
 # General commands
 alias mkdr="mkdir -pv"
-alias fzfp="fzf-defaults --preview 'bat --color=always --style=numbers --line-range=:500 {}'"
+alias fzfp="fzf-defaults --preview-window '60%' --preview '$fzf_preview_normal'"
 alias pvim="vim --clean"
 alias pnvim="nvim --clean"
 
 frm () {
   local selection=($(fd-defaults --color=always -tf -tl |
-    fzf-defaults --ansi --cycle --multi --preview "$fzf_preview_normal"))
+    fzf-defaults --ansi --cycle --multi \
+      --preview-window '60%' \
+      --preview "$fzf_preview_normal"))
 
   if [ -z "$selection" ]; then
     return
@@ -368,7 +371,9 @@ frm () {
 
 frdr () {
   local selection=($(fd-defaults --color=always -td -d 1 |
-    fzf-defaults --ansi --cycle --preview "$fzf_preview_normal"))
+    fzf-defaults --ansi --cycle \
+      --preview-window '60%' \
+      --preview "$fzf_preview_normal"))
 
   if [ -z "$selection" ]; then
     return
@@ -384,6 +389,7 @@ rfv () {
 fll () {
   local selection=$(fd-defaults --color=always -td |
     fzf-defaults --ansi --cycle \
+      --preview-window '60%' \
       --preview "$fzf_preview_normal")
   if [ -n "$selection" ]; then
     \ls -alhF  --color=always "$selection"
@@ -392,13 +398,17 @@ fll () {
 
 lfd () {
   fd-defaults --color=always |
-    fzf-defaults --ansi --cycle --preview "$fzf_preview_normal"
+    fzf-defaults --ansi --cycle \
+      --preview-window '60%' \
+      --preview "$fzf_preview_normal"
 }
 
 # experimental
 lfa () {
   local selection=$(cd "/" && fd-defaults --color=always |
-    fzf-defaults --ansi --cycle --preview "$fzf_preview_normal")
+    fzf-defaults --ansi --cycle \
+      --preview-window '60%' \
+      --preview "$fzf_preview_normal")
   echo "$selection"
 }
 
@@ -417,6 +427,7 @@ fcd () {
   selection=$(fd-defaults --color=always -tl -td "$pattern" "$location" |
     fzf-defaults --ansi --cycle --query "$query" \
       --header "(ctrl-/) Search in: $location" \
+      --preview-window '60%' \
       --preview "$fzf_preview_normal")
   if [ -z "$selection" ]; then
     return 1
@@ -433,6 +444,7 @@ fcdd () {
   selection=$(fd-defaults --color=always -tl -td |
     fzf-defaults --ansi --cycle \
       --query "$query" \
+      --preview-window '60%' \
       --preview "$fzf_preview_normal")
 
   if [ -z "$selection" ]; then
@@ -457,6 +469,7 @@ fcde () {
       -x dirname {} |
     sort -u |
     fzf-defaults \
+      --preview-window '60%' \
       --preview "$fzf_preview_normal" \
       --header "(ctrl-/) Search in: $location" \
       --query "$query")
@@ -470,7 +483,10 @@ fcde () {
 fcda () {
   local selection=""
 
-  selection=$(cd / && fd-defaults -tl -td | fzf-defaults --preview "$fzf_preview_normal")
+  selection=$(cd / && fd-defaults -tl -td |
+    fzf-defaults \
+      --preview-window '60%' \
+      --preview "$fzf_preview_normal")
   if [ -n "$selection" ]; then
     cd $selection
   fi
@@ -492,6 +508,7 @@ fed () {
       --ansi \
       --cycle \
       --multi \
+      --preview-window '60%' \
       --preview "$fzf_preview_normal" \
       --header "(ctrl-/) Search in: $location" \
       --query "$query"))
@@ -510,6 +527,7 @@ fedd () {
   local editor="${PREFERRED_EDITOR:-vim}"
   local selection=$(fd-defaults --color=always -L -tf |
     fzf-defaults --multi --ansi --cycle \
+      --preview-window '60%' \
       --preview "$fzf_preview_normal" --query "$query")
   if [ -z "$selection" ]; then
     return
@@ -529,6 +547,7 @@ fif () {
   rg --color=always --files-with-matches --no-messages "$*" |
     fzf-defaults \
       --ansi --cycle \
+      --preview-window '60%' \
       --preview "
         highlight -O ansi -l {} 2> /dev/null |
         rg --colors 'match:bg:yellow' --ignore-case --pretty --context 10 '$*' || rg --ignore-case --pretty --context 10 '$*' {}"
@@ -538,10 +557,8 @@ fdirs () {
   local selection="$(dirs -v |
     fzf-defaults \
       --cycle \
-      --preview '
-        echo "Path: {2..}"
-        echo ''
-        ls -AFL --color=always $(bash -c "echo "{2..})' |
+      --preview-window '60%' \
+      --preview "$fzf_preview_normal {2..}" |
     awk '{print $1}')"
 
   if [ -n "$selection" ]; then
@@ -669,7 +686,9 @@ qnv () {
     return
   fi
   local selection=$(printf "%s\n" "${quick_access[@]}" |
-    fzf-defaults --preview "$fzf_preview_normal")
+    fzf-defaults \
+      --preview-window '60%' \
+      --preview "$fzf_preview_normal")
 
   if [ -n "$selection" ]; then
     cd $selection
@@ -684,7 +703,9 @@ qed () {
   fi
   local editor="$1"
   local selection=$(printf "%s\n" "${quick_edit[@]}" |
-    fzf-defaults --preview "$fzf_preview_normal")
+    fzf-defaults \
+      --preview-window '60%' \
+      --preview "$fzf_preview_normal")
 
   if ! [ -f "$selection" ]; then
     return
@@ -729,6 +750,7 @@ cprj () {
       --bind 'alt-f:first' \
       --bind 'alt-l:last' \
       --bind 'alt-c:clear-query' \
+      --preview-window '60%' \
       --preview "$fzf_preview_normal" \
   ))
 
@@ -850,7 +872,9 @@ ftxt () {
 
   pushd "$txt" &>/dev/null
   selected=($(fd --color=always -tf . |
-    fzf-defaults --ansi --cycle --multi --preview "bat --color=always --style=numbers {}"))
+    fzf-defaults --ansi --cycle --multi \
+      --preview-window '60%' \
+      --preview "bat --style=full --color=always {}"))
 
   if [ -z "$selected" ]; then
     popd &>/dev/null
@@ -1225,6 +1249,7 @@ ptc () {
     fzf-defaults --query "$query" \
       --ansi --cycle \
       --header "(ctrl-/) Search in: $location" \
+      --preview-window '60%' \
       --preview "$fzf_preview_normal")
   if [ -z "$selection" ]; then
     return 1
@@ -1292,6 +1317,7 @@ if [ "$IS_WINDOWS" = true ]; then
     selection=$({ echo '.'; fd-defaults --color=always -tl -td -tf -L "$pattern" "$location"; } |
       fzf-defaults --ansi --cycle --query "$query" \
         --header "(ctrl-/) Search in: $location" \
+        --preview-window '60%' \
         --preview "$fzf_preview_normal")
 
     if [ -z "$selection" ]; then
@@ -1745,6 +1771,7 @@ fmpv () {
     fzf --multi --ansi --cycle \
       --info=inline \
       --height 80% --min-height 20 \
+      --preview-window '60%' \
       --preview "$fzf_preview_normal" \
       --bind "ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort" \
       --bind 'alt-f:first' \
@@ -2044,4 +2071,15 @@ themes_vivid () {
   printf "%s\n" "The theme '$selected_theme' has been set temporary on 'LS_COLORS' environment variable"
   export LS_COLORS="$(vivid generate $selected_theme)"
 }
+
+if command -v apt &>/dev/null; then
+  show_packages () {
+    dpkg-query -W -f='${Package}\n' |
+      fzf-defaults \
+        --preview-window '60%' \
+        --preview 'apt-cache show {}' \
+        --layout=reverse \
+        --bind 'enter:execute(apt-cache show {} | less)'
+  }
+fi
 

@@ -56,6 +56,7 @@ function getPsFzfOptions {
     MinHeight = 20
     Border = $true
     Info = 'inline'
+    PreviewWindow = '60%'
   }
   return $psFzfOptions
 }
@@ -74,6 +75,7 @@ function getFzfOptions () {
     '--bind', 'alt-f:first',
     '--bind', 'alt-l:last',
     '--bind', 'alt-c:clear-query',
+    '--preview-window', '60%',
     '--preview', $preview,
     '--height', '80%',
     '--min-height', '20',
@@ -1010,7 +1012,8 @@ function ftxt () {
     fd --color=always -tf . |
       fzf @fzf_options --ansi --cycle --multi `
       --with-shell 'pwsh -NoLogo -NonInteractive -NoProfile -Command' `
-      --preview 'bat --color=always --style=numbers {}'
+      --preview-window '~4,60%' `
+      --preview 'bat --style=full --color=always {}'
   ))
 
   if ($selected.Length -eq 0) {
@@ -1774,5 +1777,14 @@ function themes_vivid () {
 
   Write-Output "The theme '$selected_theme' has been set temporary on 'env:LS_COLORS' environment variable"
   $env:LS_COLORS = "$(vivid generate $selected_theme)"
+}
+
+function show_package () {
+  Get-WinGetPackage | ForEach-Object {
+    "$($_.Name)`t$($_.Id)"
+  } |
+    fzf --delimiter "`t" --with-nth=1 `
+      --preview-window '80%' `
+      --preview 'winget show {2}'
 }
 

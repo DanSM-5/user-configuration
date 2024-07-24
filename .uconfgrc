@@ -363,6 +363,7 @@ set_general_after () {
     # Print tree structure in the preview window
     export FZF_ALT_C_OPTS="
       --ansi
+      --preview-window '60%'
       --preview '$user_conf_path/utils/fzf-preview.sh {}'
       --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort'"
 
@@ -382,6 +383,7 @@ set_general_after () {
       --bind 'alt-f:first'
       --bind 'alt-l:last'
       --bind 'alt-c:clear-query'
+      --preview-window '60%'
       --preview '$user_conf_path/utils/fzf-preview.sh {}'
       --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort'"
   fi

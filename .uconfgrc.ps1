@@ -170,11 +170,13 @@ if (Test-Command fzf) {
     --bind 'alt-f:first'
     --bind 'alt-l:last'
     --bind 'alt-c:clear-query'
+    --preview-window '60%'
     --preview 'pwsh -NoProfile -NonInteractive -NoLogo -File $fzfPreviewScript " + ". {}'
     --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort'"
 
   $env:FZF_ALT_C_OPTS = "
     --ansi
+    --preview-window '60%'
     --preview 'pwsh -NoProfile -NonInteractive -NoLogo -File $fzfPreviewScript " + ". {}'
     --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort'"
 }
