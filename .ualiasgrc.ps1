@@ -1642,42 +1642,7 @@ function frdr () {
     } | Remove-Item -recurse -force
 }
 
-function Print-MemoryUsage (
-  [Switch] $Total = $false,
-  [ValidateSet('Name', 'Memory', 'name', 'memory')]
-  [String] $SortBy = 'Name'
-) {
-  $activeProcesses = Get-Process | Group-Object -Property ProcessName | % {
-    [PSCustomObject]@{
-      Name = $_.Name;
-      Size = (($_.Group | Measure-Object WorkingSet -Sum).Sum / 1KB)
-    }
-  }
-
-  if ($Total) {
-    $memorySum = ($activeProcesses | Measure-Object Size -Sum).Sum
-    # foreach ($process in $activeProcesses) {
-    #   $total += (($process.Group | Measure-Object WorkingSet -Sum).Sum / 1KB)
-    # }
-
-    return "$memorySum KB"
-  }
-
-  if ($SortBy -Like '[Mm]emory') {
-    $activeProcesses = $activeProcesses | Sort-Object -Property Size -Descending
-  }
-
-  $activeProcesses |
-    Format-Table Name, @{
-      n = 'Mem (KB)';
-      e = {
-        # '{0:N0}' -f (($_.Group | Measure-Object WorkingSet -Sum).Sum / 1KB)
-        '{0:N0}' -f $_.Size
-      };
-      a = 'right'
-    }
-}
-
+# Note: Print-MemoryUsage was moved to its own independent script
 if (Test-Path Alias:pmu) { Remove-Item Alias:pmu }
 Set-Alias -Name pmu -Value Print-MemoryUsage
 
