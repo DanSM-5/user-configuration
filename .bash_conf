@@ -87,6 +87,11 @@ if ! shopt -oq posix; then
   fi
 fi
 
+# History search with ctrl-p and ctrl-n
+bind '"\C-p": history-search-backward'
+bind '"\C-n": history-search-forward'
+
+
 # ignore case for completions
 bind 'set completion-ignore-case on'
 
