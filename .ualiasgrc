@@ -1878,11 +1878,9 @@ getShellAliasAndFunctions () {
       # alias | cut -d '=' -f 1
       # print -rl -- ${(k)aliases} ${(k)functions} ${(k)parameters}
 
-      # TODO: remove '→' character as it is adding completion functions in zsh
-
       # Functions
       compgen -A function |
-        awk '{ if ($1 !~ /^[_.-].+/) { print $1 } }';
+        awk '{ if ($1 !~ /^[→_.-].+/) { print $1 } }';
       # Aliases
       compgen -a
     }
@@ -1913,6 +1911,7 @@ fcmd () {
 
 pfn () {
   declare -f | perl -0777 -pe 's/^}\n/}\0/gm' |
+    awk -v ORS='\0' -v RS='\0' '!/^[→_-]/' |
     bat --plain --language bash --color always |
     fzf --read0 --ansi --reverse --multi --highlight-line
 }
