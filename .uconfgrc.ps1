@@ -219,7 +219,7 @@ if ((Get-Module PSReadLine).Version -ge '2.2') {
 
 # Set colors as if gnu utils for consistency
 # LS_COLORS string generated with vivid
-$env:LS_COLORS = Get-Content "${env:user_conf_path}${dirsep}.ls_colors" | Select-Object -Skip 1
+$env:LS_COLORS = Get-Content "${env:user_conf_path}${dirsep}.ls_colors"
 
 Import-Module DirColors -ErrorAction SilentlyContinue
 if (Get-Module DirColors -ErrorAction SilentlyContinue) {
