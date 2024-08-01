@@ -1,4 +1,8 @@
-# TODO: Review https://github.com/file-go/fil as a file equivalent
+# TODO: Review https://github.com/file-go/fil as a 'file' command equivalent
+
+# For more information review comments in fzf-preview.sh version
+
+# Derived from: https://github.com/kelleyma49/PSFzf/blob/master/helpers/PsFzfTabExpansion-Preview.ps1
 
 [CmdletBinding()]
 param ($DirName, $Item, $PreviewScript = "")
@@ -122,14 +126,14 @@ elseif ((Test-Path $path -PathType leaf) -or (eza -l $path *> $null && $true)) {
   # New-Item $args -ItemType Directory -ea 0
   # Variables
   $thumbnail = "$TEMP_DIR/thumbnail.png"
-  $MIME = file --dereference --mime -- "$path"
-  $FILE_LENGTH = $path.Length + 2
-  $CLEAN_MIME =  $MIME.Substring($FILE_LENGTH)
-  $IMAGE_SIZE = if ($env:PREVIEW_IMAGE_SIZE) { $env:PREVIEW_IMAGE_SIZE } else { '50x50' }
+  $MIME = file --dereference --mime --brief -- "$path"
+  # If not using --brief, remove path manually
+  # $FILE_LENGTH = $path.Length + 2
+  # $CLEAN_MIME =  $MIME.Substring($FILE_LENGTH)
 
-  switch -Regex ($CLEAN_MIME) {
+  switch -Regex ($MIME) {
     # directory - It can match here due to the eza check
-    "^directory$" {
+    "^inode\/directory.*" {
       preview_directory; break
     }
     # Files
@@ -236,13 +240,17 @@ elseif ((Test-Path $path -PathType leaf) -or (eza -l $path *> $null && $true)) {
           show_image "$thumbnail" 'Error previewing the SVG'
           break
         }
-        ".*\.(txt|md|htm|html|js|jsx|ts|tsx|css|scss|sh|bat|ps1|psm1|bash|zsh|cs|json|xml)$" {
+        ".*\.md$" {
+          glow $path || bat --color=always --style="numbers,header,changes" "$path"
+          break
+        }
+        ".*\.(txt|htm|html|js|jsx|ts|tsx|css|scss|sh|bat|ps1|psm1|bash|zsh|cs|json|xml)$" {
           bat --color=always --style="numbers,header,changes" "$path"
           break
         }
         default {
           # Fallback to bat
-          Write-Output "Unkown MIME type:" "$CLEAN_MIME" "`n`n"
+          Write-Output "Unkown MIME type:" "$MIME" "`n`n"
           bat --color=always --style="numbers,header" "$path"
           break
         }

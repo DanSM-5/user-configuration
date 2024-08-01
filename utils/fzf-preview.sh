@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# TODO: Review https://github.com/file-go/fil as a 'file' command equivalent
+
 # Dependencies
 # - bat
 # - erd
@@ -12,6 +14,7 @@
 # - 7z
 # - chafa
 # - git
+# - glow
 
 # References
 # - https://github.com/slavistan/howto-lf-image-previews
@@ -19,6 +22,17 @@
 # - https://github.com/junegunn/fzf.vim
 #   - https://github.com/junegunn/fzf.vim/blob/master/bin/preview.sh
 #   - https://github.com/junegunn/fzf/blob/master/bin/fzf-preview.sh
+# - https://gist.github.com/wolandark/6b138cbea468f1e4e5f697f8a9c85a68
+
+# TODO: Support epub preview
+# epub2txt2 does not run natively on windows and
+# v1 does not output to stdout
+#
+# Example
+# application/epub+zip*)
+# 	# Use epub2txt for EPUB files
+# 	epub2txt "$1" | head -n 1000 2>/dev/null
+# 	;;
 
 path="$@"
 
@@ -36,6 +50,29 @@ path=${path/#\~\//$HOME/}
 # Global names unless changed otherwise
 TEMP_DIR="/tmp/preview_files_script"
 thumbnail="$TEMP_DIR/thumbnail.png"
+
+preview_directory () {
+  path="$1"
+  # Print filename
+  printf "Path: $(realpath "$path" 2> /dev/null || printf '%s' "$path")\n\n"
+
+  # Detect if on git reposiry. If so, print last commit information
+  pushd "$path" &> /dev/null
+  if (git rev-parse HEAD > /dev/null 2>&1); then
+    git log --color=always -1 2> /dev/null
+    printf "\n"
+  fi
+  popd &> /dev/null
+
+  # eza -AF --oneline --color=always --icons --group-directories-first --dereference "$path" 2> /dev/null ||
+
+  # Preview directory
+  # Try erd, then eza, then ls, then fallback message
+  erd --layout inverted --color force --level 3 --suppress-size -I -- "$path" 2> /dev/null ||
+    eza -A --tree --level=3 --color=always --icons=always --dereference "$path" 2> /dev/null ||
+    ls -AFL --color=always "$path" 2> /dev/null ||
+    printf "\nCannot access directory $path"
+}
 
 show_image () {
   thumbnail="$1"
@@ -115,11 +152,16 @@ esac
 
 if [ -f "$path" ]; then
   # Variables
-  MIME=$(file --dereference --mime -- "$path")
-  FILE_LENGTH=$(( ${#path} + 2 ))
-  CLEAN_MIME="${MIME:FILE_LENGTH}"
+  MIME=$(file --dereference --mime --brief -- "$path")
+  # If not using --brief, remove path manually
+  # FILE_LENGTH=$(( ${#path} + 2 ))
+  # CLEAN_MIME="${MIME:FILE_LENGTH}"
 
-  case "$CLEAN_MIME" in
+  case "$MIME" in
+    # directory - Could it arrive here?
+    inode/directory*)
+      preview_directory "$path"
+    ;;
     # Files
     application/javascript*) ;&
     application/json*) ;&
@@ -214,37 +256,22 @@ if [ -f "$path" ]; then
           magick convert "$path" "$thumbnail"
           show_image "$thumbnail" || printf '%s\n' 'Error previewing the SVG'
           ;;
-        *.txt|*.md|*.htm*|*.js|*.jsx|*.ts|*.tsx|*.css|*.scss|*.sh|*.bat|*.ps1|*.psm1|*.bash|*.zsh|*.cs|*.json|*.xml)
+        *.md)
+          glow "$path" || bat --color=always --style="numbers,header,changes" "$path"
+          ;;
+        *.txt|*.htm*|*.js|*.jsx|*.ts|*.tsx|*.css|*.scss|*.sh|*.bat|*.ps1|*.psm1|*.bash|*.zsh|*.cs|*.json|*.xml)
           bat --color=always --style="numbers,header,changes" "$path"
           ;;
         *)
           # Fallback to bat
-          printf '%s\n' "Unkown MIME type:" "$CLEAN_MIME"
+          printf '%s\n' "Unkown MIME type:" "$MIME"
           printf "\n\n"
           bat --color=always --style="numbers,header" "$path"
           ;;
       esac
   esac
 elif [ -d "$path" ]; then
-  # Print filename
-  printf "Path: $(realpath "$path" 2> /dev/null || printf '%s' "$path")\n\n"
-
-  # Detect if on git reposiry. If so, print last commit information
-  pushd "$path" &> /dev/null
-  if (git rev-parse HEAD > /dev/null 2>&1); then
-    git log --color=always -1 2> /dev/null
-    printf "\n"
-  fi
-  popd &> /dev/null
-
-  # eza -AF --oneline --color=always --icons --group-directories-first --dereference "$path" 2> /dev/null ||
-
-  # Preview directory
-  # Try erd, then eza, then ls, then fallback message
-  erd --layout inverted --color force --level 3 --suppress-size -I -- "$path" 2> /dev/null ||
-    eza -A --tree --level=3 --color=always --icons=always --dereference "$path" 2> /dev/null ||
-    ls -AFL --color=always "$path" 2> /dev/null ||
-    printf "\nCannot access directory $path"
+  preview_directory "$path"
 else
   printf '%s' "Not identified: $path"
 fi
