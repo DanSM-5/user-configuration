@@ -5,8 +5,8 @@ $user_scripts_path = if ($env:user_scripts_path) { $env:user_scripts_path } else
 $prj = if ($env:prj) { $env:prj } else { "$HOME\prj" }
 $user_config_cache = "$HOME\.cache\.user_config_cache"
 
-$env:PREFERRED_EDITOR = 'nvim'
-$env:EDITOR = 'nvim'
+$env:PREFERRED_EDITOR = if (Get-Command -Name 'nvim' -ErrorAction SilentlyContinue) { 'nvim' } else { 'vim' }
+$env:EDITOR = $env:PREFERRED_EDITOR
 $env:user_conf_path = $user_conf_path
 $env:user_scripts_path = $user_scripts_path
 $env:user_config_cache = $user_config_cache
@@ -24,6 +24,33 @@ $WIN_HOME = $env:WIN_HOME
 $WIN_ROOT = $env:WIN_ROOT
 $EDITOR = $env:EDITOR
 $PREFERRED_EDITOR = $env:PREFERRED_EDITOR
+
+function gpr { Set-Location $env:prj }
+function gus { Set-Location $env:user_scripts_path }
+function guc { Set-Location $env:user_conf_path }
+function gvc { Set-Location "${HOME}\.SpaceVim.d" }
+function goh { Set-Location "$HOME"}
+function ecf () { & $env:PREFERRED_EDITOR $PROFILE }
+function egc () { & $env:PREFERRED_EDITOR "$env:user_conf_path/utils/minimal_ps_conf.ps1" }
+
+function ccd () {
+  $filepath = Get-Clipboard
+  $filepath = $filepath.Trim()
+
+  if (-not "$filepath") {
+    Write-Error "No path"
+    return
+  }
+
+  if (Test-Path -Path $filepath -PathType Leaf -ErrorAction SilentlyContinue) {
+    $filepath = [system.IO.Path]::GetDirectoryName($filepath)
+  } elseif (!(Test-Path -Path $filepath -PathType Container -ErrorAction SilentlyContinue)) {
+    Write-Error "Invalid path '$filepath'"
+    return
+  }
+
+  Set-Location "$filepath"
+}
 
 if (Get-Command -Name 'Set-PsFzfOption' -ErrorAction SilentlyContinue) {
   # fzf
@@ -60,6 +87,134 @@ if (Get-Command -Name 'Set-PsFzfOption' -ErrorAction SilentlyContinue) {
   }
 }
 
+if (-not (Test-Path env:OutputEncodingBackupSet)) {
+  $OutputEncodingBackup = [Console]::OutputEncoding
+  $env:OutputEncodingBackupSet = 'true'
+}
+
+function Switch-Utf8 () {
+    param([switch] $Enable = $false)
+
+  if ($Enable) {
+    [Console]::OutputEncoding = New-Object System.Text.Utf8Encoding
+  } else {
+    [Console]::OutputEncoding = $OutputEncodingBackup
+  }
+}
+
+if (Test-Path Alias:sutf8) { Remove-Item Alias:sutf8 }
+Set-Alias -Name sutf8 -Value Switch-Utf8
+
+if (Test-Path Alias:utf8) { Remove-Item Alias:utf8 }
+Set-Alias -Name utf8 -Value With-UTF8
+
+$env:FD_SHOW_OPTIONS = @(
+  '--follow',
+  '--hidden',
+  '--no-ignore'
+)
+
+$env:FD_EXCLUDE_OPTIONS = @(
+  '--exclude', 'AppData',
+  '--exclude', 'Android',
+  '--exclude', 'OneDrive',
+  '--exclude', 'Powershell',
+  '--exclude', 'node_modules',
+  '--exclude', 'tizen-studio',
+  '--exclude', 'Library',
+  '--exclude', 'scoop',
+  '--exclude', 'vimfiles',
+  '--exclude', 'aws',
+  '--exclude', 'pipx',
+  '--exclude', '.vscode-server',
+  '--exclude', '.vscode-server-server',
+  '--exclude', '.git',
+  '--exclude', '.gitbook',
+  '--exclude', '.gradle',
+  '--exclude', '.nix-defexpr',
+  '--exclude', '.azure',
+  '--exclude', '.SpaceVim',
+  '--exclude', '.cache',
+  '--exclude', '.jenv',
+  '--exclude', '.node-gyp',
+  '--exclude', '.npm',
+  '--exclude', '.nvm',
+  '--exclude', '.colima',
+  '--exclude', '.pyenv',
+  '--exclude', '.DS_Store',
+  '--exclude', '.vscode',
+  '--exclude', '.vim',
+  '--exclude', '.bun',
+  '--exclude', '.nuget',
+  '--exclude', '.dotnet',
+  '--exclude', '.pnpm-store',
+  '--exclude', '.pnpm*',
+  '--exclude', '.zsh_history.*',
+  '--exclude', '.android',
+  '--exclude', '.sony',
+  '--exclude', '.chocolatey',
+  '--exclude', '.gem',
+  '--exclude', '.jdks',
+  '--exclude', '.nix-profile',
+  '--exclude', '.sdkman',
+  '--exclude', '__pycache__',
+  '--exclude', '.local/pipx/*',
+  '--exclude', '.local/share/*',
+  '--exclude', '.local/state/*',
+  '--exclude', '.local/lib/*',
+  '--exclude', 'cache',
+  '--exclude', 'browser-data',
+  '--exclude', 'go',
+  '--exclude', 'nodejs',
+  '--exclude', 'podman',
+  '--exclude', 'PlayOnLinux*',
+  '--exclude', '.PlayOnLinux'
+)
+
+$FD_OPTIONS = "$env:FD_SHOW_OPTIONS $env:FD_EXCLUDE_OPTIONS"
+
+if (Get-Command -Name 'fzf' -ErrorAction SilentlyContinue) {
+  $env:FZF_CTRL_R_OPTS = "
+    --preview 'pwsh -NoLogo -NonInteractive -NoProfile -File ${env:user_conf_path}\utils\log-helper.ps1 {}' --preview-window up:3:hidden:wrap
+    --bind 'ctrl-/:toggle-preview,ctrl-s:toggle-sort'
+    --bind 'ctrl-y:execute-silent(pwsh -NoLogo -NonInteractive -NoProfile -File ${env:user_conf_path}\utils\copy-helper.ps1 {})+abort'
+    --color header:italic
+    --header 'ctrl-y: Copy'"
+
+  $fzfPreviewScript = "${env:user_conf_path}\utils\fzf-preview.ps1"
+
+  $env:FZF_CTRL_T_OPTS = "
+    --multi
+    --ansi --cycle
+    --header 'ctrl-a: All | ctrl-d: Dirs | ctrl-f: Files | ctrl-y: Copy | ctrl-t: CWD'
+    --prompt 'All> '
+    --bind `"ctrl-a:change-prompt(All> )+reload(fd $FD_OPTIONS --color=always)`"
+    --bind `"ctrl-f:change-prompt(Files> )+reload(fd $FD_OPTIONS --color=always --type file)`"
+    --bind `"ctrl-d:change-prompt(Dirs> )+reload(fd $FD_OPTIONS --color=always --type directory)`"
+    --bind `"ctrl-t:change-prompt(CWD> )+reload(pwsh -NoLogo -NoProfile -NonInteractive -Command eza --color=always --all --dereference --oneline --group-directories-first `$PWD)`"
+    --bind 'ctrl-y:execute-silent(pwsh -NoLogo -NonInteractive -NoProfile -File ${env:user_conf_path}\utils\copy-helper.ps1 {+f})+abort'
+    --bind `"ctrl-o:execute-silent(pwsh -NoLogo -NoProfile -NonInteractive -Command Start-Process '{}')+abort`"
+    --bind 'alt-a:select-all'
+    --bind 'alt-d:deselect-all'
+    --bind 'alt-f:first'
+    --bind 'alt-l:last'
+    --bind 'alt-c:clear-query'
+    --preview-window '60%'
+    --preview 'pwsh -NoProfile -NonInteractive -NoLogo -File $fzfPreviewScript " + ". {}'
+    --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort'"
+
+  $env:FZF_ALT_C_OPTS = "
+    --ansi
+    --preview-window '60%'
+    --preview 'pwsh -NoProfile -NonInteractive -NoLogo -File $fzfPreviewScript " + ". {}'
+    --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort'"
+}
+
+if (Get-Command -Name 'fd' -ErrorAction SilentlyContinue) {
+  $env:FZF_CTRL_T_COMMAND = "With-UTF8 { fd $FD_OPTIONS --color=always }"
+  $env:FZF_ALT_C_COMMAND = "With-UTF8 { fd --type directory --color=always $FD_OPTIONS }"
+}
+
 $script:gsudoModule = "$(scoop prefix gsudo)/gsudoModule.psd1"
 if (Test-Path "$script:gsudoModule") {
   Import-Module "$script:gsudoModule"
@@ -74,6 +229,15 @@ if ((Get-Module PSReadLine).Version -ge '2.2') {
   Set-PSReadLineKeyHandler -Chord "Ctrl+LeftArrow" -Function BackwardWord
   Set-PSReadLineKeyHandler -Chord "Ctrl+n" -Function HistorySearchForward
   Set-PSReadLineKeyHandler -Chord "Ctrl+p" -Function HistorySearchBackward
+}
+
+Import-Module DirColors -ErrorAction SilentlyContinue
+if (Get-Module DirColors -ErrorAction SilentlyContinue) {
+  # Set colors as if gnu utils for consistency
+  # LS_COLORS string generated with vivid
+  $env:LS_COLORS = Get-Content "${env:user_conf_path}\.ls_colors"
+
+  $null = ConvertFrom-LSColors -LSColors "$env:LS_COLORS"
 }
 
 if (Get-Command -Name starship -ErrorAction SilentlyContinue) {
@@ -181,5 +345,50 @@ function .. {
 
 function ... {
   up 2
+}
+
+# Open content of prompt in editor
+# It mimics bash ctrl-x ctrl-e
+# Readline example: https://gist.github.com/mklement0/290ef7cdbdf0db274d6da64fade46929
+# PSReadline documentation: https://learn.microsoft.com/en-us/dotnet/api/microsoft.powershell.psconsolereadline?view=powershellsdk-1.1.0&viewFallbackFrom=powershellsdk-7.4.0
+Set-PSReadLineKeyHandler -Chord 'ctrl+o,e' -ScriptBlock {
+  $line = $cursor = $proc = $null
+  $editorArgs = @()
+  $editor = if ($env:PREFERRED_EDITOR) { $env:PREFERRED_EDITOR }
+    elseif ($env:EDITOR) { $env:EDITOR }
+    else { 'vim' }
+
+  try {
+    $tmpf = New-TemporaryFile
+    $tmp_file = $tmpf.FullName.Replace('.tmp', '.ps1')
+    Move-Item $tmpf.FullName $tmp_file
+    # Get current content
+    [Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref] $line, [ref] $cursor)
+    # If (n)vim, start at last line
+    if ( $editor -Like '*vim' ) {
+      $editorArgs += '+'
+    }
+    # Add current content of prompt to buffer
+    $line = $line.Replace("`r", "").Trim()
+    [System.IO.File]::WriteAllLines($tmp_file, $line, [System.Text.UTF8Encoding]($false))
+
+    $editorArgs += $tmp_file
+    # Start editor and wait for it to close
+    $proc = Start-Process $editor -NoNewWindow -PassThru -ArgumentList $editorArgs
+    $proc.WaitForExit()
+    $proc = $null
+    # Clean prompt
+    [Microsoft.PowerShell.PSConsoleReadLine]::RevertLine()
+    $content = (Get-Content -Path $tmp_file -Raw -Encoding UTF8).Replace("`r","").Replace("`t", "  ").Trim()
+    [Microsoft.PowerShell.PSConsoleReadLine]::Insert($content)
+    # [Microsoft.PowerShell.PSConsoleReadLine]::AcceptLine()
+  } finally {
+    # Cleanup
+    $proc = $null
+    if (Test-Path -Path $tmpf.FullName -PathType Leaf -ErrorAction SilentlyContinue) {
+      Remove-Item -Force $tmpf.FullName
+    }
+    Remove-Item -Force $tmp_file
+  }
 }
 
