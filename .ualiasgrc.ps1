@@ -1306,15 +1306,16 @@ function fedd () {
 if (Test-Path Alias:utf8) { Remove-Item Alias:utf8 }
 Set-Alias -Name utf8 -Value With-UTF8
 
-if (-not (Test-Path variable:OutputEncodingBackup)) {
-  $OutputEncodingBackup = $OutputEncoding
+if (-not (Test-Path env:OutputEncodingBackupSet)) {
+  $OutputEncodingBackup = [Console]::OutputEncoding
+  $env:OutputEncodingBackupSet = 'true'
 }
 
 function Switch-Utf8 ([switch] $Enable = $false) {
   if ($Enable) {
-    $OutputEncoding = [Console]::OutputEncoding = New-Object System.Text.Utf8Encoding
+    [Console]::OutputEncoding = New-Object System.Text.Utf8Encoding
   } else {
-    [Console]::OutputEncoding = $OutputEncoding = $OutputEncodingBackup
+    [Console]::OutputEncoding = $OutputEncodingBackup
   }
 }
 
