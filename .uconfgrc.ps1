@@ -154,6 +154,9 @@ if (Test-Command fzf) {
 
   $fzfPreviewScript = "${env:user_conf_path}${dirsep}utils${dirsep}fzf-preview.ps1"
 
+  # Evaluate the use of
+  # --with-shell 'pwsh -NoLogo -NonInteractive -NoProfile -C'
+  # It fails in preview script with multi word files unlike current implementation
   $env:FZF_CTRL_T_OPTS = "
     --multi
     --ansi --cycle
@@ -182,8 +185,15 @@ if (Test-Command fzf) {
 }
 
 if (Test-Command fd) {
-  $env:FZF_CTRL_T_COMMAND = "fd $FD_OPTIONS --color=always"
-  $env:FZF_ALT_C_COMMAND = "fd --type directory --color=always $FD_OPTIONS"
+  # Use With-UTF8 wrapper for commands on windows. This helps files that use
+  # unicode characters being displayed correctly.
+  if ($IsWindows) {
+    $env:FZF_CTRL_T_COMMAND = "With-UTF8 { fd $FD_OPTIONS --color=always }"
+    $env:FZF_ALT_C_COMMAND = "With-UTF8 { fd --type directory --color=always $FD_OPTIONS }"
+  } else {
+    $env:FZF_CTRL_T_COMMAND = "fd $FD_OPTIONS --color=always"
+    $env:FZF_ALT_C_COMMAND = "fd --type directory --color=always $FD_OPTIONS"
+  }
 }
 
 if (Test-Command rg) {
