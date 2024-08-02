@@ -42,7 +42,7 @@ if ((Test-Command oh-my-posh) -and (Test-Path "${HOME}${dirsep}omp-theme")) {
 if (Test-Command Set-PsFzfOption) {
   # fzf
   # $color_gruvbox = '--colot="bg+:#3c3836,bg:#32302f,spinner:#fb4934,hl:#928374,fg:#ebdbb2,header:#928374,info:#8ec07c,pointer:#fb4934,marker:#fb4934,fg+:#ebdbb2,prompt:#fb4934,hl+:#fb4934"'
-  $env:FZF_DEFAULT_OPTS="--height 80% --layout=reverse --border"
+
   # replace 'Ctrl+t' and 'Ctrl+r' with your preferred bindings:
   $altc = if ($IsMacOS) { 'ç' } else { 'Alt+c' }
   $alta = if ($IsMacOS) { 'å' } else { 'Alt+a' }
@@ -144,8 +144,12 @@ if (Test-Command Set-PsFzfOption) {
 $FD_OPTIONS = "$env:FD_SHOW_OPTIONS $env:FD_EXCLUDE_OPTIONS"
 
 if (Test-Command fzf) {
+  $SHOME = $HOME.Replace('\', '/')
+
+  $env:FZF_DEFAULT_OPTS="--history=$SHOME/.cache/fzf-history/fzf-history-default --height 80% --layout=reverse --border"
 
   $env:FZF_CTRL_R_OPTS = "
+    --history=$SHOME/.cache/fzf-history/fzf-history-ctrlr
     --preview 'pwsh -NoLogo -NonInteractive -NoProfile -File ${env:user_conf_path}${dirsep}utils${dirsep}log-helper.ps1 {}' --preview-window up:3:hidden:wrap
     --bind 'ctrl-/:toggle-preview,ctrl-s:toggle-sort'
     --bind 'ctrl-y:execute-silent(pwsh -NoLogo -NonInteractive -NoProfile -File ${env:user_conf_path}${dirsep}utils${dirsep}copy-helper.ps1 {})+abort'
@@ -158,6 +162,7 @@ if (Test-Command fzf) {
   # --with-shell 'pwsh -NoLogo -NonInteractive -NoProfile -C'
   # It fails in preview script with multi word files unlike current implementation
   $env:FZF_CTRL_T_OPTS = "
+    --history=$SHOME/.cache/fzf-history/fzf-history-ctrlt
     --multi
     --ansi --cycle
     --header 'ctrl-a: All | ctrl-d: Dirs | ctrl-f: Files | ctrl-y: Copy | ctrl-t: CWD'
@@ -178,10 +183,13 @@ if (Test-Command fzf) {
     --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort'"
 
   $env:FZF_ALT_C_OPTS = "
+    --history=$SHOME/.cache/fzf-history/fzf-history-altc
     --ansi
     --preview-window '60%'
     --preview 'pwsh -NoProfile -NonInteractive -NoLogo -File $fzfPreviewScript " + ". {}'
     --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort'"
+
+  Remove-Variable SHOME
 }
 
 if (Test-Command fd) {
