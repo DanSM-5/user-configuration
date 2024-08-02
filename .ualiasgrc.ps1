@@ -753,7 +753,6 @@ function getShellAliasAndFunctions ([Switch] $GetTempFile) {
 function fcmd () {
   $commandFile = getShellAliasAndFunctions -GetTempFile
   $definitionsFile = New-TemporaryFile
-  $previewFile = New-TemporaryFile
 
   try {
     # Get all function and alias definitions in a file for later reuse
@@ -764,19 +763,39 @@ function fcmd () {
     }
 
     # Create a script body pointing to the temporary file with the commands definitions
-    @"
-      Param(
-         [String]
-         `$PreviewItem = ""
-      )
+    $preview = @"
+      `$Item = {}
+      `$PreviewItem = `$Item.Trim("'").Trim('"');
+      `$cmdResults = Get-Command `$PreviewItem -ErrorAction SilentlyContinue;
+      if (`$cmdResults) {
+        `$RunningInWindowsTerminal = [bool](`$env:WT_Session);
+        `$IsWindowsCheck = (`$PSVersionTable.PSVersion.Major -le 5) -or `$IsWindows;
+        `$ansiCompatible = `$RunningInWindowsTerminal -or (-not `$IsWindowsCheck);
+        if (`$cmdResults.CommandType -ne 'Application') {
+          if (`$ansiCompatible -and (Get-Command bat -ErrorAction SilentlyContinue)) {
+            Get-Help `$PreviewItem | bat --language man -p --color=always
+          } else {
+            Get-Help `$PreviewItem
+          }
+        } else {
+          `$cmdResults.Source
+        }
+      } else {
+        if (`$PreviewItem -eq "..") {
+          `$PreviewItem = "\.\."
+        } elseif (`$PreviewItem -eq "...") {
+          `$PreviewItem = "\.\.\."
+        }
+        rg -A 100 -B 1 -m 1 "^`$PreviewItem" "$($definitionsFile.FullName)" |
+          bat --language powershell --color=always -p -H 2
+      }
+"@
 
-      rg -A 50 -B 1 -m 1 "^`$PreviewItem" "$($definitionsFile.FullName)" |
-        bat -l powershell --color=always -p -H 2
-"@ > $previewFile.FullName
-
-    $options = getPsFzfOptions
-    $options.Preview = $options.Preview + " " + $previewFile.FullName
-    [System.IO.File]::ReadLines($commandFile.FullName) | Invoke-Fzf @options
+    $options = getFzfOptions
+    [System.IO.File]::ReadLines($commandFile.FullName) |
+      fzf @options `
+        --with-shell "pwsh -NoLogo -NonInteractive -NoProfile -Command" `
+        --preview $preview
   } finally {
     # Remove Commands file
     if (Test-Path -Path $commandFile.FullName -PathType leaf -ErrorAction SilentlyContinue) {
@@ -786,11 +805,6 @@ function fcmd () {
     # Remove Definitions file
     if (Test-Path -Path $definitionsFile.FullName -PathType leaf -ErrorAction SilentlyContinue) {
       Remove-Item -Force -Path $definitionsFile.FullName
-    }
-
-    # Remove Preview file
-    if (Test-Path -Path $previewFile.FullName -PathType leaf -ErrorAction SilentlyContinue) {
-      Remove-Item -Force -Path $previewFile.FullName
     }
   }
 }
