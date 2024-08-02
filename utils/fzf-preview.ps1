@@ -5,12 +5,13 @@
 # Derived from: https://github.com/kelleyma49/PSFzf/blob/master/helpers/PsFzfTabExpansion-Preview.ps1
 
 [CmdletBinding()]
-param ($DirName, $Item, $PreviewScript = "")
+param ($DirName, $Item)
 
 # trim quote strings:
 $DirName = $DirName.Trim("'").Trim('"')
 $Item = $Item.Trim("'").Trim('"')
-$PreviewScript = $PreviewScript.Trim("'").Trim('"')
+# PreviewScript was removed
+# $PreviewScript = $PreviewScript.Trim("'").Trim('"')
 
 $RunningInWindowsTerminal = [bool]($env:WT_Session)
 $IsWindowsCheck = ($PSVersionTable.PSVersion.Major -le 5) -or $IsWindows
@@ -276,10 +277,10 @@ elseif (($cmdResults = Get-Command $Item -ErrorAction SilentlyContinue)) {
             $cmdResults.Source
         }
     }
-}
-elseif ($PreviewScript) {
-    # Run custom preview script
-    Invoke-Command -ScriptBlock ([scriptblock]::Create((Get-Content "$PreviewScript"))) -ArgumentList $Item
+# }
+# elseif ($PreviewScript) {
+#     # Run custom preview script
+#     Invoke-Command -ScriptBlock ([scriptblock]::Create((Get-Content "$PreviewScript"))) -ArgumentList $Item
 } else {
   Write-Output "Not identified: $path"
 }
