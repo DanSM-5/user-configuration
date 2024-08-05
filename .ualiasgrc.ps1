@@ -28,7 +28,8 @@ function pimg () { & "${env:user_conf_path}${dirsep}utils${dirsep}paste-image.ps
 function gpr { Set-Location $env:prj }
 function gus { Set-Location $env:user_scripts_path }
 function guc { Set-Location $env:user_conf_path }
-function gvc { Set-Location "${HOME}${dirsep}.SpaceVim.d" }
+function gvc { Set-Location "${HOME}${dirsep}vim-config" }
+# function gvc { Set-Location "${HOME}${dirsep}.SpaceVim.d" }
 function goh { Set-Location "$HOME"}
 
 function epf { nvim $PROFILE }
@@ -36,7 +37,8 @@ function ecf { nvim "$(Join-Path -Path $env:user_conf_path -ChildPath .uconfrc.p
 function egc { nvim "$(Join-Path -Path $env:user_conf_path -ChildPath .uconfgrc.ps1)" }
 function eal { nvim "$(Join-Path -Path $env:user_conf_path -ChildPath .ualiasrc.ps1)" }
 function ega { nvim "$(Join-Path -Path $env:user_conf_path -ChildPath .ualiasgrc.ps1)" }
-function evc { nvim "$(Join-Path -Path $HOME -ChildPath ".SpaceVim.d${dirsep}init.toml")" }
+function evc { nvim "$(Join-Path -Path $HOME -ChildPath "vim-config${dirsep}vimstart.vim")" }
+# function evc { nvim "$(Join-Path -Path $HOME -ChildPath ".SpaceVim.d${dirsep}init.toml")" }
 
 function getPsFzfOptions {
   $path = $PWD.ProviderPath.Replace('\', '/')

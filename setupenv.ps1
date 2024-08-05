@@ -6,8 +6,10 @@ $SHOME = $HOME.Replace('\', '/')
 $mpv_location = "$SHOME/.config/mpv"
 $env:SETUP_TERMINAL = if ($env:SETUP_TERMINAL) { $env:SETUP_TERMINAL } else { 'false' }
 $env:USE_SSH_REMOTE = if ($env:USE_SSH_REMOTE) { $env:USE_SSH_REMOTE } else { 'true' }
+$env:SETUP_VIM_CONFIG = if ($env:SETUP_VIM_CONFIG) { $env:SETUP_VIM_CONFIG } else { 'true' }
 $setup_terminal = $env:SETUP_TERMINAL -eq 'true'
 $remote_url = if ($env:USE_SSH_REMOTE -eq 'true') { 'git@github-personal:DanSM-5' } else { 'https://github.com/DanSM-5' }
+$setup_vim_config = $env:SETUP_VIM_CONFIG -eq 'true'
 
 try {
   New-Item -Path "$SHOME/.config" -ItemType Directory -ErrorAction SilentlyContinue
@@ -16,7 +18,8 @@ try {
 # Required repos
 $repos = @{
   "$SHOME/user-scripts" = "$remote_url/user-scripts";
-  "$SHOME/.SpaceVim.d" = "$remote_url/space-vim-config";
+  # "$SHOME/.SpaceVim.d" = "$remote_url/space-vim-config";
+  "$SHOME/vim-config" = "$remote_url/vim-config";
   "$SHOME/.config/vscode-nvim" = "$remote_url/vscode-nvim";
   "$SHOME/omp-theme" = "$remote_url/omp-theme";
   "$mpv_location" = "$remote_url/mpv-conf";
@@ -98,5 +101,24 @@ if ($IsWindows) {
     Push-Location "$SHOME/.config/kitty"
     git clone 'https://github.com/yurikhan/kitty_grab.git'
     Pop-Location
+}
+
+if ($setup_vim_config) {
+  Push-Location "$HOME/vim-config" *> $null
+
+  # TODO: Add a ps1 install script in vim-config
+  $gitbash = "$(where.exe env | Select-String 'Git\\usr\\bin\\env')"
+  # Install the config
+  & $gitbash ./install.sh
+
+  # Uncomment below to install plugins from the command line
+
+  # # vim
+  # vim -es -u vimrc -i NONE -c "PlugInstall" -c "qa"
+
+  # # neovim
+  # nvim -es -u init.vim -i NONE -c "PlugInstall" -c "qa"
+
+  Pop-Location *> $null
 }
 

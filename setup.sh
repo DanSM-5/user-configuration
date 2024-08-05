@@ -8,12 +8,14 @@
 # - user_conf_path: Path for the user-configuration repository
 # - SETUP_TERMINAL: Setup terminal configuration Windows Terminal or Kitty
 # - USE_SSH_REMOTE: Use ssh key from config
+# - SETUP_VIM_CONFIG: Run install script in vim-config
 
 # Config repo + default location
 export user_conf_path="${user_conf_path:-$HOME/.usr_conf}"
 config_repo="https://github.com/DanSM-5/user-configuration"
 export SETUP_TERMINAL="${SETUP_TERMINAL:-true}"
 export USE_SSH_REMOTE="${USE_SSH_REMOTE:-true}"
+export SETUP_VIM_CONFIG="${SETUP_VIM_CONFIG:-true}"
 
 if [ "$USE_SSH_REMOTE" = 'true' ]; then
   config_repo="git@github-personal:DanSM-5/user-configuration"

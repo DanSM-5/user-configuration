@@ -8,6 +8,7 @@
 # - user_conf_path: Path for the user-configuration repository
 # - SETUP_TERMINAL: Setup terminal configuration Windows Terminal or Kitty
 # - USE_SSH_REMOTE: Use ssh key from config
+# - SETUP_VIM_CONFIG: Run install script in vim-config
 
 # Platform specific
 $dirsep = if ($IsWindows) { '\' } else { '/' }
@@ -18,6 +19,7 @@ $env:user_conf_path = $user_conf_path
 $env:SETUP_TERMINAL = if ($env:SETUP_TERMINAL) { $env:SETUP_TERMINAL } else { 'true' }
 $env:USE_SSH_REMOTE = if ($env:USE_SSH_REMOTE) { $env:USE_SSH_REMOTE } else { 'true' }
 $config_repo = if ($env:USE_SSH_REMOTE -eq 'true') { 'git@github-personal:DanSM-5/user-configuration' } else { 'https://github.com/DanSM-5/user-configuration' }
+$env:SETUP_VIM_CONFIG = if ($env:SETUP_VIM_CONFIG) { $env:SETUP_VIM_CONFIG } else { 'true' }
 
 # Start from HOME
 Set-Location $HOME

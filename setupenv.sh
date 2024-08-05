@@ -6,6 +6,7 @@ windows=false
 remote_url="https://github.com/DanSM-5"
 SETUP_TERMINAL="${SETUP_TERMINAL:-false}"
 USE_SSH_REMOTE="${USE_SSH_REMOTE:-true}"
+SETUP_VIM_CONFIG="${SETUP_VIM_CONFIG:-true}"
 
 mkdir -p "$HOME/.config"
 
@@ -22,7 +23,8 @@ mpv_location="$HOME/.config/mpv"
 # Required repos
 declare -A repos=(
   ["$HOME/user-scripts"]="$remote_url/user-scripts"
-  ["$HOME/.SpaceVim.d"]="$remote_url/space-vim-config"
+  # ["$HOME/.SpaceVim.d"]="$remote_url/space-vim-config"
+  ["$HOME/vim-config"]="$remote_url/vim-config"
   ["$HOME/.config/vscode-nvim"]="$remote_url/vscode-nvim"
   ["$HOME/omp-theme"]="$remote_url/omp-theme"
   ["$mpv_location"]="$remote_url/mpv-conf"
@@ -114,5 +116,22 @@ if command -v termux-setup-storage &> /dev/null; then
   export user_conf_path="${user_conf_path:-$HOME/.usr_conf}"
   mkdir -p "$HOME/.termux"
   cp -r "$user_conf_path/.termux"/* "$HOME/.termux"
+fi
+
+if [ "$SETUP_VIM_CONFIG" = 'true' ]; then
+  pushd "$HOME/vim-config" &> /dev/null
+
+  # Install the config
+  ./install.sh
+
+  # Uncomment below to install plugins from the command line
+
+  # # vim
+  # vim -es -u vimrc -i NONE -c "PlugInstall" -c "qa"
+
+  # # neovim
+  # nvim -es -u init.vim -i NONE -c "PlugInstall" -c "qa"
+
+  popd 2> /dev/null
 fi
 
