@@ -813,8 +813,8 @@ function fcmd () {
 
 function fnvm () {
   $nvm_version = nvm list | ? { $_ } | fzf | % {
-   $trimmed = $_.Trim()
-   return if ($trimmed -match '^[*-]') { ($trimmed.Split())[1].Trim() } else { $trimmed }
+    $trimmed = $_.Trim()
+    if ($trimmed -match '^[*-]') { ($trimmed.Split())[1].Trim() } else { $trimmed }
   }
 
   if ($nvm_version) {
