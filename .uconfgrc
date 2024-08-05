@@ -356,6 +356,8 @@ set_general_after () {
       SHOME="$HOME"
     fi
 
+    [ ! -d "$SHOME/.cache/fzf-history" ] && mkdir -p "$SHOME/.cache/fzf-history"
+
     export FZF_DEFAULT_OPTS="--history=$SHOME/.cache/fzf-history/fzf-history-default --height 80% --layout=reverse --border"
 
     # CTRL-/ to toggle small preview window to see the full command

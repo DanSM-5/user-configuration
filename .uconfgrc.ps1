@@ -146,6 +146,10 @@ $FD_OPTIONS = "$env:FD_SHOW_OPTIONS $env:FD_EXCLUDE_OPTIONS"
 if (Test-Command fzf) {
   $SHOME = $HOME.Replace('\', '/')
 
+  if (!(Test-Path -PathType Container -Path "$SHOME/.cache/fzf-history" -ErrorAction SilentlyContinue)) {
+    New-Item -Path "$SHOME/.cache/fzf-history" -ItemType Directory -ErrorAction SilentlyContinue
+  }
+
   $env:FZF_DEFAULT_OPTS="--history=$SHOME/.cache/fzf-history/fzf-history-default --height 80% --layout=reverse --border"
 
   $env:FZF_CTRL_R_OPTS = "
