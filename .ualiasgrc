@@ -2075,6 +2075,7 @@ rupdate () {
     "$HOME/.SpaceVim.d"
     "$HOME/.config/vscode-nvim"
     "$HOME/omp-theme"
+    "$HOME/vim-config"
   )
 
   for repo in "${repositories[@]}"; do

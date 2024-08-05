@@ -1700,6 +1700,7 @@ function rupdate () {
     "$HOME${dirsep}.SpaceVim.d"
     "$HOME${dirsep}.config${dirsep}vscode-nvim"
     "$HOME${dirsep}omp-theme"
+    "$HOME${dirsep}vim-config"
   )
 
   foreach ($repo in $repositories) {
