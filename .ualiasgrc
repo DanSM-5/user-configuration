@@ -205,7 +205,7 @@ fwc () {
   # Clean branch name
   branch_name="${selection//origin\//}"
 
-  gwc "$branch_name"
+  gwc "$branch_name" --track
 }
 
 if command_exists delta; then
