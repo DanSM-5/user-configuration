@@ -240,21 +240,36 @@ function fmerge () {
   fgb @args | % { git merge "$_" }
 }
 
-
-# Bare repo checkout
-function gwc () {
-  $current_directory = $PWD
-  $is_bare_repository = $false
+function get_bare_repository () {
+  $current_directory = $PWD.ToString()
   $toplevel = ''
   $bare_root = ''
-  $branch_name = ''
+  $is_bare_repository = $false
 
-  if (("$(git rev-parse --is-bare-repository 2>/dev/null)" -eq 'true') -and (Test-Path -Path 'config' -PathType Leaf -ErrorAction SilentlyContinue)) {
-    $bare_root = $PWD
+  if ("$(git rev-parse --is-bare-repository 2> $null)" -eq 'true') {
+    $is_bare_repository = $true
+    if (!(Test-Path -Path 'config' -PathType Leaf -ErrorAction SilentlyContinue)) {
+      while ($PWD.Drive.Root -ne $PWD) {
+        # Check if is a bare repo
+        if (("$(git rev-parse --is-bare-repository 2> $null)" -eq 'true') -and (Test-Path -Path 'config' -PathType Leaf -ErrorAction SilentlyContinue)) {
+          $bare_root = $PWD.ToString()
+          break
+        }
+        # If error, it means we are no longer under a git repository
+        if (!$?) {
+          Write-Error "Could not find the root of the bare repository"
+          return
+        }
+        # Move up a directory
+        cd ..
+      }
+    } else {
+      $bare_root = $PWD.ToString()
+    }
   } else {
-    while ($PWD -ne "/") {
+    while ($PWD.Drive.Root -ne $PWD) {
       # Check if is a bare repo
-      if ("$(git rev-parse --is-bare-repository 2>/dev/null)" -eq 'true') {
+      if ("$(git rev-parse --is-bare-repository 2> $null)" -eq 'true') {
         $is_bare_repository = $true
         break
       }
@@ -264,38 +279,56 @@ function gwc () {
       cd ..
     }
 
-    # Recover location
+    # Recover current dir
     cd "$current_directory"
 
     if ($is_bare_repository -eq $false) {
-      Write-Output "Not in a bare repository"
+      Write-Error "Not in a bare repository"
       return
     }
 
     $toplevel = git rev-parse --show-toplevel
     if (!(Test-Path -Path "$toplevel/.git" -PathType Leaf -ErrorAction SilentlyContinue)) {
-      Write-Output "Cannot find .git file"
+      Write-Error "Cannot find .git file"
       return
     }
 
     $bare_root = ((((Get-Content "$toplevel/.git") -Split ' ')[1]) -Split '/worktrees')[0]
 
     if (!(Test-Path -Path "$bare_root" -PathType Container -ErrorAction SilentlyContinue)) {
-      Write-Output "Cannot find location of bare repository"
+      Write-Error "Cannot find location of bare repository"
       return
     }
 
     # Test if detected directory is bare repository
     Push-Location "$bare_root"
     if ("$(git rev-parse --is-bare-repository 2>/dev/null)" -ne 'true') {
-      Write-Output "Wrongly detecting '$bare_root' as root of bare repository"
+      Write-Error "Wrongly detecting '$bare_root' as root of bare repository"
       Pop-Location
       return
     }
     Pop-Location
   }
 
-  Push-Location "$bare_root"
+  return $bare_root
+}
+
+if (Test-Path Alias:gbr) { Remove-Item Alias:gbr }
+Set-Alias -Name gbr -Value get_bare_repository
+
+# Bare repo checkout
+function gwc () {
+  $current_directory = $PWD
+  $bare_root = ''
+  $branch_name = ''
+
+  $bare_root = get_bare_repository
+
+  if (!$bare_root) {
+    return
+  }
+
+  Push-Location "$bare_root" *> $null
 
   if ( $args[0] -eq "-b" ) {
     $branch_name = $args[1]
@@ -311,7 +344,8 @@ function gwc () {
     }
   }
 
-  Pop-Location
+  # Recover previous location
+  Pop-Location *> $null
 
   # Attempt to cd into new worktree
   cd "$bare_root/$branch_name" *> $null
@@ -329,6 +363,26 @@ function fwc () {
   }
 
   gwc "$branch_name"
+}
+
+function fwr () {
+  $selection = ''
+  $bare_root = ''
+
+  $bare_root = get_bare_repository
+
+  if (!$bare_root) {
+    return
+  }
+
+  $selection = fgb @args | % {
+    # Clean branch name
+    $_ -replace 'origin/', ''
+  }
+
+  if ($selection) {
+    git worktree remove "$selection"
+  }
 }
 
 # Example
@@ -1795,7 +1849,7 @@ if ($IsWindows) {
         $selected = $packages | fzf @fzf_options `
           --cycle `
           --preview 'scoop info {}'
-          
+
         if (!$selected) { break }
         scoop info $selected | bat --style=plain --color=always --paging=always
         $selected = ''

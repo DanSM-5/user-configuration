@@ -120,19 +120,39 @@ gdf () {
   grepo diff
 }
 
-# Bare repo checkout
-gwc () {
+get_bare_repository () {
   local current_directory="$PWD"
+  local toplevel
+  local bare_root
   local is_bare_repository=false
-  local toplevel bare_root branch_name
 
-  # Check if already on bare repository root
-  if [ "$(git rev-parse --is-bare-repository 2>/dev/null)" = true ] && [ -f config ]; then
-    bare_root="$PWD"
+  if [ "$(git rev-parse --is-bare-repository 2>/dev/null)" = true ]; then
+    is_bare_repository=true
+    if ! [ -f config ]; then
+      # Navigate up until fin the root
+      while ! [ "$PWD" = "/" ]; do
+        # Check if is a bare repo
+        if [ "$(git rev-parse --is-bare-repository 2>/dev/null)" = true ] && [ -f config ]; then
+          bare_root="$PWD"
+          break
+        fi
+        # If error, it means we are no longer under a git repository
+        if [ "$?" -ne 0 ]; then
+          printf '%s' "Could not find the root of the bare repository"
+          return
+        fi
+        # Move up a directory
+        cd ..
+      done
+    else
+      bare_root="$PWD"
+    fi
   else
+    # Check if any parent directoy (up to the root) is a bare repo
     while ! [ "$PWD" = "/" ]; do
       # Check if is a bare repo
       if [ "$(git rev-parse --is-bare-repository 2>/dev/null)" = true ]; then
+        # Not savig $PWD here because it could be an intermediate directory
         is_bare_repository=true
         break
       fi
@@ -144,17 +164,17 @@ gwc () {
       cd ..
     done
 
-    # Recover location
+    # Recover current dir
     cd "$current_directory" || return
 
     if [ "$is_bare_repository" = false ]; then
-      printf "%s\n" "Not in a bare repository"
+      printf "%s\n" "Not in a bare repository" > /dev/stderr
       return
     fi
 
     toplevel="$(git rev-parse --show-toplevel)"
     if ! [ -f "$toplevel/.git" ]; then
-      printf "%s\n" "Cannot find .git file"
+      printf "%s\n" "Cannot find .git file" > /dev/stderr
       return
     fi
 
@@ -162,21 +182,39 @@ gwc () {
     bare_root="${bare_root%/worktrees*}"
 
     if ! [ -d "$bare_root" ]; then
-      printf "%s\n" "Cannot find location of bare repository"
+      printf "%s\n" "Cannot find location of bare repository" > /dev/stderr
       return
     fi
 
     # Test if detected directory is bare repository
-    pushd "$bare_root" || return
+    pushd "$bare_root" &>/dev/null || return
     if ! [ "$(git rev-parse --is-bare-repository 2>/dev/null)" = true ]; then
-      printf "%s\n" "Wrongly detecting '$bare_root' as root of bare repository"
+      printf "%s\n" "Wrongly detecting '$bare_root' as root of bare repository" > /dev/stderr
       popd || return
       return
     fi
-    popd || return
+    popd &>/dev/null || return
   fi
 
-  pushd "$bare_root" || return
+  printf '%s' "$bare_root"
+}
+
+alias gcr="get_bare_repository"
+
+# Bare repo checkout
+gwc () {
+  local current_directory="$PWD"
+  local bare_root branch_name
+
+  bare_root="$(get_bare_repository)"
+
+  # Didn't find any bare repository
+  if [ -z "$bare_root" ]; then
+    return 1
+  fi
+
+  # Go to bare root
+  pushd "$bare_root" &>/dev/null || return 1
 
   if [ "$1" = "-b" ]; then
     branch_name="$2"
@@ -188,6 +226,7 @@ gwc () {
       git worktree add "$branch_name" "$branch_name" "${@:2}"
   fi
 
+  # Recover previous location
   popd || return
 
   # Attempt to cd into new worktree
@@ -206,6 +245,26 @@ fwc () {
   branch_name="${selection//origin\//}"
 
   gwc "$branch_name" --track
+}
+
+fwr () {
+  local selection
+  local bare_root
+  local branch_name
+
+  bare_root="$(get_bare_repository)"
+
+  if [ -z "$bare_root" ]; then
+    return 1
+  fi
+
+  selection=$(fgb "${*:-}")
+  # Clean branch name
+  branch_name="${selection//origin\//}"
+
+  if [ -n "$selection" ]; then
+    git worktree remove "$branch_name"
+  fi
 }
 
 if command_exists delta; then
