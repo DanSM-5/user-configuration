@@ -769,7 +769,7 @@ function getShellAliasAndFunctions ([Switch] $GetTempFile) {
 
   try {
     # Get alias names
-    Get-Alias | % { $_.Name } >> $presortedFile.FullName
+    Get-Alias | ForEach-Object { $_.Name } >> $presortedFile.FullName
 
     # Get function names
     $sb_functions = [System.Text.StringBuilder]::new()
@@ -786,7 +786,7 @@ function getShellAliasAndFunctions ([Switch] $GetTempFile) {
     $function_names >> $presortedFile.FullName
 
     # Get sorted output
-    [System.IO.File]::ReadLines($presortedFile.FullName) | Sort -u | Out-File $outTempFile -encoding ascii
+    [System.IO.File]::ReadLines($presortedFile.FullName) | Sort-Object -u | Out-File $outTempFile -encoding ascii
 
     if (-not $GetTempFile) {
       return (Get-Content $outTempFile.FullName)
@@ -866,7 +866,10 @@ function fcmd () {
 }
 
 function fnvm () {
-  $nvm_version = nvm list | ? { $_ } | fzf | % {
+  $nvm_version = nvm list |
+    Where-Object { $_ } |
+    fzf |
+    ForEach-Object {
     $trimmed = $_.Trim()
     if ($trimmed -match '^[*-]') { ($trimmed.Split())[1].Trim() } else { $trimmed }
   }
