@@ -90,6 +90,7 @@ if (Test-Command Set-PsFzfOption) {
     '--exclude', 'OneDrive',
     '--exclude', 'Powershell',
     '--exclude', 'node_modules',
+    '--exclude', 'plugged',
     '--exclude', 'tizen-studio',
     '--exclude', 'Library',
     '--exclude', 'scoop',

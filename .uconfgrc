@@ -297,6 +297,7 @@ set_general_after () {
     --exclude AppData
     --exclude Android
     --exclude node_modules
+    --exclude plugged
     --exclude tizen-studio
     --exclude Library
     --exclude scoop
