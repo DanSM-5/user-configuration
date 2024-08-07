@@ -10,7 +10,8 @@ $prj = if ($env:prj) { $env:prj } else { "${HOME}${dirsep}prj" }
 $user_config_cache = if ($env:user_config_cache) { $env:user_config_cache } else { "${HOME}${dirsep}.cache${dirsep}.user_config_cache" }
 
 $env:PREFERRED_EDITOR = 'nvim'
-$env:EDITOR = 'nvim'
+$env:EDITOR = $env.PREFERRED_EDITOR
+$env:VISUAL = $env:PREFERRED_EDITOR
 $env:user_conf_path = "$user_conf_path"
 $env:user_scripts_path = "$user_scripts_path"
 $env:user_config_cache = $user_config_cache
@@ -27,6 +28,7 @@ $env:TERM = if ($env:TERM) { $env:TERM } else { 'xterm-256color' }
 $WIN_HOME = $env:WIN_HOME
 $WIN_ROOT = $env:WIN_ROOT
 $EDITOR = $env:EDITOR
+$VISUAL = $env:VISUAL
 $PREFERRED_EDITOR = $env:PREFERRED_EDITOR
 
 if ((Test-Command oh-my-posh) -and (Test-Path "${HOME}${dirsep}omp-theme")) {

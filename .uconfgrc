@@ -261,6 +261,7 @@ set_general_after () {
   fi
 
   export EDITOR="$PREFERRED_EDITOR"
+  export VISUAL="$PREFERRED_EDITOR"
 
   # For nix package manager
   if command_exists nix-env; then
