@@ -10,7 +10,7 @@ $prj = if ($env:prj) { $env:prj } else { "${HOME}${dirsep}prj" }
 $user_config_cache = if ($env:user_config_cache) { $env:user_config_cache } else { "${HOME}${dirsep}.cache${dirsep}.user_config_cache" }
 
 $env:PREFERRED_EDITOR = 'nvim'
-$env:EDITOR = $env.PREFERRED_EDITOR
+$env:EDITOR = $env:PREFERRED_EDITOR
 $env:VISUAL = $env:PREFERRED_EDITOR
 $env:user_conf_path = "$user_conf_path"
 $env:user_scripts_path = "$user_scripts_path"
