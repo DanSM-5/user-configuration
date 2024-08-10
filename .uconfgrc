@@ -407,7 +407,7 @@ set_general_after () {
 
   # fzf support
   if command_exists rg; then
-    export FZF_DEFAULT_COMMAND='rg --files --follow --no-ignore --hidden --glob "!node_modules" --glob "!.git"'
+    export FZF_DEFAULT_COMMAND='rg --files --follow --no-ignore --hidden --glob "!plugged" --glob "!node_modules" --glob "!.git"'
   fi
 
   if command_exists fd; then

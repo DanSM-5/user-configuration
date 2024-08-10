@@ -213,9 +213,9 @@ if (Test-Command fd) {
 
 if (Test-Command rg) {
   $env:FZF_DEFAULT_COMMAND = if ($IsWindows) {
-    'rg --files --no-ignore --hidden --glob "!.git" --glob "!node_modules" --follow'
+    'rg --files --no-ignore --hidden --glob "!plugged" --glob "!.git" --glob "!node_modules" --follow'
   } else {
-    'rg --files --no-ignore --hidden --glob !.git --glob !node_modules --follow'
+    'rg --files --no-ignore --hidden --glob !plugged --glob !.git --glob !node_modules --follow'
   }
 }
 
