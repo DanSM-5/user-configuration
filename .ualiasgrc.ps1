@@ -1860,3 +1860,14 @@ if ($IsWindows) {
     }
   }
 }
+
+function config () {
+  if (Test-Path -Path "$HOME/.config/$args" -PathType Container -ErrorAction SilentlyContinue) {
+    Set-Location "$HOME/.config/$args"
+  } elseif (Test-Path -Path "$HOME/.config/$args" -PathType Leaf -ErrorAction SilentlyContinue) {
+    & $env:PREFERRED_EDITOR "$HOME/.config/$1"
+  } else {
+    Write-Output "$1 does not exist in the .config directory."
+  }
+}
+

@@ -2190,6 +2190,17 @@ themes_vivid () {
   fi
 
   printf "%s\n" "The theme '$selected_theme' has been set temporary on 'LS_COLORS' environment variable"
-  export LS_COLORS="$(vivid generate "$selected_theme")"
+  LS_COLORS="$(vivid generate "$selected_theme")"
+  export LS_COLORS
+}
+
+config () {
+  if [ -d "$HOME/.config/$1" ]; then
+    cd "$HOME/.config/$1" || return
+  elif [ -f "$HOME/.config/$1" ]; then
+    "$PREFERRED_EDITOR" "$HOME/.config/$1"
+  else
+    echo "$1 does not exist in the .config directory."
+  fi
 }
 
