@@ -171,19 +171,12 @@ set_general () {
   # export PAGER='bat -p --paging=always'
   export COLORTERM='truecolor'
   export TERM="${TERM:-xterm-256color}"
-  export BAT_THEME='Dracula'
+  export BAT_THEME='OneHalfDark'
 
   # LS_COLORS string generated with vivid
   export LS_COLORS="$(cat "$user_conf_path/.ls_colors")"
   # Set colors
   # export LS_COLORS='rs=0:di=01;93:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=04;35;47:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:'
-
-
-  # dark='--color=bg+:#3F3F3F,bg:#4B4B4B,border:#6B6B6B,spinner:#98BC99,hl:#719872,fg:#D9D9D9,header:#719872,info:#BDBB72,pointer:#E12672,marker:#E17899,fg+:#D9D9D9,preview-bg:#3F3F3F,prompt:#98BEDE,hl+:#98BC99'
-  # light='--color=bg+:#D9D9D9,bg:#E1E1E1,border:#C8C8C8,spinner:#719899,hl:#719872,fg:#616161,header:#719872,info:#727100,pointer:#E12672,marker:#E17899,fg+:#616161,preview-bg:#D9D9D9,prompt:#0099BD,hl+:#719899'
-  local gruvbox='--color="bg+:#3c3836,bg:#32302f,spinner:#fb4934,hl:#928374,fg:#ebdbb2,header:#928374,info:#8ec07c,pointer:#fb4934,marker:#fb4934,fg+:#ebdbb2,prompt:#fb4934,hl+:#fb4934"'
-  # nord_vim='--color=bg+:#3B4252,bg:#2E3440,spinner:#81A1C1,hl:#616E88,fg:#D8DEE9,header:#616E88,info:#81A1C1,pointer:#81A1C1,marker:#81A1C1,fg+:#D8DEE9,prompt:#81A1C1,hl+:#81A1C1'
-  # molokai='--color=bg+:#293739,bg:#1B1D1E,border:#808080,spinner:#E6DB74,hl:#7E8E91,fg:#F8F8F2,header:#7E8E91,info:#A6E22E,pointer:#A6E22E,marker:#F92672,fg+:#F8F8F2,prompt:#F92672,hl+:#F92672'
 
   # Add nix to environment
   if [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
@@ -360,7 +353,25 @@ set_general_after () {
 
     [ ! -d "$SHOME/.cache/fzf-history" ] && mkdir -p "$SHOME/.cache/fzf-history"
 
-    export FZF_DEFAULT_OPTS="--history=$SHOME/.cache/fzf-history/fzf-history-default --height 80% --layout=reverse --border"
+    FZF_DEFAULT_OPTS="
+      --history=$SHOME/.cache/fzf-history/fzf-history-default
+      --height 80%
+      --layout=reverse
+      --border
+    "'
+      --color=dark
+      --color=fg:-1,bg:-1,hl:#c678dd,fg+:#ffffff,bg+:#4b5263,hl+:#d858fe
+      --color=info:#98c379,prompt:#61afef,pointer:#be5046,marker:#e5c07b,spinner:#61afef,header:#61afef
+    '
+
+    export FZF_DEFAULT_OPTS
+
+    # dark='--color=bg+:#3F3F3F,bg:#4B4B4B,border:#6B6B6B,spinner:#98BC99,hl:#719872,fg:#D9D9D9,header:#719872,info:#BDBB72,pointer:#E12672,marker:#E17899,fg+:#D9D9D9,preview-bg:#3F3F3F,prompt:#98BEDE,hl+:#98BC99'
+    # light='--color=bg+:#D9D9D9,bg:#E1E1E1,border:#C8C8C8,spinner:#719899,hl:#719872,fg:#616161,header:#719872,info:#727100,pointer:#E12672,marker:#E17899,fg+:#616161,preview-bg:#D9D9D9,prompt:#0099BD,hl+:#719899'
+    # local gruvbox='--color="bg+:#3c3836,bg:#32302f,spinner:#fb4934,hl:#928374,fg:#ebdbb2,header:#928374,info:#8ec07c,pointer:#fb4934,marker:#fb4934,fg+:#ebdbb2,prompt:#fb4934,hl+:#fb4934"'
+    # nord_vim='--color=bg+:#3B4252,bg:#2E3440,spinner:#81A1C1,hl:#616E88,fg:#D8DEE9,header:#616E88,info:#81A1C1,pointer:#81A1C1,marker:#81A1C1,fg+:#D8DEE9,prompt:#81A1C1,hl+:#81A1C1'
+    # molokai='--color=bg+:#293739,bg:#1B1D1E,border:#808080,spinner:#E6DB74,hl:#7E8E91,fg:#F8F8F2,header:#7E8E91,info:#A6E22E,pointer:#A6E22E,marker:#F92672,fg+:#F8F8F2,prompt:#F92672,hl+:#F92672'
+
 
     # CTRL-/ to toggle small preview window to see the full command
     # CTRL-Y to copy the command into clipboard using pbcopy
@@ -371,11 +382,14 @@ set_general_after () {
       --bind 'ctrl-s:toggle-sort'
       --bind 'ctrl-y:execute-silent(echo -n {2..} | \$clipboard_copy)+abort'
       --color header:italic
+      --prompt 'History> '
       --header 'Press CTRL-Y to copy command into clipboard'"
 
     # Print tree structure in the preview window
     export FZF_ALT_C_OPTS="
       --history=$SHOME/.cache/fzf-history/fzf-history-altc
+      --prompt 'CD> '
+      --color header:italic
       --ansi
       --preview-window '60%'
       --preview '$user_conf_path/utils/fzf-preview.sh {}'
@@ -387,9 +401,10 @@ set_general_after () {
       --ansi --cycle
       --header 'ctrl-a: All | ctrl-d: Dirs | ctrl-f: Files | ctrl-y: Copy | ctrl-t: CWD | ctrl-o: Open'
       --prompt 'All> '
-      --bind \"ctrl-a:change-prompt(All> )+reload(fd ${FD_SHOW_OPTIONS[@]} ${FD_EXCLUDE_OPTIONS[@]} --color=always)\"
-      --bind \"ctrl-f:change-prompt(Files> )+reload(fd ${FD_SHOW_OPTIONS[@]} ${FD_EXCLUDE_OPTIONS[@]} --color=always --type file)\"
-      --bind \"ctrl-d:change-prompt(Dirs> )+reload(fd ${FD_SHOW_OPTIONS[@]} ${FD_EXCLUDE_OPTIONS[@]} --color=always --type directory)\"
+      --color header:italic
+      --bind \"ctrl-a:change-prompt(All> )+reload(fd ${FD_SHOW_OPTIONS[*]} ${FD_EXCLUDE_OPTIONS[*]} --color=always)\"
+      --bind \"ctrl-f:change-prompt(Files> )+reload(fd ${FD_SHOW_OPTIONS[*]} ${FD_EXCLUDE_OPTIONS[*]} --color=always --type file)\"
+      --bind \"ctrl-d:change-prompt(Dirs> )+reload(fd ${FD_SHOW_OPTIONS[*]} ${FD_EXCLUDE_OPTIONS[*]} --color=always --type directory)\"
       --bind 'ctrl-t:change-prompt(CWD> )+reload(eza --color=always --all --dereference --no-quotes --group-directories-first \$PWD)'
       --bind 'ctrl-y:execute-silent(\"\$user_conf_path/utils/copy-helper\" \"{+f}\")+abort'
       --bind 'ctrl-o:execute-silent($user_scripts_path/bin/start {})+abort'

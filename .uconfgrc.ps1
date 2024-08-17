@@ -30,6 +30,8 @@ $WIN_ROOT = $env:WIN_ROOT
 $EDITOR = $env:EDITOR
 $VISUAL = $env:VISUAL
 $PREFERRED_EDITOR = $env:PREFERRED_EDITOR
+# Sets theme to use in bat
+$env:BAT_THEME = 'OneHalfDark'
 
 if ((Test-Command oh-my-posh) -and (Test-Path "${HOME}${dirsep}omp-theme")) {
   # Import-Module oh-my-posh
@@ -153,7 +155,15 @@ if (Test-Command fzf) {
     New-Item -Path "$SHOME/.cache/fzf-history" -ItemType Directory -ErrorAction SilentlyContinue
   }
 
-  $env:FZF_DEFAULT_OPTS="--history=$SHOME/.cache/fzf-history/fzf-history-default --height 80% --layout=reverse --border"
+  $env:FZF_DEFAULT_OPTS="
+    --history=$SHOME/.cache/fzf-history/fzf-history-default
+    --height 80%
+    --layout=reverse
+    --border
+    --color=dark
+    --color='fg:-1,bg:-1,hl:#c678dd,fg+:#ffffff,bg+:#4b5263,hl+:#d858fe'
+    --color='info:#98c379,prompt:#61afef,pointer:#be5046,marker:#e5c07b,spinner:#61afef,header:#61afef'
+  "
 
   $env:FZF_CTRL_R_OPTS = "
     --history=$SHOME/.cache/fzf-history/fzf-history-ctrlr
@@ -161,6 +171,7 @@ if (Test-Command fzf) {
     --bind 'ctrl-/:toggle-preview,ctrl-s:toggle-sort'
     --bind 'ctrl-y:execute-silent(pwsh -NoLogo -NonInteractive -NoProfile -File ${env:user_conf_path}${dirsep}utils${dirsep}copy-helper.ps1 {})+abort'
     --color header:italic
+    --prompt 'History> '
     --header 'ctrl-y: Copy'"
 
   $fzfPreviewScript = "${env:user_conf_path}${dirsep}utils${dirsep}fzf-preview.ps1"
@@ -174,6 +185,7 @@ if (Test-Command fzf) {
     --ansi --cycle
     --header 'ctrl-a: All | ctrl-d: Dirs | ctrl-f: Files | ctrl-y: Copy | ctrl-t: CWD'
     --prompt 'All> '
+    --color header:italic
     --bind `"ctrl-a:change-prompt(All> )+reload(fd $FD_OPTIONS --color=always)`"
     --bind `"ctrl-f:change-prompt(Files> )+reload(fd $FD_OPTIONS --color=always --type file)`"
     --bind `"ctrl-d:change-prompt(Dirs> )+reload(fd $FD_OPTIONS --color=always --type directory)`"
@@ -192,6 +204,8 @@ if (Test-Command fzf) {
   $env:FZF_ALT_C_OPTS = "
     --history=$SHOME/.cache/fzf-history/fzf-history-altc
     --ansi
+    --prompt 'CD> '
+    --color header:italic
     --preview-window '60%'
     --preview 'pwsh -NoProfile -NonInteractive -NoLogo -File $fzfPreviewScript " + ". {}'
     --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort'"
