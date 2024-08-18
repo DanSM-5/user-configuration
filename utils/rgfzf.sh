@@ -66,15 +66,23 @@ fi
 fzf \
   --header '╱ CTRL-R (Ripgrep mode) ╱ CTRL-F (fzf mode) ╱' \
   --disabled --ansi --multi \
+  --cycle --info=inline \
+  --bind 'alt-up:preview-page-up,alt-down:preview-page-down' \
+  --bind 'ctrl-s:toggle-sort' \
+  --bind 'alt-f:first' \
+  --bind 'alt-l:last' \
+  --bind 'alt-c:clear-query' \
+  --bind 'alt-a:select-all' \
+  --bind 'alt-d:deselect-all' \
   --bind "0:toggle-preview" \
-  --bind "start:$RELOAD" \
   --bind "ctrl-l:toggle-preview" \
+  --bind 'ctrl-/:toggle-preview' \
+  --bind "start:$RELOAD" \
   --bind "change:$RELOAD" \
   --bind "enter:become:$OPENER" \
   --bind "ctrl-o:execute:$OPENER" \
   --bind "ctrl-r:unbind(ctrl-r)+change-prompt(1. 🔎 ripgrep> )+disable-search+reload($RG_PREFIX {q} || :)+rebind(change,ctrl-f)" \
   --bind "ctrl-f:unbind(change,ctrl-f)+change-prompt(2. ✅ fzf> )+enable-search+clear-query+rebind(ctrl-r)" \
-  --bind 'alt-a:select-all,alt-d:deselect-all,ctrl-/:toggle-preview' \
   --prompt '1. 🔎 ripgrep> ' \
   --delimiter : \
   --preview 'bat --style=full --color=always --highlight-line {2} {1}' \

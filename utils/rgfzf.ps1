@@ -210,22 +210,30 @@ function Invoke-PsFzfRipgrep() {
             # $TEMP_FILE = '{+f}'
         }
 
-        $RELOAD = "reload:$RG_PREFIX {q} || $trueCmd"
+        $RELOAD = "reload:$sleepCmd $RG_PREFIX {q} || $trueCmd"
         $OPENER = Get-EditorLaunch
 
         & $script:FzfLocation --ansi `
           --header '╱ CTRL-R (Ripgrep mode) ╱ CTRL-F (fzf mode) ╱' `
           --disabled --ansi --multi `
-          --with-shell "pwsh -NoLogo -NonInteractive -NoProfile -Command" `
-          --bind "0:toggle-preview" `
+          --cycle --info=inline `
+          --with-shell 'pwsh -NoLogo -NonInteractive -NoProfile -Command' `
+          --bind 'alt-up:preview-page-up,alt-down:preview-page-down' `
+          --bind 'ctrl-s:toggle-sort' `
+          --bind 'alt-f:first' `
+          --bind 'alt-l:last' `
+          --bind 'alt-c:clear-query' `
+          --bind 'alt-a:select-all' `
+          --bind 'alt-d:deselect-all' `
+          --bind '0:toggle-preview' `
+          --bind 'ctrl-l:toggle-preview' `
+	        --bind 'ctrl-/:toggle-preview' `
           --bind "start:$RELOAD" `
-          --bind "ctrl-l:toggle-preview" `
           --bind "change:$RELOAD" `
           --bind "enter:become:$OPENER" `
           --bind "ctrl-o:execute:$OPENER" `
           --bind ("ctrl-r:unbind(ctrl-r)+change-prompt" + '(1. 🔎 ripgrep> )' + "+disable-search+reload($RG_PREFIX {q} || $trueCmd)+rebind(change,ctrl-f)") `
           --bind ("ctrl-f:unbind(change,ctrl-f)+change-prompt" + '(2. ✅ fzf> )' + "+enable-search+clear-query+rebind(ctrl-r)") `
-          --bind 'alt-a:select-all,alt-d:deselect-all,ctrl-/:toggle-preview' `
           --prompt '1. 🔎 ripgrep> ' `
           --delimiter : `
           --preview 'bat --style=full --color=always --highlight-line {2} {1}' `
