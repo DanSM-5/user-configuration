@@ -40,11 +40,14 @@ function ega { nvim "$(Join-Path -Path $env:user_conf_path -ChildPath .ualiasgrc
 function evc { nvim "$(Join-Path -Path $HOME -ChildPath "vim-config${dirsep}vimstart.vim")" }
 # function evc { nvim "$(Join-Path -Path $HOME -ChildPath ".SpaceVim.d${dirsep}init.toml")" }
 
+$fzfPreviewScript = Join-Path -Path $env:user_conf_path -ChildPath "utils${dirsep}fzf-preview.ps1"
+$fzf_preview_normal = ("pwsh -NoProfile -NonInteractive -NoLogo -File `"$fzfPreviewScript`"" + " \""" + '.' + "\"" {}")
+
 function getPsFzfOptions {
-  $path = $PWD.ProviderPath.Replace('\', '/')
-  $fzfPreviewScript = Join-Path -Path $env:user_conf_path -ChildPath "utils${dirsep}fzf-preview.ps1"
+  # $path = $PWD.ProviderPath.Replace('\', '/')
   $psFzfOptions = @{
-    Preview = $("pwsh -NoProfile -NonInteractive -NoLogo -File \""$fzfPreviewScript\"" \""" + $path + "\"" {}" );
+    # Preview = $("pwsh -NoProfile -NonInteractive -NoLogo -File \""$fzfPreviewScript\"" \""" + $path + "\"" {}" );
+    Preview = $fzf_preview_normal
     Bind = @(
       'ctrl-/:change-preview-window(down|hidden|)',
       'alt-up:preview-page-up',
@@ -63,11 +66,10 @@ function getPsFzfOptions {
   return $psFzfOptions
 }
 
-$fzf_preview_normal = ("pwsh -NoProfile -NonInteractive -NoLogo -File `"$fzfPreviewScript`"" + " \""" + '.' + "\"" {}")
 function getFzfOptions () {
-  $path = $PWD.ProviderPath.Replace('\', '/')
-  $fzfPreviewScript = Join-Path -Path $env:user_conf_path -ChildPath "utils${dirsep}fzf-preview.ps1"
-  $preview = ("pwsh -NoProfile -NonInteractive -NoLogo -File `"$fzfPreviewScript`"" + " \""" + $path + "\"" {}")
+  # $path = $PWD.ProviderPath.Replace('\', '/')
+  # $fzfPreviewScript = Join-Path -Path $env:user_conf_path -ChildPath "utils${dirsep}fzf-preview.ps1"
+  # $preview = ("pwsh -NoProfile -NonInteractive -NoLogo -File `"$fzfPreviewScript`"" + " \""" + $path + "\"" {}")
 
   $options = @(
     '--bind', 'ctrl-/:change-preview-window(down|hidden|)',
@@ -78,7 +80,8 @@ function getFzfOptions () {
     '--bind', 'alt-l:last',
     '--bind', 'alt-c:clear-query',
     '--preview-window', '60%',
-    '--preview', $preview,
+    # '--preview', $preview,
+    '--preview', $fzf_preview_normal,
     '--height', '80%',
     '--min-height', '20',
     '--info=inline',

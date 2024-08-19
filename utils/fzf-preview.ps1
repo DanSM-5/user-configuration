@@ -5,7 +5,19 @@
 # Derived from: https://github.com/kelleyma49/PSFzf/blob/master/helpers/PsFzfTabExpansion-Preview.ps1
 
 [CmdletBinding()]
-param ($DirName, $Item)
+param (
+  [string] $DirName,
+  [string[]]
+  $ItemName
+)
+
+
+if ($ItemName -is [System.Collections.IEnumerable]) {
+  $Item = $ItemName -Join ' '
+} else {
+  $Item = $ItemName.ToString()
+}
+
 
 # trim quote strings:
 $DirName = $DirName.Trim("'").Trim('"')
@@ -28,27 +40,29 @@ else {
 
 function preview_directory () {
   # Display fullname on top
-  $fullpath = (Resolve-Path $path).Path
+  $fullpath = (Resolve-Path -LiteralPath $path).Path
   Write-Output "Path: $fullpath" ""
   $addspace = $false
 
-  # don't output anything if not a git repo
-  Push-Location $path
-  if ($ansiCompatible) {
-      git log --color=always -1 2> $null
-      $addspace = $?
-  }
-  else {
-      git log -1 2> $null
-      $addspace = $?
-  }
-  Pop-Location
+  try {
+    Push-Location -LiteralPath $path *> $null
+    # don't output anything if not a git repo
+    if ($ansiCompatible) {
+        git log --color=always -1 2> $null
+        $addspace = $?
+    }
+    else {
+        git log -1 2> $null
+        $addspace = $?
+    }
+    Pop-Location *> $null
+  } catch {}
 
   try {
     if ($addspace) { Write-Output "" }
     erd --layout inverted --color force --level 3 -I --suppress-size -- $path 2> $null ||
       eza -A --tree --level=3 --color=always --icons=always --dereference $path 2> $null ||
-      Get-ChildItem $path
+      Get-ChildItem -LiteralPath $path
     # if (Get-Command erd -ErrorAction SilentlyContinue) {
     #   if ($addspace) { Write-Output "" }
     #   erd --layout inverted --color force --level 3 -I --suppress-size -- $path || Get-ChildItem $path
