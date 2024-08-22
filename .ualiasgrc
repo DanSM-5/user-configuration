@@ -1030,7 +1030,7 @@ yt-dlp-play-quality () {
 }
 
 mpvw () {
-  echo "Playing: $@"
+  echo "Playing: $*"
   "$mpv_commd" "$@"
 }
 
@@ -1346,7 +1346,7 @@ py () {
         (whereis python  | awk '{for (i=2; i<=NF; i++) print $i}' &) 2> /dev/null
         (whereis python2 | awk '{for (i=2; i<=NF; i++) print $i}' &) 2> /dev/null
         (whereis python3 | awk '{for (i=2; i<=NF; i++) print $i}' &) 2> /dev/null
-        ((printf "%s\n" /usr/bin/python*) 2> /dev/null &)
+        ( (printf "%s\n" /usr/bin/python*) 2> /dev/null &)
         (which python 2> /dev/null &)
         (which python3 2> /dev/null &)
       } | sort -u
@@ -1450,7 +1450,7 @@ if [ "$IS_WSL" = true ]; then
   }
 
   file_explorer_open () {
-    pwsh.exe -nolo -nonin -nopro -c "Start-Process $@"
+    pwsh.exe -nolo -nonin -nopro -c "Start-Process $*"
   }
 
   start () {
