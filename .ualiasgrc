@@ -203,7 +203,6 @@ alias gcr="get_bare_repository"
 
 # Bare repo checkout
 gwc () {
-  local current_directory="$PWD"
   local bare_root branch_name
 
   bare_root="$(get_bare_repository)"
@@ -628,7 +627,8 @@ fdirs () {
 }
 
 fenv () {
-  local tmpfile="$(mktemp)"
+  local tmpfile
+  tmpfile="$(mktemp)"
   # Cleanup file on exit
   trap "rm -- '$tmpfile'" EXIT
 
@@ -642,13 +642,14 @@ fenv () {
   # as first element if key is pressed
   local output=($(cat -v "$tmpfile" |
     fzf-defaults \
-      --preview 'printf "%q" {}' --preview-window 'up:50%:hidden:wrap' \
+      --preview 'printf "%q" {}' \
+      --preview-window 'up:50%:hidden:wrap' \
       --bind 'ctrl-/:toggle-preview' \
       --bind 'ctrl-s:toggle-sort' \
       --bind 'ctrl-y:execute-silent(echo -n {} | $clipboard_copy)+abort' \
       --expect 'ctrl-h,ctrl-v' \
       --color header:italic \
-      --header 'CTRL-Y: Copy'))
+      --header 'CTRL-Y: Copy | CTRL-V: Value | CTRL-H: Key'))
 
   # Subshell to keep helper functions as local
   (
