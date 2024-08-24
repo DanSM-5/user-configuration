@@ -112,7 +112,7 @@ function getFzfPreview ([string] $ScriptContent = 'Get-Content $args') {
   }
 }
 
-function getFdExcluded {
+function fd-Excluded {
   $exclusionArr = @(
     $env:FD_SHOW_OPTIONS -Split ' '
     $env:FD_EXCLUDE_OPTIONS -Split ' '
@@ -270,7 +270,7 @@ function get_bare_repository () {
           return
         }
         # Move up a directory
-        cd ..
+        Set-Location ..
       }
     } else {
       $bare_root = $PWD.ToString()
@@ -285,11 +285,11 @@ function get_bare_repository () {
       # If error, it means we are no longer under a git repository
       if (!$?) { break }
       # Move up a directory
-      cd ..
+      Set-Location ..
     }
 
     # Recover current dir
-    cd "$current_directory"
+    Set-Location "$current_directory"
 
     if ($is_bare_repository -eq $false) {
       Write-Error "Not in a bare repository"
@@ -327,7 +327,6 @@ Set-Alias -Name gbr -Value get_bare_repository
 
 # Bare repo checkout
 function gwc () {
-  $current_directory = $PWD
   $bare_root = ''
   $branch_name = ''
 
@@ -357,11 +356,11 @@ function gwc () {
   Pop-Location *> $null
 
   # Attempt to cd into new worktree
-  cd "$bare_root/$branch_name" *> $null
+  Set-Location "$bare_root/$branch_name" *> $null
 }
 
 function fwc () {
-  $branch_name = fgb @args | % {
+  $branch_name = fgb @args | ForEach-Object {
     # Clean branch name
     $_ -replace 'origin/', ''
   }
@@ -384,7 +383,7 @@ function fwr () {
     return
   }
 
-  $selection = fgb @args | % {
+  $selection = fgb @args | ForEach-Object {
     # Clean branch name
     $_ -replace 'origin/', ''
   }
@@ -428,8 +427,9 @@ function qnv () {
   $quick_access |
     Invoke-Fzf `
       -Header "(ctrl-/) Toggle preview" `
-      @options |
-    % { Set-Location "$_" }
+      @options | ForEach-Object {
+        Set-Location "$_"
+      }
 }
 
 function qed ([string] $editor = 'nvim') {
@@ -442,8 +442,9 @@ function qed ([string] $editor = 'nvim') {
   $quick_edit |
     Invoke-Fzf `
       -Header "(ctrl-/) Toggle preview" `
-      @options |
-    % { & "$editor" "$_" }
+      @options | ForEach-Object {
+        & "$editor" "$_"
+      }
 }
 
 function cprj ([Switch] $Raw) {
@@ -505,7 +506,7 @@ function fcd () {
   }
 
   $location = if ("$location" -eq "~") { "$HOME" } else { "$location" }
-  $exclude = getFdExcluded
+  $exclude = fd-Excluded
 
   $selection = "$(
     fd `
@@ -532,7 +533,7 @@ function fcdd () {
   $pattern = if ($args[0]) { $args[0] } else { "." }
   $query = $args[1..$args.length]
   $options = getPsFzfOptions
-  $exclude = getFdExcluded
+  $exclude = fd-Excluded
 
   $selection = "$(
     fd `
@@ -566,13 +567,13 @@ function fcde () {
   }
 
   $location = if ("$location" -eq "~") { "$HOME" } else { "$location" }
-  $exclude = getFdExcluded
+  $exclude = fd-Excluded
 
   $selection = "$(
     fd `
       @exclude `
       -L -tf "$pattern" "$location" |
-    % { Split-Path "$_" } |
+    ForEach-Object { Split-Path "$_" } |
     Sort-Object -Unique |
     Invoke-Fzf `
       -Header 'Press CTRL-/ to toggle preview' `
@@ -634,7 +635,7 @@ function mr { npm run $args }
 
 function fnr {
   if ( -not (Test-Path package.json) ) {
-    Write-Output "No package.json in dir $(pwd)"
+    Write-Output "No package.json in dir $PWD"
     return
   }
 
@@ -660,7 +661,7 @@ function fnr {
   $copy_script = $value_script + " | Set-Clipboard"
   $selection = Get-Content package.json |
     jq -r '.scripts | keys[]' |
-    Sort |
+    Sort-Object |
     fzf --query "$query" --height '50%' --min-height '20' `
       --with-shell 'pwsh -nolo -nopro -nonin -c' `
       --border --no-multi `
@@ -707,12 +708,6 @@ function fdirs () {
 }
 
 function fenv () {
-  $showValue = $false
-
-  if ($args[0] -eq '-v') { $showValue = $true }
-
-  # TODO: Investigate change-preview-window not working
-  # '--bind', 'ctrl-/:change-preview-window(down|hidden|)',
   $options = @(
     '--preview', "pwsh -NoLogo -NonInteractive -NoProfile -File $env:user_conf_path${dirsep}utils${dirsep}log-helper.ps1 {}",
     '--bind', 'ctrl-/:toggle-preview',
@@ -720,13 +715,13 @@ function fenv () {
     '--bind', 'alt-down:preview-page-down',
     '--bind', 'ctrl-s:toggle-sort',
     '--expect', 'ctrl-h,ctrl-v',
-    '--header', 'CTRL-Y: Copy',
+    '--header', 'CTRL-Y: Copy | CTRL-V: Value | CTRL-H: Key',
     '--bind', "ctrl-y:execute-silent(pwsh -NoLogo -NonInteractive -NoProfile -File '${env:user_conf_path}${dirsep}utils${dirsep}copy-helper.ps1' {})+abort",
     '--preview-window', 'up:50%:hidden:wrap'
   )
 
   $output = @($(Get-childItem -Path env: |
-    % { Write-Output "$($_.key)=$($_.value.Trim() -Replace '\n', ' ')" } |
+    ForEach-Object { Write-Output "$($_.key)=$($_.value.Trim() -Replace '\n', ' ')" } |
     fzf @options))
 
     if ($output[0] -eq 'ctrl-h') {
@@ -735,7 +730,6 @@ function fenv () {
     } elseif ($output[0] -eq 'ctrl-v') {
       $res = $output[1] -Split '='
       $res[1..$res.length] -Join '='
-      # if ($showValue) { $res[1..$res.length] -Join '=' } else { $res[0] }
     } else {
       $output
     }
@@ -1000,7 +994,7 @@ if (Get-Command -Name 'eza' -ErrorAction SilentlyContinue) {
 
     # NOTE: Looks like -Force is better to get all files
     # $filesFound = Get-ChildItem -Attributes Directory, Directory+Hidden, Hidden, Archive, Archive+Hidden -Path $path -Include * | % {
-    $filesFound = Get-ChildItem -Path $path -Force -ErrorAction SilentlyContinue | % {
+    $filesFound = Get-ChildItem -Path $path -Force -ErrorAction SilentlyContinue | ForEach-Object {
       # $acc = [PSCustomObject] @{ Dirs = '' }
       # $acc = @()
       # } {
@@ -1323,7 +1317,7 @@ function fed () {
     $location = "$HOME" + $location.Substring(1)
   }
 
-  $exclude = getFdExcluded
+  $exclude = fd-Excluded
 
   $selection = @($(
     fd `
@@ -1356,7 +1350,7 @@ function fedd () {
   $query = $args[1..$args.length]
   $editor = "$env:PREFERRED_EDITOR" ?? 'vim'
   $options = getPsFzfOptions
-  $exclude = getFdExcluded
+  $exclude = fd-Excluded
 
   $selection = "$(
     fd `
@@ -1476,7 +1470,7 @@ function ptc () {
     $location = "$HOME"
   }
 
-  $exclude = getFdExcluded
+  $exclude = fd-Excluded
 
   $selection = "$(
     &{
@@ -1498,7 +1492,7 @@ function ptc () {
     return
   }
 
-  $selection = Get-Item "$selection" -Force | Select-Object FullName | % { $_.FullName }
+  $selection = Get-Item "$selection" -Force | Select-Object FullName | ForEach-Object { $_.FullName }
   Write-Output "$selection" | tr -d "\r\n" | pbcopy
 }
 
@@ -1511,7 +1505,7 @@ function Count-Files (
 
   function Get-SimpleCount () {
     $dir = $_.Name
-    fd --hidden $FdProps . $dir | Measure-Object | % {
+    fd --hidden $FdProps . $dir | Measure-Object | ForEach-Object {
       [PSCustomObject] @{
         Name = $dir
         Count = $_.Count
@@ -1521,7 +1515,7 @@ function Count-Files (
 
   function Get-CountWithSize () {
     $dir = $_.Name
-    $size = Get-ChildItem -Recurse -Path $dir 2>&1 | % {
+    $size = Get-ChildItem -Recurse -Path $dir 2>&1 | ForEach-Object {
       if ($_ -is [System.Management.Automation.ErrorRecord]) {
         # Print message if it is an error
         Write-Host $_.Exception.Message -ForegroundColor Red
@@ -1542,7 +1536,7 @@ function Count-Files (
       $size = "$([math]::Round($temp, 3))B"
     }
 
-    fd --hidden $FdProps . "$dir" | Measure-Object | % {
+    fd --hidden $FdProps . "$dir" | Measure-Object | ForEach-Object {
       [PSCustomObject] @{
         Name = $dir
         Count = $_.Count
@@ -1552,9 +1546,9 @@ function Count-Files (
   }
 
   if ($Size) {
-    $result = Get-ChildItem -Attributes Directory, Directory+Hidden | % { Get-CountWithSize $_ }
+    $result = Get-ChildItem -Attributes Directory, Directory+Hidden | ForEach-Object { Get-CountWithSize $_ }
   } else {
-    $result = Get-ChildItem -Attributes Directory, Directory+Hidden | % { Get-SimpleCount $_ }
+    $result = Get-ChildItem -Attributes Directory, Directory+Hidden | ForEach-Object { Get-SimpleCount $_ }
   }
 
   $result | Format-Table -Auto -Wrap
@@ -1635,12 +1629,12 @@ function wifiList ([string] $WifiName = '') {
     return
   }
 
-  netsh wlan show profile | Select-String "All User" | % {
+  netsh wlan show profile | Select-String "All User" | ForEach-Object {
     $profileName = parseNetsh "$_"
     $profilePass = "No Password"
 
     $profilePass = netsh wlan show profile "$profileName" key=clear |
-      Select-String "Key Content" | % { parseNetsh "$_" }
+      Select-String "Key Content" | ForEach-Object { parseNetsh "$_" }
 
     $profilePass = if ($profilePass) { $profilePass } else { "No Password" }
 
@@ -1684,7 +1678,7 @@ function Test-ReparsePoint([string]$path) {
 function frm () {
   $query = "$args"
   $options = getPsFzfOptions
-  $exclude = getFdExcluded
+  $exclude = fd-Excluded
 
   fd `
     @exclude `
@@ -1695,7 +1689,7 @@ function frm () {
     @options `
     -Ansi -Cycle `
     -Multi `
-    -Query "$query" | ? {
+    -Query "$query" | Where-Object {
       # If item is a file or a SymbolicLink
       (
         Test-Path -PathType Leaf "$_" -ErrorAction SilentlyContinue
@@ -1706,7 +1700,7 @@ function frm () {
 function frdr () {
   $query = "$args"
   $options = getPsFzfOptions
-  $exclude = getFdExcluded
+  $exclude = fd-Excluded
 
   fd `
     @exclude `
@@ -1717,7 +1711,7 @@ function frdr () {
     @options `
     -Ansi -Cycle `
     -Multi `
-    -Query "$query" | ? {
+    -Query "$query" | Where-Object {
       # If item is a file or a SymbolicLink
       (
         Test-Path -PathType Container "$_" -ErrorAction SilentlyContinue
@@ -1842,7 +1836,7 @@ if ($IsWindows) {
         $selected = $packages | fzf @fzf_options `
           --cycle `
           --delimiter "`t" --with-nth=1 `
-          --preview 'winget show {2} | bat --style=plain --color=always --language yml' | % {
+          --preview 'winget show {2} | bat --style=plain --color=always --language yml' | ForEach-Object {
             ($_ -Split "`t")[1]
           }
 
