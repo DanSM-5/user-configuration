@@ -112,7 +112,7 @@ function getFzfPreview ([string] $ScriptContent = 'Get-Content $args') {
   }
 }
 
-function fd-Excluded {
+function getFdExcluded {
   $exclusionArr = @(
     $env:FD_SHOW_OPTIONS -Split ' '
     $env:FD_EXCLUDE_OPTIONS -Split ' '
@@ -211,12 +211,18 @@ function gprevr ([int] $first = 1, [int] $second = 0) {
 }
 
 function fadd () {
-  fgf @args | % { git add $_ }
+  fgf @args | ForEach-Object {
+    Write-Host $_
+    git add $_
+  }
 }
 
 function fpad () {
   $files = @()
-  fgf @args | % { $files += "$_" }
+  fgf @args | ForEach-Object {
+    Write-Host $_
+    $files += "$_"
+  }
 
   if ($files) {
     git add -p @files
@@ -224,23 +230,23 @@ function fpad () {
 }
 
 function fco () {
-  fgb @args | % { git checkout "$($_ -replace 'origin/', '')" }
+  fgb @args | ForEach-Object { git checkout "$($_ -replace 'origin/', '')" }
 }
 
 function fck () {
-  fgb @args | % { git checkout "$($_ -replace 'origin/', '')" }
+  fgb @args | ForEach-Object { git checkout "$($_ -replace 'origin/', '')" }
 }
 
 function fgrm () {
-  fgf @args | % { git checkout -- "$_" }
+  fgf @args | ForEach-Object { git checkout -- "$_" }
 }
 
 function fsa () {
-  fgs @args | % { git stash apply $_ }
+  fgs @args | ForEach-Object { git stash apply $_ }
 }
 
 function fmerge () {
-  fgb @args | % { git merge "$_" }
+  fgb @args | ForEach-Object { git merge "$_" }
 }
 
 function get_bare_repository () {
@@ -499,7 +505,7 @@ function fcd () {
   }
 
   $location = if ("$location" -eq "~") { "$HOME" } else { "$location" }
-  $exclude = fd-Excluded
+  $exclude = getFdExcluded
 
   $selection = "$(
     fd `
@@ -526,7 +532,7 @@ function fcdd () {
   $pattern = if ($args[0]) { $args[0] } else { "." }
   $query = $args[1..$args.length]
   $options = getPsFzfOptions
-  $exclude = fd-Excluded
+  $exclude = getFdExcluded
 
   $selection = "$(
     fd `
@@ -560,7 +566,7 @@ function fcde () {
   }
 
   $location = if ("$location" -eq "~") { "$HOME" } else { "$location" }
-  $exclude = fd-Excluded
+  $exclude = getFdExcluded
 
   $selection = "$(
     fd `
@@ -1317,7 +1323,7 @@ function fed () {
     $location = "$HOME" + $location.Substring(1)
   }
 
-  $exclude = fd-Excluded
+  $exclude = getFdExcluded
 
   $selection = @($(
     fd `
@@ -1350,7 +1356,7 @@ function fedd () {
   $query = $args[1..$args.length]
   $editor = "$env:PREFERRED_EDITOR" ?? 'vim'
   $options = getPsFzfOptions
-  $exclude = fd-Excluded
+  $exclude = getFdExcluded
 
   $selection = "$(
     fd `
@@ -1470,7 +1476,7 @@ function ptc () {
     $location = "$HOME"
   }
 
-  $exclude = fd-Excluded
+  $exclude = getFdExcluded
 
   $selection = "$(
     &{
@@ -1678,7 +1684,7 @@ function Test-ReparsePoint([string]$path) {
 function frm () {
   $query = "$args"
   $options = getPsFzfOptions
-  $exclude = fd-Excluded
+  $exclude = getFdExcluded
 
   fd `
     @exclude `
@@ -1700,7 +1706,7 @@ function frm () {
 function frdr () {
   $query = "$args"
   $options = getPsFzfOptions
-  $exclude = fd-Excluded
+  $exclude = getFdExcluded
 
   fd `
     @exclude `
