@@ -94,6 +94,11 @@ show_image () {
     return
   fi
 
+  if [ "$IS_WSL" = true ]; then
+    chafa -f sixels -s "$IMAGE_SIZE" "$thumbnail"
+    return
+  fi
+
   if [ "$TERM_PROGRAM" = 'vscode' ]; then
     chafa -f sixels -s "$IMAGE_SIZE" "$thumbnail"
     return
