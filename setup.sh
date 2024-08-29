@@ -22,7 +22,7 @@ if [ "$USE_SSH_REMOTE" = 'true' ]; then
 fi
 
 # Start from HOME
-cd "$HOME"
+cd "$HOME" || exit
 
 if [ -d "$user_conf_path" ]; then
   echo "Config repository already exist. Skipping..."
@@ -31,7 +31,7 @@ else
 fi
 
 # Change location to config path
-cd "$user_conf_path"
+cd "$user_conf_path" || exit
 
 scripts_to_run=(
   "$user_conf_path/install.sh"

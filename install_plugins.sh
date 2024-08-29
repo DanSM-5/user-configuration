@@ -28,9 +28,10 @@ repos=(
 # done
 # DIR=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
 
-cache_dir="$HOME/.cache/.user_config_cache"
-plugins="$cache_dir/plugins"
-completions="$cache_dir/completions"
+user_config_cache="$HOME/.cache/.user_config_cache"
+export user_config_cache
+plugins="$user_config_cache/plugins"
+completions="$user_config_cache/completions"
 zsh="$completions/zsh"
 bash="$completions/bash"
 
@@ -39,21 +40,25 @@ mkdir -p "$completions"
 mkdir -p "$zsh"
 mkdir -p "$bash"
 
-pushd "$plugins"
+pushd "$plugins" || exit
 for repo in "${repos[@]}"; do
   dir="${repo##*/}"
   dir_location="$plugins/${dir%.*}"
   if ! [ -d "$dir_location" ]; then
-    git clone "$repo"
+    git clone --depth=1 "$repo"
   fi
 done
-popd
+popd || exit
 
 # Copy completions
-command cp -fr "$HOME/.usr_conf/completions" "$cache_dir"
+command cp -fr "$HOME/.usr_conf/completions" "$user_config_cache"
 
 # Git completion for zsh in gitbash
 if [ -f /mingw64/share/git/completion/git-completion.zsh ]; then
   command cp /mingw64/share/git/completion/git-completion.zsh "$zsh/_git"
+fi
+
+if command -v zsh &>/dev/null && [[ -v user_conf_path ]]; then
+  "$user_conf_path"/compile_plugins.zsh
 fi
 
