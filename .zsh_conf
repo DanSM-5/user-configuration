@@ -48,13 +48,21 @@ fpath=(
   "${fpath[@]}"
 )
 
+
+function zcompile-many() {
+  local f
+  for f; do zcompile -R -- "$f".zwc "$f"; done
+}
+
 # Use modern completion system
-autoload -Uz compinit
-compinit
+autoload -Uz compinit && compinit
 
 # Add bash completion for pipx
-autoload -U bashcompinit
-bashcompinit
+autoload -U bashcompinit && bashcompinit
+
+# Compile zcomdump if wordcount changed
+[[ ~/.zcompdump.zwc -nt ~/.zcompdump ]] || zcompile-many ~/.zcompdump
+unfunction zcompile-many
 
 # Auto completion configs
 zstyle ':completion:*' auto-description 'specify: %d'
