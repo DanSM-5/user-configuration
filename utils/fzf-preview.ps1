@@ -97,12 +97,15 @@ function show_image ([string] $thumbnail, [string] $ErrorMessage) {
     return
   }
 
-  if ($env:TERM_PROGRAM -eq 'vscode') {
-    chafa -f sixels -s "$IMAGE_SIZE" "$thumbnail" || Write-Host $ErrorMessage
+  # Windows terminal support sixel from v1.22
+  if ($env:TERM_PROGRAM -eq 'vscode' -or $IsWindows -or $env:IS_WINDOWS -eq 'true') {
+    chafa -f sixels --colors=full --polite=on --animate=off -s "$IMAGE_SIZE" "$thumbnail" ||
+      chafa -s "$IMAGE_SIZE" --animate=off "$thumbnail" ||
+      Write-Host $ErrorMessage
     return
   }
 
-  chafa -s "$IMAGE_SIZE" "$thumbnail" || Write-Host $ErrorMessage
+  chafa -f sixels -s "$IMAGE_SIZE" "$thumbnail" || Write-Host $ErrorMessage
   return
 }
 

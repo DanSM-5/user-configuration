@@ -94,17 +94,13 @@ show_image () {
     return
   fi
 
-  if [ "$IS_WSL" = true ]; then
-    chafa -f sixels -s "$IMAGE_SIZE" "$thumbnail"
+  if [ "$TERM_PROGRAM" = 'vscode' ] || [ "$IS_WINDOWS" = true ]; then
+    chafa -f sixels --colors=full --polite=on --animate=off -s "$IMAGE_SIZE" "$thumbnail" 2>/dev/null ||
+      chafa -s "$IMAGE_SIZE" --animate=off "$thumbnail" 2>/dev/null
     return
   fi
 
-  if [ "$TERM_PROGRAM" = 'vscode' ]; then
-    chafa -f sixels -s "$IMAGE_SIZE" "$thumbnail"
-    return
-  fi
-
-  chafa -s "$IMAGE_SIZE" "$thumbnail"
+  chafa -f sixels -s "$IMAGE_SIZE" "$thumbnail"
 }
 
 show_7z () {
