@@ -91,6 +91,11 @@ show_image () {
       --place="$IMAGE_SIZE@0x0" "$thumbnail" |
         sed '$d' | sed $'$s/$/\e[m/'
 
+    # TODO: Test later
+    # kitty +kitten icat --silent --stdin no \
+    #   --unicode-placeholder \
+    #   --transfer-mode file --place "${IMAGE_SIZE}@0x0" "$thumbnail"
+
     return
   fi
 
