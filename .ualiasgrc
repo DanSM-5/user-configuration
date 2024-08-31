@@ -10,11 +10,16 @@ export user_scripts_path="${user_scripts_path:-"$HOME/user-scripts"}"
 export prj="${prj:-"$HOME/prj"}"
 export user_config_cache="${user_config_cache:-"$HOME/.cache/.user_config_cache"}"
 
+# shellcheck disable=SC2139
 alias gpr="cd '$prj'"
+# shellcheck disable=SC2139
 alias gus="cd '$user_scripts_path'"
+# shellcheck disable=SC2139
 alias guc="cd '$HOME/.usr_conf'"
+# shellcheck disable=SC2139
 alias gvc="cd '$HOME/vim-config'"
 # alias gvc="cd $HOME/.SpaceVim.d"
+# shellcheck disable=SC2139
 alias goh="cd '$HOME'"
 
 export uprf="$HOME/.profile"
@@ -52,14 +57,22 @@ fd-defaults () {
 
 PREFERRED_EDITOR="${PREFERRED_EDITOR:-vim}"
 
+# shellcheck disable=SC2139
 alias epf="$PREFERRED_EDITOR '$HOME/.profile'"
+# shellcheck disable=SC2139
 alias ecf="$PREFERRED_EDITOR '$uconf'"
+# shellcheck disable=SC2139
 alias egc="$PREFERRED_EDITOR '$uconfg'"
+# shellcheck disable=SC2139
 alias eal="$PREFERRED_EDITOR '$ualias'"
+# shellcheck disable=SC2139
 alias ega="$PREFERRED_EDITOR '$ualiasg'"
+# shellcheck disable=SC2139
 alias evc="$PREFERRED_EDITOR '$HOME/vim-config/vimstart.vim'"
 # alias evc="$PREFERRED_EDITOR $HOME/.SpaceVim.d/init.toml"
+# shellcheck disable=SC2139
 alias ezsh="$PREFERRED_EDITOR '$user_conf_path/.zsh_conf'"
+# shellcheck disable=SC2139
 alias ebash="$PREFERRED_EDITOR '$user_conf_path/.bash_conf'"
 
 # Git
@@ -554,7 +567,7 @@ fcda () {
 
 fed () {
   local location="${1:-.}"
-  local query="${@:3}"
+  local query="${*:3}"
   local pattern="."
   local editor="${PREFERRED_EDITOR:-vim}"
 
@@ -563,7 +576,10 @@ fed () {
     location="$HOME"
   fi
 
-  local selection=($(fd-defaults --color=always -L -tf "$pattern" "$location" |
+  local selection=()
+  while IFS='' read -r line; do
+    selection+=("$line")
+  done < <(fd-defaults --color=always -L -tf "$pattern" "$location" |
     fzf-defaults \
       --ansi \
       --cycle \
@@ -571,7 +587,8 @@ fed () {
       --preview-window '60%' \
       --preview "$fzf_preview_normal" \
       --header "(ctrl-/) Search in: $location" \
-      --query "$query"))
+      --query "$query")
+
   if [ -z "$selection" ]; then
     return
   fi
