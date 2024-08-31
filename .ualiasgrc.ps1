@@ -1865,12 +1865,18 @@ if ($IsWindows) {
 }
 
 function config () {
-  if (Test-Path -Path "$HOME/.config/$args" -PathType Container -ErrorAction SilentlyContinue) {
+  $first = $args[0]
+
+  if (!$first) {
+    Push-Location "$HOME/.config"
+    fed '.'
+    Pop-Location
+  } elseif (Test-Path -Path "$HOME/.config/$first" -PathType Container -ErrorAction SilentlyContinue) {
     Set-Location "$HOME/.config/$args"
-  } elseif (Test-Path -Path "$HOME/.config/$args" -PathType Leaf -ErrorAction SilentlyContinue) {
-    & $env:PREFERRED_EDITOR "$HOME/.config/$1"
+  } elseif (Test-Path -Path "$HOME/.config/$first" -PathType Leaf -ErrorAction SilentlyContinue) {
+    & $env:PREFERRED_EDITOR "$HOME/.config/$first"
   } else {
-    Write-Output "$1 does not exist in the .config directory."
+    Write-Output "$first does not exist in the .config directory."
   }
 }
 

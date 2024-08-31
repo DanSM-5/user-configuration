@@ -2196,7 +2196,11 @@ themes_vivid () {
 }
 
 config () {
-  if [ -d "$HOME/.config/$1" ]; then
+  if [ -z "$*" ]; then
+    pushd "$HOME/.config" || return
+    fed '.'
+    popd || return
+  elif [ -d "$HOME/.config/$1" ]; then
     cd "$HOME/.config/$1" || return
   elif [ -f "$HOME/.config/$1" ]; then
     "$PREFERRED_EDITOR" "$HOME/.config/$1"
