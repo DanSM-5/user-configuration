@@ -94,6 +94,11 @@ show_image () {
     return
   fi
 
+  if [ "$TERM_PROGRAM" = 'WezTerm' ]; then
+    chafa -f sixels --polite on -s "$IMAGE_SIZE" "$thumbnail" 2>/dev/null
+    return
+  fi
+
   if [ "$TERM_PROGRAM" = 'vscode' ] || [ "$IS_WINDOWS" = true ]; then
     chafa -f sixels --colors=full --polite=on --animate=off -s "$IMAGE_SIZE" "$thumbnail" 2>/dev/null ||
       chafa -s "$IMAGE_SIZE" --animate=off "$thumbnail" 2>/dev/null
