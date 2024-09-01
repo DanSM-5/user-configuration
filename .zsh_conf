@@ -105,7 +105,7 @@ bindkey "^[[1;5D" backward-word
 if [ "$IS_MAC" = true ]; then
   terminal_type="$([ -z "$TERM_PROGRAM" ] && echo "$TERM" || echo "$TERM_PROGRAM")"
   case "$terminal_type" in
-    *kitty)
+    *kitty|WezTerm*)
       # kitty (alt-[left|right])
       bindkey "\e[1;3D" backward-word # ⌥←
       bindkey "\e[1;3C" forward-word # ⌥→
