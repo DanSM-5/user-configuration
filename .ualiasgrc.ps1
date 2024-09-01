@@ -1066,10 +1066,13 @@ function ntmp {
 
 function ntxt ([String] $filename = '') {
   $filename = if ($filename) { $filename } else { "tmp-$(New-Guid).md" }
+  $filename = "${env:prj}${dirsep}txt${dirsep}${filename}"
+  $dirlocation = [System.IO.Path]::GetDirectoryName($filename)
+
   $editor = if ($env:PREFERRED_EDITOR) { $env:PREFERRED_EDITOR } else { vim }
-  $prj_dir = "${env:prj}${dirsep}txt"
-  New-Item -Path $prj_dir -ItemType Directory -ea 0
-  & $editor "$prj_dir${dirsep}$filename"
+  New-Item -Path $dirlocation -ItemType Directory -ea 0
+
+  & $editor "$filename"
 }
 
 function ftxt () {

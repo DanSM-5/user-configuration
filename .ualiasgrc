@@ -425,7 +425,7 @@ fgrm () {
   while IFS='' read -r pathspec; do
     selection+=("$pathspec")
   done < <(fgf "${*:-}")
-  
+
   echo "Reverting: ${selection[*]}"
 
   # shellcheck disable=SC2128
@@ -1001,10 +1001,14 @@ ntmp () {
 }
 
 ntxt () {
-  local filename
+  local filename dirlocation
+
   filename="${*:-tmp-$(uuidgen 2>/dev/null || date +%d-%m-%Y_%H-%M-%S).md}"
-  mkdir -p "$prj/txt"
-  "${PREFERRED_EDITOR:-vim}" "$prj/txt/$filename"
+  filename="$prj/txt/$filename"
+  dirlocation="${filename%/*}"
+  mkdir -p "$dirlocation"
+
+  "${PREFERRED_EDITOR:-vim}" "$filename"
 }
 
 ftxt () {
