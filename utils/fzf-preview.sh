@@ -86,15 +86,21 @@ show_image () {
     # 2. The last line of the output is the ANSI reset code without newline.
     #    This confuses fzf and makes it render scroll offset indicator.
     #    So we remove the last line and append the reset code to its previous line.
+
+    IMAGE_SIZE="${PREVIEW_WIDTH:-50}x${PREVIEW_HEIGHT:-50}@${PREVIEW_CORDX:-0}x${PREVIEW_CORDY:-0}"
+
     kitty icat --clear --transfer-mode=stream \
       --unicode-placeholder --stdin=no \
-      --place="$IMAGE_SIZE@0x0" "$thumbnail" |
+      --place="$IMAGE_SIZE" "$thumbnail" |
         sed '$d' | sed $'$s/$/\e[m/'
 
-    # TODO: Test later
-    # kitty +kitten icat --silent --stdin no \
+    # TODO: Create a handler for lf?
+    # Ref: https://github.com/gokcehan/lf/wiki/Previews#with-kitty-and-pistol
+    # Kitty needs to use a cleaner script and do some tty redirection.
+    #
+    # kitty icat --clear --silent --stdin no \
     #   --unicode-placeholder \
-    #   --transfer-mode file --place "${IMAGE_SIZE}@0x0" "$thumbnail"
+    #   --transfer-mode stream --place "${IMAGE_SIZE}" "$thumbnail"
 
     return
   fi
