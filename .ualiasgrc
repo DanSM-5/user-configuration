@@ -248,9 +248,11 @@ gwc () {
 fwc () {
   local selection branch_name
 
-  while IFS='' read -r branch; do
-    selection="$branch"
-  done < <(fgb "${*:-}")
+  selection=$(fgb "${*:-}")
+
+  # while IFS='' read -r branch; do
+  #   selection="$branch"
+  # done < <(fgb "${*:-}")
 
   if [ -z "$selection" ]; then
     return
@@ -365,14 +367,16 @@ fshow() {
 
 fadd () {
   local selection
-  #   local ifsog="$IFS"
-  #   IFS="
-  # " selection=( $(fgf "${*:-}" | sed 's/^\"//' | sed 's/\"$//') )
-  #   IFS="$ifsog"
-  selection=()
-  while IFS='' read -r pathspec; do
-    selection+=("$pathspec")
-  done < <(fgf "${*:-}" | sed 's/^\"//' | sed 's/\"$//')
+  local ifsog="$IFS"
+  IFS="
+" selection=( $(fgf "${*:-}" | sed 's/^\"//' | sed 's/\"$//') )
+  IFS="$ifsog"
+
+  # selection=()
+  # while IFS='' read -r pathspec; do
+  #   selection+=("$pathspec")
+  # done < <(fgf "${*:-}" | sed 's/^\"//' | sed 's/\"$//')
+
   echo "${selection[@]}"
   # shellcheck disable=SC2128
   if [ -n "$selection" ]; then
@@ -382,14 +386,16 @@ fadd () {
 
 fpad () {
   local selection
-  #   local ifsog="$IFS"
-  #   IFS="
-  # " selection=( $(fgf "${*:-}" | sed 's/^\"//' | sed 's/\"$//') )
-  #   IFS="$ifsog"
-  selection=()
-  while IFS='' read -r pathspec; do
-    selection+=("$pathspec")
-  done < <(fgf "${*:-}" | sed 's/^\"//' | sed 's/\"$//')
+  local ifsog="$IFS"
+  IFS="
+" selection=( $(fgf "${*:-}" | sed 's/^\"//' | sed 's/\"$//') )
+  IFS="$ifsog"
+
+  # selection=()
+  # while IFS='' read -r pathspec; do
+  #   selection+=("$pathspec")
+  # done < <(fgf "${*:-}" | sed 's/^\"//' | sed 's/\"$//')
+
   echo "${selection[@]}"
   # shellcheck disable=SC2128
   if [ -n "$selection" ]; then
@@ -398,33 +404,40 @@ fpad () {
 }
 
 fco () {
-  # local selection=$(fgb "${*:-}")
   local selection
-  while IFS='' read -r branch_name; do
-    selection="$branch_name"
-  done < <(fgb "${*:-}")
+  selection=$(fgb "${*:-}")
+
+  # while IFS='' read -r branch_name; do
+  #   selection="$branch_name"
+  # done < <(fgb "${*:-}")
+
   if [ -n "$selection" ]; then
     git checkout "${selection//origin\//}"
   fi
 }
 
 fck () {
-  # local selection=$(fgb "${*:-}")
   local selection
-  while IFS='' read -r branch_name; do
-    selection="$branch_name"
-  done < <(fgb "${*:-}")
+  selection=$(fgb "${*:-}")
+
+  # while IFS='' read -r branch_name; do
+  #   selection="$branch_name"
+  # done < <(fgb "${*:-}")
+
   if [ -n "$selection" ]; then
-    git checkout "${selection//origin\//}"
+    echo "Selection: $selection"
+    # git checkout "${selection//origin\//}"
   fi
 }
 
 fgrm () {
-  # local selection=($(fgf "${*:-}"))
-  local selection=()
-  while IFS='' read -r pathspec; do
-    selection+=("$pathspec")
-  done < <(fgf "${*:-}")
+  local selection
+  selection=($(fgf "${*:-}"))
+
+  # local selection=()
+  # while IFS='' read -r pathspec; do
+  #   selection+=("$pathspec")
+  # done < <(fgf "${*:-}")
 
   echo "Reverting: ${selection[*]}"
 
@@ -435,23 +448,28 @@ fgrm () {
 }
 
 fmerge () {
-  # local selection=$(fgb "${*:-}")
   local selection
-  while IFS='' read -r branch_name; do
-    selection="$branch_name"
-  done < <(fgb "${*:-}")
+  selection=$(fgb "${*:-}")
+
+  # while IFS='' read -r branch_name; do
+  #   selection="$branch_name"
+  # done < <(fgb "${*:-}")
+
   echo "$selection"
+
   if [ -n "$selection" ]; then
     git merge "$selection"
   fi
 }
 
 fsa () {
-  # local selection=$(fgs "${*:-}")
   local selection
-  while IFS='' read -r stash_ref; do
-    selection="$stash_ref"
-  done < <(fgb "${*:-}")
+  selection=$(fgs "${*:-}")
+
+  # while IFS='' read -r stash_ref; do
+  #   selection="$stash_ref"
+  # done < <(fgb "${*:-}")
+
   if [ -n "$selection" ]; then
     git stash apply "$selection"
   fi
@@ -474,18 +492,18 @@ alias pvim="vim --clean"
 alias pnvim="nvim --clean"
 
 frm () {
-  local selection=()
-  # local selection=($(fd-defaults --color=always -tf -tl |
-  #   fzf-defaults --ansi --cycle --multi \
-  #     --preview-window '60%' \
-  #     --preview "$fzf_preview_normal"))
-
-  while IFS='' read -r to_rm_file; do
-    selection+=("$to_rm_file")
-  done < <(fd-defaults --color=always -tf -tl |
+  local selection
+  selection=($(fd-defaults --color=always -tf -tl |
     fzf-defaults --ansi --cycle --multi \
       --preview-window '60%' \
-      --preview "$fzf_preview_normal")
+      --preview "$fzf_preview_normal"))
+
+  # while IFS='' read -r to_rm_file; do
+  #   selection+=("$to_rm_file")
+  # done < <(fd-defaults --color=always -tf -tl |
+  #   fzf-defaults --ansi --cycle --multi \
+  #     --preview-window '60%' \
+  #     --preview "$fzf_preview_normal")
 
   # shellcheck disable=SC2128
   if [ -z "$selection" ]; then
@@ -496,18 +514,18 @@ frm () {
 }
 
 frdr () {
-  local selection=()
-  # selection=($(fd-defaults --color=always -td -d 1 |
-  #   fzf-defaults --ansi --cycle \
-  #     --preview-window '60%' \
-  #     --preview "$fzf_preview_normal"))
-
-  while IFS='' read -r dir_to_rm; do
-    selection+=("$dir_to_rm")
-  done < <(fd-defaults --color=always -td -d 1 |
+  local selection
+  selection=($(fd-defaults --color=always -td -d 1 |
     fzf-defaults --ansi --cycle \
       --preview-window '60%' \
-      --preview "$fzf_preview_normal")
+      --preview "$fzf_preview_normal"))
+
+  # while IFS='' read -r dir_to_rm; do
+  #   selection+=("$dir_to_rm")
+  # done < <(fd-defaults --color=always -td -d 1 |
+  #   fzf-defaults --ansi --cycle \
+  #     --preview-window '60%' \
+  #     --preview "$fzf_preview_normal")
 
   # shellcheck disable=SC2128
   if [ -z "$selection" ]; then
@@ -641,10 +659,8 @@ fed () {
     location="$HOME"
   fi
 
-  local selection=()
-  while IFS='' read -r line; do
-    selection+=("$line")
-  done < <(fd-defaults --color=always -L -tf "$pattern" "$location" |
+  local selection
+  selection=($(fd-defaults --color=always -L -tf "$pattern" "$location" |
     fzf-defaults \
       --ansi \
       --cycle \
@@ -652,8 +668,21 @@ fed () {
       --preview-window '60%' \
       --preview "$fzf_preview_normal" \
       --header "(ctrl-/) Search in: $location" \
-      --query "$query")
+      --query "$query"))
 
+  # while IFS='' read -r new_line; do
+  #   selection+=("$new_line")
+  # done < <(fd-defaults --color=always -L -tf "$pattern" "$location" |
+  #   fzf-defaults \
+  #     --ansi \
+  #     --cycle \
+  #     --multi \
+  #     --preview-window '60%' \
+  #     --preview "$fzf_preview_normal" \
+  #     --header "(ctrl-/) Search in: $location" \
+  #     --query "$query")
+
+  # shellcheck disable=SC2128
   if [ -z "$selection" ]; then
     return
   fi
@@ -1021,17 +1050,17 @@ ftxt () {
   fi
 
   pushd "$txt" &>/dev/null || return
-  # selected=($(fd --color=always -tf . |
-  #   fzf-defaults --ansi --cycle --multi \
-  #     --preview-window '60%' \
-  #     --preview "bat --style=full --color=always {}"))
-
-  while IFS='' read -r selected_file; do
-    selected+=("$selected_file")
-  done < <(fd --color=always -tf . |
+  selected=($(fd --color=always -tf . |
     fzf-defaults --ansi --cycle --multi \
       --preview-window '60%' \
-      --preview "bat --style=full --color=always {}")
+      --preview "bat --style=full --color=always {}"))
+
+  # while IFS='' read -r selected_file; do
+  #   selected+=("$selected_file")
+  # done < <(fd --color=always -tf . |
+  #   fzf-defaults --ansi --cycle --multi \
+  #     --preview-window '60%' \
+  #     --preview "bat --style=full --color=always {}")
 
   # shellcheck disable=SC2128
   if [ -z "$selected" ]; then
