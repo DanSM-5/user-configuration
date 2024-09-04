@@ -261,7 +261,11 @@ fwc () {
   # Clean branch name
   branch_name="${selection//origin\//}"
 
-  gwc "$branch_name" --track
+  if [[ $selection =~ ^origin\/ ]]; then
+    gwc "$branch_name" --track
+  else
+    gwc "$branch_name"
+  fi
 }
 
 fwr () {
