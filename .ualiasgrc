@@ -425,8 +425,7 @@ fck () {
   # done < <(fgb "${*:-}")
 
   if [ -n "$selection" ]; then
-    echo "Selection: $selection"
-    # git checkout "${selection//origin\//}"
+    git checkout "${selection//origin\//}"
   fi
 }
 
