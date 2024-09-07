@@ -1775,7 +1775,7 @@ function rupdate () {
     Write-Output "Repo: $repo"
     $remote = (((git remote -v)[0]).Split())[1]
     Write-Output "Remote: $remote"
-    git fetch && git pull --rebase --color=always
+    git fetch && git pull --rebase
     Pop-Location *> $null || return
   }
 }
