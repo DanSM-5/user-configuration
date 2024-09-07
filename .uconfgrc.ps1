@@ -168,6 +168,11 @@ if (Test-Command fzf) {
   $env:FZF_CTRL_R_OPTS = "
     --history=$SHOME/.cache/fzf-history/fzf-history-ctrlr
     --preview 'pwsh -NoLogo -NonInteractive -NoProfile -File ${env:user_conf_path}${dirsep}utils${dirsep}log-helper.ps1 {}' --preview-window up:3:hidden:wrap
+    --bind 'alt-a:select-all'
+    --bind 'alt-d:deselect-all'
+    --bind 'alt-f:first'
+    --bind 'alt-l:last'
+    --bind 'alt-c:clear-query'
     --bind 'ctrl-/:toggle-preview,ctrl-s:toggle-sort'
     --bind 'ctrl-y:execute-silent(pwsh -NoLogo -NonInteractive -NoProfile -File ${env:user_conf_path}${dirsep}utils${dirsep}copy-helper.ps1 {})+abort'
     --color header:italic
@@ -208,6 +213,11 @@ if (Test-Command fzf) {
     --color header:italic
     --preview-window '60%'
     --preview 'pwsh -NoProfile -NonInteractive -NoLogo -File $fzfPreviewScript " + ". {}'
+    --bind 'alt-a:select-all'
+    --bind 'alt-d:deselect-all'
+    --bind 'alt-f:first'
+    --bind 'alt-l:last'
+    --bind 'alt-c:clear-query'
     --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort'"
 
   Remove-Variable SHOME
