@@ -13,7 +13,16 @@ is_in_git_repo() {
 fzf-down() {
   fzf --height 50% \
     --min-height 20 \
-    --bind "ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort" \
+    --info=inline \
+    --cycle \
+    --layout=reverse \
+    --bind 'alt-f:first' \
+    --bind 'alt-l:last' \
+    --bind 'alt-c:clear-query' \
+    --bind 'ctrl-/:change-preview-window(down|hidden|)' \
+    --bind 'alt-up:preview-page-up' \
+    --bind 'alt-down:preview-page-down' \
+    --bind 'ctrl-s:toggle-sort' \
     --border "$@"
 }
 
@@ -29,6 +38,7 @@ fgf () {
   git -c color.status=always status --short |
   fzf-down -m --ansi --nth 2..,.. \
     --query "$INITIAL_QUERY" \
+    --preview-window '60%' \
     --preview "selected=\$(printf '%s' {2..} | sed 's/^\"//' | sed 's/\"$//') ; if [ -f \"\$selected\" ]; then
         git diff --color=always -- \"\$selected\"""$__page_command__"' |
           sed 1,4d |

@@ -17,8 +17,13 @@ function get_fzf_down_options() {
   $options = @(
     '--height', '50%',
     '--min-height', '20',
+    '--info=inline',
+    '--cycle',
     '--layout=reverse',
     '--border',
+    '--bind', 'alt-f:first',
+    '--bind', 'alt-l:last',
+    '--bind', 'alt-c:clear-query',
     '--bind', 'ctrl-/:change-preview-window(down|hidden|)',
     '--bind', 'alt-up:preview-page-up',
     '--bind', 'alt-down:preview-page-down',
@@ -56,6 +61,7 @@ function fgf () {
   $down_options = get_fzf_down_options
   $cmd_options = @(
     "--query=$query",
+    '--preview-window', '60%',
     '--multi',
     '--ansi',
     '--nth', '2..,..',
@@ -101,7 +107,8 @@ function fgb () {
     "--query=$query",
     '--multi',
     '--ansi',
-    '--tac'
+    '--tac',
+    '--preview-window', 'right:70%',
     '--preview', $preview
   )
 
