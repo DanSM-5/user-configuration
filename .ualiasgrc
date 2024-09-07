@@ -2271,10 +2271,11 @@ rupdate () {
       continue
     fi
 
-    pushd "$repo" || return
-    printf "%s\n" "Updating repo: $repo"
-    git fetch && git pull --rebase
-    popd || return
+    pushd "$repo" &>/dev/null || return
+    printf "%s\n" "Repo: $repo"
+    printf "%s\n" "Remote: $(git remote -v | awk 'NR == 1 {print $2}')"
+    git fetch --color=always && git pull --rebase --color=always
+    popd &>/dev/null || return
   done
 }
 
