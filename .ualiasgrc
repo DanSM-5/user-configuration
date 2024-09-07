@@ -2274,7 +2274,7 @@ rupdate () {
     pushd "$repo" &>/dev/null || return
     printf "%s\n" "Repo: $repo"
     printf "%s\n" "Remote: $(git remote -v | awk 'NR == 1 {print $2}')"
-    git fetch --color=always && git pull --rebase --color=always
+    git fetch && git pull --rebase --color=always
     popd &>/dev/null || return
   done
 }
