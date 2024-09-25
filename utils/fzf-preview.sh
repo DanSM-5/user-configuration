@@ -191,7 +191,7 @@ if [ -f "$path" ]; then
     # SVG
     image/svg+xml*)
       mkdir -p "$TEMP_DIR"
-      magick convert "$path" "$thumbnail"
+      magick "$path" "$thumbnail"
       show_image "$thumbnail" || printf '%s\n' 'Error previewing the SVG'
       ;;
     # Images
@@ -270,7 +270,7 @@ if [ -f "$path" ]; then
             ;;
         *.svg)
           mkdir -p "$TEMP_DIR"
-          magick convert "$path" "$thumbnail"
+          magick "$path" "$thumbnail"
           show_image "$thumbnail" || printf '%s\n' 'Error previewing the SVG'
           ;;
         *.md)

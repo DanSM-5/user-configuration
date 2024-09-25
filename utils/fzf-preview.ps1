@@ -162,7 +162,7 @@ elseif ((Test-Path $path -PathType leaf) -or (eza -l $path *> $null && $true)) {
     # SVG
     "^image\/svg\+xml.*" {
       New-Item $TEMP_DIR -ItemType Directory -ea 0
-      magick convert "$path" "$thumbnail"
+      magick "$path" "$thumbnail"
       show_image "$thumbnail" Write-Output 'Error previewing the SVG'
       break
     }
@@ -254,7 +254,7 @@ elseif ((Test-Path $path -PathType leaf) -or (eza -l $path *> $null && $true)) {
         }
         ".*\.svg$" {
           New-Item $TEMP_DIR -ItemType Directory -ea 0
-          magick convert "$path" "$thumbnail"
+          magick "$path" "$thumbnail"
           show_image "$thumbnail" 'Error previewing the SVG'
           break
         }
