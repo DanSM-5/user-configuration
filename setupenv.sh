@@ -130,7 +130,11 @@ if [ "$SETUP_VIM_CONFIG" = 'true' ]; then
   # vim -es -u vimrc -i NONE -c "PlugInstall" -c "qa"
 
   # # neovim
+  # VimPlug
   # nvim -es -u init.vim -i NONE -c "PlugInstall" -c "qa"
+  # hvim +PlugUpdate +sleep1000m +exit
+  # Lazy.vim
+  nvim --headless "+Lazy! sync" +qa
 
   popd 2> /dev/null
 fi

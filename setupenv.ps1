@@ -101,13 +101,17 @@ if ($IsWindows) {
     Push-Location "$SHOME/.config/kitty"
     git clone 'https://github.com/yurikhan/kitty_grab.git'
     Pop-Location
+  }
 }
 
 if ($setup_vim_config) {
   Push-Location "$HOME/vim-config" *> $null
 
   # TODO: Add a ps1 install script in vim-config
-  $gitbash = "$(where.exe env | Select-String 'Git\\usr\\bin\\env')"
+  $gitbash = (where.exe bash | Select-String 'Git\\usr\\bin\\bash').ToString()
+  if (!$gitbash.EndsWith('bash.exe')) {
+    return
+  }
   # Install the config
   & $gitbash ./install.sh
 
@@ -118,6 +122,8 @@ if ($setup_vim_config) {
 
   # # neovim
   # nvim -es -u init.vim -i NONE -c "PlugInstall" -c "qa"
+  # Lazy.nvim
+  nvim --headless "+Lazy! sync" +qa
 
   Pop-Location *> $null
 }
