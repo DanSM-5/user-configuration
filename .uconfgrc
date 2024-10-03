@@ -436,8 +436,8 @@ set_general_after () {
   fi
 
   if command_exists fd; then
-    export FZF_CTRL_T_COMMAND="fd --color=always ${FD_SHOW_OPTIONS[@]} ${FD_EXCLUDE_OPTIONS[@]}"
-    export FZF_ALT_C_COMMAND="fd --color=always --type directory ${FD_SHOW_OPTIONS[@]} ${FD_EXCLUDE_OPTIONS[@]}"
+    export FZF_CTRL_T_COMMAND="fd --color=always ${FD_SHOW_OPTIONS[*]} ${FD_EXCLUDE_OPTIONS[*]}"
+    export FZF_ALT_C_COMMAND="fd --color=always --type directory ${FD_SHOW_OPTIONS[*]} ${FD_EXCLUDE_OPTIONS[*]}"
 
     # Use fd (https://github.com/sharkdp/fd) instead of the default find
     # command for listing path candidates.
