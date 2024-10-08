@@ -133,7 +133,6 @@ function Get-EditorLaunch() {
       }
 "@
   } elseif ($editor -eq 'code' -or $editor -eq 'code-insiders' -or $editor -eq 'codium') {
-    $goto = '"{1}:{2}"'
     return @"
       if (`$env:FZF_SELECT_COUNT -eq 0) {
         `$file = {1};
@@ -192,7 +191,6 @@ function Invoke-PsFzfRipgrep() {
       "rg --column --line-number --no-heading --color=always --smart-case --no-ignore --glob !.git --glob !node_modules --hidden "
     }
     $INITIAL_QUERY = $SearchString
-    $results = ''
     $originalFzfDefaultCommand = $env:FZF_DEFAULT_COMMAND
     # $editor = if ($PREFERRED_EDITOR) { $PREFERRED_EDITOR } elseif ($EDITOR) { $EDITOR } else { nvim }
 
