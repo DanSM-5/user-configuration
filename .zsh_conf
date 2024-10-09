@@ -94,7 +94,7 @@ zle -N self-insert url-quote-magic
 
 # Additional options
 setopt interactive_comments
-setopt extended_glob
+# setopt extended_glob
 
 # Keybinding for delete key
 bindkey "^[[3~" delete-char
