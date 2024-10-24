@@ -75,6 +75,11 @@ if [ "$VSCODE_NVIM" = true ]; then
   return 0
 fi
 
+if [ "$VSCODE_DEBUG" = true ]; then
+  source "$HOME/.usr_conf/utils/vscode_debug_conf.sh"
+  return 0
+fi
+
 # Handle Find it faster vscode extension
 if [ "$FIND_IT_FASTER_ACTIVE" = 1 ]; then
   printf "No need to source from here"
