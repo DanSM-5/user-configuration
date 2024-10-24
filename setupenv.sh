@@ -30,17 +30,19 @@ declare -A repos=(
   ["$mpv_location"]="$remote_url/mpv-conf"
 )
 
+# INFO: external scripts have been changed into submodules
 # Repos that should be clonned within $HOME/user-scripts
-declare -A user_scripts=(
-  ["$HOME/user-scripts/ff2mpv"]="$remote_url/ff2mpv"
-)
+# declare -A user_scripts=(
+#   ["$HOME/user-scripts/ff2mpv"]="$remote_url/ff2mpv"
+# )
 
+# INFO: plugins have been changed into submodules
 # Repos that should be clonned within mpv/scripts
-declare -A mpv_plugins=(
-  ["$mpv_location/scripts/mpv_sponsorblock"]="$remote_url/mpv_sponsorblock"
-  ["$mpv_location/scripts/mpv-gif-generator"]="$remote_url/mpv-gif-generator"
-  ["$mpv_location/scripts/file-browser"]="https://github.com/CogentRedTester/mpv-file-browser"
-)
+# declare -A mpv_plugins=(
+#   ["$mpv_location/scripts/mpv_sponsorblock"]="$remote_url/mpv_sponsorblock"
+#   ["$mpv_location/scripts/mpv-gif-generator"]="$remote_url/mpv-gif-generator"
+#   ["$mpv_location/scripts/file-browser"]="https://github.com/CogentRedTester/mpv-file-browser"
+# )
 
 try_clone () {
   local location="$1"
@@ -48,7 +50,7 @@ try_clone () {
 
   # Only clone if dir doesn't exist already
   if ! [ -d "$location" ]; then
-    git clone "$repo" "$location"
+    git clone --recurse-submodules "$repo" "$location"
   else
     printf '%s\n' "Repo: $repo already exist in $location"
   fi
@@ -67,8 +69,8 @@ process_list () {
 }
 
 process_list repos
-process_list user_scripts
-process_list mpv_plugins
+# process_list user_scripts
+# process_list mpv_plugins
 
 
 if [ "$windows" = true ]; then

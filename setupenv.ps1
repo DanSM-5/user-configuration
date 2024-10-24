@@ -25,17 +25,19 @@ $repos = @{
   "$mpv_location" = "$remote_url/mpv-conf";
 }
 
+# INFO: external scripts have been changed into submodules
 # Repos that should be clonned within $HOME/user-scripts
-$user_scripts = @{
-  "$SHOME/user-scripts/ff2mpv" = "$remote_url/ff2mpv";
-}
+# $user_scripts = @{
+#   "$SHOME/user-scripts/ff2mpv" = "$remote_url/ff2mpv";
+# }
 
+# INFO: plugins have been changed into submodules
 # Repos that should be clonned within mpv/scripts
-$mpv_plugins = @{
-  "$mpv_location/scripts/mpv_sponsorblock" = "$remote_url/mpv_sponsorblock";
-  "$mpv_location/scripts/mpv-gif-generator" = "$remote_url/mpv-gif-generator";
-  "$mpv_location/scripts/file-browser" = "https://github.com/CogentRedTester/mpv-file-browser";
-}
+# $mpv_plugins = @{
+#   "$mpv_location/scripts/mpv_sponsorblock" = "$remote_url/mpv_sponsorblock";
+#   "$mpv_location/scripts/mpv-gif-generator" = "$remote_url/mpv-gif-generator";
+#   "$mpv_location/scripts/file-browser" = "https://github.com/CogentRedTester/mpv-file-browser";
+# }
 
 function try_clone ([string] $location, [string] $repo) {
 
@@ -43,7 +45,7 @@ function try_clone ([string] $location, [string] $repo) {
   if (Test-Path -Path $location -PathType Container -ErrorAction SilentlyContinue) {
     Write-Output "Repo: $repo already exist in $location"
   } else {
-    git clone "$repo" "$location"
+    git clone --recurse-submodules "$repo" "$location"
   }
 }
 
@@ -55,8 +57,8 @@ function process_list ([HashTable] $array) {
 }
 
 process_list $repos
-process_list $user_scripts
-process_list $mpv_plugins
+# process_list $user_scripts
+# process_list $mpv_plugins
 
 if ($IsWindows) {
   # Windows mpv reads from AppData/Roaming
