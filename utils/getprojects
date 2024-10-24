@@ -14,7 +14,14 @@ if [ -z "$base_dir" ]; then
   fi
 fi
 
-all_directories=()
+# all_directories=()
+
+is_gitbash=false
+case "$(uname -a)" in
+  MINGW*|MSYS*|CYGWIN*|*NT*)
+    is_gitbash=true
+    ;;
+esac
 
 help () {
   while IFS= read -r line; do
@@ -64,7 +71,7 @@ get_locations () {
       dir_path=$(eval "printf '%s' $dir 2>/dev/null" | sed -E 's/^[[:space:]]*//' | sed -E 's/[[:space:]]*$//')
       # Resolving paths takes around 300ms in gitbash
       # TODO: Investigate if this line can be safely removed
-      dir_path=$(realpath "$dir_path" 2>/dev/null)
+      [ "$is_gitbash" = false ] && dir_path=$(realpath "$dir_path" 2>/dev/null)
       [ -d "$dir_path" ] && printf "%s\n" "${dir_path%/}"
       # [ -d "$dir_path" ] && all_directories+=("${dir_path%/}")
     done < "$locations_file"
