@@ -8,8 +8,16 @@ $env:SETUP_TERMINAL = if ($env:SETUP_TERMINAL) { $env:SETUP_TERMINAL } else { 'f
 $env:USE_SSH_REMOTE = if ($env:USE_SSH_REMOTE) { $env:USE_SSH_REMOTE } else { 'true' }
 $env:SETUP_VIM_CONFIG = if ($env:SETUP_VIM_CONFIG) { $env:SETUP_VIM_CONFIG } else { 'true' }
 $setup_terminal = $env:SETUP_TERMINAL -eq 'true'
-$remote_url = if ($env:USE_SSH_REMOTE -eq 'true') { 'git@github-personal:DanSM-5' } else { 'https://github.com/DanSM-5' }
+$remote_url = 'https://github.com/DanSM-5'
 $setup_vim_config = $env:SETUP_VIM_CONFIG -eq 'true'
+
+if ($env:USE_SSH_REMOTE -eq 'true') {
+  $remote_url = 'git@github-personal:DanSM-5'
+} else {
+  # Force all submodules to be cloned by https
+  git config --global url."https://github.com/".insteadOf 'git@github.com:'
+  git config --global url."https://github.com/".insteadOf 'git@github-personal:'
+}
 
 try {
   New-Item -Path "$SHOME/.config" -ItemType Directory -ErrorAction SilentlyContinue

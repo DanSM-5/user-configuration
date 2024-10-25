@@ -16,6 +16,10 @@ fi
 
 if [ "$USE_SSH_REMOTE" = 'true' ]; then
   remote_url="git@github-personal:DanSM-5"
+else
+  # Force all submodules to be cloned by https
+  git config --global url."https://github.com/".insteadOf 'git@github.com:'
+  git config --global url."https://github.com/".insteadOf 'git@github-personal:'
 fi
 
 mpv_location="$HOME/.config/mpv"
