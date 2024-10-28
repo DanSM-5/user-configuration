@@ -80,8 +80,15 @@ function preview_directory () {
 
 function show_image ([string] $thumbnail, [string] $ErrorMessage) {
   $IMAGE_SIZE = if ($env:PREVIEW_IMAGE_SIZE) { $env:PREVIEW_IMAGE_SIZE } else { '50x50' }
+  $width = if ($env:PREVIEW_WIDTH) { $env:PREVIEW_WIDTH } else { '50' }
+  $height = if ($env:PREVIEW_HEIGHT) { $env:PREVIEW_HEIGHT } else { '50' }
+  $x = if ($env:PREVIEW_CORDX) { $env:PREVIEW_CORDX } else { '0' }
+  $y = if ($env:PREVIEW_CORDY) { $env:PREVIEW_CORDY } else { '0' }
+
 
   if ($env:KITTY_WINDOW_ID) {
+    $IMAGE_SIZE = "${width}x${height}@${x}x${y}"
+
     # if ($env:TERM -Match .+kitty) {
     # 1. 'memory' is the fastest option but if you want the image to be scrollable,
     #    you have to use 'stream'.
@@ -91,7 +98,7 @@ function show_image ([string] $thumbnail, [string] $ErrorMessage) {
     #    So we remove the last line and append the reset code to its previous line.
     kitty icat --clear --transfer-mode=stream `
       --unicode-placeholder --stdin=no `
-      --place="$IMAGE_SIZE@0x0" "$thumbnail" |
+      --place="$IMAGE_SIZE" "$thumbnail" |
         sed '$d' | sed $'$s/$/\e[m/' || Write-Host $ErrorMessage
 
     return
