@@ -102,9 +102,9 @@ __emoji__ () {
   READLINE_POINT=$(( READLINE_POINT + ${#selected} ))
 }
 
-bind -m emacs-standard -x '"\C-o\C-i": __emoji__'
-bind -m vi-command -x '"\C-o\C-i": __emoji__'
-bind -m vi-insert -x '"\C-o\C-i": __emoji__'
+bind -m emacs-standard -x '"\C-oi": __emoji__'
+bind -m vi-command -x '"\C-oi": __emoji__'
+bind -m vi-insert -x '"\C-oi": __emoji__'
 
 __cprj__ () {
   local dir
@@ -113,7 +113,7 @@ __cprj__ () {
   if [ -d "$dir" ]; then
     printf 'builtin cd -- %q' "$dir"
   elif [ -n "$dir" ]; then
-    printf '%s ' "${PREFERRED_EDITOR:-${EDITOR:-vim}} ${dir[@]}"
+    printf '%s ' "${PREFERRED_EDITOR:-${EDITOR:-vim}} ${dir[*]}"
   else
     printf ''
   fi

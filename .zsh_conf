@@ -165,9 +165,9 @@ __emoji__ () {
 }
 
 zle -N __emoji__
-bindkey -M emacs '^o^i' __emoji__
-bindkey -M vicmd '^o^i' __emoji__
-bindkey -M viins '^o^i' __emoji__
+bindkey -M emacs '^oi' __emoji__
+bindkey -M vicmd '^oi' __emoji__
+bindkey -M viins '^oi' __emoji__
 
 __cprj__ () {
   # Store current typed content

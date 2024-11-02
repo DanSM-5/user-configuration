@@ -419,7 +419,7 @@ function InvokePromptHack()
 	}
 }
 
-Set-PSReadLineKeyHandler -Chord 'ctrl+o,ctrl+i' -ScriptBlock {
+Set-PSReadLineKeyHandler -Chord 'ctrl+o,i' -ScriptBlock {
   $line = $cursor = $proc = $null
   # Get current content
   [Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref] $line, [ref] $cursor)
