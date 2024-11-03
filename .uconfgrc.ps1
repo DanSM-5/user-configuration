@@ -440,6 +440,14 @@ Set-PSReadLineKeyHandler -Chord 'ctrl+o,i' -ScriptBlock {
   }
 }
 
+if (Test-Command carapace) {
+  # ~/.config/powershell/Microsoft.PowerShell_profile.ps1
+  $env:CARAPACE_BRIDGES = 'zsh,fish,bash,inshellisense' # optional
+  Set-PSReadLineOption -Colors @{ "Selection" = "`e[7m" }
+  Set-PSReadlineKeyHandler -Key Tab -Function MenuComplete
+  carapace _carapace | Out-String | Invoke-Expression
+}
+
 $addlast = ""
 $addfirst = ""
 $userscriptbin = "${env:user_scripts_path}${dirsep}bin"

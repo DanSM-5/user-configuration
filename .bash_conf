@@ -213,3 +213,9 @@ if [ -f "$user_config_cache/plugins/fzf-tab-completion/bash/fzf-bash-completion.
   bind -x '"\t": fzf_bash_completion'
 fi
 
+if command -v carapace &>/dev/null; then
+  # ~/.bashrc
+  export CARAPACE_BRIDGES='zsh,fish,bash,inshellisense' # optional
+  source <(carapace _carapace)
+fi
+
