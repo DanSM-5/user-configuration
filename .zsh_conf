@@ -306,7 +306,7 @@ elif [ -f "$user_config_cache/plugins/zsh-syntax-highlighting/zsh-syntax-highlig
   source "$user_config_cache/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 fi
 
-if command -v carapace &>/dev/null; then
+if command -v carapace &>/dev/null && [ "$IS_GITBASH" = false ]; then
   # ~/.zshrc
   export CARAPACE_BRIDGES='zsh,fish,bash,inshellisense' # optional
   zstyle ':completion:*' format $'\e[2;37mCompleting %d\e[m'
