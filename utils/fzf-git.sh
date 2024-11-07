@@ -4,8 +4,6 @@
 
 # Ref: https://gist.github.com/junegunn/8b572b8d4b5eddd8b85e5f4d40f17236
 
-path_preview_script="$user_conf_path/utils/fzf-preview.sh"
-
 is_in_git_repo() {
   git rev-parse HEAD > /dev/null 2>&1
 }
@@ -35,9 +33,11 @@ fi
 fgf () {
   is_in_git_repo || return
   local INITIAL_QUERY="${*:-}"
+  local path_preview_script="$user_conf_path/utils/fzf-preview.sh"
   git -c color.status=always status --short |
   fzf-down -m --ansi --nth 2..,.. \
     --query "$INITIAL_QUERY" \
+    "--history=$FZF_HIST_DIR/fzf-git_file" \
     --preview-window '60%' \
     --preview "selected=\$(printf '%s' {2..} | sed 's/^\"//' | sed 's/\"$//') ; if [ -f \"\$selected\" ]; then
         git diff --color=always -- \"\$selected\"""$__page_command__"' |
@@ -58,6 +58,7 @@ fgb () {
   fzf-down --ansi --multi --tac \
     --preview-window right:70% \
     --query "$INITIAL_QUERY" \
+    "--history=$FZF_HIST_DIR/fzf-git_branch" \
     --preview '
       git log --oneline --graph --date=short --color=always --pretty="format:%C(auto)%cd %h%d %s" $(sed s/^..// <<< {} | cut -d" " -f1)' |
   sed 's/^..//' | cut -d' ' -f1 |
@@ -84,6 +85,7 @@ fgh () {
     --graph --color=always |
   fzf-down --ansi --no-sort --reverse --multi \
     --query "$INITIAL_QUERY" \
+    "--history=$FZF_HIST_DIR/fzf-git_hash" \
     --header 'Press CTRL-S to toggle sort' \
     --preview '
       grep -o "[a-f0-9]\{7,\}" <<< {} |
@@ -101,6 +103,7 @@ fgha () {
     --graph --color=always |
   fzf-down --ansi --no-sort --reverse --multi \
     --query "$INITIAL_QUERY" \
+    "--history=$FZF_HIST_DIR/fzf-git_hash-all" \
     --header 'Press CTRL-S to toggle sort' \
     --preview '
       grep -o "[a-f0-9]\{7,\}" <<< {} |
@@ -115,6 +118,7 @@ fgr () {
   git remote -v | awk '{print $1 "\t" $2}' | uniq |
   fzf-down --tac \
     --query "$INITIAL_QUERY" \
+    "--history=$FZF_HIST_DIR/fzf-git_remote" \
     --preview '
       git log --color=always --oneline --graph --date=short --pretty="format:%C(auto)%cd %h%d %s" {1}' |
   cut -d$'\t' -f1
@@ -125,6 +129,7 @@ fgs () {
   local INITIAL_QUERY="${*:-}"
   git stash list |
     fzf-down --reverse -d: \
+      "--history=$FZF_HIST_DIR/fzf-git_stash" \
       --preview '
         git show --color=always {1}'"$__page_command__"' |
           bat -p --color=always' \
@@ -132,3 +137,4 @@ fgs () {
   cut -d: -f1
   # git stash list | fzf-down --reverse -d: --preview 'git show --color=always {1}' |
 }
+

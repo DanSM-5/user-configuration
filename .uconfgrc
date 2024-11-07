@@ -351,10 +351,12 @@ set_general_after () {
       SHOME="$HOME"
     fi
 
-    [ ! -d "$SHOME/.cache/fzf-history" ] && mkdir -p "$SHOME/.cache/fzf-history"
+    export FZF_HIST_DIR="$SHOME/.cache/fzf-history"
+
+    [ ! -d "$FZF_HIST_DIR" ] && mkdir -p "$FZF_HIST_DIR"
 
     FZF_DEFAULT_OPTS="
-      --history=$SHOME/.cache/fzf-history/fzf-history-default
+      --history=$FZF_HIST_DIR/fzf-history-default
       --height 80%
       --layout=reverse
       --border
@@ -376,7 +378,7 @@ set_general_after () {
     # CTRL-/ to toggle small preview window to see the full command
     # CTRL-Y to copy the command into clipboard using pbcopy
     export FZF_CTRL_R_OPTS="
-      --history=$SHOME/.cache/fzf-history/fzf-history-ctrlr
+      --history=$FZF_HIST_DIR/fzf-history-ctrlr
       --preview 'bat --color=always -pp --language bash <<< {2..}' --preview-window up:3:hidden:wrap
       --bind 'alt-a:select-all'
       --bind 'alt-d:deselect-all'
@@ -392,7 +394,7 @@ set_general_after () {
 
     # Print tree structure in the preview window
     export FZF_ALT_C_OPTS="
-      --history=$SHOME/.cache/fzf-history/fzf-history-altc
+      --history=$FZF_HIST_DIR/fzf-history-altc
       --prompt 'CD> '
       --color header:italic
       --ansi
@@ -406,7 +408,7 @@ set_general_after () {
       --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort'"
 
     export FZF_CTRL_T_OPTS="
-      --history=$SHOME/.cache/fzf-history/fzf-history-ctrlt
+      --history=$FZF_HIST_DIR/fzf-history-ctrlt
       --multi
       --ansi --cycle
       --header 'ctrl-a: All | ctrl-d: Dirs | ctrl-f: Files | ctrl-y: Copy | ctrl-t: CWD | ctrl-o: Open'

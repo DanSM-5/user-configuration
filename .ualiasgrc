@@ -346,6 +346,7 @@ fshow() {
       git log --graph --color=always \
           --format="%C(auto)%h%d %s %C(black)%C(bold)%cr" "$@" |
       fzf --ansi --multi --no-sort --reverse --query="$q" \
+          "--history=$FZF_HIST_DIR/fzf-git_show" \
           --print-query --expect=ctrl-d --bind=ctrl-s:toggle-sort); do
     q=$(head -1 <<< "$out")
     k=$(head -2 <<< "$out" | tail -1)
@@ -911,6 +912,7 @@ cprj () {
 
   local selection=($(printf "%s\n" "${directories[@]}" |
     fzf-defaults \
+      "--history=$FZF_HIST_DIR/fzf-change-prj" \
       --no-multi \
       --ansi --cycle \
       --info=inline \

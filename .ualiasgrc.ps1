@@ -461,6 +461,7 @@ function cprj ([Switch] $Raw) {
   $selection = @(
     $directories |
       fzf @options `
+        --history="$env:FZF_HIST_DIR/fzf-change-prj" `
         --no-multi `
         --ansi --cycle `
         --info=inline `

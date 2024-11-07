@@ -150,13 +150,14 @@ $FD_OPTIONS = "$env:FD_SHOW_OPTIONS $env:FD_EXCLUDE_OPTIONS"
 
 if (Test-Command fzf) {
   $SHOME = $HOME.Replace('\', '/')
+  $env:FZF_HIST_DIR = "$SHOME/.cache/fzf-history" 
 
-  if (!(Test-Path -PathType Container -Path "$SHOME/.cache/fzf-history" -ErrorAction SilentlyContinue)) {
-    New-Item -Path "$SHOME/.cache/fzf-history" -ItemType Directory -ErrorAction SilentlyContinue
+  if (!(Test-Path -PathType Container -Path $env:FZF_HIST_DIR -ErrorAction SilentlyContinue)) {
+    New-Item -Path $env:FZF_HIST_DIR -ItemType Directory -ErrorAction SilentlyContinue
   }
 
   $env:FZF_DEFAULT_OPTS="
-    --history=$SHOME/.cache/fzf-history/fzf-history-default
+    --history=$env:FZF_HIST_DIR/fzf-history-default
     --height 80%
     --layout=reverse
     --border
@@ -166,7 +167,7 @@ if (Test-Command fzf) {
   "
 
   $env:FZF_CTRL_R_OPTS = "
-    --history=$SHOME/.cache/fzf-history/fzf-history-ctrlr
+    --history=$env:FZF_HIST_DIR/fzf-history-ctrlr
     --preview 'pwsh -NoLogo -NonInteractive -NoProfile -File ${env:user_conf_path}${dirsep}utils${dirsep}log-helper.ps1 {}' --preview-window up:3:hidden:wrap
     --bind 'alt-a:select-all'
     --bind 'alt-d:deselect-all'
@@ -185,7 +186,7 @@ if (Test-Command fzf) {
   # --with-shell 'pwsh -NoLogo -NonInteractive -NoProfile -C'
   # It fails in preview script with multi word files unlike current implementation
   $env:FZF_CTRL_T_OPTS = "
-    --history=$SHOME/.cache/fzf-history/fzf-history-ctrlt
+    --history=$env:FZF_HIST_DIR/fzf-history-ctrlt
     --multi
     --ansi --cycle
     --header 'ctrl-a: All | ctrl-d: Dirs | ctrl-f: Files | ctrl-y: Copy | ctrl-t: CWD'
@@ -207,7 +208,7 @@ if (Test-Command fzf) {
     --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort'"
 
   $env:FZF_ALT_C_OPTS = "
-    --history=$SHOME/.cache/fzf-history/fzf-history-altc
+    --history=$env:FZF_HIST_DIR/fzf-history-altc
     --ansi
     --prompt 'CD> '
     --color header:italic

@@ -61,6 +61,7 @@ function fgf () {
   $down_options = get_fzf_down_options
   $cmd_options = @(
     "--query=$query",
+    "--history=$env:FZF_HIST_DIR/fzf-git_file",
     '--preview-window', '60%',
     '--multi',
     '--ansi',
@@ -105,6 +106,7 @@ function fgb () {
   $down_options = get_fzf_down_options
   $cmd_options = @(
     "--query=$query",
+    "--history=$env:FZF_HIST_DIR/fzf-git_branch",
     '--multi',
     '--ansi',
     '--tac',
@@ -148,6 +150,7 @@ function fgt () {
   $down_options = get_fzf_down_options
   $cmd_options = @(
     "--query=$query",
+    "--history=$env:FZF_HIST_DIR/fzf-git_tag",
     '--multi',
     '--preview-window', 'right:70%',
     '--preview', $preview
@@ -192,6 +195,7 @@ function fgh () {
   $down_options = get_fzf_down_options
   $cmd_options = @(
     "--query=$query",
+    "--history=$env:FZF_HIST_DIR/fzf-git_hash",
     '--ansi',
     '--no-sort',
     '--reverse',
@@ -245,6 +249,7 @@ function fgha () {
   $down_options = get_fzf_down_options
   $cmd_options = @(
     "--query=$query",
+    "--history=$env:FZF_HIST_DIR/fzf-git_hash-all",
     '--ansi',
     '--no-sort',
     '--reverse',
@@ -278,6 +283,7 @@ function fgr () {
   $down_options = get_fzf_down_options
   $cmd_options = @(
     "--query=$query",
+    "--history=$env:FZF_HIST_DIR/fzf-git_remotes",
     '--tac',
     '--preview', $preview
   )
@@ -307,6 +313,7 @@ function fgs () {
   $down_options = get_fzf_down_options
   $cmd_options = @(
     "--query=$query",
+    "--history=$env:FZF_HIST_DIR/fzf-git_stash",
     '--reverse',
     '--delimiter', ':',
     '--preview', $preview
@@ -344,6 +351,7 @@ function fshow () {
 
   $down_options = get_fzf_down_options
   $cmd_options = @(
+    "--history=$env:FZF_HIST_DIR/fzf-git_show",
     '--query=',
     '--ansi',
     '--multi',
@@ -384,3 +392,4 @@ function fshow () {
 }
 
 # Export-ModuleMember -Function fgb
+
