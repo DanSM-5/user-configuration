@@ -22,7 +22,6 @@ alias gvc="cd '$HOME/vim-config'"
 # shellcheck disable=SC2139
 alias goh="cd '$HOME'"
 
-export uprf="$HOME/.profile"
 uconf="$user_conf_path/.uconfrc"
 uconfg="$user_conf_path/.uconfgrc"
 ualias="$user_conf_path/.ualiasrc"
@@ -996,11 +995,11 @@ up () {
 }
 
 # Sourcing
-alias spf="source $HOME/.${SHELL_NAME}rc || source .profile || echo 'Source profile encountered an error'"
-alias scfg="source $user_conf_path/.uconfrc"
-alias sgcf="source $user_conf_path/.uconfgrc"
-alias sals="source $user_conf_path/.ualiasrc"
-alias sgal="source $user_conf_path/.ualiasgrc"
+alias spf="source '$HOME/.${SHELL_NAME}rc' || source '$HOME/.profile' || echo 'Source profile encountered an error'"
+alias scfg="source '$user_conf_path/.uconfrc'"
+alias sgcf="source '$user_conf_path/.uconfgrc'"
+alias sals="source '$user_conf_path/.ualiasrc'"
+alias sgal="source '$user_conf_path/.ualiasgrc'"
 
 if [ "$IS_GITBASH" = true ]; then
   if [ "$IS_ZSH" = true ]; then
