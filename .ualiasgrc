@@ -912,7 +912,7 @@ cprj () {
 
   local selection=($(printf "%s\n" "${directories[@]}" |
     fzf-defaults \
-      "--history=$FZF_HIST_DIR/fzf-change-prj" \
+      "--history=$FZF_HIST_DIR/cprj" \
       --no-multi \
       --ansi --cycle \
       --info=inline \
