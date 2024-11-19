@@ -220,6 +220,10 @@ set_general () {
     export PATH="$HOME/.cargo/bin:$PATH"
   fi
 
+  if command_exists go; then
+    export PATH="$HOME/go/bin:$PATH"
+  fi
+
   # To install useful key bindings and fuzzy completion:
   # $(brew --prefix)/opt/fzf/install # call only once
   # case $SHELL_NAME in
