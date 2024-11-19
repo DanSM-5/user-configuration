@@ -488,6 +488,16 @@ set_general_after () {
 
   fi
 
+  if [ -z "$PNPM_HOME" ]; then
+    # pnpm
+    export PNPM_HOME="$HOME/.local/share/pnpm"
+    case ":$PATH:" in
+      *":$PNPM_HOME:"*) ;;
+      *) export PATH="$PNPM_HOME:$PATH" ;;
+    esac
+    # pnpm end
+  fi
+
   # User scripts bin should be the bottom of the path as a safer location to add binaries or scripts
   if [ -d "$user_scripts_path/bin" ] && ! command -v 'path_end' &> /dev/null; then
     PATH="$PATH:$user_scripts_path/bin"
