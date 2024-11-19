@@ -34,10 +34,12 @@
 # 	epub2txt "$1" | head -n 1000 2>/dev/null
 # 	;;
 
-path="$@"
+path="$*"
 
 # NOTE: Remove ' -> ' from symlins for eza until '-X' is fixed
 path="$(printf '%s' "$path" | sed 's| ->.*||')"
+# Trim
+path="$(printf '%s' "$path" | xargs)"
 
 # Escape if any special character
 # path="$(printf "%q" "$path")"
