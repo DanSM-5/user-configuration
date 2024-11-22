@@ -116,10 +116,10 @@ function fgb () {
 
 
   try {
-    $selected = git branch -a --color=always | grep -v '/HEAD\s' | sort |
+    $selected = git branch -a --color=always | grep -v '/HEAD\s' | Sort-Object |
       fzf @down_options @cmd_options |
       sed 's/^..//' | cut -d' ' -f1 |
-      sed 's#^remotes##'
+      sed 's#^remotes/##'
 
     return $selected
   } finally {
