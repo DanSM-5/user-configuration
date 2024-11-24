@@ -278,13 +278,18 @@ fwr () {
     return 1
   fi
 
-  selection=$(fgb "${*:-}")
-  # Clean branch name
-  branch_name="${selection//origin\//}"
+  selection=($(fgb "${*:-}"))
 
-  if [ -n "$selection" ]; then
-    git worktree remove "$branch_name"
+  if [ -z "${selection[*]}" ]; then
+    return
   fi
+
+  for branch in "${selection[@]}"; do
+    # Clean branch name
+    branch_name="${branch//origin\//}"
+
+    git worktree remove "$branch_name"
+  done
 }
 
 if command_exists delta; then

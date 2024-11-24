@@ -383,13 +383,13 @@ function fwr () {
     return
   }
 
-  $selection = fgb @args | ForEach-Object {
+  fgb @args | ForEach-Object {
     # Clean branch name
     $_ -replace 'origin/', ''
-  }
-
-  if ($selection) {
-    git worktree remove "$selection"
+  } | ForEach-Object {
+    if (!$_) {
+      git worktree remove "$_"
+    }
   }
 }
 
