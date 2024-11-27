@@ -350,7 +350,9 @@ fshow() {
   while out=$(
       git log --graph --color=always \
           --format="%C(auto)%h%d %s %C(black)%C(bold)%cr" "$@" |
-      fzf --ansi --multi --no-sort --reverse --query="$q" \
+      fzf-defaults --ansi --multi --no-sort --reverse --query="$q" \
+          --bind 'ctrl-a:select-all' \
+          --bind 'ctrl-d:deselect-all' \
           "--history=$FZF_HIST_DIR/fzf-git_show" \
           --print-query --expect=ctrl-d --bind=ctrl-s:toggle-sort); do
     q=$(head -1 <<< "$out")

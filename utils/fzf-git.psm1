@@ -20,11 +20,15 @@ function get_fzf_down_options() {
     '--info=inline',
     '--cycle',
     '--layout=reverse',
+    '--multi',
     '--border',
     '--bind', 'alt-f:first',
     '--bind', 'alt-l:last',
     '--bind', 'alt-c:clear-query',
+    '--bind', 'ctrl-a:select-all',
+    '--bind', 'ctrl-d:deselect-all',
     '--bind', 'ctrl-/:change-preview-window(down|hidden|)',
+    '--bind', 'ctrl-^:toggle-preview',
     '--bind', 'alt-up:preview-page-up',
     '--bind', 'alt-down:preview-page-down',
     '--bind', 'ctrl-s:toggle-sort'
@@ -63,7 +67,6 @@ function fgf () {
     "--query=$query",
     "--history=$env:FZF_HIST_DIR/fzf-git_file",
     '--preview-window', '60%',
-    '--multi',
     '--ansi',
     '--nth', '2..,..',
     '--preview', $preview
@@ -107,7 +110,6 @@ function fgb () {
   $cmd_options = @(
     "--query=$query",
     "--history=$env:FZF_HIST_DIR/fzf-git_branch",
-    '--multi',
     '--ansi',
     '--tac',
     '--preview-window', 'right:70%',
@@ -151,7 +153,6 @@ function fgt () {
   $cmd_options = @(
     "--query=$query",
     "--history=$env:FZF_HIST_DIR/fzf-git_tag",
-    '--multi',
     '--preview-window', 'right:70%',
     '--preview', $preview
   )
@@ -199,7 +200,6 @@ function fgh () {
     '--ansi',
     '--no-sort',
     '--reverse',
-    '--multi',
     '--preview', $preview
   )
 
@@ -253,7 +253,6 @@ function fgha () {
     '--ansi',
     '--no-sort',
     '--reverse',
-    '--multi',
     '--preview', $preview
   )
 
@@ -354,7 +353,6 @@ function fshow () {
     "--history=$env:FZF_HIST_DIR/fzf-git_show",
     '--query=',
     '--ansi',
-    '--multi',
     '--no-sort',
     '--reverse',
     '--print-query',

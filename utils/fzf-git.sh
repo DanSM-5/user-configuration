@@ -14,10 +14,14 @@ fzf-down() {
     --info=inline \
     --cycle \
     --layout=reverse \
+    --multi \
     --bind 'alt-f:first' \
     --bind 'alt-l:last' \
     --bind 'alt-c:clear-query' \
+    --bind 'ctrl-a:select-all' \
+    --bind 'ctrl-d:deselect-all' \
     --bind 'ctrl-/:change-preview-window(down|hidden|)' \
+    --bind 'ctrl-^:toggle-preview' \
     --bind 'alt-up:preview-page-up' \
     --bind 'alt-down:preview-page-down' \
     --bind 'ctrl-s:toggle-sort' \
@@ -35,16 +39,16 @@ fgf () {
   local INITIAL_QUERY="${*:-}"
   local path_preview_script="$user_conf_path/utils/fzf-preview.sh"
   git -c color.status=always status --short |
-  fzf-down -m --ansi --nth 2..,.. \
+  fzf-down --ansi --nth 2..,.. \
     --query "$INITIAL_QUERY" \
     "--history=$FZF_HIST_DIR/fzf-git_file" \
     --preview-window '60%' \
-    --preview "selected=\$(printf '%s' {2..} | sed 's/^\"//' | sed 's/\"$//') ; if [ -f \"\$selected\" ]; then
+    --preview "selected=\$(printf '%s' {2..} | sed 's/^\"//' | sed 's/\"$//') ;
+      if [ -f \"\$selected\" ]; then
         git diff --color=always -- \"\$selected\"""$__page_command__"' |
           sed 1,4d |
           bat -p --color=always
-        printf "\n";
-        # bat --color=always --style="numbers,header,changes" "$selected"
+        printf "\n" ;
       fi
       '"$path_preview_script"' "$selected"' |
   cut -c4- | sed 's/.* -> //'
@@ -55,7 +59,7 @@ fgb () {
   is_in_git_repo || return
   local INITIAL_QUERY="${*:-}"
   git branch -a --color=always | grep -v '/HEAD\s' | sort |
-  fzf-down --ansi --multi --tac \
+  fzf-down --ansi --tac \
     --preview-window right:70% \
     --query "$INITIAL_QUERY" \
     "--history=$FZF_HIST_DIR/fzf-git_branch" \
@@ -69,7 +73,7 @@ fgt () {
   is_in_git_repo || return
   local INITIAL_QUERY="${*:-}"
   git tag --sort -version:refname |
-  fzf-down --multi --preview-window right:70% \
+  fzf-down --preview-window right:70% \
     --query "$INITIAL_QUERY" \
     --preview '
       git show --color=always {}'"$__page_command__"' |
@@ -83,7 +87,7 @@ fgh () {
   git log --date=short \
     --format="%C(green)%C(bold)%cd %C(auto)%h%d %s (%an)" \
     --graph --color=always |
-  fzf-down --ansi --no-sort --reverse --multi \
+  fzf-down --ansi --no-sort --reverse \
     --query "$INITIAL_QUERY" \
     "--history=$FZF_HIST_DIR/fzf-git_hash" \
     --header 'Press CTRL-S to toggle sort' \
@@ -101,7 +105,7 @@ fgha () {
   git log --all --date=short \
     --format="%C(green)%C(bold)%cd %C(auto)%h%d %s (%an)" \
     --graph --color=always |
-  fzf-down --ansi --no-sort --reverse --multi \
+  fzf-down --ansi --no-sort --reverse \
     --query "$INITIAL_QUERY" \
     "--history=$FZF_HIST_DIR/fzf-git_hash-all" \
     --header 'Press CTRL-S to toggle sort' \
