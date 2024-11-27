@@ -49,6 +49,7 @@ function getPsFzfOptions {
     # Preview = $("pwsh -NoProfile -NonInteractive -NoLogo -File \""$fzfPreviewScript\"" \""" + $path + "\"" {}" );
     Preview = $fzf_preview_normal
     Bind = @(
+      'ctrl-^:toggle-preview',
       'ctrl-/:change-preview-window(down|hidden|)',
       'alt-up:preview-page-up',
       'alt-down:preview-page-down',
@@ -72,6 +73,7 @@ function getFzfOptions () {
   # $preview = ("pwsh -NoProfile -NonInteractive -NoLogo -File `"$fzfPreviewScript`"" + " \""" + $path + "\"" {}")
 
   $options = @(
+    '--bind', 'ctrl-^:toggle-preview',
     '--bind', 'ctrl-/:change-preview-window(down|hidden|)',
     '--bind', 'alt-up:preview-page-up',
     '--bind', 'alt-down:preview-page-down',
