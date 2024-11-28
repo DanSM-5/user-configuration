@@ -115,10 +115,7 @@ function getFzfPreview ([string] $ScriptContent = 'Get-Content $args') {
 }
 
 function fd-Excluded {
-  $exclusionArr = @(
-    $env:FD_SHOW_OPTIONS -Split ' '
-    $env:FD_EXCLUDE_OPTIONS -Split ' '
-  )
+  $exclusionArr = @(Get-Content "$user_conf_path\fzf\fd_exclude" ; Get-Content "$user_conf_path\fzf\fd_show")
   return $exclusionArr
 }
 
@@ -456,7 +453,8 @@ function cprj ([Switch] $Raw) {
     return
   }
 
-  $fd_command = "fd --color=always --type file $FD_SHOW_OPTIONS $FD_EXCLUDE_OPTIONS . {}"
+  $fd_exclude_args = fd-Excluded
+  $fd_command = "fd --color=always --type file $fd_exclude_args . {}"
   $reload_command = "pwsh -NoLogo -NonInteractive -NoProfile -File ${env:user_conf_path}${dirsep}utils${dirsep}getprojects.ps1"
 
   $options = getFzfOptions

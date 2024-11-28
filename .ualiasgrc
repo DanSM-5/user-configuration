@@ -49,9 +49,12 @@ fzf-defaults () {
 fzf_preview_normal="$user_conf_path/utils/fzf-preview.sh {}"
 
 fd-defaults () {
+  local fd_show=($(command cat "$user_conf_path/fzf/fd_show"))
+  local fd_exclude=($(command cat "$user_conf_path/fzf/fd_exclude"))
+
   fd \
-    "${FD_SHOW_OPTIONS[@]}" \
-    "${FD_EXCLUDE_OPTIONS[@]}" \
+    "${fd_show[@]}" \
+    "${fd_exclude[@]}" \
     "$@"
 }
 
@@ -904,11 +907,15 @@ cprj () {
   local return_dir="$1"
   local directories=($("$user_conf_path/utils/getprojects"))
 
-  if [ -z "$directories" ]; then
+  if [ -z "${directories[*]}" ]; then
     return
   fi
 
-  local fd_command="fd --color=always --type file ${FD_SHOW_OPTIONS[@]} ${FD_EXCLUDE_OPTIONS[@]} . {}"
+  local fd_show
+  local fd_exclude
+  fd_show="$(command cat "$user_conf_path/fzf/fd_show")"
+  fd_exclude="$(command cat "$user_conf_path/fzf/fd_exclude")"
+  local fd_command="fd --color=always --type file $fd_show $fd_exclude . {}"
   local reload_command="$user_conf_path/utils/getprojects"
 
   # if [ "$IS_WINSHELL" = true ]; then
@@ -2152,7 +2159,10 @@ countFiles () {
       printFunc=printWithFileSize
     fi
 
-    for dirl in $(fd "${FD_SHOW_OPTIONS[@]}" "${FD_EXCLUDE_OPTIONS[@]}" -td -d 1); do
+    local fd_show=($(command cat "$user_conf_path/fzf/fd_show"))
+    local fd_exclude=($(command cat "$user_conf_path/fzf/fd_exclude"))
+
+    for dirl in $(fd "${fd_show[@]}" "${fd_exclude[@]}" -td -d 1); do
     # for dirl in .*/ */; do
       $printFunc "$dirl"
     done | column -t -s $'\t'

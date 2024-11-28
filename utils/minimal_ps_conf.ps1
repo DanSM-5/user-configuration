@@ -108,72 +108,22 @@ Set-Alias -Name sutf8 -Value Switch-Utf8
 if (Test-Path Alias:utf8) { Remove-Item Alias:utf8 }
 Set-Alias -Name utf8 -Value With-UTF8
 
-$env:FD_SHOW_OPTIONS = @(
-  '--follow',
-  '--hidden',
-  '--no-ignore'
-)
-
-$env:FD_EXCLUDE_OPTIONS = @(
-  '--exclude', 'AppData',
-  '--exclude', 'Android',
-  '--exclude', 'OneDrive',
-  '--exclude', 'Powershell',
-  '--exclude', 'node_modules',
-  '--exclude', 'tizen-studio',
-  '--exclude', 'Library',
-  '--exclude', 'scoop',
-  '--exclude', 'vimfiles',
-  '--exclude', 'aws',
-  '--exclude', 'pipx',
-  '--exclude', '.vscode-server',
-  '--exclude', '.vscode-server-server',
-  '--exclude', '.git',
-  '--exclude', '.gitbook',
-  '--exclude', '.gradle',
-  '--exclude', '.nix-defexpr',
-  '--exclude', '.azure',
-  '--exclude', '.SpaceVim',
-  '--exclude', '.cache',
-  '--exclude', '.jenv',
-  '--exclude', '.node-gyp',
-  '--exclude', '.npm',
-  '--exclude', '.nvm',
-  '--exclude', '.colima',
-  '--exclude', '.pyenv',
-  '--exclude', '.DS_Store',
-  '--exclude', '.vscode',
-  '--exclude', '.vim',
-  '--exclude', '.bun',
-  '--exclude', '.nuget',
-  '--exclude', '.dotnet',
-  '--exclude', '.pnpm-store',
-  '--exclude', '.pnpm*',
-  '--exclude', '.zsh_history.*',
-  '--exclude', '.android',
-  '--exclude', '.sony',
-  '--exclude', '.chocolatey',
-  '--exclude', '.gem',
-  '--exclude', '.jdks',
-  '--exclude', '.nix-profile',
-  '--exclude', '.sdkman',
-  '--exclude', '__pycache__',
-  '--exclude', '.local/pipx/*',
-  '--exclude', '.local/share/*',
-  '--exclude', '.local/state/*',
-  '--exclude', '.local/lib/*',
-  '--exclude', 'cache',
-  '--exclude', 'browser-data',
-  '--exclude', 'go',
-  '--exclude', 'nodejs',
-  '--exclude', 'podman',
-  '--exclude', 'PlayOnLinux*',
-  '--exclude', '.PlayOnLinux'
-)
-
-$FD_OPTIONS = "$env:FD_SHOW_OPTIONS $env:FD_EXCLUDE_OPTIONS"
-
 if (Get-Command -Name 'fzf' -ErrorAction SilentlyContinue) {
+  $SHOME = $HOME.Replace('\', '/')
+  $env:FZF_HIST_DIR = "$SHOME/.cache/fzf-history" 
+
+  if (!(Test-Path -PathType Container -Path $env:FZF_HIST_DIR -ErrorAction SilentlyContinue)) {
+    New-Item -Path $env:FZF_HIST_DIR -ItemType Directory -ErrorAction SilentlyContinue
+  }
+
+  $env:FZF_DEFAULT_OPTS="--history=$env:FZF_HIST_DIR/fzf-history-default"
+  $env:FZF_DEFAULT_OPTS_FILE="$SHOME/.usr_conf/fzf/fzf-default-opts"
+
+  # temporary variables
+  $fzfPreviewScript = "${env:user_conf_path}/utils/fzf-preview.ps1" -Replace '\\', '/'
+  $fzfFdScript = "${user_conf_path}/fzf/ctrl_t_command.ps1" -Replace '\\', '/'
+  $fzfCopyHelper = "${env:user_conf_path}/utils/copy-helper.ps1" -Replace '\\', '/'
+
   $env:FZF_CTRL_R_OPTS = "
     --preview 'pwsh -NoLogo -NonInteractive -NoProfile -File ${env:user_conf_path}\utils\log-helper.ps1 {}' --preview-window up:3:hidden:wrap
     --bind 'ctrl-/:toggle-preview,ctrl-s:toggle-sort'
@@ -181,18 +131,16 @@ if (Get-Command -Name 'fzf' -ErrorAction SilentlyContinue) {
     --color header:italic
     --header 'ctrl-y: Copy'"
 
-  $fzfPreviewScript = "${env:user_conf_path}\utils\fzf-preview.ps1"
-
   $env:FZF_CTRL_T_OPTS = "
     --multi
     --ansi --cycle
     --header 'ctrl-a: All | ctrl-d: Dirs | ctrl-f: Files | ctrl-y: Copy | ctrl-t: CWD'
     --prompt 'All> '
-    --bind `"ctrl-a:change-prompt(All> )+reload(fd $FD_OPTIONS --color=always)`"
-    --bind `"ctrl-f:change-prompt(Files> )+reload(fd $FD_OPTIONS --color=always --type file)`"
-    --bind `"ctrl-d:change-prompt(Dirs> )+reload(fd $FD_OPTIONS --color=always --type directory)`"
+    --bind `"ctrl-a:change-prompt(All> )+reload($fzfFdScript)`"
+    --bind `"ctrl-f:change-prompt(Files> )+reload($fzfFdScript --type file)`"
+    --bind `"ctrl-d:change-prompt(Dirs> )+reload($fzfFdScript --type directory)`"
     --bind `"ctrl-t:change-prompt(CWD> )+reload(pwsh -NoLogo -NoProfile -NonInteractive -Command eza --color=always --all --dereference --oneline --group-directories-first `$PWD)`"
-    --bind 'ctrl-y:execute-silent(pwsh -NoLogo -NonInteractive -NoProfile -File ${env:user_conf_path}\utils\copy-helper.ps1 {+f})+abort'
+    --bind 'ctrl-y:execute-silent($fzfCopyHelper {+f})+abort'
     --bind `"ctrl-o:execute-silent(pwsh -NoLogo -NoProfile -NonInteractive -Command Start-Process '{}')+abort`"
     --bind 'alt-a:select-all'
     --bind 'alt-d:deselect-all'
@@ -200,19 +148,23 @@ if (Get-Command -Name 'fzf' -ErrorAction SilentlyContinue) {
     --bind 'alt-l:last'
     --bind 'alt-c:clear-query'
     --preview-window '60%'
-    --preview 'pwsh -NoProfile -NonInteractive -NoLogo -File $fzfPreviewScript " + ". {}'
+    --preview '$fzfPreviewScript " + ". {}'
+    --with-shell 'powershell -NoLogo -NonInteractive -NoProfile -Command'
     --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort'"
 
   $env:FZF_ALT_C_OPTS = "
     --ansi
     --preview-window '60%'
-    --preview 'pwsh -NoProfile -NonInteractive -NoLogo -File $fzfPreviewScript " + ". {}'
+    --preview '$fzfPreviewScript " + ". {}'
+    --with-shell 'powershell -NoLogo -NonInteractive -NoProfile -Command'
     --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort'"
 }
 
 if (Get-Command -Name 'fd' -ErrorAction SilentlyContinue) {
-  $env:FZF_CTRL_T_COMMAND = "With-UTF8 { fd $FD_OPTIONS --color=always }"
-  $env:FZF_ALT_C_COMMAND = "With-UTF8 { fd --type directory --color=always $FD_OPTIONS }"
+  # $env:FZF_CTRL_T_COMMAND = "With-UTF8 { fd $FD_OPTIONS --color=always }"
+  # $env:FZF_ALT_C_COMMAND = "With-UTF8 { fd --type directory --color=always $FD_OPTIONS }"
+  $env:FZF_CTRL_T_COMMAND = "With-UTF8 { $user_conf_path/fzf/ctrl_t_command.ps1 }"
+  $env:FZF_ALT_C_COMMAND = "With-UTF8 { $user_conf_path/fzf/alt_c_command.ps1 }"
 }
 
 $script:gsudoModule = "$(scoop prefix gsudo)/gsudoModule.psd1"

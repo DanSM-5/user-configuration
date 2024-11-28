@@ -283,70 +283,6 @@ set_general_after () {
   # For envman. Do not edit.
   [ -s "$HOME/.config/envman/load.sh" ] && source "$HOME/.config/envman/load.sh"
 
-  # Flags to apply to fd commands
-  export FD_SHOW_OPTIONS=(
-    --follow
-    --hidden
-    --no-ignore
-  )
-
-  # Fixes to exclude from being find
-  export FD_EXCLUDE_OPTIONS=(
-    --exclude AppData
-    --exclude Android
-    --exclude node_modules
-    --exclude plugged
-    --exclude tizen-studio
-    --exclude Library
-    --exclude scoop
-    --exclude vimfiles
-    --exclude aws
-    --exclude nvim
-    --exclude .vscode-server
-    --exclude .vscode-server-server
-    --exclude .git
-    --exclude .gitbook
-    --exclude .gradle
-    --exclude .nix-defexpr
-    --exclude .azure
-    --exclude .SpaceVim
-    --exclude .cache
-    --exclude .jenv
-    --exclude .node-gyp
-    --exclude .npm
-    --exclude .nvm
-    --exclude .colima
-    --exclude .pyenv
-    --exclude .DS_Store
-    --exclude .vscode
-    --exclude .vim
-    --exclude .bun
-    --exclude .nuget
-    --exclude .dotnet
-    --exclude .pnpm-store
-    --exclude "'.pnpm*'"
-    --exclude "'.zsh_history.*'"
-    --exclude .android
-    --exclude .sony
-    --exclude .chocolatey
-    --exclude .gem
-    --exclude .jdks
-    --exclude .nix-profile
-    --exclude .sdkman
-    --exclude __pycache__
-    --exclude "'.local/pipx/*'"
-    --exclude "'.local/share/*'"
-    --exclude "'.local/state/*'"
-    --exclude "'.local/lib/*'"
-    --exclude cache
-    --exclude browser-data
-    --exclude go
-    --exclude nodejs
-    --exclude podman
-    --exclude "'PlayOnLinux*'"
-    --exclude .PlayOnLinux
-  )
-
   if command_exists fzf; then
     if [ "$IS_GITBASH" = true ]; then
       # Replace all backslash '\' into forward slash '/'
@@ -383,6 +319,7 @@ set_general_after () {
       --bind 'ctrl-s:toggle-sort'
       --bind 'ctrl-y:execute-silent(echo -n {2..} | \$clipboard_copy)+abort'
       --color header:italic
+      --ansi --cycle
       --prompt 'History> '
       --header 'ctrl-y: Copy'"
 
@@ -391,7 +328,7 @@ set_general_after () {
       --history=$FZF_HIST_DIR/fzf-history-altc
       --prompt 'CD> '
       --color header:italic
-      --ansi
+      --ansi --cycle
       --preview-window '60%'
       --preview '$user_conf_path/utils/fzf-preview.sh {}'
       --bind 'alt-a:select-all'
@@ -408,9 +345,9 @@ set_general_after () {
       --header 'ctrl-a: All | ctrl-d: Dirs | ctrl-f: Files | ctrl-y: Copy | ctrl-t: CWD | ctrl-o: Open'
       --prompt 'All> '
       --color header:italic
-      --bind \"ctrl-a:change-prompt(All> )+reload(fd ${FD_SHOW_OPTIONS[*]} ${FD_EXCLUDE_OPTIONS[*]} --color=always)\"
-      --bind \"ctrl-f:change-prompt(Files> )+reload(fd ${FD_SHOW_OPTIONS[*]} ${FD_EXCLUDE_OPTIONS[*]} --color=always --type file)\"
-      --bind \"ctrl-d:change-prompt(Dirs> )+reload(fd ${FD_SHOW_OPTIONS[*]} ${FD_EXCLUDE_OPTIONS[*]} --color=always --type directory)\"
+      --bind \"ctrl-a:change-prompt(All> )+reload($user_conf_path/fzf/ctrl_t_command --color=always)\"
+      --bind \"ctrl-f:change-prompt(Files> )+reload($user_conf_path/fzf/ctrl_t_command --color=always --type file)\"
+      --bind \"ctrl-d:change-prompt(Dirs> )+reload($user_conf_path/fzf/ctrl_t_command --color=always --type directory)\"
       --bind 'ctrl-t:change-prompt(CWD> )+reload(eza --color=always --all --dereference --no-quotes --group-directories-first \$PWD)'
       --bind 'ctrl-y:execute-silent(\"\$user_conf_path/utils/copy-helper\" \"{+f}\")+abort'
       --bind 'ctrl-o:execute-silent($user_scripts_path/bin/start {})+abort'
@@ -432,8 +369,10 @@ set_general_after () {
   fi
 
   if command_exists fd; then
-    export FZF_CTRL_T_COMMAND="fd --color=always ${FD_SHOW_OPTIONS[*]} ${FD_EXCLUDE_OPTIONS[*]}"
-    export FZF_ALT_C_COMMAND="fd --color=always --type directory ${FD_SHOW_OPTIONS[*]} ${FD_EXCLUDE_OPTIONS[*]}"
+    # export FZF_CTRL_T_COMMAND="fd --color=always ${FD_SHOW_OPTIONS[*]} ${FD_EXCLUDE_OPTIONS[*]}"
+    # export FZF_ALT_C_COMMAND="fd --color=always --type directory ${FD_SHOW_OPTIONS[*]} ${FD_EXCLUDE_OPTIONS[*]}"
+    export FZF_CTRL_T_COMMAND="$user_conf_path/fzf/ctrl_t_command"
+    export FZF_ALT_C_COMMAND="$user_conf_path/fzf/alt_c_command"
 
     # Use fd (https://github.com/sharkdp/fd) instead of the default find
     # command for listing path candidates.
