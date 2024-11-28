@@ -78,7 +78,26 @@ preview_directory () {
 
 show_image () {
   thumbnail="$1"
-  IMAGE_SIZE="${PREVIEW_IMAGE_SIZE:-50x50}"
+
+  if [[ -n $FZF_PREVIEW_COLUMNS ]]; then
+    # FZF_PREVIEW_TOP     Top position of the preview window
+    # FZF_PREVIEW_LEFT    Left position of the preview window
+    # FZF_PREVIEW_LINES   Number of lines in the preview window
+    # FZF_PREVIEW_COLUMNS Number of columns in the preview window
+
+    # From fzf preview
+    height="$FZF_PREVIEW_LINES"
+    width="$FZF_PREVIEW_COLUMNS"
+    x="$FZF_PREVIEW_LEFT"
+    y="$FZF_PREVIEW_TOP"
+    IMAGE_SIZE="${width}x${height}"
+  else
+    width="${PREVIEW_WIDTH:-50}"
+    height="${PREVIEW_HEIGHT:-50}"
+    x="${PREVIEW_CORDX:-0}"
+    y="${PREVIEW_CORDY:-0}"
+    IMAGE_SIZE="${PREVIEW_IMAGE_SIZE:-50x50}"
+  fi
 
   if [[ -v KITTY_WINDOW_ID ]]; then
   # if [[ "$TERM" =~ .+kitty ]]; then
@@ -89,7 +108,7 @@ show_image () {
     #    This confuses fzf and makes it render scroll offset indicator.
     #    So we remove the last line and append the reset code to its previous line.
 
-    IMAGE_SIZE="${PREVIEW_WIDTH:-50}x${PREVIEW_HEIGHT:-50}@${PREVIEW_CORDX:-0}x${PREVIEW_CORDY:-0}"
+    IMAGE_SIZE="${width}x${height}@${x}x${y}"
 
     kitty icat --clear --transfer-mode=stream \
       --unicode-placeholder --stdin=no \

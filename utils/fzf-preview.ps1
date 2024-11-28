@@ -79,12 +79,25 @@ function preview_directory () {
 }
 
 function show_image ([string] $thumbnail, [string] $ErrorMessage) {
-  $IMAGE_SIZE = if ($env:PREVIEW_IMAGE_SIZE) { $env:PREVIEW_IMAGE_SIZE } else { '50x50' }
-  $width = if ($env:PREVIEW_WIDTH) { $env:PREVIEW_WIDTH } else { '50' }
-  $height = if ($env:PREVIEW_HEIGHT) { $env:PREVIEW_HEIGHT } else { '50' }
-  $x = if ($env:PREVIEW_CORDX) { $env:PREVIEW_CORDX } else { '0' }
-  $y = if ($env:PREVIEW_CORDY) { $env:PREVIEW_CORDY } else { '0' }
+  if ($env:FZF_PREVIEW_COLUMNS) {
+    # FZF_PREVIEW_TOP     Top position of the preview window
+    # FZF_PREVIEW_LEFT    Left position of the preview window
+    # FZF_PREVIEW_LINES   Number of lines in the preview window
+    # FZF_PREVIEW_COLUMNS Number of columns in the preview window
 
+    # From fzf preview
+    $height = $env:FZF_PREVIEW_LINES
+    $width = $env:FZF_PREVIEW_COLUMNS
+    $x = $env:FZF_PREVIEW_LEFT
+    $y = $env:FZF_PREVIEW_TOP
+    $IMAGE_SIZE = "${width}x${height}"
+  } else {
+    $width = if ($env:PREVIEW_WIDTH) { $env:PREVIEW_WIDTH } else { '50' }
+    $height = if ($env:PREVIEW_HEIGHT) { $env:PREVIEW_HEIGHT } else { '50' }
+    $x = if ($env:PREVIEW_CORDX) { $env:PREVIEW_CORDX } else { '0' }
+    $y = if ($env:PREVIEW_CORDY) { $env:PREVIEW_CORDY } else { '0' }
+    $IMAGE_SIZE = if ($env:PREVIEW_IMAGE_SIZE) { $env:PREVIEW_IMAGE_SIZE } else { '50x50' }
+  }
 
   if ($env:KITTY_WINDOW_ID) {
     $IMAGE_SIZE = "${width}x${height}@${x}x${y}"
