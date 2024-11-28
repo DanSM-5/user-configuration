@@ -39,7 +39,7 @@ path="$*"
 # NOTE: Remove ' -> ' from symlins for eza until '-X' is fixed
 path="$(printf '%s' "$path" | sed 's| ->.*||')"
 # Trim
-path="$(printf '%s' "$path" | xargs)"
+path="$(printf '%s' "$path" | LS_COLORS='' xargs)"
 
 # Escape if any special character
 # path="$(printf "%q" "$path")"
