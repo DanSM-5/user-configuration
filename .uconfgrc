@@ -359,18 +359,8 @@ set_general_after () {
 
     [ ! -d "$FZF_HIST_DIR" ] && mkdir -p "$FZF_HIST_DIR"
 
-    FZF_DEFAULT_OPTS="
-      --history=$FZF_HIST_DIR/fzf-history-default
-      --height 80%
-      --layout=reverse
-      --border
-    "'
-      --color=dark
-      --color=fg:-1,bg:-1,hl:#c678dd,fg+:#ffffff,bg+:#4b5263,hl+:#d858fe
-      --color=info:#98c379,prompt:#61afef,pointer:#be5046,marker:#e5c07b,spinner:#61afef,header:#61afef
-    '
-
-    export FZF_DEFAULT_OPTS
+    export FZF_DEFAULT_OPTS="--history=$FZF_HIST_DIR/fzf-history-default"
+    export FZF_DEFAULT_OPTS_FILE="$SHOME/.usr_conf/fzf/fzf-default-opts"
 
     # dark='--color=bg+:#3F3F3F,bg:#4B4B4B,border:#6B6B6B,spinner:#98BC99,hl:#719872,fg:#D9D9D9,header:#719872,info:#BDBB72,pointer:#E12672,marker:#E17899,fg+:#D9D9D9,preview-bg:#3F3F3F,prompt:#98BEDE,hl+:#98BC99'
     # light='--color=bg+:#D9D9D9,bg:#E1E1E1,border:#C8C8C8,spinner:#719899,hl:#719872,fg:#616161,header:#719872,info:#727100,pointer:#E12672,marker:#E17899,fg+:#616161,preview-bg:#D9D9D9,prompt:#0099BD,hl+:#719899'
