@@ -3,7 +3,7 @@
 $content = "$args"
 
 if (Test-Path -Path $content -PathType Leaf -ErrorAction SilentlyContinue) {
-  (@(Get-Content $content | % { "'$_'" })) -Join ' ' | Set-Clipboard
+  (@(Get-Content $content | ForEach-Object { "'$_'" })) -Join ' ' | Set-Clipboard
   return
 }
 
