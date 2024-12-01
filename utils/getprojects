@@ -17,11 +17,14 @@ fi
 # all_directories=()
 
 is_gitbash=false
-case "$(uname -a)" in
-  MINGW*|MSYS*|CYGWIN*|*NT*)
-    is_gitbash=true
-    ;;
-esac
+if [ "$OS" = "Windows_NT" ]; then
+  is_gitbash=true
+fi
+# case "$(uname -a)" in
+#   MINGW*|MSYS*|CYGWIN*|*NT*)
+#     is_gitbash=true
+#     ;;
+# esac
 
 help () {
   while IFS= read -r line; do
@@ -89,7 +92,7 @@ get_directories () {
       dir_path=$(eval "printf '%s' $dir 2>/dev/null" | sed -E 's/^[[:space:]]*//' | sed -E 's/[[:space:]]*$//')
       dir_path=$(realpath "$dir_path" 2>/dev/null)
       if [ -d "$dir_path" ]; then
-        locations=($(fd --type 'directory' --type 'symlink' --max-depth 1 . "$dir_path"))
+        mapfile -t locations < <(fd --type 'directory' --type 'symlink' --max-depth 1 . "$dir_path")
         for lock in "${locations[@]}"; do
           [ -d "$lock" ] && printf "%s\n" "${lock%/}"
           # [ -d "$lock" ] && all_directories+=("${lock%/}")
@@ -101,7 +104,7 @@ get_directories () {
 
 get_directories_from_path () {
   [ ! -d "$1" ] && return
-  local locations=($(fd --type 'directory' --type 'symlink' --max-depth 1 . "$1"))
+  mapfile -t locations < <(fd --type 'directory' --type 'symlink' --max-depth 1 . "$1")
   for lock in "${locations[@]}"; do
     [ -d "$lock" ] && printf "%s\n" "${lock%/}"
     # [ -d "$lock" ] && all_directories+=("${lock%/}")
@@ -131,6 +134,7 @@ paths=()
 
 # args parsing
 # ref: https://stackoverflow.com/a/14203146
+# shellcheck disable=SC2221 disable=SC2222
 while [[ $# -gt 0 ]]; do
   case $1 in
     -d|-directories|--directories)
