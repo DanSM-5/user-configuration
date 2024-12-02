@@ -248,8 +248,8 @@ set_general_after () {
   fi
 
   # oh-my-posh requires brew
-  if command_exists oh-my-posh && test -f ~/omp-theme/jandedobbeleer.omp.v2.json; then
-    eval "$(oh-my-posh --init --shell $SHELL_NAME --config ~/omp-theme/jandedobbeleer.omp.v2.json)"
+  if command_exists oh-my-posh && test -f ~/omp-theme/jandedobbeleer.omp.v3.json; then
+    eval "$(oh-my-posh --init --shell $SHELL_NAME --config ~/omp-theme/jandedobbeleer.omp.v3.json)"
   fi
 
   export PREFERRED_EDITOR='vim'
