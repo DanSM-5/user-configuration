@@ -911,10 +911,14 @@ cprj () {
     return
   fi
 
-  local fd_show
-  local fd_exclude
-  fd_show="$(command cat "$user_conf_path/fzf/fd_show")"
-  fd_exclude="$(command cat "$user_conf_path/fzf/fd_exclude")"
+  local fd_show=""
+  local fd_exclude=""
+  while IFS= read -r line_fd_show; do
+    fd_show="$fd_show $line_fd_show"
+  done < "$user_conf_path/fzf/fd_show"
+  while IFS= read -r line_fd_exclude; do
+    fd_exclude="$fd_exclude $line_fd_exclude"
+  done < "$user_conf_path/fzf/fd_show"
   local fd_command="fd --color=always --type file $fd_show $fd_exclude . {}"
   local reload_command="$user_conf_path/utils/getprojects"
 
