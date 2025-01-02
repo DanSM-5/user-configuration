@@ -392,7 +392,7 @@ set_general_after () {
         --preview-window="70%:wrap"
       )" &&
       echo "opening $file" &&
-      xdg-open "$file"
+      start "$file"
     }
   fi
 
