@@ -152,6 +152,8 @@ if (Test-Command fzf) {
     --bind 'alt-l:last'
     --bind 'alt-c:clear-query'
     --with-shell 'pwsh -NoLogo -NonInteractive -NoProfile -Command'
+    --bind `"ctrl-a:change-prompt(CD> )+reload($fzfFdScript --color=always)`"
+    --bind `"ctrl-t:change-prompt(CWD> )+reload(pwsh -NoLogo -NoProfile -NonInteractive -Command eza --color=always --only-dirs --dereference --no-quotes --oneline `$PWD)`"
     --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort'"
 
   Remove-Variable SHOME
