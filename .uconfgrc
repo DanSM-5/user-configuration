@@ -329,7 +329,7 @@ set_general_after () {
       --bind 'alt-l:last'
       --bind 'alt-c:clear-query'
       --bind \"ctrl-a:change-prompt(CD> )+reload($user_conf_path/fzf/alt_c_command --color=always)\"
-      --bind 'ctrl-t:change-prompt(CWD> )+reload(eza -A --color=always --only-dirs --dereference --no-quotes \$PWD)'
+      --bind 'ctrl-t:change-prompt(CWD> )+reload(eza -A --follow-symlinks --color=always --only-dirs --dereference --no-quotes \$PWD)'
       --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort'"
 
     export FZF_CTRL_T_OPTS="
