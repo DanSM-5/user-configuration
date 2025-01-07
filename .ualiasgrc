@@ -1245,7 +1245,7 @@ dwv () {
 
   echo "Downloading: $vid_url" "$@"
 
-  "$yt_dlp_commd" "$vid_url"
+  "$yt_dlp_commd" "$@" "$vid_url"
 }
 
 dgl () {
