@@ -65,8 +65,8 @@ configure_repo () {
   local repo="$1"
 
   # Set user and email on repo
-  git -c "$repo" config user.email dan@config.com
-  git -c "$repo" config user.user dan
+  git -C "$repo" config user.email dan@config.com
+  git -C "$repo" config user.user dan
 }
 
 process_list () {

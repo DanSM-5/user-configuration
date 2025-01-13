@@ -60,8 +60,8 @@ function try_clone ([string] $location, [string] $repo) {
 
 function configure_repo ([string] $repo) {
   # Set user and email on repo
-  git -c "$repo" config user.email dan@config.com
-  git -c "$repo" config user.user dan
+  git -C "$repo" config user.email dan@config.com
+  git -C "$repo" config user.user dan
 }
 
 function process_list ([HashTable] $array) {
