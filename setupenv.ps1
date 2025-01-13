@@ -54,7 +54,7 @@ function try_clone ([string] $location, [string] $repo) {
     Write-Output "Repo: $repo already exist in $location"
   } else {
     git clone --recurse-submodules "$repo" "$location"
-    git submodule update --init --recurse
+    git -C "$location" submodule update --init --recursive
   }
 }
 
