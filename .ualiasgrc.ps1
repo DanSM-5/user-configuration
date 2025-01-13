@@ -1772,12 +1772,12 @@ function rupdate () {
       continue
     }
 
-    Push-Location "$repo" *> $null || return
     Write-Output "Repo: $repo"
-    $remote = (((git remote -v)[0]).Split())[1]
+    $remote = (((git -C $repo remote -v)[0]).Split())[1]
     Write-Output "Remote: $remote"
-    git fetch && git pull --rebase
-    Pop-Location *> $null || return
+    git -C $repo fetch
+    git -C $repo pull --rebase
+    git -C $repo submodule update --init --recursive
   }
 }
 

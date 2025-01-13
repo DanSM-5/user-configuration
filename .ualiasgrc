@@ -2294,11 +2294,12 @@ rupdate () {
       continue
     fi
 
-    pushd "$repo" &>/dev/null || return
     printf "%s\n" "Repo: $repo"
-    printf "%s\n" "Remote: $(git remote -v | awk 'NR == 1 {print $2}')"
-    git fetch && git pull --rebase
-    popd &>/dev/null || return
+    printf "%s\n" "Remote: $(git -C "$repo" remote -v | awk 'NR == 1 {print $2}')"
+    git -C "$repo" fetch
+    git -C "$repo" pull --rebase
+    git -C "$repo" submodule update --init --recursive
+
   done
 }
 
