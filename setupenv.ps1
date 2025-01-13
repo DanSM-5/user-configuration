@@ -54,13 +54,21 @@ function try_clone ([string] $location, [string] $repo) {
     Write-Output "Repo: $repo already exist in $location"
   } else {
     git clone --recurse-submodules "$repo" "$location"
+    git submodule update --init --recurse
   }
+}
+
+function configure_repo ([string] $repo) {
+  # Set user and email on repo
+  git -c "$repo" config user.email dan@config.com
+  git -c "$repo" config user.user dan
 }
 
 function process_list ([HashTable] $array) {
   foreach ($location in $array.Keys) {
     $repo = $array[$location]
     try_clone $location $repo
+    configure_repo $location
   }
 }
 

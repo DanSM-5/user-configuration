@@ -55,9 +55,18 @@ try_clone () {
   # Only clone if dir doesn't exist already
   if ! [ -d "$location" ]; then
     git clone --recurse-submodules "$repo" "$location"
+    git submodule update --init --recurse
   else
     printf '%s\n' "Repo: $repo already exist in $location"
   fi
+}
+
+configure_repo () {
+  local repo="$1"
+
+  # Set user and email on repo
+  git -c "$repo" config user.email dan@config.com
+  git -c "$repo" config user.user dan
 }
 
 process_list () {
@@ -68,6 +77,7 @@ process_list () {
     repo="${array["$location"]}"
     if [ -n "$location" ] && [ -n "$repo" ]; then
       try_clone "$location" "$repo"
+      configure_repo "$location"
     fi
   done
 }
