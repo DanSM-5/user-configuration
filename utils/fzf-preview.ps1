@@ -8,12 +8,18 @@
 param (
   [string] $DirName,
   [string[]]
+  [Parameter(ValueFromRemainingArguments = $true)]
   $ItemName
 )
 
 
 if ($ItemName -is [System.Collections.IEnumerable]) {
-  $Item = $ItemName -Join ' '
+  # Multiple arguments received
+  # Cleanup trailing spaces, quotes and path separators
+  $Item = $ItemName | ForEach-Object {
+    $_.Trim("'").Trim('"').Trim('/').Trim('\').Trim()
+  } | Where-Object { $_ }
+  $Item = $Item -Join ' '
 } else {
   $Item = $ItemName.ToString()
 }
