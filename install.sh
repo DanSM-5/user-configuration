@@ -2,9 +2,10 @@
 
 # Set if not already
 user_conf_path="${user_conf_path:-$HOME/.usr_conf}"
-config_dir="${user_conf_path##*/}"
+config_dir="$user_conf_path"
 # Do not expand HOME variable
-config_path="\$HOME/$config_dir"
+[[ "$config_dir" =~ ^"$HOME"(/|$) ]] && config_dir="~${config_dir#"$HOME"}"
+config_path="${config_dir//\~/\$HOME}/load_conf.sh"
 
 backup () {
   local file="$1"
@@ -28,8 +29,8 @@ printf "
 #       LOAD USER CONFIG       #
 ################################
 
-[ -f \"$config_path/load_conf.sh\" ] && \. \"$config_path/load_conf.sh\"
-" >> "$HOME/.dotfilesrc"
+[ -f \"%s\" ] && \. \"%s\"
+" "$config_path" "$config_path" >> "$HOME/.dotfilesrc"
 
   ln -s "$dotfiles" "$bashrc"
   ln -s "$dotfiles" "$zshrc"
