@@ -70,13 +70,16 @@ else
   esac
 fi
 
+# Set location of user configuration
+export user_conf_path="${user_conf_path:-$HOME/.usr_conf}"
+
 # If loading from vscode config, we only care about the environment variables above
 if [ "$VSCODE_NVIM" = true ]; then
   return 0
 fi
 
 if [ "$VSCODE_DEBUG" = true ]; then
-  source "$HOME/.usr_conf/utils/vscode_debug_conf.sh"
+  source "$user_conf_path/utils/vscode_debug_conf.sh"
   return 0
 fi
 
@@ -91,8 +94,8 @@ export userconf_initial_path="${userconf_initial_path:-"$PATH"}"
 export PATH="${userconf_initial_path:-"$PATH"}"
 
 # Source User Scripts
-test -f "$HOME/.usr_conf/.uconfgrc" && \. "$HOME/.usr_conf/.uconfgrc" || true
-test -f "$HOME/.usr_conf/.ualiasgrc" && \. "$HOME/.usr_conf/.ualiasgrc" || true
-test -f "$HOME/.usr_conf/.uconfrc" && \. "$HOME/.usr_conf/.uconfrc" || true
-test -f "$HOME/.usr_conf/.ualiasrc" && \. "$HOME/.usr_conf/.ualiasrc" || true
+test -f "$user_conf_path/.uconfgrc" && \. "$user_conf_path/.uconfgrc" || true
+test -f "$user_conf_path/.ualiasgrc" && \. "$user_conf_path/.ualiasgrc" || true
+test -f "$user_conf_path/.uconfrc" && \. "$user_conf_path/.uconfrc" || true
+test -f "$user_conf_path/.ualiasrc" && \. "$user_conf_path/.ualiasrc" || true
 
