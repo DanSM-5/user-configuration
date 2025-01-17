@@ -35,7 +35,7 @@ export IS_FROM_CONTAINER="${IS_FROM_CONTAINER:-false}" # Can only be true if run
 # Detect if running WSL
 # NOTE: No &> redirection in sh
 # if [ -f /mnt/c/Windows/System32/cmd.exe ]; then
-if cat /proc/version 2>&1 | grep '[Mm]icrosoft' 2>&1 >/dev/null; then
+if cat /proc/version 2>&1 | grep '[Mm]icrosoft' >/dev/null 2>&1; then
   export IS_WINDOWS=true
   export IS_WSL=true
   export IS_LINUX=true
