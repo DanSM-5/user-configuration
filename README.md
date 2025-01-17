@@ -60,6 +60,9 @@ if (Test-Path -Path "$HOME/.usr_conf/load_conf.ps1" -PathType Leaf -ErrorAction 
 }
 ```
 
+> [!TIP]
+> Setting the environment variable `user_conf_path` before sourcing `load_conf` for bash/zsh or powershell will make it respect the user configuration location across the configuration.
+
 ### General files
 
 General files are meant to be sourced in any platform. They handle the required configurations and add curstom alias and functions
