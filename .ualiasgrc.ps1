@@ -1065,51 +1065,6 @@ function ntmp {
   & $editor "$temporary/tmp-$(New-Guid).md"
 }
 
-function ntxt ([String] $filename = '') {
-  $filename = if ($filename) { $filename } else { "tmp-$(New-Guid).md" }
-  $filename = "${env:prj}${dirsep}txt${dirsep}${filename}"
-  $dirlocation = [System.IO.Path]::GetDirectoryName($filename)
-
-  $editor = if ($env:PREFERRED_EDITOR) { $env:PREFERRED_EDITOR } else { vim }
-  New-Item -Path $dirlocation -ItemType Directory -ea 0
-
-  & $editor "$filename"
-}
-
-function ftxt () {
-  $txt = "${env:prj}${dirsep}txt"
-
-  if (-not (Test-Path -PathType Container -Path "$txt" -ErrorAction SilentlyContinue)) {
-    Write-Output "No $txt directory"
-    return
-  }
-
-  $selected = @()
-  $fzf_options = getFzfOptions
-
-  Push-Location "$txt" *> $null
-  $selected = @($(
-    fd --color=always -tf . |
-      fzf @fzf_options --ansi --cycle --multi `
-      --with-shell 'pwsh -NoLogo -NonInteractive -NoProfile -Command' `
-      --preview-window '~4,60%' `
-      --preview 'bat --style=full --color=always {}'
-  ))
-
-  if ($selected.Length -eq 0) {
-    Pop-Location *> $null
-    return
-  }
-
-  $editor = if ($env:PREFERRED_EDITOR) { $env:PREFERRED_EDITOR } else { 'vim' }
-
-  try {
-    & "$editor" @selected
-  } finally {
-    Pop-Location *> $null
-  }
-}
-
 # extract files
 function ex () {
   $filename = $args[0]

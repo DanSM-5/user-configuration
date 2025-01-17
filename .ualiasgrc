@@ -1052,49 +1052,6 @@ ntmp () {
   "${PREFERRED_EDITOR:-vim}" "/tmp/tmp-$(uuidgen 2>/dev/null || date +%d-%m-%Y_%H-%M-%S).md"
 }
 
-ntxt () {
-  local filename dirlocation
-
-  filename="${*:-tmp-$(uuidgen 2>/dev/null || date +%d-%m-%Y_%H-%M-%S).md}"
-  filename="$prj/txt/$filename"
-  dirlocation="${filename%/*}"
-  mkdir -p "$dirlocation"
-
-  "${PREFERRED_EDITOR:-vim}" "$filename"
-}
-
-ftxt () {
-  local txt="$prj/txt"
-  local selected=()
-
-  if ! [ -d "$txt" ]; then
-    printf '%s' "No $txt directory, creating..."
-    mkdir -p "$txt"
-  fi
-
-  pushd "$txt" &>/dev/null || return
-  selected=($(fd --color=always -tf . |
-    fzf-defaults --ansi --cycle --multi \
-      --preview-window '60%' \
-      --preview "bat --style=full --color=always {}"))
-
-  # while IFS='' read -r selected_file; do
-  #   selected+=("$selected_file")
-  # done < <(fd --color=always -tf . |
-  #   fzf-defaults --ansi --cycle --multi \
-  #     --preview-window '60%' \
-  #     --preview "bat --style=full --color=always {}")
-
-  # shellcheck disable=SC2128
-  if [ -z "$selected" ]; then
-    popd &>/dev/null || return
-    return
-  fi
-
-  "${PREFERRED_EDITOR:-vim}" "${selected[@]}"
-  popd &>/dev/null || return
-}
-
 # extract files
 ex () {
   # $1 must be file name
