@@ -28,6 +28,7 @@ repos=(
 # done
 # DIR=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
 
+export user_conf_path="${user_conf_path:-"$HOME/.usr_conf"}"
 user_config_cache="$HOME/.cache/.user_config_cache"
 export user_config_cache
 plugins="$user_config_cache/plugins"
@@ -51,7 +52,7 @@ done
 popd || exit
 
 # Copy completions
-command cp -fr "$HOME/.usr_conf/completions" "$user_config_cache"
+command cp -fr "$user_conf_path/completions" "$user_config_cache"
 
 # Git completion for zsh in gitbash
 if [ -f /mingw64/share/git/completion/git-completion.zsh ]; then
