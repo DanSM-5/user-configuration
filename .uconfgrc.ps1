@@ -4,9 +4,14 @@
 ############################################
 
 # Follow structure conf folders and files
+
+# Configuration location
 $user_conf_path = if ($env:user_conf_path) { $env:user_conf_path } else { "${HOME}${dirsep}.usr_conf" }
+# Scripts location
 $user_scripts_path = if ($env:user_scripts_path) { $env:user_scripts_path } else { "${HOME}${dirsep}user-scripts" }
+# Project specific files location
 $prj = if ($env:prj) { $env:prj } else { "${HOME}${dirsep}prj" }
+# Cache files location
 $user_config_cache = if ($env:user_config_cache) { $env:user_config_cache } else { "${HOME}${dirsep}.cache${dirsep}.user_config_cache" }
 
 $env:PREFERRED_EDITOR = 'nvim'
@@ -84,19 +89,20 @@ if (Test-Command Set-PsFzfOption) {
 
 if (Test-Command fzf) {
   $SHOME = $HOME.Replace('\', '/')
+  $SCONF = $user_conf_path.Replace('\', '/')
   $env:FZF_HIST_DIR = "$SHOME/.cache/fzf-history" 
 
   # temporary variables
-  $fzfPreviewScript = "${env:user_conf_path}${dirsep}utils${dirsep}fzf-preview.ps1" -Replace '\\', '/'
-  $fzfFdScript = "${user_conf_path}${dirsep}fzf${dirsep}ctrl_t_command.ps1" -Replace '\\', '/'
-  $fzfCopyHelper = "${env:user_conf_path}${dirsep}utils${dirsep}copy-helper.ps1" -Replace '\\', '/'
+  $fzfPreviewScript = "$SCONF/utils/fzf-preview.ps1"
+  $fzfFdScript = "$SCONF/fzf/ctrl_t_command.ps1"
+  $fzfCopyHelper = "$SCONF/utils/copy-helper.ps1"
 
   if (!(Test-Path -PathType Container -Path $env:FZF_HIST_DIR -ErrorAction SilentlyContinue)) {
     New-Item -Path $env:FZF_HIST_DIR -ItemType Directory -ErrorAction SilentlyContinue
   }
 
   $env:FZF_DEFAULT_OPTS="--history=$env:FZF_HIST_DIR/fzf-history-default"
-  $env:FZF_DEFAULT_OPTS_FILE="$SHOME/.usr_conf/fzf/fzf-default-opts"
+  $env:FZF_DEFAULT_OPTS_FILE="$SCONF/fzf/fzf-default-opts"
 
   $env:FZF_CTRL_R_OPTS = "
     --history=$env:FZF_HIST_DIR/fzf-history-ctrlr
@@ -157,6 +163,7 @@ if (Test-Command fzf) {
     --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort'"
 
   Remove-Variable SHOME
+  Remove-Variable SCONF
   Remove-Variable fzfPreviewScript
   Remove-Variable fzfFdScript
   Remove-Variable fzfCopyHelper

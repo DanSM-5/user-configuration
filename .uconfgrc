@@ -5,31 +5,39 @@
 ######################################
 
 # Follow structure conf folders and files
+
+# Configuration location
 export user_conf_path="${user_conf_path:-"$HOME/.usr_conf"}"
+# Scripts location
 export user_scripts_path="${user_scripts_path:-"$HOME/user-scripts"}"
+# Project specific files location
 export prj="${prj:-"$HOME/prj"}"
+# Cache files location
 export user_config_cache="${user_config_cache:-"$HOME/.cache/.user_config_cache"}"
 
 backup_path () {
-  export PATH_BACKUP=$(echo -n $PATH | tr ":" "\n")
+  PATH_BACKUP=$(echo -n "$PATH" | tr ":" "\n")
+  export PATH_BACKUP
 }
 
 # Separate path entries that start with /mnt/
 set_windows_path () {
-  export WIN_PATH=$(echo -n $PATH_BACKUP | rg "/mnt/" | sed ':a; N; $!ba; s/\n/:/g')
+  WIN_PATH=$(echo -n "$PATH_BACKUP" | rg "/mnt/" | sed ':a; N; $!ba; s/\n/:/g')
+  export WIN_PATH
 }
 
 set_unix_path () {
-  export UNIX_PATH=$(echo -n $PATH_BACKUP | rg "/mnt/" --invert-match | sed ':a; N; $!ba; s/\n/:/g')
+  UNIX_PATH=$(echo -n "$PATH_BACKUP" | rg "/mnt/" --invert-match | sed ':a; N; $!ba; s/\n/:/g')
+  export UNIX_PATH
 }
 
 set_path () {
   export PATH="$1"
 }
 
-path_append ()  { path_remove $1; export PATH="$PATH:$1"; }
-path_prepend () { path_remove $1; export PATH="$1:$PATH"; }
-path_remove ()  { export PATH=`echo -n $PATH | awk -v RS=: -v ORS=: '$0 != "'$1'"' | sed 's/:$//'`; }
+path_append ()  { path_remove "$1"; export PATH="$PATH:$1"; }
+path_prepend () { path_remove "$1"; export PATH="$1:$PATH"; }
+path_remove ()  { PATH=$(echo -n "$PATH" | awk -v RS=: -v ORS=: '$0 != "'"$1"'"' | sed 's/:$//'); export PATH; }
 
 detect_shell () {
   # echo "Loading..."
@@ -104,7 +112,7 @@ set_wsl () {
 
 set_gitbash () {
   # Load fzf-git
-  [ -f "$HOME/.usr_conf/utils/fzf-git.sh" ] && source "$HOME/.usr_conf/utils/fzf-git.sh"
+  [ -f "$user_conf_path/utils/fzf-git.sh" ] && source "$user_conf_path/utils/fzf-git.sh"
 
   export MSYS="$MSYS winsymlinks:nativestrict"
 
@@ -238,7 +246,7 @@ set_general_after () {
   fi
 
   if [ -f "$HOME/.fzf.$SHELL_NAME" ]; then
-    source "$HOME/.usr_conf/utils/fzf-git.sh"
+    source "$user_conf_path/utils/fzf-git.sh"
   fi
 
   if command_exists starship; then
@@ -279,8 +287,10 @@ set_general_after () {
     if [ "$IS_GITBASH" = true ]; then
       # Replace all backslash '\' into forward slash '/'
       SHOME="${USERPROFILE//\\//}"
+      SCONF="${user_conf_path//\\//}"
     else
       SHOME="$HOME"
+      SCONF="$user_conf_path"
     fi
 
     export FZF_HIST_DIR="$SHOME/.cache/fzf-history"
@@ -288,7 +298,7 @@ set_general_after () {
     [ ! -d "$FZF_HIST_DIR" ] && mkdir -p "$FZF_HIST_DIR"
 
     export FZF_DEFAULT_OPTS="--history=$FZF_HIST_DIR/fzf-history-default"
-    export FZF_DEFAULT_OPTS_FILE="$SHOME/.usr_conf/fzf/fzf-default-opts"
+    export FZF_DEFAULT_OPTS_FILE="$SCONF/fzf/fzf-default-opts"
 
     # dark='--color=bg+:#3F3F3F,bg:#4B4B4B,border:#6B6B6B,spinner:#98BC99,hl:#719872,fg:#D9D9D9,header:#719872,info:#BDBB72,pointer:#E12672,marker:#E17899,fg+:#D9D9D9,preview-bg:#3F3F3F,prompt:#98BEDE,hl+:#98BC99'
     # light='--color=bg+:#D9D9D9,bg:#E1E1E1,border:#C8C8C8,spinner:#719899,hl:#719872,fg:#616161,header:#719872,info:#727100,pointer:#E12672,marker:#E17899,fg+:#616161,preview-bg:#D9D9D9,prompt:#0099BD,hl+:#719899'
@@ -355,6 +365,7 @@ set_general_after () {
       --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort'"
 
     unset SHOME
+    unset SCONF
   fi
 
   # fzf support
