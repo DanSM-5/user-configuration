@@ -110,6 +110,7 @@ Set-Alias -Name utf8 -Value With-UTF8
 
 if (Get-Command -Name 'fzf' -ErrorAction SilentlyContinue) {
   $SHOME = $HOME.Replace('\', '/')
+  $SCONF = $user_conf_path.Replace('\', '/')
   $env:FZF_HIST_DIR = "$SHOME/.cache/fzf-history" 
 
   if (!(Test-Path -PathType Container -Path $env:FZF_HIST_DIR -ErrorAction SilentlyContinue)) {
@@ -117,12 +118,12 @@ if (Get-Command -Name 'fzf' -ErrorAction SilentlyContinue) {
   }
 
   $env:FZF_DEFAULT_OPTS="--history=$env:FZF_HIST_DIR/fzf-history-default"
-  $env:FZF_DEFAULT_OPTS_FILE="$SHOME/.usr_conf/fzf/fzf-default-opts"
+  $env:FZF_DEFAULT_OPTS_FILE="$SCONF/fzf/fzf-default-opts"
 
   # temporary variables
-  $fzfPreviewScript = "${env:user_conf_path}/utils/fzf-preview.ps1" -Replace '\\', '/'
-  $fzfFdScript = "${user_conf_path}/fzf/ctrl_t_command.ps1" -Replace '\\', '/'
-  $fzfCopyHelper = "${env:user_conf_path}/utils/copy-helper.ps1" -Replace '\\', '/'
+  $fzfPreviewScript = "$SCONF/utils/fzf-preview.ps1"
+  $fzfFdScript = "$SCONF/fzf/ctrl_t_command.ps1"
+  $fzfCopyHelper = "$SCONF/utils/copy-helper.ps1"
 
   $env:FZF_CTRL_R_OPTS = "
     --preview 'pwsh -NoLogo -NonInteractive -NoProfile -File ${env:user_conf_path}\utils\log-helper.ps1 {}' --preview-window up:3:hidden:wrap
@@ -153,11 +154,27 @@ if (Get-Command -Name 'fzf' -ErrorAction SilentlyContinue) {
     --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort'"
 
   $env:FZF_ALT_C_OPTS = "
-    --ansi
+    --history=$env:FZF_HIST_DIR/fzf-history-altc
+    --ansi --cycle
+    --prompt 'CD> '
+    --color header:italic
     --preview-window '60%'
     --preview '$fzfPreviewScript " + ". {}'
+    --bind 'alt-a:select-all'
+    --bind 'alt-d:deselect-all'
+    --bind 'alt-f:first'
+    --bind 'alt-l:last'
+    --bind 'alt-c:clear-query'
     --with-shell 'powershell -NoLogo -NonInteractive -NoProfile -Command'
+    --bind `"ctrl-a:change-prompt(CD> )+reload($fzfFdScript --color=always)`"
+    --bind `"ctrl-t:change-prompt(CWD> )+reload(pwsh -NoLogo -NoProfile -NonInteractive -Command eza -A --show-symlinks --color=always --only-dirs --dereference --no-quotes --oneline `$PWD)`"
     --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort'"
+
+  Remove-Variable SHOME
+  Remove-Variable SCONF
+  Remove-Variable fzfPreviewScript
+  Remove-Variable fzfFdScript
+  Remove-Variable fzfCopyHelper
 }
 
 if (Get-Command -Name 'fd' -ErrorAction SilentlyContinue) {
