@@ -23,6 +23,7 @@ $dirsep = if ($IsWindows) { '\' } else { '/' }
 $pathsep = if ($IsWindows) { ';' } else { ':' }
 $env:dirsep = $dirsep
 $env:pathsep = $pathsep
+$env:user_conf_path = if ($env:user_conf_path) { $env:user_conf_path } else { "$HOME${dirsep}.usr_conf" }
 
 # Needed for all scripts even if other fails
 function Test-Command {
@@ -47,16 +48,16 @@ $env:PATH = if ($env:userconf_initial_path) { $env:userconf_initial_path } else 
 
 
 # Source User Scripts
-if (Test-Path -Path "$HOME${dirsep}.usr_conf${dirsep}.uconfgrc.ps1" -PathType Leaf) {
-  . $HOME\.usr_conf\.uconfgrc.ps1
+if (Test-Path -Path "${env:user_conf_path}${dirsep}.uconfgrc.ps1" -PathType Leaf) {
+  . "${env:user_conf_path}${dirsep}.uconfgrc.ps1"
 }
-if (Test-Path -Path "$HOME${dirsep}.usr_conf${dirsep}.ualiasgrc.ps1" -PathType Leaf) {
-  . $HOME\.usr_conf\.ualiasgrc.ps1
+if (Test-Path -Path "${env:user_conf_path}${dirsep}.ualiasgrc.ps1" -PathType Leaf) {
+  . "${env:user_conf_path}${dirsep}.ualiasgrc.ps1"
 }
-if (Test-Path -Path "$HOME${dirsep}.usr_conf${dirsep}.uconfrc.ps1" -PathType Leaf) {
-  . $HOME\.usr_conf\.uconfrc.ps1
+if (Test-Path -Path "${env:user_conf_path}${dirsep}.uconfrc.ps1" -PathType Leaf) {
+  . "${env:user_conf_path}${dirsep}.uconfrc.ps1"
 }
-if (Test-Path -Path "$HOME${dirsep}.usr_conf${dirsep}.ualiasrc.ps1" -PathType Leaf) {
-  . $HOME\.usr_conf\.ualiasrc.ps1
+if (Test-Path -Path "${env:user_conf_path}${dirsep}.ualiasrc.ps1" -PathType Leaf) {
+  . "${env:user_conf_path}${dirsep}.ualiasrc.ps1"
 }
 
