@@ -28,7 +28,7 @@ $PREFERRED_EDITOR = $env:PREFERRED_EDITOR
 function gpr { Set-Location $env:prj }
 function gus { Set-Location $env:user_scripts_path }
 function guc { Set-Location $env:user_conf_path }
-function gvc { Set-Location "${HOME}\.SpaceVim.d" }
+function gvc { Set-Location "$HOME\vim-config" }
 function goh { Set-Location "$HOME"}
 function ecf () { & $env:PREFERRED_EDITOR $PROFILE }
 function egc () { & $env:PREFERRED_EDITOR "$env:user_conf_path/utils/minimal_ps_conf.ps1" }
