@@ -90,11 +90,13 @@ if (Test-Command Set-PsFzfOption) {
 if (Test-Command fzf) {
   $SHOME = $HOME.Replace('\', '/')
   $SCONF = $user_conf_path.Replace('\', '/')
+  $SCRIP = $user_scripts_path.Replace('\', '/')
   $env:FZF_HIST_DIR = "$SHOME/.cache/fzf-history" 
 
   # temporary variables
   $fzfPreviewScript = "$SCONF/utils/fzf-preview.ps1"
   $fzfFdScript = "$SCONF/fzf/ctrl_t_command.ps1"
+  $fzfFdDirsScript = "$SCONF/fzf/alt_c_command.ps1"
   $fzfCopyHelper = "$SCONF/utils/copy-helper.ps1"
 
   if (!(Test-Path -PathType Container -Path $env:FZF_HIST_DIR -ErrorAction SilentlyContinue)) {
@@ -158,14 +160,20 @@ if (Test-Command fzf) {
     --bind 'alt-l:last'
     --bind 'alt-c:clear-query'
     --with-shell 'pwsh -NoLogo -NonInteractive -NoProfile -Command'
-    --bind `"ctrl-a:change-prompt(CD> )+reload($fzfFdScript --color=always)`"
     --bind `"ctrl-t:change-prompt(CWD> )+reload(pwsh -NoLogo -NoProfile -NonInteractive -Command eza -A --show-symlinks --color=always --only-dirs --dereference --no-quotes --oneline `$PWD)`"
+    --bind `"ctrl-a:change-prompt(Cd> )+reload($fzfFdDirsScript)`"
+    --bind `"ctrl-u:change-prompt(Up> )+reload($fzfFdDirsScript . ..)`"
+    --bind `"ctrl-e:change-prompt(Config> )+reload(echo $SCONF ; $fzfFdDirsScript . $SCONF)`"
+    --bind `"ctrl-r:change-prompt(Scripts> )+reload(echo $SCRIP ; $fzfFdDirsScript . $SCRIP)`"
+    --bind `"ctrl-w:change-prompt(Projects> )+reload($fzfFdDirsScript . $SHOME/projects)`"
     --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort'"
 
   Remove-Variable SHOME
   Remove-Variable SCONF
+  Remove-Variable SCRIP
   Remove-Variable fzfPreviewScript
   Remove-Variable fzfFdScript
+  Remove-Variable fzfFdDirsScript
   Remove-Variable fzfCopyHelper
 }
 
