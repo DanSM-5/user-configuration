@@ -7,7 +7,6 @@ $search_query = $args[0]
 
 # Parse path
 $path_value = $args[1..$args.length]
-$path_value = $path_value.Replace('\\', '/')
 $path_value = "$($PWD.ProviderPath.Replace('\', '/'))/$($path_value.Replace('\\','/'))"
 
 try {
