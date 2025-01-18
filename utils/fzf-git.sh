@@ -37,7 +37,7 @@ fi
 fgf () {
   is_in_git_repo || return
   local INITIAL_QUERY="${*:-}"
-  local path_preview_script="$user_conf_path/utils/fzf-preview.sh"
+  local path_preview_script="${user_conf_path:-"$HOME/.usr_conf"}/utils/fzf-preview.sh"
   git -c color.status=always status --short |
   fzf-down --ansi --nth 2..,.. \
     --query "$INITIAL_QUERY" \

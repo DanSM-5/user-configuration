@@ -11,7 +11,8 @@ function is_in_git_repo () {
 
 $__pager__ = if (Get-Command -Name delta -All -ErrorAction 0) { 'delta | ' } else { '' }
 
-$path_preview_script = Join-Path $env:user_conf_path "utils/fzf-preview.ps1"
+$user_conf_path = if ($env:user_conf_path) { $env:user_conf_path } else { "$HOME/.usr_conf" }
+$path_preview_script = Join-Path $user_conf_path "utils/fzf-preview.ps1"
 
 function get_fzf_down_options() {
   $options = @(
