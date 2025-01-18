@@ -1634,8 +1634,8 @@ function Test-ReparsePoint([string]$path) {
 # Try using Test-ReparsePoint or dir /aL
 # https://stackoverflow.com/questions/817794/find-out-whether-a-file-is-a-symbolic-link-in-powershell
 function frm () {
-  $query = "$args"
-  $options = getPsFzfOptions
+  $query = if ($args) { @('--query', "$args") } else { @() }
+  $options = getFzfOptions
   $exclude = fd-Options
 
   fd `
@@ -1643,16 +1643,16 @@ function frm () {
     --path-separator '/' `
     --color=always `
     -tf -tl |
-  Invoke-Fzf `
+  fzf `
     @options `
-    -Ansi -Cycle `
-    -Multi `
-    -Query "$query" | Where-Object {
-      # If item is a file or a SymbolicLink
-      (
-        Test-Path -PathType Leaf "$_" -ErrorAction SilentlyContinue
-      ) -or ($_.LinkType)
-    } | Remove-Item
+    --ansi --cycle `
+    --multi `
+    @query | ForEach-Object {
+      # Only remove files or symlinks, not directories
+      if (-not (Test-Path -PathType Container -LiteralPath "$_" -ErrorAction SilentlyContinue)) {
+        Remove-Item -LiteralPath "$_"
+      }
+    } 
 }
 
 function frdr () {
