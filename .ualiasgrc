@@ -566,122 +566,122 @@ fcd () {
 }
 
 # sed '1d;2d'
-fcdd () {
-  local query="$*"
-  local selection=""
+# fcdd () {
+#   local query="$*"
+#   local selection=""
 
-  selection=$(fd-defaults --color=always -tl -td |
-    fzf-defaults --ansi --cycle \
-      --query "$query" \
-      --preview-window '60%' \
-      --preview "$fzf_preview_normal")
+#   selection=$(fd-defaults --color=always -tl -td |
+#     fzf-defaults --ansi --cycle \
+#       --query "$query" \
+#       --preview-window '60%' \
+#       --preview "$fzf_preview_normal")
 
-  if [ -z "$selection" ]; then
-    return 1
-  fi
+#   if [ -z "$selection" ]; then
+#     return 1
+#   fi
 
-  cd "$selection" || return
-}
+#   cd "$selection" || return
+# }
 
-fcde () {
-  local location="${1:-.}"
-  local pattern="${2:-.}"
-  local query="${*:3}"
-  local selection
+# fcde () {
+#   local location="${1:-.}"
+#   local pattern="${2:-.}"
+#   local query="${*:3}"
+#   local selection
 
-  if ! [ -d "$location" ]; then
-    echo "Invalid location. Defaulting to cwd."
-    location="."
-  fi
+#   if ! [ -d "$location" ]; then
+#     echo "Invalid location. Defaulting to cwd."
+#     location="."
+#   fi
 
-  selection=$(
-    fd-defaults -L -tf "$pattern" "$location" \
-      -x dirname {} |
-    sort -u |
-    fzf-defaults \
-      --preview-window '60%' \
-      --preview "$fzf_preview_normal" \
-      --header "(ctrl-/) Search in: $location" \
-      --query "$query")
-  if [ -z "$selection" ]; then
-    return
-  fi
+#   selection=$(
+#     fd-defaults -L -tf "$pattern" "$location" \
+#       -x dirname {} |
+#     sort -u |
+#     fzf-defaults \
+#       --preview-window '60%' \
+#       --preview "$fzf_preview_normal" \
+#       --header "(ctrl-/) Search in: $location" \
+#       --query "$query")
+#   if [ -z "$selection" ]; then
+#     return
+#   fi
 
-  cd "$selection" || return
-}
+#   cd "$selection" || return
+# }
 
-fcda () {
-  local selection=""
+# fcda () {
+#   local selection=""
 
-  selection=$(cd / && fd-defaults -tl -td |
-    fzf-defaults \
-      --preview-window '60%' \
-      --preview "$fzf_preview_normal")
-  if [ -n "$selection" ]; then
-    cd "$selection" || return
-  fi
-}
+#   selection=$(cd / && fd-defaults -tl -td |
+#     fzf-defaults \
+#       --preview-window '60%' \
+#       --preview "$fzf_preview_normal")
+#   if [ -n "$selection" ]; then
+#     cd "$selection" || return
+#   fi
+# }
 
-fed () {
-  local location="${1:-.}"
-  local query="${*:3}"
-  local pattern="."
-  local editor="${PREFERRED_EDITOR:-vim}"
+# fed () {
+#   local location="${1:-.}"
+#   local query="${*:3}"
+#   local pattern="."
+#   local editor="${PREFERRED_EDITOR:-vim}"
 
-  if ! [ -d "$location" ]; then
-    pattern="$location"
-    location="$HOME"
-  fi
+#   if ! [ -d "$location" ]; then
+#     pattern="$location"
+#     location="$HOME"
+#   fi
 
-  local selection
-  selection=($(fd-defaults --color=always -L -tf "$pattern" "$location" |
-    fzf-defaults \
-      --ansi \
-      --cycle \
-      --multi \
-      --preview-window '60%' \
-      --preview "$fzf_preview_normal" \
-      --header "(ctrl-/) Search in: $location" \
-      --query "$query"))
+#   local selection
+#   selection=($(fd-defaults --color=always -L -tf "$pattern" "$location" |
+#     fzf-defaults \
+#       --ansi \
+#       --cycle \
+#       --multi \
+#       --preview-window '60%' \
+#       --preview "$fzf_preview_normal" \
+#       --header "(ctrl-/) Search in: $location" \
+#       --query "$query"))
 
-  # while IFS='' read -r new_line; do
-  #   selection+=("$new_line")
-  # done < <(fd-defaults --color=always -L -tf "$pattern" "$location" |
-  #   fzf-defaults \
-  #     --ansi \
-  #     --cycle \
-  #     --multi \
-  #     --preview-window '60%' \
-  #     --preview "$fzf_preview_normal" \
-  #     --header "(ctrl-/) Search in: $location" \
-  #     --query "$query")
+#   # while IFS='' read -r new_line; do
+#   #   selection+=("$new_line")
+#   # done < <(fd-defaults --color=always -L -tf "$pattern" "$location" |
+#   #   fzf-defaults \
+#   #     --ansi \
+#   #     --cycle \
+#   #     --multi \
+#   #     --preview-window '60%' \
+#   #     --preview "$fzf_preview_normal" \
+#   #     --header "(ctrl-/) Search in: $location" \
+#   #     --query "$query")
 
-  # shellcheck disable=SC2128
-  if [ -z "$selection" ]; then
-    return
-  fi
-  if [ -n "$2" ] && [ "$2" != "-" ]; then
-    editor="$2"
-  fi
+#   # shellcheck disable=SC2128
+#   if [ -z "$selection" ]; then
+#     return
+#   fi
+#   if [ -n "$2" ] && [ "$2" != "-" ]; then
+#     editor="$2"
+#   fi
 
-  "$editor" "${selection[@]}"
-}
+#   "$editor" "${selection[@]}"
+# }
 
-fedd () {
-  local query="${@:2}"
-  local editor="${PREFERRED_EDITOR:-vim}"
-  local selection=$(fd-defaults --color=always -L -tf |
-    fzf-defaults --multi --ansi --cycle \
-      --preview-window '60%' \
-      --preview "$fzf_preview_normal" --query "$query")
-  if [ -z "$selection" ]; then
-    return
-  fi
-  if [ -n "$1" ] && [ "$1" != "-" ]; then
-    editor="$1"
-  fi
-  "$editor" "${selection[@]}"
-}
+# fedd () {
+#   local query="${*:2}"
+#   local editor="${PREFERRED_EDITOR:-vim}"
+#   local selection=$(fd-defaults --color=always -L -tf |
+#     fzf-defaults --multi --ansi --cycle \
+#       --preview-window '60%' \
+#       --preview "$fzf_preview_normal" --query "$query")
+#   if [ -z "$selection" ]; then
+#     return
+#   fi
+#   if [ -n "$1" ] && [ "$1" != "-" ]; then
+#     editor="$1"
+#   fi
+#   "$editor" "${selection[@]}"
+# }
 
 fif () {
   if [ ! "$#" -gt 0 ]; then

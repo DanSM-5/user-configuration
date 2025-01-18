@@ -114,8 +114,8 @@ function getFzfPreview ([string] $ScriptContent = 'Get-Content $args') {
   }
 }
 
-function fd-Excluded {
-  $exclusionArr = @(Get-Content "$user_conf_path\fzf\fd_exclude" ; Get-Content "$user_conf_path\fzf\fd_show")
+function fd-Options {
+  $exclusionArr = @(Get-Content "$user_conf_path${dirsep}fzf${dirsep}fd_exclude" ; Get-Content "$user_conf_path${dirsep}fzf${dirsep}fd_show")
   return $exclusionArr
 }
 
@@ -453,7 +453,7 @@ function cprj ([Switch] $Raw) {
     return
   }
 
-  $fd_exclude_args = fd-Excluded
+  $fd_exclude_args = fd-Options
   $fd_command = "fd --color=always --type file $fd_exclude_args . {}"
   $reload_command = "pwsh -NoLogo -NonInteractive -NoProfile -File ${env:user_conf_path}${dirsep}utils${dirsep}getprojects.ps1"
 
@@ -507,7 +507,7 @@ function fcd () {
   }
 
   $location = if ("$location" -eq "~") { "$HOME" } else { "$location" }
-  $exclude = fd-Excluded
+  $exclude = fd-Options
 
   $selection = "$(
     fd `
@@ -530,64 +530,64 @@ function fcd () {
   Set-Location "$selection"
 }
 
-function fcdd () {
-  $pattern = if ($args[0]) { $args[0] } else { "." }
-  $query = $args[1..$args.length]
-  $options = getPsFzfOptions
-  $exclude = fd-Excluded
+# function fcdd () {
+#   $pattern = if ($args[0]) { $args[0] } else { "." }
+#   $query = $args[1..$args.length]
+#   $options = getPsFzfOptions
+#   $exclude = fd-Options
 
-  $selection = "$(
-    fd `
-      @exclude `
-      --path-separator '/' `
-      --color=always `
-      -tl -td "$pattern" |
-    Invoke-Fzf `
-      -Ansi -Cycle `
-      -Header 'Press CTRL-/ to toggle preview' `
-      -Query "$query" `
-      @options
-    )"
+#   $selection = "$(
+#     fd `
+#       @exclude `
+#       --path-separator '/' `
+#       --color=always `
+#       -tl -td "$pattern" |
+#     Invoke-Fzf `
+#       -Ansi -Cycle `
+#       -Header 'Press CTRL-/ to toggle preview' `
+#       -Query "$query" `
+#       @options
+#     )"
 
-  if ((-not $selection) -or (-not (Test-Path $selection))) {
-    return
-  }
+#   if ((-not $selection) -or (-not (Test-Path $selection))) {
+#     return
+#   }
 
-  Set-Location "$selection"
-}
+#   Set-Location "$selection"
+# }
 
-function fcde () {
-  $location = if ($args[0]) { $args[0] } else { "." }
-  $pattern = if ($args[1]) { $args[1] } else { "." }
-  $query = $args[2..$args.length]
-  $options = getPsFzfOptions
+# function fcde () {
+#   $location = if ($args[0]) { $args[0] } else { "." }
+#   $pattern = if ($args[1]) { $args[1] } else { "." }
+#   $query = $args[2..$args.length]
+#   $options = getPsFzfOptions
 
-  if ( -not (Test-Path $location) ) {
-    Write-Output "Invalid location. Defaulting to cwd."
-    $location = $PWD
-  }
+#   if ( -not (Test-Path $location) ) {
+#     Write-Output "Invalid location. Defaulting to cwd."
+#     $location = $PWD
+#   }
 
-  $location = if ("$location" -eq "~") { "$HOME" } else { "$location" }
-  $exclude = fd-Excluded
+#   $location = if ("$location" -eq "~") { "$HOME" } else { "$location" }
+#   $exclude = fd-Options
 
-  $selection = "$(
-    fd `
-      @exclude `
-      -L -tf "$pattern" "$location" |
-    ForEach-Object { Split-Path "$_" } |
-    Sort-Object -Unique |
-    Invoke-Fzf `
-      -Header 'Press CTRL-/ to toggle preview' `
-      -Query "$query" `
-      @options
-  )"
+#   $selection = "$(
+#     fd `
+#       @exclude `
+#       -L -tf "$pattern" "$location" |
+#     ForEach-Object { Split-Path "$_" } |
+#     Sort-Object -Unique |
+#     Invoke-Fzf `
+#       -Header 'Press CTRL-/ to toggle preview' `
+#       -Query "$query" `
+#       @options
+#   )"
 
-  if ((-not $selection) -or (-not (Test-Path $selection))) {
-    return
-  }
+#   if ((-not $selection) -or (-not (Test-Path $selection))) {
+#     return
+#   }
 
-  Set-Location "$selection"
-}
+#   Set-Location "$selection"
+# }
 
 function info () {
   # can also be piped into less
@@ -1259,84 +1259,84 @@ function dwi () {
   gallery-dl "$image_url" @args
 }
 
-function fed () {
-  $location = $args[0] ?? "."
-  $query = $args[2..$args.length]
-  $pattern = "."
-  $editor = "$env:PREFERRED_EDITOR" ?? 'vim'
-  $options = getPsFzfOptions
+# function fed () {
+#   $location = $args[0] ?? "."
+#   $query = $args[2..$args.length]
+#   $pattern = "."
+#   $editor = "$env:PREFERRED_EDITOR" ?? 'vim'
+#   $options = getPsFzfOptions
 
-  if ( -not (Test-Path $location) ) {
-    $pattern = "$location"
-    $location = "$HOME"
-  }
+#   if ( -not (Test-Path $location) ) {
+#     $pattern = "$location"
+#     $location = "$HOME"
+#   }
 
-  $location = if ("$location" -eq "~") { "$HOME" } else { "$location" }
-  if ("$location" -like '~*') {
-    $location = "$HOME" + $location.Substring(1)
-  }
+#   $location = if ("$location" -eq "~") { "$HOME" } else { "$location" }
+#   if ("$location" -like '~*') {
+#     $location = "$HOME" + $location.Substring(1)
+#   }
 
-  $exclude = fd-Excluded
+#   $exclude = fd-Options
 
-  $selection = @($(
-    fd `
-      @exclude `
-      --path-separator '/' `
-      --color=always `
-      -tf `
-      "$pattern" "$location" |
-    Invoke-Fzf `
-      -Multi `
-      -Ansi `
-      -Cycle `
-      -Header "(ctrl-/) Search in: $location" `
-      -Query "$query" `
-      @options
-  ))
+#   $selection = @($(
+#     fd `
+#       @exclude `
+#       --path-separator '/' `
+#       --color=always `
+#       -tf `
+#       "$pattern" "$location" |
+#     Invoke-Fzf `
+#       -Multi `
+#       -Ansi `
+#       -Cycle `
+#       -Header "(ctrl-/) Search in: $location" `
+#       -Query "$query" `
+#       @options
+#   ))
 
-  if (-not $selection) {
-    return
-  }
+#   if (-not $selection) {
+#     return
+#   }
 
-  if ($args[1] -and ($args[1] -ne "-")) {
-    $editor = $args[1]
-  }
+#   if ($args[1] -and ($args[1] -ne "-")) {
+#     $editor = $args[1]
+#   }
 
-  & "$editor" $selection
-}
+#   & "$editor" $selection
+# }
 
-function fedd () {
-  $query = $args[1..$args.length]
-  $editor = "$env:PREFERRED_EDITOR" ?? 'vim'
-  $options = getPsFzfOptions
-  $exclude = fd-Excluded
+# function fedd () {
+#   $query = $args[1..$args.length]
+#   $editor = "$env:PREFERRED_EDITOR" ?? 'vim'
+#   $options = getPsFzfOptions
+#   $exclude = fd-Options
 
-  $selection = "$(
-    fd `
-      @exclude `
-      --path-separator '/' `
-      --color=always `
-      -tf |
-    Invoke-Fzf `
-      -Multi `
-      -Cycle `
-      -Header "(ctrl-/) Search in: $location" `
-      -Query "$query" `
-      @options
-    )"
-  # -Bind ctrl-/:toggle-preview `
-# -Preview "bat --color=always {}" `
+#   $selection = "$(
+#     fd `
+#       @exclude `
+#       --path-separator '/' `
+#       --color=always `
+#       -tf |
+#     Invoke-Fzf `
+#       -Multi `
+#       -Cycle `
+#       -Header "(ctrl-/) Search in: $location" `
+#       -Query "$query" `
+#       @options
+#     )"
+#   # -Bind ctrl-/:toggle-preview `
+# # -Preview "bat --color=always {}" `
 
-  if ((-not $selection) -or (-not (Test-Path $selection))) {
-    return
-  }
+#   if ((-not $selection) -or (-not (Test-Path $selection))) {
+#     return
+#   }
 
-  if ($args[0] -and ($args[0] -ne "-")) {
-    $editor = $args[0]
-  }
+#   if ($args[0] -and ($args[0] -ne "-")) {
+#     $editor = $args[0]
+#   }
 
-  & "$editor" "$selection"
-}
+#   & "$editor" "$selection"
+# }
 
 if (Test-Path Alias:utf8) { Remove-Item Alias:utf8 }
 Set-Alias -Name utf8 -Value With-UTF8
@@ -1429,7 +1429,7 @@ function ptc () {
     $location = "$HOME"
   }
 
-  $exclude = fd-Excluded
+  $exclude = fd-Options
 
   $selection = "$(
     &{
@@ -1637,7 +1637,7 @@ function Test-ReparsePoint([string]$path) {
 function frm () {
   $query = "$args"
   $options = getPsFzfOptions
-  $exclude = fd-Excluded
+  $exclude = fd-Options
 
   fd `
     @exclude `
@@ -1659,7 +1659,7 @@ function frm () {
 function frdr () {
   $query = "$args"
   $options = getPsFzfOptions
-  $exclude = fd-Excluded
+  $exclude = fd-Options
 
   fd `
     @exclude `
