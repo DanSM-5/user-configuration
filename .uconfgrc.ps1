@@ -108,14 +108,16 @@ if (Test-Command fzf) {
 
   $env:FZF_CTRL_R_OPTS = "
     --history=$env:FZF_HIST_DIR/fzf-history-ctrlr
-    --preview 'pwsh -NoLogo -NonInteractive -NoProfile -File ${env:user_conf_path}${dirsep}utils${dirsep}log-helper.ps1 {}' --preview-window up:3:hidden:wrap
+    --with-shell 'pwsh -NoLogo -NonInteractive -NoProfile -Command'
+    --preview '$SCONF/utils/log-helper.ps1 {}'
+    --preview-window up:3:hidden:wrap
     --bind 'alt-a:select-all'
     --bind 'alt-d:deselect-all'
     --bind 'alt-f:first'
     --bind 'alt-l:last'
     --bind 'alt-c:clear-query'
     --bind 'ctrl-/:toggle-preview,ctrl-s:toggle-sort'
-    --bind 'ctrl-y:execute-silent(pwsh -NoLogo -NonInteractive -NoProfile -File ${env:user_conf_path}${dirsep}utils${dirsep}copy-helper.ps1 {})+abort'
+    --bind 'ctrl-y:execute-silent($SCONF/utils/copy-helper.ps1 {})+abort'
     --color header:italic
     --prompt 'History> '
     --ansi --cycle
@@ -134,16 +136,16 @@ if (Test-Command fzf) {
     --bind `"ctrl-a:change-prompt(All> )+reload($fzfFdScript)`"
     --bind `"ctrl-f:change-prompt(Files> )+reload($fzfFdScript --type file)`"
     --bind `"ctrl-d:change-prompt(Dirs> )+reload($fzfFdScript --type directory)`"
-    --bind `"ctrl-t:change-prompt(CWD> )+reload(pwsh -NoLogo -NoProfile -NonInteractive -Command eza --color=always --all --dereference --oneline --group-directories-first `$PWD)`"
+    --bind `"ctrl-t:change-prompt(CWD> )+reload(eza --color=always --all --dereference --oneline --group-directories-first `$PWD)`"
     --bind 'ctrl-y:execute-silent($fzfCopyHelper {+f})+abort'
-    --bind `"ctrl-o:execute-silent(pwsh -NoLogo -NoProfile -NonInteractive -Command Start-Process '{}')+abort`"
+    --bind `"ctrl-o:execute-silent(Start-Process {})+abort`"
     --bind 'alt-a:select-all'
     --bind 'alt-d:deselect-all'
     --bind 'alt-f:first'
     --bind 'alt-l:last'
     --bind 'alt-c:clear-query'
     --preview-window '60%'
-    --preview '$fzfPreviewScript " + ". {}'
+    --preview '$fzfPreviewScript . {}'
     --with-shell 'pwsh -NoLogo -NonInteractive -NoProfile -Command'
     --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort'"
 
@@ -153,14 +155,14 @@ if (Test-Command fzf) {
     --prompt 'CD> '
     --color header:italic
     --preview-window '60%'
-    --preview '$fzfPreviewScript " + ". {}'
+    --preview '$fzfPreviewScript . {}'
     --bind 'alt-a:select-all'
     --bind 'alt-d:deselect-all'
     --bind 'alt-f:first'
     --bind 'alt-l:last'
     --bind 'alt-c:clear-query'
     --with-shell 'pwsh -NoLogo -NonInteractive -NoProfile -Command'
-    --bind `"ctrl-t:change-prompt(CWD> )+reload(pwsh -NoLogo -NoProfile -NonInteractive -Command eza -A --show-symlinks --color=always --only-dirs --dereference --no-quotes --oneline `$PWD)`"
+    --bind `"ctrl-t:change-prompt(CWD> )+reload(eza -A --show-symlinks --color=always --only-dirs --dereference --no-quotes --oneline `$PWD)`"
     --bind `"ctrl-a:change-prompt(Cd> )+reload($fzfFdDirsScript)`"
     --bind `"ctrl-u:change-prompt(Up> )+reload($fzfFdDirsScript . ..)`"
     --bind `"ctrl-e:change-prompt(Config> )+reload(echo $SCONF ; $fzfFdDirsScript . $SCONF)`"

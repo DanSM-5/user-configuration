@@ -111,7 +111,14 @@ Set-Alias -Name utf8 -Value With-UTF8
 if (Get-Command -Name 'fzf' -ErrorAction SilentlyContinue) {
   $SHOME = $HOME.Replace('\', '/')
   $SCONF = $user_conf_path.Replace('\', '/')
+  $SCRIP = $user_scripts_path.Replace('\', '/')
   $env:FZF_HIST_DIR = "$SHOME/.cache/fzf-history" 
+
+  # temporary variables
+  $fzfPreviewScript = "$SCONF/utils/fzf-preview.ps1"
+  $fzfFdScript = "$SCONF/fzf/ctrl_t_command.ps1"
+  $fzfFdDirsScript = "$SCONF/fzf/alt_c_command.ps1"
+  $fzfCopyHelper = "$SCONF/utils/copy-helper.ps1"
 
   if (!(Test-Path -PathType Container -Path $env:FZF_HIST_DIR -ErrorAction SilentlyContinue)) {
     New-Item -Path $env:FZF_HIST_DIR -ItemType Directory -ErrorAction SilentlyContinue
@@ -120,36 +127,46 @@ if (Get-Command -Name 'fzf' -ErrorAction SilentlyContinue) {
   $env:FZF_DEFAULT_OPTS="--history=$env:FZF_HIST_DIR/fzf-history-default"
   $env:FZF_DEFAULT_OPTS_FILE="$SCONF/fzf/fzf-default-opts"
 
-  # temporary variables
-  $fzfPreviewScript = "$SCONF/utils/fzf-preview.ps1"
-  $fzfFdScript = "$SCONF/fzf/ctrl_t_command.ps1"
-  $fzfCopyHelper = "$SCONF/utils/copy-helper.ps1"
-
   $env:FZF_CTRL_R_OPTS = "
-    --preview 'pwsh -NoLogo -NonInteractive -NoProfile -File ${env:user_conf_path}\utils\log-helper.ps1 {}' --preview-window up:3:hidden:wrap
+    --history=$env:FZF_HIST_DIR/fzf-history-ctrlr
+    --with-shell 'powershell -NoLogo -NonInteractive -NoProfile -Command'
+    --preview '$SCONF/utils/log-helper.ps1 {}'
+    --preview-window up:3:hidden:wrap
+    --bind 'alt-a:select-all'
+    --bind 'alt-d:deselect-all'
+    --bind 'alt-f:first'
+    --bind 'alt-l:last'
+    --bind 'alt-c:clear-query'
     --bind 'ctrl-/:toggle-preview,ctrl-s:toggle-sort'
-    --bind 'ctrl-y:execute-silent(pwsh -NoLogo -NonInteractive -NoProfile -File ${env:user_conf_path}\utils\copy-helper.ps1 {})+abort'
+    --bind 'ctrl-y:execute-silent($SCONF/utils/copy-helper.ps1 {})+abort'
     --color header:italic
+    --prompt 'History> '
+    --ansi --cycle
     --header 'ctrl-y: Copy'"
 
+  # Evaluate the use of
+  # --with-shell 'pwsh -NoLogo -NonInteractive -NoProfile -C'
+  # It fails in preview script with multi word files unlike current implementation
   $env:FZF_CTRL_T_OPTS = "
+    --history=$env:FZF_HIST_DIR/fzf-history-ctrlt
     --multi
     --ansi --cycle
     --header 'ctrl-a: All | ctrl-d: Dirs | ctrl-f: Files | ctrl-y: Copy | ctrl-t: CWD'
     --prompt 'All> '
+    --color header:italic
     --bind `"ctrl-a:change-prompt(All> )+reload($fzfFdScript)`"
     --bind `"ctrl-f:change-prompt(Files> )+reload($fzfFdScript --type file)`"
     --bind `"ctrl-d:change-prompt(Dirs> )+reload($fzfFdScript --type directory)`"
-    --bind `"ctrl-t:change-prompt(CWD> )+reload(pwsh -NoLogo -NoProfile -NonInteractive -Command eza --color=always --all --dereference --oneline --group-directories-first `$PWD)`"
+    --bind `"ctrl-t:change-prompt(CWD> )+reload(eza --color=always --all --dereference --oneline --group-directories-first `$PWD)`"
     --bind 'ctrl-y:execute-silent($fzfCopyHelper {+f})+abort'
-    --bind `"ctrl-o:execute-silent(pwsh -NoLogo -NoProfile -NonInteractive -Command Start-Process '{}')+abort`"
+    --bind `"ctrl-o:execute-silent(Start-Process {})+abort`"
     --bind 'alt-a:select-all'
     --bind 'alt-d:deselect-all'
     --bind 'alt-f:first'
     --bind 'alt-l:last'
     --bind 'alt-c:clear-query'
     --preview-window '60%'
-    --preview '$fzfPreviewScript " + ". {}'
+    --preview '$fzfPreviewScript . {}'
     --with-shell 'powershell -NoLogo -NonInteractive -NoProfile -Command'
     --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort'"
 
@@ -159,21 +176,27 @@ if (Get-Command -Name 'fzf' -ErrorAction SilentlyContinue) {
     --prompt 'CD> '
     --color header:italic
     --preview-window '60%'
-    --preview '$fzfPreviewScript " + ". {}'
+    --preview '$fzfPreviewScript . {}'
     --bind 'alt-a:select-all'
     --bind 'alt-d:deselect-all'
     --bind 'alt-f:first'
     --bind 'alt-l:last'
     --bind 'alt-c:clear-query'
     --with-shell 'powershell -NoLogo -NonInteractive -NoProfile -Command'
-    --bind `"ctrl-a:change-prompt(CD> )+reload($fzfFdScript --color=always)`"
-    --bind `"ctrl-t:change-prompt(CWD> )+reload(pwsh -NoLogo -NoProfile -NonInteractive -Command eza -A --show-symlinks --color=always --only-dirs --dereference --no-quotes --oneline `$PWD)`"
+    --bind `"ctrl-t:change-prompt(CWD> )+reload(eza -A --show-symlinks --color=always --only-dirs --dereference --no-quotes --oneline `$PWD)`"
+    --bind `"ctrl-a:change-prompt(Cd> )+reload($fzfFdDirsScript)`"
+    --bind `"ctrl-u:change-prompt(Up> )+reload($fzfFdDirsScript . ..)`"
+    --bind `"ctrl-e:change-prompt(Config> )+reload(echo $SCONF ; $fzfFdDirsScript . $SCONF)`"
+    --bind `"ctrl-r:change-prompt(Scripts> )+reload(echo $SCRIP ; $fzfFdDirsScript . $SCRIP)`"
+    --bind `"ctrl-w:change-prompt(Projects> )+reload($fzfFdDirsScript . $SHOME/projects)`"
     --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort'"
 
   Remove-Variable SHOME
   Remove-Variable SCONF
+  Remove-Variable SCRIP
   Remove-Variable fzfPreviewScript
   Remove-Variable fzfFdScript
+  Remove-Variable fzfFdDirsScript
   Remove-Variable fzfCopyHelper
 }
 
@@ -191,14 +214,15 @@ if (Test-Path "$script:gsudoModule") {
   Set-Alias -Name sudo -Value gsudo
 }
 
-if ((Get-Module PSReadLine).Version -ge '2.2') {
+if ((Get-Module PSReadLine).Version -ge [Version]'2.2.0') {
   Set-PSReadLineOption -PredictionSource History
   Set-PSReadLineOption -Colors @{ InlinePrediction = "#B3E5FF" }
   Set-PSReadLineKeyHandler -Chord "Ctrl+RightArrow" -Function ForwardWord
   Set-PSReadLineKeyHandler -Chord "Ctrl+LeftArrow" -Function BackwardWord
-  Set-PSReadLineKeyHandler -Chord "Ctrl+n" -Function HistorySearchForward
-  Set-PSReadLineKeyHandler -Chord "Ctrl+p" -Function HistorySearchBackward
 }
+
+Set-PSReadLineKeyHandler -Chord "Ctrl+n" -Function HistorySearchForward
+Set-PSReadLineKeyHandler -Chord "Ctrl+p" -Function HistorySearchBackward
 
 Import-Module DirColors -ErrorAction SilentlyContinue
 if (Get-Module DirColors -ErrorAction SilentlyContinue) {
@@ -246,7 +270,7 @@ if (Get-Command -Name 'eza' -ErrorAction SilentlyContinue) {
     # $position = $PSCmdlet.MyInvocation.PipelinePosition
     # $length = $PSCmdlet.MyInvocation.PipelineLength
 
-    $filesFound = Get-ChildItem -Path $path -Force:$All -ErrorAction SilentlyContinue | % {
+    $filesFound = Get-ChildItem -Path $path -Force:$All -ErrorAction SilentlyContinue | ForEach-Object {
       $fileName = $_.Name
 
       # Return filename as it, no need to format for pipeline
