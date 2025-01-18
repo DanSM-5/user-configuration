@@ -685,14 +685,13 @@ function fif () {
   }
 
   $single = "$args"
-  $options = getPsFzfOptions
+  $options = getFzfOptions
 
   rg --color=always --files-with-matches --no-messages "$single" |
-    Invoke-Fzf `
-      -Ansi -Cycle `
-      -Height $options.Height -MinHeight $options.MinHeight -Border `
-      -Bind $options.Bind `
-      -Preview "pwsh -NoLogo -NonInteractive -NoProfile -File $env:user_conf_path/utils/highlight.ps1 \`"$single\`" {}"
+    fzf `
+      --ansi --cycle `
+      @options `
+      --preview "pwsh -NoLogo -NonInteractive -NoProfile -Command $env:user_conf_path/utils/highlight.ps1 `"$single`" {}"
 }
 
 function fdirs () {
