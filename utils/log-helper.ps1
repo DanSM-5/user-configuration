@@ -1,6 +1,6 @@
 # Helper to log content
 
-$content = "$args" || ""
+$content = if ($args) { "$args" } else { "" }
 
 $content | bat -pp --color=always --language powershell
 
