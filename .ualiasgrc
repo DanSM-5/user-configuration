@@ -36,11 +36,13 @@ fzf-defaults () {
   # --preview-window '~4,+{2}+4/3,<80(up)'
   fzf --height 80% --min-height 20 --border \
     --info=inline \
-    --bind 'ctrl-^:toggle-preview' \
-    --bind "ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort" \
     --bind 'alt-f:first' \
     --bind 'alt-l:last' \
     --bind 'alt-c:clear-query' \
+    --bind 'ctrl-^:toggle-preview' \
+    --bind 'ctrl-/:change-preview-window(down|hidden|)' \
+    --bind 'alt-up:preview-page-up,alt-down:preview-page-down' \
+    --bind 'ctrl-s:toggle-sort' \
     --header 'Press CTRL-/ to toggle preview' \
     "$@"
 }
@@ -336,48 +338,6 @@ gprevr () {
   else
     git diff HEAD~"$first"..HEAD~"$second" | bat
   fi
-}
-
-# fshow - git commit browser (enter for show, ctrl-d for diff, ` toggles sort)
-fshow() {
-  git rev-parse HEAD > /dev/null 2>&1 || return
-
-  local def_pager="less -R"
-  local pager=""
-  if [ -n "$__git_pager__" ]; then
-    # if set pager is delta
-    pager="$__git_pager__ --paging=always"
-  else
-    pager="$def_pager"
-  fi
-  local out shas sha q k
-  while out=$(
-      git log --graph --color=always \
-          --format="%C(auto)%h%d %s %C(black)%C(bold)%cr" "$@" |
-      fzf-defaults --ansi --multi --no-sort --reverse --query="$q" \
-          --bind 'ctrl-a:select-all' \
-          --bind 'ctrl-d:deselect-all' \
-          "--history=$FZF_HIST_DIR/fzf-git_show" \
-          --print-query --expect=ctrl-d --bind=ctrl-s:toggle-sort); do
-    q=$(head -1 <<< "$out")
-    k=$(head -2 <<< "$out" | tail -1)
-    # shas=($(sed '1,2d;s/^[^a-z0-9]*//;/^$/d' <<< "$out" | awk '{print $1}'))
-
-    shas=()
-    while IFS='' read -r new_sha; do
-      shas+=("$new_sha")
-    done < <(sed '1,2d;s/^[^a-z0-9]*//;/^$/d' <<< "$out" | awk '{print $1}')
-
-    # shellcheck disable=SC2128
-    [ -z "$shas" ] && continue
-    if [ "$k" = ctrl-d ]; then
-      bash -c "git diff --color=always ${shas[*]} | $pager"
-    else
-      for sha in "${shas[@]}"; do
-        bash -c "git show --color=always $sha | $pager"
-      done
-    fi
-  done
 }
 
 fadd () {

@@ -4,11 +4,11 @@
 
 # Ref: https://gist.github.com/junegunn/8b572b8d4b5eddd8b85e5f4d40f17236
 
-is_in_git_repo() {
+is_in_git_repo () {
   git rev-parse HEAD > /dev/null 2>&1
 }
 
-fzf-down() {
+fzf-down () {
   fzf --height 50% \
     --min-height 20 \
     --info=inline \
@@ -140,5 +140,45 @@ fgs () {
     --query "$INITIAL_QUERY" |
   cut -d: -f1
   # git stash list | fzf-down --reverse -d: --preview 'git show --color=always {1}' |
+}
+
+# fshow - git commit browser (enter for show, ctrl-d for diff, ` toggles sort)
+fshow () {
+  git rev-parse HEAD > /dev/null 2>&1 || return
+
+  local def_pager="less -R"
+  local pager=""
+  if [ -n "$__git_pager__" ]; then
+    # if set pager is delta
+    pager="$__git_pager__ --paging=always"
+  else
+    pager="$def_pager"
+  fi
+  local out shas sha q k
+  while out=$(
+      git log --graph --color=always \
+          --format="%C(auto)%h%d %s %C(black)%C(bold)%cr" "$@" |
+      fzf-down --ansi --multi --no-sort --reverse --query="$q" \
+          "--history=$FZF_HIST_DIR/fzf-git_show" \
+          --print-query --expect=ctrl-d --bind=ctrl-s:toggle-sort); do
+    q=$(head -1 <<< "$out")
+    k=$(head -2 <<< "$out" | tail -1)
+    # shas=($(sed '1,2d;s/^[^a-z0-9]*//;/^$/d' <<< "$out" | awk '{print $1}'))
+
+    shas=()
+    while IFS='' read -r new_sha; do
+      shas+=("$new_sha")
+    done < <(sed '1,2d;s/^[^a-z0-9]*//;/^$/d' <<< "$out" | awk '{print $1}')
+
+    # shellcheck disable=SC2128
+    [ -z "$shas" ] && continue
+    if [ "$k" = ctrl-d ]; then
+      bash -c "git diff --color=always ${shas[*]} | $pager"
+    else
+      for sha in "${shas[@]}"; do
+        bash -c "git show --color=always $sha | $pager"
+      done
+    fi
+  done
 }
 
