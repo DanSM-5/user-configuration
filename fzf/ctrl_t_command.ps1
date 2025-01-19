@@ -1,5 +1,7 @@
 #!/usr/bin/env pwsh
 
+$user_conf_path = if ($env:user_conf_path) { $env:user_conf_path } else { "$HOME/.usr_conf" }
+
 $fd_exclude_file = "$user_conf_path/fzf/fd_exclude"
 $fd_show_file = "$user_conf_path/fzf/fd_show"
 

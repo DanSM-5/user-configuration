@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+user_conf_path="${user_conf_path:-"$HOME/.usr_conf"}"
+
 fd_exclude_file="$user_conf_path/fzf/fd_exclude"
 fd_show_file="$user_conf_path/fzf/fd_show"
 
