@@ -74,7 +74,7 @@ fzf \
   --bind 'alt-c:clear-query' \
   --bind 'alt-a:select-all' \
   --bind 'alt-d:deselect-all' \
-  --bind "0:toggle-preview" \
+  --bind "ctrl-^:toggle-preview" \
   --bind "ctrl-l:toggle-preview" \
   --bind 'ctrl-/:toggle-preview' \
   --bind "start:$RELOAD" \
