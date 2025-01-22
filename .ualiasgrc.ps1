@@ -1058,12 +1058,6 @@ if (Get-Command -Name 'eza' -ErrorAction SilentlyContinue) {
 function pvim() { vim --clean @args }
 function pnvim() { nvim --clean @args }
 
-function ntmp {
-  $temporary = if ($env:TEMP) { $env:TEMP } else { "${HOME}${dirsep}tmp" }
-  $editor = if ($env:PREFERRED_EDITOR) { $env:PREFERRED_EDITOR } else { vim }
-  & $editor "$temporary/tmp-$(New-Guid).md"
-}
-
 # extract files
 function ex () {
   $filename = $args[0]

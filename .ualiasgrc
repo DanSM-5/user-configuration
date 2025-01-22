@@ -1007,11 +1007,6 @@ trim () {
   ltrim | rtrim
 }
 
-# Open temp file on [n]vim
-ntmp () {
-  "${PREFERRED_EDITOR:-vim}" "/tmp/tmp-$(uuidgen 2>/dev/null || date +%d-%m-%Y_%H-%M-%S).md"
-}
-
 # extract files
 ex () {
   # $1 must be file name
