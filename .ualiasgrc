@@ -35,7 +35,7 @@ fzf-defaults () {
   # --bind ctrl-/:toggle-preview \
   # --preview-window '~4,+{2}+4/3,<80(up)'
   fzf --height 80% --min-height 20 --border \
-    --info=inline \
+    --input-border \
     --bind 'alt-f:first' \
     --bind 'alt-l:last' \
     --bind 'alt-c:clear-query' \

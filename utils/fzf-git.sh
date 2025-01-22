@@ -11,7 +11,7 @@ is_in_git_repo () {
 fzf-down () {
   fzf --height 50% \
     --min-height 20 \
-    --info=inline \
+    --input-border \
     --cycle \
     --layout=reverse \
     --multi \

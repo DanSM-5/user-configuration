@@ -18,7 +18,7 @@ function get_fzf_down_options() {
   $options = @(
     '--height', '50%',
     '--min-height', '20',
-    '--info=inline',
+    '--input-border',
     '--cycle',
     '--layout=reverse',
     '--multi',

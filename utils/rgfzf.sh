@@ -66,7 +66,8 @@ fi
 fzf \
   --header '╱ CTRL-R (Ripgrep mode) ╱ CTRL-F (fzf mode) ╱' \
   --disabled --ansi --multi \
-  --cycle --info=inline \
+  --cycle \
+  --input-border \
   --bind 'alt-up:preview-page-up,alt-down:preview-page-down' \
   --bind 'ctrl-s:toggle-sort' \
   --bind 'alt-f:first' \

@@ -108,6 +108,7 @@ if (Test-Command fzf) {
 
   $env:FZF_CTRL_R_OPTS = "
     --history=$env:FZF_HIST_DIR/fzf-history-ctrlr
+    --input-border
     --with-shell 'pwsh -NoLogo -NonInteractive -NoProfile -Command'
     --preview '$SCONF/utils/log-helper.ps1 {}'
     --preview-window up:3:hidden:wrap
@@ -128,6 +129,7 @@ if (Test-Command fzf) {
   # It fails in preview script with multi word files unlike current implementation
   $env:FZF_CTRL_T_OPTS = "
     --history=$env:FZF_HIST_DIR/fzf-history-ctrlt
+    --input-border
     --multi
     --ansi --cycle
     --header 'ctrl-a: All | ctrl-d: Dirs | ctrl-f: Files | ctrl-y: Copy | ctrl-t: CWD'
@@ -151,6 +153,7 @@ if (Test-Command fzf) {
 
   $env:FZF_ALT_C_OPTS = "
     --history=$env:FZF_HIST_DIR/fzf-history-altc
+    --input-border
     --ansi --cycle
     --prompt 'CD> '
     --color header:italic

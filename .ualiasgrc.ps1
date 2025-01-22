@@ -86,7 +86,7 @@ function getFzfOptions () {
     '--preview', $fzf_preview_normal,
     '--height', '80%',
     '--min-height', '20',
-    '--info=inline',
+    '--input-border',
     '--border'
   )
 

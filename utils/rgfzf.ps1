@@ -214,7 +214,8 @@ function Invoke-PsFzfRipgrep() {
         & $script:FzfLocation --ansi `
           --header '╱ CTRL-R (Ripgrep mode) ╱ CTRL-F (fzf mode) ╱' `
           --disabled --ansi --multi `
-          --cycle --info=inline `
+          --cycle `
+          --input-border `
           --with-shell 'pwsh -NoLogo -NonInteractive -NoProfile -Command' `
           --bind 'alt-up:preview-page-up,alt-down:preview-page-down' `
           --bind 'ctrl-s:toggle-sort' `

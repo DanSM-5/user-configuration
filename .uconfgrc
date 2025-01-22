@@ -315,6 +315,7 @@ set_general_after () {
     # CTRL-Y to copy the command into clipboard using pbcopy
     export FZF_CTRL_R_OPTS="
       --history=$FZF_HIST_DIR/fzf-history-ctrlr
+      --input-border
       --preview 'bat --color=always -pp --language bash <<< {2..}' --preview-window up:3:hidden:wrap
       --bind 'alt-a:select-all'
       --bind 'alt-d:deselect-all'
@@ -332,6 +333,7 @@ set_general_after () {
     # Print tree structure in the preview window
     export FZF_ALT_C_OPTS="
       --history=$FZF_HIST_DIR/fzf-history-altc
+      --input-border
       --prompt 'CD> '
       --color header:italic
       --ansi --cycle
@@ -352,6 +354,7 @@ set_general_after () {
 
     export FZF_CTRL_T_OPTS="
       --history=$FZF_HIST_DIR/fzf-history-ctrlt
+      --input-border
       --multi
       --ansi --cycle
       --header 'ctrl-a: All | ctrl-d: Dirs | ctrl-f: Files | ctrl-y: Copy | ctrl-t: CWD | ctrl-o: Open'
