@@ -43,6 +43,7 @@ fgf () {
     --query "$INITIAL_QUERY" \
     "--history=$FZF_HIST_DIR/fzf-git_file" \
     --preview-window '60%' \
+    --prompt 'Files> ' \
     --preview "selected=\$(printf '%s' {2..} | sed 's/^\"//' | sed 's/\"$//') ;
       if [ -f \"\$selected\" ]; then
         git diff --color=always -- \"\$selected\"""$__page_command__"' |
@@ -61,6 +62,7 @@ fgb () {
   git branch -a --color=always | grep -v '/HEAD\s' | sort |
   fzf-down --ansi --tac \
     --preview-window right:70% \
+    --prompt 'Branches> ' \
     --query "$INITIAL_QUERY" \
     "--history=$FZF_HIST_DIR/fzf-git_branch" \
     --preview '
@@ -74,6 +76,7 @@ fgt () {
   local INITIAL_QUERY="${*:-}"
   git tag --sort -version:refname |
   fzf-down --preview-window right:70% \
+    --prompt 'Tags> ' \
     --query "$INITIAL_QUERY" \
     --preview '
       git show --color=always {}'"$__page_command__"' |
@@ -88,6 +91,7 @@ fgh () {
     --format="%C(green)%C(bold)%cd %C(auto)%h%d %s (%an)" \
     --graph --color=always |
   fzf-down --ansi --no-sort --reverse \
+    --prompt 'Hashes> ' \
     --query "$INITIAL_QUERY" \
     "--history=$FZF_HIST_DIR/fzf-git_hash" \
     --header 'Press CTRL-S to toggle sort' \
@@ -106,6 +110,7 @@ fgha () {
     --format="%C(green)%C(bold)%cd %C(auto)%h%d %s (%an)" \
     --graph --color=always |
   fzf-down --ansi --no-sort --reverse \
+    --prompt 'All Hashes> ' \
     --query "$INITIAL_QUERY" \
     "--history=$FZF_HIST_DIR/fzf-git_hash-all" \
     --header 'Press CTRL-S to toggle sort' \
@@ -121,6 +126,7 @@ fgr () {
   local INITIAL_QUERY="${*:-}"
   git remote -v | awk '{print $1 "\t" $2}' | uniq |
   fzf-down --tac \
+    --prompt 'Remotes> ' \
     --query "$INITIAL_QUERY" \
     "--history=$FZF_HIST_DIR/fzf-git_remote" \
     --preview '
@@ -133,6 +139,7 @@ fgs () {
   local INITIAL_QUERY="${*:-}"
   git stash list |
     fzf-down --reverse -d: \
+      --prompt 'Stashes> ' \
       "--history=$FZF_HIST_DIR/fzf-git_stash" \
       --preview '
         git show --color=always {1}'"$__page_command__"' |
@@ -159,6 +166,7 @@ fshow () {
       git log --graph --color=always \
           --format="%C(auto)%h%d %s %C(black)%C(bold)%cr" "$@" |
       fzf-down --ansi --multi --no-sort --reverse --query="$q" \
+          --prompt 'Commits> ' \
           "--history=$FZF_HIST_DIR/fzf-git_show" \
           --print-query --expect=ctrl-d --bind=ctrl-s:toggle-sort); do
     q=$(head -1 <<< "$out")

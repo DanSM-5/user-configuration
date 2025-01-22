@@ -66,6 +66,7 @@ function fgf () {
   $down_options = get_fzf_down_options
   $cmd_options = @(
     "--query=$query",
+    '--prompt', 'Files> ',
     "--history=$env:FZF_HIST_DIR/fzf-git_file",
     '--preview-window', '60%',
     '--ansi',
@@ -110,6 +111,7 @@ function fgb () {
   $down_options = get_fzf_down_options
   $cmd_options = @(
     "--query=$query",
+    '--prompt', 'Branches> ',
     "--history=$env:FZF_HIST_DIR/fzf-git_branch",
     '--ansi',
     '--tac',
@@ -153,6 +155,7 @@ function fgt () {
   $down_options = get_fzf_down_options
   $cmd_options = @(
     "--query=$query",
+    '--prompt', 'Tags> ',
     "--history=$env:FZF_HIST_DIR/fzf-git_tag",
     '--preview-window', 'right:70%',
     '--preview', $preview
@@ -197,6 +200,7 @@ function fgh () {
   $down_options = get_fzf_down_options
   $cmd_options = @(
     "--query=$query",
+    '--prompt', 'Hashes> ',
     "--history=$env:FZF_HIST_DIR/fzf-git_hash",
     '--ansi',
     '--no-sort',
@@ -250,6 +254,7 @@ function fgha () {
   $down_options = get_fzf_down_options
   $cmd_options = @(
     "--query=$query",
+    '--prompt', 'All Hashes> ',
     "--history=$env:FZF_HIST_DIR/fzf-git_hash-all",
     '--ansi',
     '--no-sort',
@@ -283,6 +288,7 @@ function fgr () {
   $down_options = get_fzf_down_options
   $cmd_options = @(
     "--query=$query",
+    '--prompt', 'Remotes> ',
     "--history=$env:FZF_HIST_DIR/fzf-git_remotes",
     '--tac',
     '--preview', $preview
@@ -313,6 +319,7 @@ function fgs () {
   $down_options = get_fzf_down_options
   $cmd_options = @(
     "--query=$query",
+    '--prompt', 'Stashes> ',
     "--history=$env:FZF_HIST_DIR/fzf-git_stash",
     '--reverse',
     '--delimiter', ':',
@@ -353,6 +360,7 @@ function fshow () {
   $cmd_options = @(
     "--history=$env:FZF_HIST_DIR/fzf-git_show",
     '--query=',
+    '--prompt', 'Commits> ',
     '--ansi',
     '--no-sort',
     '--reverse',
