@@ -153,15 +153,18 @@ function gupdate {
   git fetch
   git pull
 }
-function gpush { git push $args }
-function gadd { git add $args }
-function greset { git reset $args }
-function gbranch { git branch $args }
-function grebase { git grebase $args }
-function gmerge { git merge $args }
-function gco { git checkout $args }
-function gck { git checkout $args }
-function grm { git checkout -- . }
+function gpush { git push @args }
+function gadd { git add @args }
+function greset { git reset @args }
+function gbranch { git branch @args }
+function grebase { git grebase @args }
+function gmerge { git merge @args }
+function gco { git checkout @args }
+function gck { git checkout @args }
+function grm { git checkout @args -- . }
+function egt { git config -e @args }
+function egtg { git config --global -e @args }
+
 function grepo {
   git rev-parse HEAD *> $null
 

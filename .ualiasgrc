@@ -106,6 +106,8 @@ alias gspop="git stash pop"
 alias gsp="git stash push -m"
 alias gss="git stash show"
 alias gsd="git stash drop"
+alias egt="git config -e"
+alias egtg="git config --global -e"
 
 grepo () {
   git rev-parse HEAD > /dev/null 2>&1 || return
