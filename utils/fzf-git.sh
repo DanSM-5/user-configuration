@@ -158,14 +158,24 @@ fshow () {
   if [ -n "$__git_pager__" ]; then
     # if set pager is delta
     pager="$__git_pager__ --paging=always"
+    preview_pager='| delta'
   else
     pager="$def_pager"
+    preview_pager=''
   fi
   local out shas sha q k
+  local preview="
+    grep -o \"[a-f0-9]\{7,\}\" <<< {} |
+      xargs git show --color=always $preview_pager |
+        bat -p --color=always
+  "
+
   while out=$(
       git log --graph --color=always \
           --format="%C(auto)%h%d %s %C(black)%C(bold)%cr" "$@" |
       fzf-down --ansi --multi --no-sort --reverse --query="$q" \
+          --height '80%' \
+          --preview "$preview" \
           --prompt 'Commits> ' \
           "--history=$FZF_HIST_DIR/fzf-git_show" \
           --print-query --expect=ctrl-d --bind=ctrl-s:toggle-sort); do

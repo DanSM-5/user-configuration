@@ -345,26 +345,39 @@ function fgs () {
 function fshow () {
   if (-not (is_in_git_repo)) { return }
 
-  $pager = if (Get-Command delta -ErrorAction SilentlyContinue) {
-    'delta --paging=always'
+  if (Get-Command delta -ErrorAction SilentlyContinue) {
+    $pager = 'delta --paging=always'
+    $preview_pager = '| delta'
   } else {
-    'less -R'
+    $pager = 'less -R'
+    $preview_pager = ''
   }
   $content_file = New-Temporaryfile
   $out = ''
   $shas = ''
   $q = ''
   $k = ''
+  $preview = "
+    `$hash = if ({} -match `"[a-f0-9]{7,}`") {
+      `$matches[0]
+    } else { @() }
+    git show --color=always `$hash $preview_pager |
+      bat -p --color=always
+  "
 
   $down_options = get_fzf_down_options
   $cmd_options = @(
-    "--history=$env:FZF_HIST_DIR/fzf-git_show",
     '--query=',
+    "--history=$env:FZF_HIST_DIR/fzf-git_show",
     '--prompt', 'Commits> ',
     '--ansi',
     '--no-sort',
     '--reverse',
     '--print-query',
+    '--height', '80%',
+    '--header', 'ctrl-d: Diff',
+    '--with-shell', 'pwsh -NoLogo -NonInteractive -NoProfile -Command'
+    '--preview', $preview,
     '--expect=ctrl-d'
   )
 
