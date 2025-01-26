@@ -329,7 +329,7 @@ function fgs () {
   try {
     $selected = git stash list |
       fzf @down_options @cmd_options |
-      cut -d':' -f1
+      cut --delimiter=':' -f1
 
     return $selected
   } finally {
@@ -384,7 +384,7 @@ function fshow () {
       if (-not $shas) { continue; }
       if ($q) { $cmd_options[0] = "--query=$q" }
       if ($k -eq 'ctrl-d') {
-        pwsh -NoLogo -NonInteractive -NoProfile -Command "git show --color=always $shas | $pager"
+        pwsh -NoLogo -NonInteractive -NoProfile -Command "git diff --color=always $shas | $pager"
       } else {
         foreach ($sha in $shas) {
           pwsh -NoLogo -NonInteractive -NoProfile -Command "git show --color=always $sha | $pager"
