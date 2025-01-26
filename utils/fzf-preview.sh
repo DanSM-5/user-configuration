@@ -38,8 +38,18 @@ path="$*"
 
 # NOTE: Remove ' -> ' from symlins for eza until '-X' is fixed
 path="$(printf '%s' "$path" | sed 's| ->.*||')"
+
 # Trim
-path="$(printf '%s' "$path" | LS_COLORS='' xargs)"
+trim () {
+  local var="$*"
+  # remove leading whitespace characters
+  var="${var#"${var%%[![:space:]]*}"}"
+  # remove trailing whitespace characters
+  var="${var%"${var##*[![:space:]]}"}"
+  printf '%s' "$var"
+}
+
+path="$(trim "$path")"
 
 # Escape if any special character
 # path="$(printf "%q" "$path")"
