@@ -94,10 +94,10 @@ if (Test-Command fzf) {
   $env:FZF_HIST_DIR = "$SHOME/.cache/fzf-history" 
 
   # temporary variables
-  $fzfPreviewScript = "$SCONF/utils/fzf-preview.ps1"
-  $fzfFdScript = "$SCONF/fzf/ctrl_t_command.ps1"
-  $fzfFdDirsScript = "$SCONF/fzf/alt_c_command.ps1"
-  $fzfCopyHelper = "$SCONF/utils/copy-helper.ps1"
+  $fzf_preview_script = "$SCONF/utils/fzf-preview.ps1"
+  $ctrl_t_command = "$SCONF/fzf/ctrl_t_command.ps1"
+  $alt_c_command = "$SCONF/fzf/alt_c_command.ps1"
+  $fzf_copy_helper = "$SCONF/utils/copy-helper.ps1"
 
   if (!(Test-Path -PathType Container -Path $env:FZF_HIST_DIR -ErrorAction SilentlyContinue)) {
     New-Item -Path $env:FZF_HIST_DIR -ItemType Directory -ErrorAction SilentlyContinue
@@ -136,11 +136,11 @@ if (Test-Command fzf) {
     --header 'ctrl-a: All | ctrl-d: Dirs | ctrl-f: Files | ctrl-y: Copy | ctrl-t: CWD'
     --prompt 'All> '
     --color header:italic
-    --bind `"ctrl-a:change-prompt(All> )+reload($fzfFdScript)`"
-    --bind `"ctrl-f:change-prompt(Files> )+reload($fzfFdScript --type file)`"
-    --bind `"ctrl-d:change-prompt(Dirs> )+reload($fzfFdScript --type directory)`"
+    --bind `"ctrl-a:change-prompt(All> )+reload($ctrl_t_command)`"
+    --bind `"ctrl-f:change-prompt(Files> )+reload($ctrl_t_command --type file)`"
+    --bind `"ctrl-d:change-prompt(Dirs> )+reload($ctrl_t_command --type directory)`"
     --bind `"ctrl-t:change-prompt(CWD> )+reload(eza --color=always --all --dereference --oneline --group-directories-first `$PWD)`"
-    --bind 'ctrl-y:execute-silent($fzfCopyHelper {+f})+abort'
+    --bind 'ctrl-y:execute-silent($fzf_copy_helper {+f})+abort'
     --bind `"ctrl-o:execute-silent(Start-Process {})+abort`"
     --bind 'alt-a:select-all'
     --bind 'alt-d:deselect-all'
@@ -148,7 +148,7 @@ if (Test-Command fzf) {
     --bind 'alt-l:last'
     --bind 'alt-c:clear-query'
     --preview-window '60%'
-    --preview '$fzfPreviewScript {}'
+    --preview '$fzf_preview_script {}'
     --with-shell 'pwsh -NoLogo -NonInteractive -NoProfile -Command'
     --bind 'ctrl-^:toggle-preview'
     --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort'"
@@ -161,7 +161,7 @@ if (Test-Command fzf) {
     --color header:italic
     --header 'ctrl-a: CD | ctrl-d: Up | ctrl-e: Config | ctrl-r: Scripts | ctrl-t: CWD | ctrl-w: Projects'
     --preview-window '60%'
-    --preview '$fzfPreviewScript {}'
+    --preview '$fzf_preview_script {}'
     --bind 'alt-a:select-all'
     --bind 'alt-d:deselect-all'
     --bind 'alt-f:first'
@@ -169,21 +169,21 @@ if (Test-Command fzf) {
     --bind 'alt-c:clear-query'
     --with-shell 'pwsh -NoLogo -NonInteractive -NoProfile -Command'
     --bind `"ctrl-t:change-prompt(CWD> )+reload(eza -A --show-symlinks --color=always --only-dirs --dereference --no-quotes --oneline `$PWD)`"
-    --bind `"ctrl-a:change-prompt(CD> )+reload($fzfFdDirsScript)`"
-    --bind `"ctrl-u:change-prompt(Up> )+reload($fzfFdDirsScript . ..)`"
-    --bind `"ctrl-e:change-prompt(Config> )+reload(echo $SCONF ; $fzfFdDirsScript . $SCONF)`"
-    --bind `"ctrl-r:change-prompt(Scripts> )+reload(echo $SCRIP ; $fzfFdDirsScript . $SCRIP)`"
-    --bind `"ctrl-w:change-prompt(Projects> )+reload($fzfFdDirsScript . $SHOME/projects)`"
+    --bind `"ctrl-a:change-prompt(CD> )+reload($alt_c_command)`"
+    --bind `"ctrl-u:change-prompt(Up> )+reload($alt_c_command . ..)`"
+    --bind `"ctrl-e:change-prompt(Config> )+reload(echo $SCONF ; $alt_c_command . $SCONF)`"
+    --bind `"ctrl-r:change-prompt(Scripts> )+reload(echo $SCRIP ; $alt_c_command . $SCRIP)`"
+    --bind `"ctrl-w:change-prompt(Projects> )+reload($alt_c_command . $SHOME/projects)`"
     --bind 'ctrl-^:toggle-preview'
     --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort'"
 
   Remove-Variable SHOME
   Remove-Variable SCONF
   Remove-Variable SCRIP
-  Remove-Variable fzfPreviewScript
-  Remove-Variable fzfFdScript
-  Remove-Variable fzfFdDirsScript
-  Remove-Variable fzfCopyHelper
+  Remove-Variable fzf_preview_script
+  Remove-Variable ctrl_t_command
+  Remove-Variable alt_c_command
+  Remove-Variable fzf_copy_helper
 }
 
 if (Test-Command fd) {
