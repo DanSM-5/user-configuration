@@ -41,7 +41,7 @@ function evc { nvim "$(Join-Path -Path $HOME -ChildPath "vim-config${dirsep}vims
 # function evc { nvim "$(Join-Path -Path $HOME -ChildPath ".SpaceVim.d${dirsep}init.toml")" }
 
 $fzfPreviewScript = Join-Path -Path $env:user_conf_path -ChildPath "utils${dirsep}fzf-preview.ps1"
-$fzf_preview_normal = ("pwsh -NoProfile -NonInteractive -NoLogo -File `"$fzfPreviewScript`"" + " \""" + '.' + "\"" {}")
+$fzf_preview_normal = ('pwsh -NoProfile -NonInteractive -NoLogo -File "' + $fzfPreviewScript + '" {}')
 
 function getPsFzfOptions {
   # $path = $PWD.ProviderPath.Replace('\', '/')

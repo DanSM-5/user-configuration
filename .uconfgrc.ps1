@@ -148,7 +148,7 @@ if (Test-Command fzf) {
     --bind 'alt-l:last'
     --bind 'alt-c:clear-query'
     --preview-window '60%'
-    --preview '$fzfPreviewScript . {}'
+    --preview '$fzfPreviewScript {}'
     --with-shell 'pwsh -NoLogo -NonInteractive -NoProfile -Command'
     --bind 'ctrl-^:toggle-preview'
     --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort'"
@@ -161,7 +161,7 @@ if (Test-Command fzf) {
     --color header:italic
     --header 'ctrl-a: CD | ctrl-d: Up | ctrl-e: Config | ctrl-r: Scripts | ctrl-t: CWD | ctrl-w: Projects'
     --preview-window '60%'
-    --preview '$fzfPreviewScript . {}'
+    --preview '$fzfPreviewScript {}'
     --bind 'alt-a:select-all'
     --bind 'alt-d:deselect-all'
     --bind 'alt-f:first'

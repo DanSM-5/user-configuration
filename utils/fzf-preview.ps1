@@ -6,28 +6,14 @@
 
 [CmdletBinding()]
 param (
-  [string] $DirName,
   [string[]]
   [Parameter(ValueFromRemainingArguments = $true)]
   $ItemName
 )
 
-
-if ($ItemName -is [System.Collections.IEnumerable]) {
-  # Multiple arguments received
-  # Cleanup trailing spaces, quotes and path separators
-  $Item = $ItemName | ForEach-Object {
-    $_.Trim("'").Trim('"').Trim('/').Trim('\').Trim()
-  } | Where-Object { $_ }
-  $Item = $Item -Join ' '
-} else {
-  $Item = $ItemName.ToString()
-}
-
-
 # trim quote strings:
-$DirName = $DirName.Trim("'").Trim('"')
-$Item = $Item.Trim("'").Trim('"')
+$Item = ($ItemName -Join ' ').Trim('"').Trim("'").Trim('/').Trim('\').Trim()
+
 # PreviewScript was removed
 # $PreviewScript = $PreviewScript.Trim("'").Trim('"')
 
@@ -40,6 +26,7 @@ if ([System.IO.Path]::IsPathRooted($Item)) {
     $path = $Item
 }
 else {
+    $DirName = if ($env:PREVIEW_INJECTED_DIR) { $env:PREVIEW_INJECTED_DIR } else { '.' }
     $path = Join-Path $DirName $Item
     $path = [System.IO.Path]::GetFullPath($path)
 }
@@ -150,11 +137,11 @@ function show_pdf ([string] $path, [string] $thumbnail) {
 }
 
 # is directory?
-if (Test-Path $path -PathType Container) {
+if (Test-Path -LiteralPath $path -PathType Container) {
   preview_directory
 }
 # is file?
-elseif ((Test-Path $path -PathType leaf) -or (eza -l $path *> $null && $true)) {
+elseif ((Test-Path -LiteralPath $path -PathType leaf) -or (eza -l $path *> $null && $true)) {
   if (-not (Get-Command file -ErrorAction SilentlyContinue)) {
     # use bat (https://github.com/sharkdp/bat) if it's available:
     if ($ansiCompatible -and $(Get-Command bat -ErrorAction SilentlyContinue)) {

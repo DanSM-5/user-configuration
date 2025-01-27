@@ -50,7 +50,7 @@ function fgf () {
         bat -p --color=always;
       Write-Output "";
     }
-    $path_preview_script . `$args;
+    $path_preview_script `$args;
 "@ > $preview_file.FullName
 
   # NOTE: The above command uses sed '1,4d' instead of

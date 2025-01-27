@@ -166,7 +166,7 @@ if (Get-Command -Name 'fzf' -ErrorAction SilentlyContinue) {
     --bind 'alt-l:last'
     --bind 'alt-c:clear-query'
     --preview-window '60%'
-    --preview '$fzfPreviewScript . {}'
+    --preview '$fzfPreviewScript {}'
     --with-shell 'powershell -NoLogo -NonInteractive -NoProfile -Command'
     --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort'"
 
@@ -176,7 +176,7 @@ if (Get-Command -Name 'fzf' -ErrorAction SilentlyContinue) {
     --prompt 'CD> '
     --color header:italic
     --preview-window '60%'
-    --preview '$fzfPreviewScript . {}'
+    --preview '$fzfPreviewScript {}'
     --bind 'alt-a:select-all'
     --bind 'alt-d:deselect-all'
     --bind 'alt-f:first'
