@@ -322,6 +322,7 @@ set_general_after () {
       --bind 'alt-f:first'
       --bind 'alt-l:last'
       --bind 'alt-c:clear-query'
+      --bind 'ctrl-^:toggle-preview'
       --bind 'ctrl-/:toggle-preview'
       --bind 'ctrl-s:toggle-sort'
       --bind 'ctrl-y:execute-silent(echo -n {2..} | \$clipboard_copy)+abort'
@@ -336,6 +337,7 @@ set_general_after () {
       --input-border
       --prompt 'CD> '
       --color header:italic
+      --header 'ctrl-a: CD | ctrl-d: Up | ctrl-e: Config | ctrl-r: Scripts | ctrl-t: CWD | ctrl-w: Projects'
       --ansi --cycle
       --preview-window '60%'
       --preview '$user_conf_path/utils/fzf-preview.sh {}'
@@ -350,6 +352,7 @@ set_general_after () {
       --bind \"ctrl-e:change-prompt(Config> )+reload(echo $SCONF ; $alt_c_command . $SCONF)\"
       --bind \"ctrl-r:change-prompt(Scripts> )+reload(echo $SCRIP ; $alt_c_command . $SCRIP)\"
       --bind \"ctrl-w:change-prompt(Projects> )+reload($alt_c_command . $SHOME/projects)\"
+      --bind 'ctrl-^:toggle-preview'
       --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort'"
 
     export FZF_CTRL_T_OPTS="
@@ -373,6 +376,7 @@ set_general_after () {
       --bind 'alt-c:clear-query'
       --preview-window '60%'
       --preview '$user_conf_path/utils/fzf-preview.sh {}'
+      --bind 'ctrl-^:toggle-preview'
       --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort'"
 
     unset SHOME

@@ -117,6 +117,7 @@ if (Test-Command fzf) {
     --bind 'alt-f:first'
     --bind 'alt-l:last'
     --bind 'alt-c:clear-query'
+    --bind 'ctrl-^:toggle-preview'
     --bind 'ctrl-/:toggle-preview,ctrl-s:toggle-sort'
     --bind 'ctrl-y:execute-silent($SCONF/utils/copy-helper.ps1 {})+abort'
     --color header:italic
@@ -149,6 +150,7 @@ if (Test-Command fzf) {
     --preview-window '60%'
     --preview '$fzfPreviewScript . {}'
     --with-shell 'pwsh -NoLogo -NonInteractive -NoProfile -Command'
+    --bind 'ctrl-^:toggle-preview'
     --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort'"
 
   $env:FZF_ALT_C_OPTS = "
@@ -157,6 +159,7 @@ if (Test-Command fzf) {
     --ansi --cycle
     --prompt 'CD> '
     --color header:italic
+    --header 'ctrl-a: CD | ctrl-d: Up | ctrl-e: Config | ctrl-r: Scripts | ctrl-t: CWD | ctrl-w: Projects'
     --preview-window '60%'
     --preview '$fzfPreviewScript . {}'
     --bind 'alt-a:select-all'
@@ -166,11 +169,12 @@ if (Test-Command fzf) {
     --bind 'alt-c:clear-query'
     --with-shell 'pwsh -NoLogo -NonInteractive -NoProfile -Command'
     --bind `"ctrl-t:change-prompt(CWD> )+reload(eza -A --show-symlinks --color=always --only-dirs --dereference --no-quotes --oneline `$PWD)`"
-    --bind `"ctrl-a:change-prompt(Cd> )+reload($fzfFdDirsScript)`"
+    --bind `"ctrl-a:change-prompt(CD> )+reload($fzfFdDirsScript)`"
     --bind `"ctrl-u:change-prompt(Up> )+reload($fzfFdDirsScript . ..)`"
     --bind `"ctrl-e:change-prompt(Config> )+reload(echo $SCONF ; $fzfFdDirsScript . $SCONF)`"
     --bind `"ctrl-r:change-prompt(Scripts> )+reload(echo $SCRIP ; $fzfFdDirsScript . $SCRIP)`"
     --bind `"ctrl-w:change-prompt(Projects> )+reload($fzfFdDirsScript . $SHOME/projects)`"
+    --bind 'ctrl-^:toggle-preview'
     --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort'"
 
   Remove-Variable SHOME
