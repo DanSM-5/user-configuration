@@ -840,7 +840,7 @@ qnv () {
       --preview "$fzf_preview_normal")
 
   if [ -n "$selection" ]; then
-    cd $selection
+    cd "$selection" || return
   fi
 }
 
@@ -862,7 +862,7 @@ qed () {
   if [ -z "$editor" ]; then
     editor="${PREFERRED_EDITOR:-vim}"
   fi
-  $editor $selection
+  $editor "$selection"
 }
 
 cprj () {
@@ -928,7 +928,7 @@ cprj () {
     return
   fi
 
-  cd "${selection[@]}"
+  cd "${selection[@]}" || return
 }
 
 # Add an "alert" alias for long running commands.  Use like so:
@@ -986,9 +986,9 @@ alias sgal="source '$user_conf_path/.ualiasgrc'"
 
 if [ "$IS_GITBASH" = true ]; then
   if [ "$IS_ZSH" = true ]; then
-    alias refrenv="source $user_conf_path/utils/refrenvz.sh"
+    alias refrenv="source '$user_conf_path/utils/refrenvz.sh'"
   else
-    alias refrenv="source $user_conf_path/utils/refrenv.sh"
+    alias refrenv="source '$user_conf_path/utils/refrenv.sh'"
   fi
 fi
 
@@ -1046,7 +1046,7 @@ ex () {
 archive () {
   atype="$1"
 
-  case atype in
+  case "$atype" in
     tar)   tar cvf "$2" "${@:3}";;
     tgz)   tar czvf "$2" "${@:3}";;
     7z)    7z a "$2" "${@:3}";;
@@ -1226,12 +1226,12 @@ play () {
     return 1
   fi
 
-  if [[ "$url" =~ ".torrent" ]]; then
+  if [[ "$url" =~ .torrent$ ]]; then
     toruw stream --torrent "$url" "$@"
     return 0
   fi
 
-  if [[ "$url" =~ "magnet:" ]]; then
+  if [[ "$url" =~ ^magnet: ]]; then
     toruw stream --magnet "$url" "$@"
     return 0
   fi
@@ -1264,12 +1264,12 @@ tplay () {
     return 1
   fi
 
-  if [[ "$url" =~ ".torrent" ]]; then
+  if [[ "$url" =~ .torrent$ ]]; then
     toruw stream --torrent "$url" "$@"
     return 0
   fi
 
-  if [[ "$url" =~ "magnet:" ]]; then
+  if [[ "$url" =~ ^magnet: ]]; then
     toruw stream --magnet "$url" "$@"
     return 0
   fi
@@ -1283,7 +1283,7 @@ tplay () {
 }
 
 getHostPath () {
-  local input="$@"
+  local input="$*"
   local filepath="$(echo "$input" | tr -d "\r\n")"
 
   if [ -z "$filepath" ]; then
@@ -1339,7 +1339,7 @@ ccd () {
     return 1
   fi
 
-  cd "$filepath"
+  cd "$filepath" || return
 }
 
 ocd () {
@@ -1503,9 +1503,9 @@ if [ "$IS_WSL" = true ]; then
   dgl () {
     # Setting location to windows to avoid
     # issues launching gallery-dl if using windows binary
-    pushd "$WIN_HOME"
+    pushd "$WIN_HOME" || return
     Download-Gdl "$@"
-    popd
+    popd || return
   }
 
   cmd () {
@@ -1622,15 +1622,15 @@ if [ "$IS_WSL" = true ]; then
   }
 
   linuxToWindowsPath () {
-    echo "$(wslpath -aw "$1")"
+    wslpath -aw "$1"
   }
 
   windowsToLinuxPath () {
-    echo "$(wslpath -au "$1")"
+    wslpath -au "$1"
   }
 
   getHostPath () {
-    local input="$@"
+    local input="$*"
     local filepath="$(trim <<< "$input" | tr -d "\r\n")"
 
     if [ -z "$filepath" ]; then
@@ -1660,7 +1660,7 @@ if [ "$IS_WSL" = true ]; then
   }
 
   getPath () {
-    local input="$@"
+    local input="$*"
     local win_path="$(getHostPath "$input")"
 
     printf "%q" "$(wslpath -ua "$win_path")"
@@ -1682,7 +1682,7 @@ if [ "$IS_WSL" = true ]; then
       return 1
     fi
 
-    cd "$(wslpath -au "$filepath")"
+    cd "$(wslpath -au "$filepath")" || return
   }
 
   # ocd () {
@@ -1713,9 +1713,9 @@ if [ "$IS_WSL" = true ]; then
   # }
 
   getTempDir () {
-    pushd "$WIN_HOME" &> /dev/null
+    pushd "$WIN_HOME" &> /dev/null || return
     local dir_path="$(cmd.exe /c "echo %TEMP%" | sed 's/\\ / /g' | sed -e 's/[[:space:]]*$//')"
-    popd &> /dev/null
+    popd &> /dev/null || return
     printf "%q" "$(wslpath -au "$dir_path")"
   }
 
@@ -1782,7 +1782,7 @@ else
     }
 
     clipboard_copyw () {
-      xsel -ib "$@"
+      xsel -ib "$*"
     }
 
     clipboard_pastew () {
@@ -1856,7 +1856,7 @@ else
     }
 
     getPath () {
-      local input="$@"
+      local input="$*"
       local filepath="$(echo "$input" | tr -d "\r\n")"
 
       if [ -z "$filepath" ]; then
@@ -1935,17 +1935,17 @@ else
     }
 
     if [ "$IS_ZSH" = true ]; then
-      alias refrenv="source $user_conf_path/utils/refrenvz.sh"
+      alias refrenv="source '$user_conf_path/utils/refrenvz.sh'"
     else
-      alias refrenv="source $user_conf_path/utils/refrenv.sh"
+      alias refrenv="source '$user_conf_path/utils/refrenv.sh'"
     fi
 
   fi
 fi
 
 fmpv () {
-  local mpv_args="$@"
-  local selection="$(fd -tf --color=always |
+  local mpv_args="$*"
+  local selection=($(fd -tf --color=always |
     fzf --multi --ansi --cycle \
       --info=inline \
       --height 80% --min-height 20 \
@@ -1955,11 +1955,11 @@ fmpv () {
       --bind 'alt-f:first' \
       --bind 'alt-l:last' \
       --bind 'alt-c:clear-query' \
-      --border)"
+      --border))
   if [ -z "$selection" ]; then
     return
   fi
-  local quoted=$(echo $selection |
+  local quoted=$(echo "${selection[$@]}" |
     awk '{ printf "\"""%s""\""" ", $0 }')
   bash -c "$mpv_commd $mpv_args -- $quoted"
 }
@@ -2012,19 +2012,19 @@ getShellAliasAndFunctions () {
 }
 
 fcmd () {
-  local available_commands="$(getShellAliasAndFunctions | sort)"
+  local available_commands=($(getShellAliasAndFunctions | sort))
   local tmpfile="$(mktemp)"
   # Cleanup file on exit
   trap "rm -- '$tmpfile'" EXIT
 
   # Get the output of type and store it in tmpfile
-  for cm in $(echo ${available_commands}); do
+  for cm in "${available_commands[@]}"; do
     echo ""
     type -f "$cm" 2>/dev/null || type "$cm" 2>/dev/null
   done > "$tmpfile"
 
   # --preview "rg -A 20 -B 1 --text --color=always '^{} ' $tmpfile" \
-  echo "$available_commands" |
+  printf '%s\n' "${available_commands[@]}" |
     fzf-defaults \
       --preview "
         item={}
@@ -2082,7 +2082,7 @@ countFiles () {
 
     for dirl in $(fd "${fd_show[@]}" "${fd_exclude[@]}" -td -d 1); do
     # for dirl in .*/ */; do
-      $printFunc "$dirl"
+      "$printFunc" "$dirl"
     done | column -t -s $'\t'
   )
 }
@@ -2122,7 +2122,7 @@ lfcd () {
     # `command` is needed in case `lfcd` is aliased to `lf`
     local path_on_exit="$(command lf -print-last-dir "$@")"
     if [ -d "$path_on_exit" ]; then
-      cd "$path_on_exit"
+      cd "$path_on_exit" || return
     fi
   else
     printf "%s" "Command lf not found. Please intall lf first.\n"

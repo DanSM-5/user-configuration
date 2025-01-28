@@ -313,7 +313,7 @@ function get_bare_repository () {
 
     # Test if detected directory is bare repository
     Push-Location "$bare_root"
-    if ("$(git rev-parse --is-bare-repository 2>/dev/null)" -ne 'true') {
+    if ("$(git rev-parse --is-bare-repository 2> $null)" -ne 'true') {
       Write-Error "Wrongly detecting '$bare_root' as root of bare repository"
       Pop-Location
       return
@@ -376,7 +376,6 @@ function fwc () {
 }
 
 function fwr () {
-  $selection = ''
   $bare_root = ''
 
   $bare_root = get_bare_repository
@@ -1230,12 +1229,6 @@ function restart () { shutdown /r /f /t 0 }
 function turnoff () { shutdown /s /f /t 0 }
 
 function tkill () { taskkill /f /im $args }
-
-function yt-dw () {
-  $video_url = "$(pbpaste)"
-  if ( -not $video_url ) { return }
-  yt-dlp "$video_url" $args
-}
 
 function dwv () {
   $video_url= "$(pbpaste)"
