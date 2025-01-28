@@ -7,3 +7,6 @@
 
 # Directory to read files from
 prj
+# device specific list of repos
+repos/device
+

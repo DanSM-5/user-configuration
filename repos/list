@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+# Locations should be extracted from environment
+
+# Personal repos
+$user_conf_path
+$user_scripts_path
+$HOME/vim-config
+$HOME/.config/vscode-nvim
+$HOME/omp-theme
+

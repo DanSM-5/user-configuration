@@ -2194,16 +2194,8 @@ padb () {
 
 rupdate () {
   # Navigate to important repos and pull the changes
-  local repositories=(
-    "$user_conf_path"
-    "$user_scripts_path"
-    "$HOME/.SpaceVim.d"
-    "$HOME/.config/vscode-nvim"
-    "$HOME/omp-theme"
-    "$HOME/vim-config"
-  )
 
-  for repo in "${repositories[@]}"; do
+  while read -r repo; do
     if ! [ -d "$repo" ]; then
       continue
     fi
@@ -2214,7 +2206,10 @@ rupdate () {
     git -C "$repo" pull --rebase
     git -C "$repo" submodule update --init --recursive
 
-  done
+  done < <(
+    "$user_conf_path/utils/getprojects" -f "$user_conf_path/repos/list"
+    "$user_conf_path/utils/getprojects" -f "$user_conf_path/repos/device"
+  )
 }
 
 themes_bat () {

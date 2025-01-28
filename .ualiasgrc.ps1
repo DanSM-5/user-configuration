@@ -1649,7 +1649,7 @@ function frm () {
       if (-not (Test-Path -PathType Container -LiteralPath "$_" -ErrorAction SilentlyContinue)) {
         Remove-Item -LiteralPath "$_"
       }
-    } 
+    }
 }
 
 function frdr () {
@@ -1709,14 +1709,11 @@ function padb () {
 
 function rupdate () {
   # Navigate to important repos and pull the changes
-  $repositories = @(
-    "$env:user_conf_path"
-    "$env:user_scripts_path"
-    "$HOME${dirsep}.SpaceVim.d"
-    "$HOME${dirsep}.config${dirsep}vscode-nvim"
-    "$HOME${dirsep}omp-theme"
-    "$HOME${dirsep}vim-config"
-  )
+
+  $repositories = &{
+    & "${env:user_conf_path}${dirsep}utils${dirsep}getprojects.ps1" -f "${env:user_conf_path}${dirsep}repos${dirsep}list"
+    & "${env:user_conf_path}${dirsep}utils${dirsep}getprojects.ps1" -f "${env:user_conf_path}${dirsep}repos${dirsep}device"
+  }
 
   foreach ($repo in $repositories) {
     if (!(Test-Path -Path "$repo" -PathType Container -ErrorAction SilentlyContinue)) {
