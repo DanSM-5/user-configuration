@@ -1945,7 +1945,10 @@ fi
 
 fmpv () {
   local mpv_args="$*"
-  local selection=($(fd -tf --color=always |
+  local selection
+  local ifsog="$IFS"
+  IFS="
+" selection=($(fd -tf --color=always |
     fzf --multi --ansi --cycle \
       --info=inline \
       --height 80% --min-height 20 \
@@ -1956,10 +1959,13 @@ fmpv () {
       --bind 'alt-l:last' \
       --bind 'alt-c:clear-query' \
       --border))
-  if [ -z "$selection" ]; then
+  IFS="$ifsog"
+
+  if [ -z "${selection[*]}" ]; then
     return
   fi
-  local quoted=$(echo "${selection[$@]}" |
+
+  local quoted=$(printf '%s\n' "${selection[@]}" |
     awk '{ printf "\"""%s""\""" ", $0 }')
   bash -c "$mpv_commd $mpv_args -- $quoted"
 }

@@ -1350,11 +1350,9 @@ function fmpv () {
   $mpv_args = $args
   $fzf_options = getFzfOptions
   $mpv_block = {
-    $selection = @($(
-      fd -tf --color=always | fzf --multi --ansi --cycle `
-        @fzf_options `
-        --border
-    ))
+    $selection = fd -tf --color=always |
+      fzf --multi --ansi --cycle --border `
+        @fzf_options
 
     if ($selection.Length -eq 0) { return }
 
