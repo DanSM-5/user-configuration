@@ -40,14 +40,20 @@ if grep '[Mm]icrosoft' /proc/version >/dev/null 2>&1; then
   export IS_WSL=true
   export IS_LINUX=true
 
-  case "$(uname -a)" in
-    *WSL2*)
-      export IS_WSL2=true
-      ;;
-    *)
-      export IS_WSL1=true
-      ;;
-  esac
+  if grep 'WSL2' /proc/version >/dev/null 2>&1; then
+    export IS_WSL2=true
+  else
+    export IS_WSL1=true
+  fi
+
+  # case "$(uname -a)" in
+  #   *WSL2*)
+  #     export IS_WSL2=true
+  #     ;;
+  #   *)
+  #     export IS_WSL1=true
+  #     ;;
+  # esac
 
   # if [[ $(uname -a) =~ "WSL2" ]]; then
   #   export IS_WSL2=true
@@ -62,6 +68,8 @@ elif [ "$OS" = 'Windows_NT' ]; then
   export IS_WINDOWS=true
   export IS_GITBASH=true
   export IS_WINSHELL=true
+elif [ "$OSTYPE" = 'darwin' ]; then
+  export IS_MAC=true
 else
   # Detect System
   case "$(uname)" in
@@ -85,7 +93,6 @@ fi
 
 # Handle Find it faster vscode extension
 if [ "$FIND_IT_FASTER_ACTIVE" = 1 ]; then
-  printf "No need to source from here"
   return 0
 fi
 
