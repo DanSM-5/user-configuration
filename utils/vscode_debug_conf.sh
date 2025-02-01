@@ -18,7 +18,7 @@ elif [ -n "$BASH_VERSION" ]; then
 else
   echo "[WARNING]: NO VALID CONFIGURATION DETECTED!"
   export IS_ZSH=false
-  export IS_BAHS=false
+  export IS_BASH=false
   export SHELL_NAME=unknown
 fi
 
