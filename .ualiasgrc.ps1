@@ -449,48 +449,48 @@ function qed ([string] $editor = 'nvim') {
 }
 
 function cprj ([Switch] $Raw) {
-  $directories = & "${env:user_conf_path}${dirsep}utils${dirsep}getprojects.ps1"
+  # $directories = & "${env:user_conf_path}${dirsep}utils${dirsep}getprojects.ps1"
 
-  if (!$directories) {
-    return
-  }
+  # if (!$directories) {
+  #   return
+  # }
 
-  $fd_exclude_args = fd-Options
-  $fd_command = "fd --color=always --type file $fd_exclude_args . {}"
-  $reload_command = "pwsh -NoLogo -NonInteractive -NoProfile -File ${env:user_conf_path}${dirsep}utils${dirsep}getprojects.ps1"
+  # $fd_exclude_args = fd-Options
+  # $fd_command = "fd --color=always --type file $fd_exclude_args . {}"
+  # $reload_command = "pwsh -NoLogo -NonInteractive -NoProfile -File ${env:user_conf_path}${dirsep}utils${dirsep}getprojects.ps1"
 
-  $options = getFzfOptions
-  $selection = @(
-    $directories |
-      fzf @options `
-        --history="$env:FZF_HIST_DIR/cprj" `
-        --no-multi `
-        --ansi --cycle `
-        --info=inline `
-        --header 'CTRL-R: Reload | CTRL-F: Files | CTRL-O: Open | CTRL-Y: Copy' `
-        --bind "ctrl-f:change-prompt(Files> )+reload($fd_command)+clear-query+change-multi+unbind(ctrl-f)" `
-        --bind "ctrl-r:change-prompt(Projs> )+reload($reload_command)+rebind(ctrl-f)+clear-query+change-multi(0)" `
-        --bind "ctrl-y:execute-silent(pwsh -NoLogo -NonInteractive -NoProfile -File ${env:user_conf_path}${dirsep}utils${dirsep}copy-helper.ps1 {+f})+abort" `
-        --bind "ctrl-o:execute-silent(pwsh -NoLogo -NoProfile -NonInteractive -Command Start-Process '{}')+abort" `
-        --bind 'alt-a:select-all' `
-        --bind 'alt-d:deselect-all' `
-        --bind 'alt-f:first' `
-        --bind 'alt-l:last' `
-        --bind 'alt-c:clear-query' `
-        --header 'Select project directory: ' `
-        --prompt 'Projs> '
-  )
+  # $options = getFzfOptions
+  # $selection = @(
+  #   $directories |
+  #     fzf @options `
+  #       --history="$env:FZF_HIST_DIR/cprj" `
+  #       --no-multi `
+  #       --ansi --cycle `
+  #       --info=inline `
+  #       --header 'CTRL-R: Reload | CTRL-F: Files | CTRL-O: Open | CTRL-Y: Copy' `
+  #       --bind "ctrl-f:change-prompt(Files> )+reload($fd_command)+clear-query+change-multi+unbind(ctrl-f)" `
+  #       --bind "ctrl-r:change-prompt(Projs> )+reload($reload_command)+rebind(ctrl-f)+clear-query+change-multi(0)" `
+  #       --bind "ctrl-y:execute-silent(pwsh -NoLogo -NonInteractive -NoProfile -File ${env:user_conf_path}${dirsep}utils${dirsep}copy-helper.ps1 {+f})+abort" `
+  #       --bind "ctrl-o:execute-silent(pwsh -NoLogo -NoProfile -NonInteractive -Command Start-Process '{}')+abort" `
+  #       --bind 'alt-a:select-all' `
+  #       --bind 'alt-d:deselect-all' `
+  #       --bind 'alt-f:first' `
+  #       --bind 'alt-l:last' `
+  #       --bind 'alt-c:clear-query' `
+  #       --header 'Select project directory: ' `
+  #       --prompt 'Projs> '
+  # )
+
+  [string[]]$selection = gprj
 
   if (!$selection) { return }
 
-  if ($Raw) { return $selection }
-
-  if (Test-Path -PathType Leaf -Path $selection[0] -ea 0) {
+  if (Test-Path -PathType Leaf -LiteralPath $selection[0] -ea 0) {
     & "$env:PREFERRED_EDITOR" @selection
     return
   }
 
-  Set-Location $selection[0]
+  Set-Location -LiteralPath $selection[0]
 }
 
 function rfv {

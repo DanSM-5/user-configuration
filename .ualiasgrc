@@ -866,60 +866,70 @@ qed () {
 }
 
 cprj () {
-  local return_dir="$1"
-  local directories=($("$user_conf_path/utils/getprojects"))
+  # local return_dir="$1"
+  # local directories=($("$user_conf_path/utils/getprojects"))
 
-  if [ -z "${directories[*]}" ]; then
-    return
-  fi
-
-  local fd_show=""
-  local fd_exclude=""
-  while IFS= read -r line_fd_show; do
-    fd_show="$fd_show $line_fd_show"
-  done < "$user_conf_path/fzf/fd_show"
-  while IFS= read -r line_fd_exclude; do
-    fd_exclude="$fd_exclude $line_fd_exclude"
-  done < "$user_conf_path/fzf/fd_show"
-  local fd_command="fd --color=always --type file $fd_show $fd_exclude . {}"
-  local reload_command="$user_conf_path/utils/getprojects"
-
-  # if [ "$IS_WINSHELL" = true ]; then
-  #   local win_user_conf="$(cygpath -am "$user_conf_path")"
-  #   local reload_command="pwsh -NoLogo -NonInteractive -NoProfile -File $win_user_conf/utils/getprojects.ps1"
-  # else
-  #   local reload_command="$user_conf_path/utils/getprojects"
+  # if [ -z "${directories[*]}" ]; then
+  #   return
   # fi
 
-  local selection=($(printf "%s\n" "${directories[@]}" |
-    fzf-defaults \
-      "--history=$FZF_HIST_DIR/cprj" \
-      --no-multi \
-      --ansi --cycle \
-      --info=inline \
-      --header 'CTRL-R: Reload | CTRL-F: Files | CTRL-O: Open | CTRL-Y: Copy' \
-      --prompt 'Projs> ' \
-      --bind "ctrl-f:change-prompt(Files> )+reload($fd_command)+clear-query+change-multi+unbind(ctrl-f)" \
-      --bind "ctrl-r:change-prompt(Projs> )+reload($reload_command)+rebind(ctrl-f)+clear-query+change-multi(0)" \
-      --bind "ctrl-o:execute-silent(\"$user_scripts_path/bin/start\" {})+abort" \
-      --bind "ctrl-y:execute-silent(\"$user_conf_path/utils/copy-helper\" \"{+f}\")+abort" \
-      --bind 'alt-a:select-all' \
-      --bind 'alt-d:deselect-all' \
-      --bind 'alt-f:first' \
-      --bind 'alt-l:last' \
-      --bind 'alt-c:clear-query' \
-      --preview-window '60%' \
-      --preview "$fzf_preview_normal" \
-  ))
+  # local fd_show=""
+  # local fd_exclude=""
+  # while IFS= read -r line_fd_show; do
+  #   fd_show="$fd_show $line_fd_show"
+  # done < "$user_conf_path/fzf/fd_show"
+  # while IFS= read -r line_fd_exclude; do
+  #   fd_exclude="$fd_exclude $line_fd_exclude"
+  # done < "$user_conf_path/fzf/fd_show"
+  # local fd_command="fd --color=always --type file $fd_show $fd_exclude . {}"
+  # local reload_command="$user_conf_path/utils/getprojects"
 
-  # --bind 'alt-a:select-all' \
-  # --bind 'alt-d:deselect-all' \
+  # # if [ "$IS_WINSHELL" = true ]; then
+  # #   local win_user_conf="$(cygpath -am "$user_conf_path")"
+  # #   local reload_command="pwsh -NoLogo -NonInteractive -NoProfile -File $win_user_conf/utils/getprojects.ps1"
+  # # else
+  # #   local reload_command="$user_conf_path/utils/getprojects"
+  # # fi
+
+  # local selection=($(printf "%s\n" "${directories[@]}" |
+  #   fzf-defaults \
+  #     "--history=$FZF_HIST_DIR/cprj" \
+  #     --no-multi \
+  #     --ansi --cycle \
+  #     --info=inline \
+  #     --header 'CTRL-R: Reload | CTRL-F: Files | CTRL-O: Open | CTRL-Y: Copy' \
+  #     --prompt 'Projs> ' \
+  #     --bind "ctrl-f:change-prompt(Files> )+reload($fd_command)+clear-query+change-multi+unbind(ctrl-f)" \
+  #     --bind "ctrl-r:change-prompt(Projs> )+reload($reload_command)+rebind(ctrl-f)+clear-query+change-multi(0)" \
+  #     --bind "ctrl-o:execute-silent(\"$user_scripts_path/bin/start\" {})+abort" \
+  #     --bind "ctrl-y:execute-silent(\"$user_conf_path/utils/copy-helper\" \"{+f}\")+abort" \
+  #     --bind 'alt-a:select-all' \
+  #     --bind 'alt-d:deselect-all' \
+  #     --bind 'alt-f:first' \
+  #     --bind 'alt-l:last' \
+  #     --bind 'alt-c:clear-query' \
+  #     --preview-window '60%' \
+  #     --preview "$fzf_preview_normal" \
+  # ))
+
+  # # --bind 'alt-a:select-all' \
+  # # --bind 'alt-d:deselect-all' \
+  # if [ -z "$selection" ]; then
+  #   return
+  # fi
+
+  # if [ "$return_dir" = '-r' ]; then
+  #   printf '%s\n' "${selection[@]}"
+  #   return
+  # fi
+
+  local selection
+  local ifsog="$IFS"
+  IFS="
+" selection=($(gprj))
+  IFS="$ifsog"
+
   if [ -z "$selection" ]; then
-    return
-  fi
-
-  if [ "$return_dir" = '-r' ]; then
-    printf '%s\n' "${selection[@]}"
     return
   fi
 
