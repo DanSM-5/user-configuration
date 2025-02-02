@@ -125,9 +125,6 @@ if (Test-Command fzf) {
     --ansi --cycle
     --header 'ctrl-y: Copy'"
 
-  # Evaluate the use of
-  # --with-shell 'pwsh -NoLogo -NonInteractive -NoProfile -C'
-  # It fails in preview script with multi word files unlike current implementation
   $env:FZF_CTRL_T_OPTS = "
     --history=$env:FZF_HIST_DIR/fzf-history-ctrlt
     --input-border
