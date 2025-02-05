@@ -20,20 +20,20 @@ getpass () {
   local json="$(op item list --categories 'Login' --format=json |
     jq -r 'to_entries | map({ id: .value.id, title: ((.key | tostring) + " " + .value.title) })')"
 
-  if [ -z $json ]; then
+  if [ -z "$json" ]; then
     return 1
   fi
 
-  local index=$(echo $json | jq -r '.[] | .title' | fzf | cut -d ' ' -f 1)
+  local index=$(echo "$json" | jq -r '.[] | .title' | fzf | cut -d ' ' -f 1)
 
   # No index selected
   if [ -z "$index" ]; then
     return 0
   fi
 
-  local id=$(echo $json | jq -r ".[$index] | .id")
+  local id=$(echo "$json" | jq -r ".[$index] | .id")
 
-  local keys=($(
+  mapfile -t keys < <(
     op item get --format json "$id" |
       jq -r '.fields
         | [ .[]
@@ -41,14 +41,14 @@ getpass () {
         | reduce .[] as $item ({}; .[$item.id] = $item.value)
         | [ .username, .password ]
         | .[]'
-  ))
+  )
 
   if [ "$displayRaw" = true ]; then
     echo "${keys[@]}"
     return 0
   fi
 
-  echo "${keys[@]:1:1}" | $clipboard_copy
+  echo "${keys[@]:1:1}" | "$clipboard_copy"
 
   echo "${keys[@]:0:1}"
 }
@@ -63,18 +63,18 @@ shownote () {
   local json="$(op item list --categories 'Secure Note' --format=json |
     jq -r 'to_entries | map({ id: .value.id, title: ((.key | tostring) + " " + .value.title) })')"
 
-  if [ -z $json ]; then
+  if [ -z "$json" ]; then
     return 1
   fi
 
-  local index=$(echo $json | jq -r '.[] | .title' | fzf | cut -d ' ' -f 1)
+  local index=$(echo "$json" | jq -r '.[] | .title' | fzf | cut -d ' ' -f 1)
 
   # No index selected
   if [ -z "$index" ]; then
     return
   fi
 
-  local id=$(echo $json | jq -r ".[$index] | .id")
+  local id=$(echo "$json" | jq -r ".[$index] | .id")
 
   op item get --format=json "$id" | jq -r '.fields | .[] | .value' | bat -pp
 }
