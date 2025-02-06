@@ -16,7 +16,7 @@ $path_preview_script = Join-Path $user_conf_path "utils/fzf-preview.ps1"
 
 function get_fzf_down_options() {
   $options = @(
-    '--height', '50%',
+    '--height', '80%',
     '--min-height', '20',
     '--input-border',
     '--cycle',
@@ -26,8 +26,8 @@ function get_fzf_down_options() {
     '--bind', 'alt-f:first',
     '--bind', 'alt-l:last',
     '--bind', 'alt-c:clear-query',
-    '--bind', 'ctrl-a:select-all',
-    '--bind', 'ctrl-d:deselect-all',
+    '--bind', 'alt-a:select-all',
+    '--bind', 'alt-d:deselect-all',
     '--bind', 'ctrl-/:change-preview-window(down|hidden|)',
     '--bind', 'ctrl-^:toggle-preview',
     '--bind', 'alt-up:preview-page-up',
@@ -364,7 +364,12 @@ function fshow () {
     git show --color=always `$hash $preview_pager |
       bat -p --color=always
   "
+  # Clipboard command
+  $copy = 'Get-Content {+f} | ForEach-Object { ($_ -Split "\s+")[1] } | Set-Clipboard'
 
+  $git_base_cmd = "git log --graph --color=always --format='%C(auto)%h%d %s %C(black)%C(bold)%cr'"
+  $git_current_cmd = "$git_base_cmd $args"
+  $git_all_cmd = "$git_base_cmd --all $args"
   $down_options = get_fzf_down_options
   $cmd_options = @(
     '--query=',
@@ -374,9 +379,11 @@ function fshow () {
     '--no-sort',
     '--reverse',
     '--print-query',
-    '--height', '80%',
-    '--header', 'ctrl-d: Diff',
+    '--bind', "ctrl-y:execute-silent($copy)+bell",
+    '--header', 'ctrl-d: Diff | ctrl-a: All | ctrl-f: HEAD | ctrl-y: Copy',
     '--with-shell', 'pwsh -NoLogo -NonInteractive -NoProfile -Command'
+    '--bind', "ctrl-f:reload:$git_current_cmd",
+    '--bind', "ctrl-a:reload:$git_all_cmd",
     '--preview', $preview,
     '--expect=ctrl-d'
   )

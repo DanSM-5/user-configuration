@@ -9,7 +9,7 @@ is_in_git_repo () {
 }
 
 fzf-down () {
-  fzf --height 50% \
+  fzf --height 80% \
     --min-height 20 \
     --input-border \
     --cycle \
@@ -18,8 +18,8 @@ fzf-down () {
     --bind 'alt-f:first' \
     --bind 'alt-l:last' \
     --bind 'alt-c:clear-query' \
-    --bind 'ctrl-a:select-all' \
-    --bind 'ctrl-d:deselect-all' \
+    --bind 'alt-a:select-all' \
+    --bind 'alt-d:deselect-all' \
     --bind 'ctrl-/:change-preview-window(down|hidden|)' \
     --bind 'ctrl-^:toggle-preview' \
     --bind 'alt-up:preview-page-up' \
@@ -166,19 +166,44 @@ fshow () {
   local out shas sha q k
   local preview="
     grep -o \"[a-f0-9]\{7,\}\" <<< {} |
-      xargs git show --color=always $preview_pager |
+      LS_COLORS= xargs git show --color=always $preview_pager |
         bat -p --color=always
   "
 
+  git_base_cmd="git log --graph --color=always --format='%C(auto)%h%d %s %C(black)%C(bold)%cr'"
+  git_current_cmd="$git_base_cmd $*"
+  git_all_cmd="$git_base_cmd --all $*"
+
+  # Find clipboard utility
+  local copy='true'
+  # NOTE: Will probably will never run on windows but
+  # better safe than sorry
+  if [ "$OS" = 'Windows_NT' ]; then
+    # Gitbash
+    copy="awk '{ print \$2 }' '{+f}' | pbcopy.exe"
+  elif [ "$OSTYPE" = 'darwin' ] || command -v 'pbcopy' &>/dev/null; then
+    copy="awk '{ print \$2 }' {+f} | pbcopy"
+  # Assume linux if above didn't match
+  elif [ -n "$WAYLAND_DISPLAY" ] && command -v 'wl-copy' &>/dev/null; then
+    copy="awk '{ print \$2 }' {+f} | wl-copy --foreground --type text/plain"
+  elif [ -n "$DISPLAY" ] && command -v 'xsel' &>/dev/null; then
+    copy="awk '{ print \$2 }' {+f} | xsel -i -b"
+  elif [ -n "$DISPLAY" ] && command -v 'xclip' &>/dev/null; then
+    copy="awk '{ print \$2 }' {+f} | xclip -i -selection clipboard"
+  fi
+
   while out=$(
-      git log --graph --color=always \
-          --format="%C(auto)%h%d %s %C(black)%C(bold)%cr" "$@" |
-      fzf-down --ansi --multi --no-sort --reverse --query="$q" \
-          --height '80%' \
+      fzf-down --ansi --no-sort --reverse --query="$q" \
           --preview "$preview" \
+          --bind "start:reload:$git_current_cmd" \
+          --bind "ctrl-f:reload:$git_current_cmd" \
+          --bind "ctrl-a:reload:$git_all_cmd" \
+          --bind "ctrl-y:execute-silent($copy)+bell" \
+          --header 'ctrl-d: Diff | ctrl-a: All | ctrl-f: HEAD | ctrl-y: Copy' \
           --prompt 'Commits> ' \
           "--history=$FZF_HIST_DIR/fzf-git_show" \
-          --print-query --expect=ctrl-d --bind=ctrl-s:toggle-sort); do
+          --print-query --expect=ctrl-d \
+      ); do
     q=$(head -1 <<< "$out")
     k=$(head -2 <<< "$out" | tail -1)
     # shas=($(sed '1,2d;s/^[^a-z0-9]*//;/^$/d' <<< "$out" | awk '{print $1}'))
