@@ -1828,6 +1828,8 @@ else
     # Window's python launcher
     unset_if_function py
 
+    alias xargs="userconf_initial_path= LS_COLORS= ORIGINAL_PATH= PS1= FZF_CTRL_R_OPTS= FZF_ALT_C_OPTS= FZF_CTRL_T_OPTS= xargs"
+
     # Show scoop packages on gitbash
     show_packages () {
       local selection
