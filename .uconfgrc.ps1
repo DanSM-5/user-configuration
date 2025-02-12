@@ -56,7 +56,7 @@ if (Test-Command Set-PsFzfOption) {
   $altc = if ($IsMacOS) { 'ç' } else { 'Alt+c' }
   $alta = if ($IsMacOS) { 'å' } else { 'Alt+a' }
 
-  Set-PSFzfOption -EnableAliasFuzzyEdit `
+  Set-PSFzfOption `
     -PSReadlineChordProvider 'Ctrl+t' `
     -PSReadlineChordReverseHistory 'Ctrl+r' `
     -PSReadlineChordSetLocation $altc `
@@ -72,6 +72,7 @@ if (Test-Command Set-PsFzfOption) {
 
     # -EnableAliasFuzzyGitStatus `
     # -EnableAliasFuzzySetLocation `
+    # -EnableAliasFuzzyEdit `
   Set-PSReadLineKeyHandler -Key Tab -ScriptBlock { Invoke-FzfTabCompletion }
 
   # if (Test-Path Alias:fcd) { Remove-Item Alias:fcd }
