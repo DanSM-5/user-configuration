@@ -145,7 +145,7 @@ if (Test-Command fzf) {
     --bind 'alt-f:first'
     --bind 'alt-l:last'
     --bind 'alt-c:clear-query'
-    --preview-window '60%'
+    --preview-window '60%,wrap'
     --preview '$fzf_preview_script {}'
     --with-shell 'pwsh -NoLogo -NonInteractive -NoProfile -Command'
     --bind 'ctrl-^:toggle-preview'
@@ -158,7 +158,7 @@ if (Test-Command fzf) {
     --prompt 'CD> '
     --color header:italic
     --header 'ctrl-a: CD | ctrl-d: Up | ctrl-e: Config | ctrl-r: Scripts | ctrl-t: CWD | ctrl-w: Projects'
-    --preview-window '60%'
+    --preview-window '60%,wrap'
     --preview '$fzf_preview_script {}'
     --bind 'alt-a:select-all'
     --bind 'alt-d:deselect-all'
@@ -205,6 +205,39 @@ if (Test-Command rg) {
     'rg --files --no-ignore --hidden --glob "!plugged" --glob "!.git" --glob "!node_modules" --follow'
   } else {
     'rg --files --no-ignore --hidden --glob !plugged --glob !.git --glob !node_modules --follow'
+  }
+}
+
+if (Get-Command -Name 'rga' -ErrorAction SilentlyContinue) {
+  function rga-fzf () {
+    $RG_PREFIX = 'rga --files-with-matches'
+    $file = ''
+    $OG_FZF_DEFAULT_COMMAND = ''
+    $query = $args[0]
+    try {
+      $OG_FZF_DEFAULT_COMMAND = $env:FZF_DEFAULT_COMMAND
+      $env:FZF_DEFAULT_COMMAND = "$RG_PREFIX '$query'"
+      $file = fzf --sort `
+        --with-shell 'pwsh -NoLogo -NonInteractive -NoProfile -Command' `
+        --preview="if({}) { rga --pretty --context 5 {q} {} }" `
+        --phony -q "$query" `
+        --bind "change:reload:$RG_PREFIX {q}" `
+        --bind 'alt-a:select-all' `
+        --bind 'alt-d:deselect-all' `
+        --bind 'alt-f:first' `
+        --bind 'alt-l:last' `
+        --bind 'alt-c:clear-query' `
+        --bind 'ctrl-^:toggle-preview' `
+        --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort' `
+        --preview-window="70%:wrap"
+    } finally {
+      $env:FZF_DEFAULT_COMMAND = $OG_FZF_DEFAULT_COMMAND
+    }
+    
+    if ($file) {
+      Write-Output "opening $file"
+      Start-Process "$file"
+    }
   }
 }
 

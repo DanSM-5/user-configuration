@@ -62,7 +62,7 @@ function getPsFzfOptions {
     MinHeight = 20
     Border = $true
     Info = 'inline'
-    PreviewWindow = '60%'
+    PreviewWindow = '60%,wrap'
   }
   return $psFzfOptions
 }
@@ -81,7 +81,7 @@ function getFzfOptions () {
     '--bind', 'alt-f:first',
     '--bind', 'alt-l:last',
     '--bind', 'alt-c:clear-query',
-    '--preview-window', '60%',
+    '--preview-window', '60%,wrap',
     # '--preview', $preview,
     '--preview', $fzf_preview_normal,
     '--height', '80%',
@@ -1732,7 +1732,7 @@ function themes_bat ([string] $filename) {
   $selected_theme = bat --list-themes |
     fzf @fzf_options `
       --cycle --cycle `
-      --preview-window 'right:80%' `
+      --preview-window 'right:80%:wrap' `
       --preview "bat --theme={} --color=always $filename"
 
   if (!$selected_theme) {
@@ -1748,7 +1748,7 @@ function themes_vivid () {
   $selected_theme = vivid themes |
     fzf @fzf_options `
       --cycle `
-      --preview-window 'right:70%' `
+      --preview-window 'right:70%,wrap' `
       --with-shell 'pwsh --NoLogo -NoProfile -NonInteractive -Command'`
       --preview '
       Write-Output "Theme: {}";
