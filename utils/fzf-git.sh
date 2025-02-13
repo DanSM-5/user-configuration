@@ -15,6 +15,7 @@ fzf-down () {
     --cycle \
     --layout=reverse \
     --multi \
+    --preview-window 'right,50%,wrap' \
     --bind 'alt-f:first' \
     --bind 'alt-l:last' \
     --bind 'alt-c:clear-query' \
@@ -42,7 +43,7 @@ fgf () {
   fzf-down --ansi --nth 2..,.. \
     --query "$INITIAL_QUERY" \
     "--history=$FZF_HIST_DIR/fzf-git_file" \
-    --preview-window '60%' \
+    --preview-window '60%,wrap' \
     --prompt 'Files> ' \
     --preview "selected=\$(printf '%s' {2..} | sed 's/^\"//' | sed 's/\"$//') ;
       if [ -f \"\$selected\" ]; then
@@ -61,7 +62,7 @@ fgb () {
   local INITIAL_QUERY="${*:-}"
   git branch -a --color=always | grep -v '/HEAD\s' | sort |
   fzf-down --ansi --tac \
-    --preview-window right:70% \
+    --preview-window 'right,70%,wrap' \
     --prompt 'Branches> ' \
     --query "$INITIAL_QUERY" \
     "--history=$FZF_HIST_DIR/fzf-git_branch" \
@@ -75,7 +76,7 @@ fgt () {
   is_in_git_repo || return
   local INITIAL_QUERY="${*:-}"
   git tag --sort -version:refname |
-  fzf-down --preview-window right:70% \
+  fzf-down --preview-window 'right,70%,wrap' \
     --prompt 'Tags> ' \
     --query "$INITIAL_QUERY" \
     --preview '
@@ -195,6 +196,7 @@ fshow () {
   while out=$(
       fzf-down --ansi --no-sort --reverse --query="$q" \
           --preview "$preview" \
+	  --preview-window 'right,50%,wrap' \
           --bind "start:reload:$git_current_cmd" \
           --bind "ctrl-f:reload:$git_current_cmd" \
           --bind "ctrl-a:reload:$git_all_cmd" \

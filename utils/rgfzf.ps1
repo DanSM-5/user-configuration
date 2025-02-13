@@ -236,7 +236,7 @@ function Invoke-PsFzfRipgrep() {
           --prompt '1. 🔎 ripgrep> ' `
           --delimiter : `
           --preview 'bat --style=full --color=always --highlight-line {2} {1}' `
-          --preview-window '~4,+{2}+4/3,<80(up)' `
+          --preview-window '~4,+{2}+4/3,<80(up),wrap' `
           --query "$INITIAL_QUERY"
 
         # & $script:FzfLocation --ansi `
