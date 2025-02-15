@@ -60,6 +60,6 @@ if [ -f /mingw64/share/git/completion/git-completion.zsh ]; then
 fi
 
 if command -v zsh &>/dev/null && [[ -v user_conf_path ]]; then
-  "$user_conf_path"/compile_plugins.zsh
+  "$user_conf_path"/compile_plugins.sh
 fi
 
