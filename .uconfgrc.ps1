@@ -208,39 +208,6 @@ if (Test-Command rg) {
   }
 }
 
-if (Get-Command -Name 'rga' -ErrorAction SilentlyContinue) {
-  function rga-fzf () {
-    $RG_PREFIX = 'rga --files-with-matches'
-    $file = ''
-    $OG_FZF_DEFAULT_COMMAND = ''
-    $query = $args[0]
-    try {
-      $OG_FZF_DEFAULT_COMMAND = $env:FZF_DEFAULT_COMMAND
-      $env:FZF_DEFAULT_COMMAND = "$RG_PREFIX '$query'"
-      $file = fzf --sort `
-        --with-shell 'pwsh -NoLogo -NonInteractive -NoProfile -Command' `
-        --preview="if({}) { rga --pretty --context 5 {q} {} }" `
-        --phony -q "$query" `
-        --bind "change:reload:$RG_PREFIX {q}" `
-        --bind 'alt-a:select-all' `
-        --bind 'alt-d:deselect-all' `
-        --bind 'alt-f:first' `
-        --bind 'alt-l:last' `
-        --bind 'alt-c:clear-query' `
-        --bind 'ctrl-^:toggle-preview' `
-        --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort' `
-        --preview-window="70%:wrap"
-    } finally {
-      $env:FZF_DEFAULT_COMMAND = $OG_FZF_DEFAULT_COMMAND
-    }
-    
-    if ($file) {
-      Write-Output "opening $file"
-      Start-Process "$file"
-    }
-  }
-}
-
 # For PowerShellRun
 if (Get-Command -Name Enable-PSRunEntry -ErrorAction SilentlyContinue) {
   Enable-PSRunEntry -Category All
