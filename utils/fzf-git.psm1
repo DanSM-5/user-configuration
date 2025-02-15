@@ -359,12 +359,17 @@ function fshow () {
   $q = ''
   $k = ''
   $preview = "
-    `$hash = if ({} -match `"[a-f0-9]{7,}`") {
-      `$matches[0]
-    } else { @() }
-    git show --color=always `$hash $preview_pager |
-      bat -p --color=always
-  "
+  `$var = @'
+{}
+'@
+  `$var = `$var.Trim().Trim(`"'`").Trim('`"')
+  `$hash = if (`$var -match `"[a-f0-9]{7,}`") {
+    `$matches[0]
+  } else { @() }
+  git show --color=always `$hash $preview_pager |
+    bat -p --color=always
+"
+
   # Clipboard command
   $copy = 'Get-Content {+f} | ForEach-Object { ($_ -Split "\s+")[1] } | Set-Clipboard'
 
