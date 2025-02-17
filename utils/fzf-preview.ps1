@@ -124,10 +124,11 @@ function show_image ([string] $thumbnail, [string] $ErrorMessage) {
 
 function show_pdf ([string] $path, [string] $thumbnail) {
   New-Item $script:TEMP_DIR -ItemType Directory -ea 0
-  Write-Output "File: $path`n`n"
   # Using Ghostscript for image preview
   gs -o "$thumbnail" -sDEVICE=pngalpha -dLastPage=1 "$path" *> $null
   show_image "$thumbnail" 'Error previewing the PDF'
+
+  Write-Output "File: $path"
 
   $pdftotext_flags = @( '-f', '1', '-l', '10' )
 

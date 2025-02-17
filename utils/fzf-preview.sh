@@ -160,11 +160,11 @@ show_pdf () {
   thumbnail="$2"
 
   mkdir -p "$TEMP_DIR"
-  printf '%s\n\n' "File: $path"
   # Using Ghostscript for image preview
   gs -o "$thumbnail" -sDEVICE=pngalpha -dLastPage=1 "$path" &>/dev/null
   show_image "$thumbnail" || printf '%s\n' 'Error previewing the PDF'
 
+  printf '%s' "File: $path"
   printf "\n\n"
   # Pdftotext to get sample pages
   set -o pipefail
