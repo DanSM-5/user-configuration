@@ -6,26 +6,26 @@ REM pause
 setlocal EnableDelayedExpansion
 
 REM Exclude arguments
-set "fd_exclude="
-set "fd_show="
+REM set "fd_exclude="
+set "fd_options="
 
 set "fd_exclude_file=%USERPROFILE%\.usr_conf\fzf\fd_exclude"
 
-for /f "tokens=*" %%a in (%fd_exclude_file%) do (
-  set "fd_exclude=!fd_exclude! %%a"
-)
+REM for /f "tokens=*" %%a in (%fd_exclude_file%) do (
+REM   set "fd_exclude=!fd_exclude! %%a"
+REM )
 
 REM echo Arguments read from fd_exclude_file: %fd_exclude%
 
-set "fd_show_file=%USERPROFILE%\.usr_conf\fzf\fd_show"
+set "fd_options_file=%USERPROFILE%\.usr_conf\fzf\fd_options"
 
-for /f "tokens=*" %%a in (%fd_show_file%) do (
-  set "fd_show=!fd_show! %%a"
+for /f "tokens=*" %%a in (%fd_options_file%) do (
+  set "fd_options=!fd_options! %%a"
 )
 
-REM echo Arguments read from fd_show_file: %fd_show%
+REM echo Arguments read from fd_options_file: %fd_options%
 
-call fd %fd_show% %fd_exclude% --color=always %*
+call fd %fd_options% --ignore-file %fd_exclude_file% --color=always %*
 
 endlocal
 

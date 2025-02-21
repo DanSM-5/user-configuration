@@ -115,7 +115,11 @@ function getFzfPreview ([string] $ScriptContent = 'Get-Content $args') {
 }
 
 function fd-Options {
-  $exclusionArr = @(Get-Content "$user_conf_path${dirsep}fzf${dirsep}fd_exclude" ; Get-Content "$user_conf_path${dirsep}fzf${dirsep}fd_show")
+  $exclusionArr = @(
+    "--ignore-file",
+    "$user_conf_path${dirsep}fzf${dirsep}fd_exclude";
+    Get-Content "$user_conf_path${dirsep}fzf${dirsep}fd_options"
+  )
   return $exclusionArr
 }
 
