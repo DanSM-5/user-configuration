@@ -52,12 +52,15 @@ fzf-defaults () {
 fzf_preview_normal="$user_conf_path/utils/fzf-preview.sh {}"
 
 fd-defaults () {
-  local fd_show=($(command cat "$user_conf_path/fzf/fd_show"))
-  local fd_exclude=($(command cat "$user_conf_path/fzf/fd_exclude"))
+  local fd_options=()
+  while IFS='' read -r fd_arg; do
+    fd_options+=("$fd_arg")
+  done < <(command cat "$user_conf_path/fzf/fd_options")
+  local fd_exclude_file="$user_conf_path/fzf/fd_exclude"
 
   fd \
-    "${fd_show[@]}" \
-    "${fd_exclude[@]}" \
+    "${fd_options[@]}" \
+    --ignore-file "$fd_exclude_file" \
     "$@"
 }
 
@@ -874,15 +877,15 @@ cprj () {
   #   return
   # fi
 
-  # local fd_show=""
+  # local fd_options=""
   # local fd_exclude=""
-  # while IFS= read -r line_fd_show; do
-  #   fd_show="$fd_show $line_fd_show"
-  # done < "$user_conf_path/fzf/fd_show"
+  # while IFS= read -r line_fd_option; do
+  #   fd_options="$fd_options $line_fd_option"
+  # done < "$user_conf_path/fzf/fd_options"
   # while IFS= read -r line_fd_exclude; do
   #   fd_exclude="$fd_exclude $line_fd_exclude"
-  # done < "$user_conf_path/fzf/fd_show"
-  # local fd_command="fd --color=always --type file $fd_show $fd_exclude . {}"
+  # done < "$user_conf_path/fzf/fd_options"
+  # local fd_command="fd --color=always --type file $fd_options $fd_exclude . {}"
   # local reload_command="$user_conf_path/utils/getprojects"
 
   # # if [ "$IS_WINSHELL" = true ]; then
@@ -2096,10 +2099,13 @@ countFiles () {
       printFunc=printWithFileSize
     fi
 
-    local fd_show=($(command cat "$user_conf_path/fzf/fd_show"))
-    local fd_exclude=($(command cat "$user_conf_path/fzf/fd_exclude"))
+    local fd_options=()
+    while IFS='' read -r fd_arg; do
+      fd_options+=("$fd_arg")
+    done < <(command cat "$user_conf_path/fzf/fd_options")
+    local fd_exclude_file="$user_conf_path/fzf/fd_exclude"
 
-    for dirl in $(fd "${fd_show[@]}" "${fd_exclude[@]}" -td -d 1); do
+    for dirl in $(fd "${fd_options[@]}" --ignore-file "$fd_exclude_file" -td -d 1); do
     # for dirl in .*/ */; do
       "$printFunc" "$dirl"
     done | column -t -s $'\t'
