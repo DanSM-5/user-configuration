@@ -3,14 +3,14 @@
 $user_conf_path = if ($env:user_conf_path) { $env:user_conf_path } else { "$HOME\.usr_conf" }
 $user_scripts_path = if ($env:user_scripts_path) { $env:user_scripts_path } else { "$HOME\user-scripts" }
 $prj = if ($env:prj) { $env:prj } else { "$HOME\prj" }
-$user_config_cache = "$HOME\.cache\.user_config_cache"
+$user_config_cache = if ($env:user_config_cache) { $env:user_config_cache } else { "$HOME\.cache\.user_config_cache" }
 
 $env:PREFERRED_EDITOR = if (Get-Command -Name 'nvim' -ErrorAction SilentlyContinue) { 'nvim' } else { 'vim' }
 $env:EDITOR = $env:PREFERRED_EDITOR
 $env:user_conf_path = $user_conf_path
 $env:user_scripts_path = $user_scripts_path
 $env:user_config_cache = $user_config_cache
-$env:prj = "$prj"
+$env:prj = $prj
 $env:WIN_ROOT = "C:"
 $env:WIN_HOME = $HOME
 $env:HOME = $HOME
@@ -23,7 +23,10 @@ $env:PATH += ";${env:user_scripts_path}\bin"
 $WIN_HOME = $env:WIN_HOME
 $WIN_ROOT = $env:WIN_ROOT
 $EDITOR = $env:EDITOR
+$VISUAL = $env:VISUAL
 $PREFERRED_EDITOR = $env:PREFERRED_EDITOR
+# Sets theme to use in bat
+$env:BAT_THEME = 'OneHalfDark'
 
 function gpr { Set-Location $env:prj }
 function gus { Set-Location $env:user_scripts_path }
@@ -115,10 +118,10 @@ if (Get-Command -Name 'fzf' -ErrorAction SilentlyContinue) {
   $env:FZF_HIST_DIR = "$SHOME/.cache/fzf-history" 
 
   # temporary variables
-  $fzfPreviewScript = "$SCONF/utils/fzf-preview.ps1"
-  $fzfFdScript = "$SCONF/fzf/ctrl_t_command.ps1"
-  $fzfFdDirsScript = "$SCONF/fzf/alt_c_command.ps1"
-  $fzfCopyHelper = "$SCONF/utils/copy-helper.ps1"
+  $fzf_preview_script = "$SCONF/utils/fzf-preview.ps1"
+  $ctrl_t_command = "$SCONF/fzf/ctrl_t_command.ps1"
+  $alt_c_command = "$SCONF/fzf/alt_c_command.ps1"
+  $fzf_copy_helper = "$SCONF/utils/copy-helper.ps1"
 
   if (!(Test-Path -PathType Container -Path $env:FZF_HIST_DIR -ErrorAction SilentlyContinue)) {
     New-Item -Path $env:FZF_HIST_DIR -ItemType Directory -ErrorAction SilentlyContinue
@@ -154,11 +157,11 @@ if (Get-Command -Name 'fzf' -ErrorAction SilentlyContinue) {
     --header 'ctrl-a: All | ctrl-d: Dirs | ctrl-f: Files | ctrl-y: Copy | ctrl-t: CWD'
     --prompt 'All> '
     --color header:italic
-    --bind `"ctrl-a:change-prompt(All> )+reload($fzfFdScript)`"
-    --bind `"ctrl-f:change-prompt(Files> )+reload($fzfFdScript --type file)`"
-    --bind `"ctrl-d:change-prompt(Dirs> )+reload($fzfFdScript --type directory)`"
+    --bind `"ctrl-a:change-prompt(All> )+reload($ctrl_t_command)`"
+    --bind `"ctrl-f:change-prompt(Files> )+reload($ctrl_t_command --type file)`"
+    --bind `"ctrl-d:change-prompt(Dirs> )+reload($ctrl_t_command --type directory)`"
     --bind `"ctrl-t:change-prompt(CWD> )+reload(eza --color=always --all --dereference --oneline --group-directories-first `$PWD)`"
-    --bind 'ctrl-y:execute-silent($fzfCopyHelper {+f})+abort'
+    --bind 'ctrl-y:execute-silent($fzf_copy_helper {+f})+abort'
     --bind `"ctrl-o:execute-silent(Start-Process {})+abort`"
     --bind 'alt-a:select-all'
     --bind 'alt-d:deselect-all'
@@ -166,8 +169,9 @@ if (Get-Command -Name 'fzf' -ErrorAction SilentlyContinue) {
     --bind 'alt-l:last'
     --bind 'alt-c:clear-query'
     --preview-window '60%'
-    --preview '$fzfPreviewScript {}'
+    --preview '$fzf_preview_script {}'
     --with-shell 'powershell -NoLogo -NonInteractive -NoProfile -Command'
+    --bind 'ctrl-^:toggle-preview'
     --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort'"
 
   $env:FZF_ALT_C_OPTS = "
@@ -176,7 +180,7 @@ if (Get-Command -Name 'fzf' -ErrorAction SilentlyContinue) {
     --prompt 'CD> '
     --color header:italic
     --preview-window '60%'
-    --preview '$fzfPreviewScript {}'
+    --preview '$fzf_preview_script {}'
     --bind 'alt-a:select-all'
     --bind 'alt-d:deselect-all'
     --bind 'alt-f:first'
@@ -184,20 +188,21 @@ if (Get-Command -Name 'fzf' -ErrorAction SilentlyContinue) {
     --bind 'alt-c:clear-query'
     --with-shell 'powershell -NoLogo -NonInteractive -NoProfile -Command'
     --bind `"ctrl-t:change-prompt(CWD> )+reload(eza -A --show-symlinks --color=always --only-dirs --dereference --no-quotes --oneline `$PWD)`"
-    --bind `"ctrl-a:change-prompt(Cd> )+reload($fzfFdDirsScript)`"
-    --bind `"ctrl-u:change-prompt(Up> )+reload($fzfFdDirsScript . ..)`"
-    --bind `"ctrl-e:change-prompt(Config> )+reload(echo $SCONF ; $fzfFdDirsScript . $SCONF)`"
-    --bind `"ctrl-r:change-prompt(Scripts> )+reload(echo $SCRIP ; $fzfFdDirsScript . $SCRIP)`"
-    --bind `"ctrl-w:change-prompt(Projects> )+reload($fzfFdDirsScript . $SHOME/projects)`"
+    --bind `"ctrl-a:change-prompt(Cd> )+reload($alt_c_command)`"
+    --bind `"ctrl-u:change-prompt(Up> )+reload($alt_c_command . ..)`"
+    --bind `"ctrl-e:change-prompt(Config> )+reload(echo $SCONF ; $alt_c_command . $SCONF)`"
+    --bind `"ctrl-r:change-prompt(Scripts> )+reload(echo $SCRIP ; $alt_c_command . $SCRIP)`"
+    --bind `"ctrl-w:change-prompt(Projects> )+reload($alt_c_command . $SHOME/projects)`"
+    --bind 'ctrl-^:toggle-preview'
     --bind 'ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort'"
 
   Remove-Variable SHOME
   Remove-Variable SCONF
   Remove-Variable SCRIP
-  Remove-Variable fzfPreviewScript
-  Remove-Variable fzfFdScript
-  Remove-Variable fzfFdDirsScript
-  Remove-Variable fzfCopyHelper
+  Remove-Variable fzf_preview_script
+  Remove-Variable ctrl_t_command
+  Remove-Variable alt_c_command
+  Remove-Variable fzf_copy_helper
 }
 
 if (Get-Command -Name 'fd' -ErrorAction SilentlyContinue) {

@@ -14,13 +14,13 @@ $prj = if ($env:prj) { $env:prj } else { "${HOME}${dirsep}prj" }
 # Cache files location
 $user_config_cache = if ($env:user_config_cache) { $env:user_config_cache } else { "${HOME}${dirsep}.cache${dirsep}.user_config_cache" }
 
-$env:PREFERRED_EDITOR = 'nvim'
+$env:PREFERRED_EDITOR = if (Get-Command -Name 'nvim' -ErrorAction SilentlyContinue) { 'nvim' } else { 'vim' }
 $env:EDITOR = $env:PREFERRED_EDITOR
 $env:VISUAL = $env:PREFERRED_EDITOR
-$env:user_conf_path = "$user_conf_path"
-$env:user_scripts_path = "$user_scripts_path"
+$env:user_conf_path = $user_conf_path
+$env:user_scripts_path = $user_scripts_path
 $env:user_config_cache = $user_config_cache
-$env:prj = "$prj"
+$env:prj = $prj
 $env:WIN_ROOT = if ($IsWindows) { "C:" } else { "" }
 $env:WIN_HOME = "$HOME"
 $env:HOME = if ($env:HOME) { $env:HOME } else { $HOME }
