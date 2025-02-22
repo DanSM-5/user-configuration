@@ -1351,15 +1351,17 @@ if (Test-Path Alias:sutf8) { Remove-Item Alias:sutf8 }
 Set-Alias -Name sutf8 -Value Switch-Utf8
 
 function fmpv () {
-  $mpv_args = $args
+  [string[]]$mpv_args = $args
   $fzf_options = getFzfOptions
   $mpv_block = {
-    $selection = fd -tf --color=always |
+    [string[]]$selection = fd -tf --color=always |
       fzf --multi --ansi --cycle --border `
         @fzf_options
 
     if ($selection.Length -eq 0) { return }
 
+    # echo "mpv $mpv_args -- $selection"
+    # echo $selection.Length
     mpv @mpv_args -- @selection
   }
 
