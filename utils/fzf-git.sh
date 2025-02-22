@@ -98,7 +98,7 @@ fgh () {
     --header 'Press CTRL-S to toggle sort' \
     --preview '
       grep -o "[a-f0-9]\{7,\}" <<< {} |
-        xargs git show --color=always'"$__page_command__"' |
+        LS_COLORS= xargs git show --color=always'"$__page_command__"' |
         bat -p --color=always' |
   grep -o "[a-f0-9]\{7,\}"
   # --preview 'grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show --color=always' |
@@ -117,7 +117,7 @@ fgha () {
     --header 'Press CTRL-S to toggle sort' \
     --preview '
       grep -o "[a-f0-9]\{7,\}" <<< {} |
-        xargs git show --color=always'"$__page_command__"' |
+        LS_COLORS= xargs git show --color=always'"$__page_command__"' |
         bat -p --color=always' |
   grep -o "[a-f0-9]\{7,\}"
 }

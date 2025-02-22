@@ -1,9 +1,12 @@
 # GIT heart FZF
 # -------------
-# Powershell version (requires coreutils grep, sed, awk, cut, less)
+# Powershell version
 # because using pipes with cmdlets break string encoding for formatted output
 
 # Ref: https://gist.github.com/junegunn/8b572b8d4b5eddd8b85e5f4d40f17236
+
+# TODO: Update fzf commands to use `--with-shell` rather
+# than generating temporary powershell scripts
 
 function is_in_git_repo () {
   if (git rev-parse HEAD 2> $null) { return $true } else { return $false }
@@ -47,16 +50,12 @@ function fgf () {
   @"
     if (Test-Path -Path `$args -PathType Leaf -ErrorAction SilentlyContinue) {
       git diff --color=always -- `$args |
-        $script:__pager__ sed '1,4d' |
+        Select-Object -Skip 4 | $script:__pager__
         bat -p --color=always;
       Write-Output "";
     }
     $path_preview_script `$args;
 "@ > $preview_file.FullName
-
-  # NOTE: The above command uses sed '1,4d' instead of
-  # $script:__pager__ Select-Object -Skip 4 |
-  # because powershell cmdlets break encoding
 
   $preview = if ($IsWindows) {
     "pwsh -NoProfile -NoLogo -NonInteractive -Command Invoke-Command -ScriptBlock ([scriptblock]::Create((Get-Content `""+ $preview_file.FullName + "`"))) -ArgumentList '{2..}'"
@@ -72,13 +71,15 @@ function fgf () {
     '--preview-window', '60%,wrap',
     '--ansi',
     '--nth', '2..,..',
+    '--accept-nth', '2..',
     '--preview', $preview
   )
 
   try {
-    $selected = git -c color.status=always status --short |
-      fzf @down_options @cmd_options |
-      cut -c4- | sed 's/.* -> //'
+    [string[]]$selected = git -c color.status=always status --short |
+      fzf @down_options @cmd_options | ForEach-Object {
+        $_ -replace '.* -> ', '' # Remove old name when renaming
+      }
 
     return $selected
   } finally {
@@ -94,15 +95,15 @@ function fgb () {
   $query = "$args"
   $preview_file = New-TemporaryFile
   @"
-    `$content_file = New-TemporaryFile;
-    `$args > `$content_file.FullName;
     try {
-      `$clean_content = sed 's/^..//' `$content_file.FullName | cut -d' ' -f1;
-      git log --oneline --graph --date=short --color=always --pretty="format:%C(auto)%cd %h%d %s" `$clean_content
-    } finally {
-      if (Test-Path -Path `$content_file.FullName -PathType Leaf -ErrorAction SilentlyContinue) {
-        Remove-Item -Force `$content_file.FullName
+      `$clean_content = `$args | ForEach-Object {
+        `$branch = `$_ -replace '^..',''
+        `$branch = (`$branch -split ' ')[0]
+        return `$branch
       }
+      git log --oneline --graph --date=short --color=always --pretty="format:%C(auto)%cd %h%d %s" `$clean_content
+    } catch {
+      Write-Error 'Cannot preview'
     }
 "@ > $preview_file.FullName
   $preview_script = $preview_file.FullName.Replace('.tmp', '.ps1')
@@ -122,10 +123,16 @@ function fgb () {
 
 
   try {
-    $selected = git branch -a --color=always | grep -v '/HEAD\s' | Sort-Object |
-      fzf @down_options @cmd_options |
-      sed 's/^..//' | cut -d' ' -f1 |
-      sed 's#^remotes/##'
+    [string[]]$selected = git branch -a --color=always | ForEach-Object {
+        if ($_ -NotMatch '/HEAD\s') {
+          return $_
+        }
+      } | Sort-Object |
+      fzf @down_options @cmd_options | ForEach-Object {
+        $branch = $_ -replace '^..',''
+        $branch = ($branch -split ' ')[0]
+        $branch -replace '^remotes\/', ''
+      }
 
     return $selected
   } finally {
@@ -210,10 +217,14 @@ function fgh () {
   )
 
   try {
-    $selected = git log --date=short --format='%C(green)%C(bold)%cd %C(auto)%h%d %s (%an)' --graph --color=always |
-      fzf @down_options @cmd_options |
-      grep -o "[a-f0-9]\{7,\}"
+    [string[]]$selected = git log --date=short --format='%C(green)%C(bold)%cd %C(auto)%h%d %s (%an)' --graph --color=always |
+      fzf @down_options @cmd_options | ForEach-Object {
+        if ($_ -match "[a-f0-9]{7,}") {
+          return $matches[0]
+        }
+      }
 
+    # grep -o "[a-f0-9]\{7,\}"
     return $selected
   } finally {
     if (Test-Path -Path $preview_file.FullName -PathType Leaf -ErrorAction SilentlyContinue) {
@@ -264,9 +275,13 @@ function fgha () {
   )
 
   try {
-    $selected = git log --all --date=short --format='%C(green)%C(bold)%cd %C(auto)%h%d %s (%an)' --graph --color=always |
-      fzf @down_options @cmd_options |
-      grep -o "[a-f0-9]\{7,\}"
+    [string[]]$selected = git log --all --date=short --format='%C(green)%C(bold)%cd %C(auto)%h%d %s (%an)' --graph --color=always |
+      fzf @down_options @cmd_options | ForEach-Object {
+        if ($_ -match "[a-f0-9]{7,}") {
+          return $matches[0]
+        }
+      }
+      # grep -o "[a-f0-9]\{7,\}"
 
     return $selected
   } finally {
@@ -292,14 +307,15 @@ function fgr () {
     '--prompt', 'Remotes> ',
     "--history=$env:FZF_HIST_DIR/fzf-git_remotes",
     '--tac',
+    '--accept-nth', '1',
     '--preview', $preview
   )
 
-  # NOTE: not sure how to add tab delimiter for cut, so it is left without it
-  # because tab is the default delimiter
-  $selected = git remote -v | awk '{print $1 "\t" $2}' | uniq |
-    fzf @down_options @cmd_options |
-    cut -f1 # -d$'\t'
+  $selected = git remote -v | ForEach-Object {
+    $remote_info = $_ -split "[`t ]"
+    return $remote_info[0] + "`t" + $remote_info[1]
+  } | Get-Unique |
+    fzf @down_options @cmd_options
 
   return $selected
 }
@@ -324,13 +340,13 @@ function fgs () {
     "--history=$env:FZF_HIST_DIR/fzf-git_stash",
     '--reverse',
     '--delimiter', ':',
+    '--accept-nth', '1',
     '--preview', $preview
   )
 
   try {
-    $selected = git stash list |
-      fzf @down_options @cmd_options |
-      cut --delimiter=':' -f1
+    [string[]]$selected = git stash list |
+      fzf @down_options @cmd_options
 
     return $selected
   } finally {
@@ -404,9 +420,13 @@ function fshow () {
       if (-not $out) { break; }
 
       $out > $content_file.FullName
-      $q = head -1 $content_file.FullName
-      $k = head -2 $content_file.FullName | tail -1
-      $shas = sed '1,2d;s/^[^a-z0-9]*//;/^$/d' $content_file.FullName | awk '{print $1}'
+      $q = Get-Content $content_file.FullName | Select-Object -Index 0
+      $k = Get-Content $content_file.FullName | Select-Object -Index 1
+      $shas = Get-Content $content_file.FullName | Select-Object -Skip 2 | ForEach-Object {
+        if ($_ -match "[a-f0-9]{7,}") {
+          return $matches[0]
+        }
+      }
 
       if (-not $shas) { continue; }
       if ($q) { $cmd_options[0] = "--query=$q" }
