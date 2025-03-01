@@ -1796,11 +1796,11 @@ else
     }
 
     clipboard_copyw () {
-      xsel -ib "$*"
+      xsel -ib
     }
 
     clipboard_pastew () {
-      xsel -ob "$@"
+      xsel -ob
     }
 
     export clipboard_copy="$user_conf_path/utils/copy-helper-linux.sh"
