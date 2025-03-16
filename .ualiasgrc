@@ -223,7 +223,7 @@ get_bare_repository () {
   printf '%s' "$bare_root"
 }
 
-alias gcr="get_bare_repository"
+alias gbr="get_bare_repository"
 
 # Bare repo checkout
 gwc () {
