@@ -273,6 +273,7 @@ function get_bare_repository () {
         # If error, it means we are no longer under a git repository
         if (!$?) {
           Write-Error "Could not find the root of the bare repository"
+          Set-Location -LiteralPath "$current_directory"
           return
         }
         # Move up a directory
@@ -295,7 +296,9 @@ function get_bare_repository () {
     }
 
     # Recover current dir
-    Set-Location "$current_directory"
+    Set-Location -LiteralPath "$current_directory"
+
+    # Currently inside a worktree nested inside a bare repository
 
     if ($is_bare_repository -eq $false) {
       Write-Error "Not in a bare repository"
@@ -303,20 +306,20 @@ function get_bare_repository () {
     }
 
     $toplevel = git rev-parse --show-toplevel
-    if (!(Test-Path -Path "$toplevel/.git" -PathType Leaf -ErrorAction SilentlyContinue)) {
+    if (!(Test-Path -LiteralPath "$toplevel/.git" -PathType Leaf -ErrorAction SilentlyContinue)) {
       Write-Error "Cannot find .git file"
       return
     }
 
-    $bare_root = ((((Get-Content "$toplevel/.git") -Split ' ')[1]) -Split '/worktrees')[0]
+    $bare_root = ((((Get-Content -LiteralPath "$toplevel/.git") -Split ' ')[1]) -Split '/worktrees')[0]
 
-    if (!(Test-Path -Path "$bare_root" -PathType Container -ErrorAction SilentlyContinue)) {
+    if (!(Test-Path -LiteralPath "$bare_root" -PathType Container -ErrorAction SilentlyContinue)) {
       Write-Error "Cannot find location of bare repository"
       return
     }
 
     # Test if detected directory is bare repository
-    Push-Location "$bare_root"
+    Push-Location -LiteralPath "$bare_root"
     if ("$(git rev-parse --is-bare-repository 2> $null)" -ne 'true') {
       Write-Error "Wrongly detecting '$bare_root' as root of bare repository"
       Pop-Location
@@ -338,21 +341,21 @@ function gwc () {
 
   $bare_root = get_bare_repository
 
-  if (!$bare_root) {
+  if (!$bare_root -or !(Test-Path -LiteralPath $bare_root -PathType Container -ErrorAction SilentlyContinue)) {
     return
   }
 
-  Push-Location "$bare_root" *> $null
+  Push-Location -LiteralPath "$bare_root" *> $null
 
   if ( $args[0] -eq "-b" ) {
     $branch_name = $args[1]
-    if (!(Test-Path -Path "$branch_name" -PathType Container -ErrorAction SilentlyContinue)) {
+    if (!(Test-Path -LiteralPath "$branch_name" -PathType Container -ErrorAction SilentlyContinue)) {
       $git_args = $args[2..$args.Count]
       git worktree add -b "$branch_name" "$branch_name" @git_args
     }
   } else {
     $branch_name = $args[0]
-    if (!(Test-Path -Path "$branch_name" -PathType Container -ErrorAction SilentlyContinue)) {
+    if (!(Test-Path -LiteralPath "$branch_name" -PathType Container -ErrorAction SilentlyContinue)) {
       $git_args = $args[1..$args.Count]
       git worktree add "$branch_name" "$branch_name" @git_args
     }
@@ -362,7 +365,7 @@ function gwc () {
   Pop-Location *> $null
 
   # Attempt to cd into new worktree
-  Set-Location "$bare_root/$branch_name" *> $null
+  Set-Location -LiteralPath "$bare_root/$branch_name" *> $null
 }
 
 function fwc () {
@@ -1819,7 +1822,7 @@ function config () {
   $first = $args[0]
 
   if (!$first) {
-    Push-Location "$HOME/.config"
+    Push-Location -LiteralPath "$HOME/.config"
     fed '.'
     Pop-Location
   } elseif (Test-Path -Path "$HOME/.config/$first" -PathType Container -ErrorAction SilentlyContinue) {

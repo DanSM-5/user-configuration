@@ -163,6 +163,8 @@ get_bare_repository () {
         # If error, it means we are no longer under a git repository
         if [ "$?" -ne 0 ]; then
           printf '%s' "Could not find the root of the bare repository"
+          # Recover current dir
+          cd "$current_directory" || return
           return
         fi
         # Move up a directory
@@ -190,6 +192,8 @@ get_bare_repository () {
 
     # Recover current dir
     cd "$current_directory" || return
+
+    # Currently inside a worktree nested inside a bare repository
 
     if [ "$is_bare_repository" = false ]; then
       printf "%s\n" "Not in a bare repository" > /dev/stderr
@@ -232,7 +236,7 @@ gwc () {
   bare_root="$(get_bare_repository)"
 
   # Didn't find any bare repository
-  if [ -z "$bare_root" ]; then
+  if [ -z "$bare_root" ] || [ ! -d "$bare_root" ]; then
     return 1
   fi
 
