@@ -1,8 +1,5 @@
 # Helper to log content
 
-$content = @"
-$args
-"@
-
-$content.Trim() | bat -pp --color=always --language powershell
+$content = "$args".Trim()
+$content | bat -pp --color=always --language powershell
 

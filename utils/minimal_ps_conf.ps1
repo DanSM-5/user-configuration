@@ -133,8 +133,8 @@ if (Get-Command -Name 'fzf' -ErrorAction SilentlyContinue) {
   $env:FZF_CTRL_R_OPTS = "
     --history=$env:FZF_HIST_DIR/fzf-history-ctrlr
     --with-shell 'powershell -NoLogo -NonInteractive -NoProfile -Command'
-    --preview '$SCONF/utils/log-helper.ps1 {}'
-    --preview-window up:3:hidden:wrap
+    --preview `"`$l = @'`n{r}`n'@ ; $SCONF/utils/log-helper.ps1 `$l`"
+    --preview-window up:5:hidden:wrap
     --bind 'alt-a:select-all'
     --bind 'alt-d:deselect-all'
     --bind 'alt-f:first'
