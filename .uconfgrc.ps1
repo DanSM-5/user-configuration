@@ -111,7 +111,7 @@ if (Test-Command fzf) {
     --history=$env:FZF_HIST_DIR/fzf-history-ctrlr
     --input-border
     --with-shell 'pwsh -NoLogo -NonInteractive -NoProfile -Command'
-    --preview '$SCONF/utils/log-helper.ps1 {}'
+    --preview 'pwsh -NoLogo -NonInteractive -NoProfile -File $SCONF/utils/log-helper.ps1 {}'
     --preview-window up:3:hidden:wrap
     --bind 'alt-a:select-all'
     --bind 'alt-d:deselect-all'
