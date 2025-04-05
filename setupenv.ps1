@@ -125,13 +125,8 @@ if ($IsWindows) {
 if ($setup_vim_config) {
   Push-Location "$HOME/vim-config" *> $null
 
-  # TODO: Add a ps1 install script in vim-config
-  $gitbash = (where.exe bash | Select-String 'Git\\usr\\bin\\bash').ToString()
-  if (!$gitbash.EndsWith('bash.exe')) {
-    return
-  }
   # Install the config
-  & $gitbash ./install.sh
+  ./install.ps1
 
   # Set lock file
   Copy-Item -LiteralPath ./.lazy-lock.json -Destination ./lazy-lock.json
