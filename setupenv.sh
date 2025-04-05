@@ -140,6 +140,9 @@ if [ "$SETUP_VIM_CONFIG" = 'true' ]; then
   # Install the config
   ./install.sh
 
+  # Set lock file
+  cp ./.lazy-lock.json ./lazy-lock.json
+
   # Uncomment below to install plugins from the command line
 
   # # vim
@@ -150,7 +153,7 @@ if [ "$SETUP_VIM_CONFIG" = 'true' ]; then
   # nvim -es -u init.vim -i NONE -c "PlugInstall" -c "qa"
   # hvim +PlugUpdate +sleep1000m +exit
   # Lazy.vim
-  nvim --headless "+Lazy! sync" +qa
+  nvim --headless "+Lazy! restore" +qa
 
   popd 2> /dev/null
 fi

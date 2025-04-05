@@ -104,7 +104,7 @@ if ($IsWindows) {
         Remove-Item -Path $tp -Force -ErrorAction SilentlyContinue *> $null
       }
 
-      Copy-Item -Path "$HOME/user-scripts/windows-terminal/settings.json" -Destination $tp
+      Copy-Item -LiteralPath "$HOME/user-scripts/windows-terminal/settings.json" -Destination $tp
 
       # Check if it is symlink
       # if ((Get-Item $tp).Attributes -Band [IO.FileAttributes]::ReparsePoint) {
@@ -133,6 +133,9 @@ if ($setup_vim_config) {
   # Install the config
   & $gitbash ./install.sh
 
+  # Set lock file
+  Copy-Item -LiteralPath ./.lazy-lock.json -Destination ./lazy-lock.json
+
   # Uncomment below to install plugins from the command line
 
   # # vim
@@ -141,7 +144,7 @@ if ($setup_vim_config) {
   # # neovim
   # nvim -es -u init.vim -i NONE -c "PlugInstall" -c "qa"
   # Lazy.nvim
-  nvim --headless "+Lazy! sync" +qa
+  nvim --headless "+Lazy! restore" +qa
 
   Pop-Location *> $null
 }
