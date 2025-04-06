@@ -217,21 +217,29 @@ function gprevr ([int] $first = 1, [int] $second = 0) {
 }
 
 function fadd () {
-  fgf @args | ForEach-Object {
-    Write-Host $_
-    git add $_
+  [string[]]$files = fgf @args
+
+  if ($files.Length -gt 0) {
+    Write-Output @files
+    git add @files
   }
 }
 
 function fpad () {
-  $files = @()
-  fgf @args | ForEach-Object {
-    Write-Host $_
-    $files += "$_"
-  }
+  [string[]]$files = fgf @args
 
-  if ($files) {
+  if ($files.Length -gt 0) {
+    Write-Output @files
     git add -p @files
+  }
+}
+
+function fpre () {
+  [string[]]$files = fgf @args
+
+  if ($files.Length -gt 0) {
+    Write-Output @files
+    git reset -p @files
   }
 }
 
