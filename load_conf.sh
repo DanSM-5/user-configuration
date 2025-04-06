@@ -97,8 +97,8 @@ if [ "$FIND_IT_FASTER_ACTIVE" = 1 ]; then
 fi
 
 # Store the path as it comes before modifying it
-export userconf_initial_path="${userconf_initial_path:-"$PATH"}"
-export PATH="${userconf_initial_path:-"$PATH"}"
+# export userconf_initial_path="${userconf_initial_path:-"$PATH"}"
+# export PATH="${userconf_initial_path:-"$PATH"}"
 
 # Source User Scripts
 test -f "$user_conf_path/.uconfgrc" && \. "$user_conf_path/.uconfgrc" || true

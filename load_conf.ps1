@@ -43,8 +43,8 @@ if ($env:FIND_IT_FASTER_ACTIVE) {
 }
 
 # Store the path as it comes before modifying it
-$env:userconf_initial_path = if ($env:userconf_initial_path) { $env:userconf_initial_path } else { $env:PATH }
-$env:PATH = if ($env:userconf_initial_path) { $env:userconf_initial_path } else { $env:PATH }
+# $env:userconf_initial_path = if ($env:userconf_initial_path) { $env:userconf_initial_path } else { $env:PATH }
+# $env:PATH = if ($env:userconf_initial_path) { $env:userconf_initial_path } else { $env:PATH }
 
 
 # Source User Scripts
