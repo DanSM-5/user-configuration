@@ -278,6 +278,9 @@ if [ -f "$path" ]; then
           # zipinfo "$path"
           show_7z "$path" || unzip -l "$path" || printf '%s\n' 'Error previewing zip archive'
           ;;
+        *.cbz)
+          show_7z "$path" || unzip -l "$path" || printf '%s\n' 'Error previewing cbz archive'
+          ;;
         *.rar)
           show_7z "$path" || unrar l "$path" || printf '%s\n' 'Error previewing rar archive'
           ;;

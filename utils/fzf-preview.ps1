@@ -240,6 +240,10 @@ elseif ((Test-Path -LiteralPath $path -PathType leaf) -or (eza -l $path *> $null
           7z l "$path" || unzip -l "$path" || Write-Output 'Error previewing zip archive'
           break
         }
+        ".*\.cbz$" {
+          7z l "$path" || unzip -l "$path" || Write-Output 'Error previewing cbz archive'
+          break
+        }
         ".*\.rar$" {
           7z l "$path" || unrar l "$path" || Write-Output 'Error previewing rar archive'
           break
