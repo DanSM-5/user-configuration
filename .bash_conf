@@ -107,11 +107,12 @@ bind -m vi-command -x '"\C-oi": __emoji__'
 bind -m vi-insert -x '"\C-oi": __emoji__'
 
 __cprj__ () {
-  mapfile -t dir < <(gprj | awk 'BEGIN {FS=" "} { printf "'\''%s'\''\n", $0}')
-  if [ -d "${dir[*]}" ]; then
-    printf 'builtin cd -- %q' "$dir"
-  elif [ -n "$dir" ]; then
-    printf '%s ' "${PREFERRED_EDITOR:-${EDITOR:-vim}} ${dir[*]}"
+  mapfile -t dir < <(gprj)
+  if [ -d "${dir[0]}" ]; then
+    printf 'builtin cd -- %q' "${dir[0]}"
+  elif [ -f "${dir[0]}" ]; then
+    mapfile -t quoted < <(printf '%s\n' "${dir[@]}" | awk 'BEGIN {FS=" "} { printf "'\''%s'\''\n", $0 }')
+    printf '%s ' "${PREFERRED_EDITOR:-${EDITOR:-vim}} ${quoted[*]}"
   else
     printf ''
   fi
