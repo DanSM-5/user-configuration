@@ -263,6 +263,10 @@ function fmerge () {
   fgb @args | ForEach-Object { git merge "$_" }
 }
 
+function gun () {
+  gunpushed --oneline @args
+}
+
 function get_bare_repository () {
   $current_directory = $PWD.ToString()
   $toplevel = ''

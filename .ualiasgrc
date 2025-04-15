@@ -144,6 +144,10 @@ gdf () {
   grepo diff
 }
 
+gun () {
+  gunpushed --oneline "$@"
+}
+
 get_bare_repository () {
   local current_directory="$PWD"
   local toplevel
