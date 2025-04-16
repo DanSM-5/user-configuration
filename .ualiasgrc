@@ -145,7 +145,7 @@ gdf () {
 }
 
 gun () {
-  gunpushed --oneline "$@"
+  git unpushed --oneline "$@"
 }
 
 get_bare_repository () {

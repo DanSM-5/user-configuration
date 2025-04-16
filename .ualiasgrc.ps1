@@ -264,7 +264,7 @@ function fmerge () {
 }
 
 function gun () {
-  gunpushed --oneline @args
+  git unpushed --oneline @args
 }
 
 function get_bare_repository () {
