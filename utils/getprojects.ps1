@@ -146,7 +146,7 @@ if ($PSBoundParameters.Count -eq 0) {
   get_locations
   get_directories
 
-  return $all_directories | Sort -Unique
+  return $all_directories | Sort-Object -Unique
 }
 
 if ($Locations) {
@@ -184,7 +184,7 @@ if ($Paths) {
 }
 
 if ($Unique) {
-  return $all_directories | Sort -Unique
+  return $all_directories | Sort-Object -Unique
 } else {
   return $all_directories
 }
