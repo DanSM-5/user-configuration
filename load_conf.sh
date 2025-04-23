@@ -78,6 +78,17 @@ else
   esac
 fi
 
+# Ensure everything loads correctly for vscode
+# When running in git bash/zsh these variables
+# will inherit from previos process and could be
+# using windows style paths
+if [ "$TERM_PROGRAM" = 'vscode' ]; then
+  unset user_conf_path
+  unset user_scripts_path
+  unset user_config_cache
+  unset prj
+fi
+
 # Set location of user configuration
 export user_conf_path="${user_conf_path:-$HOME/.usr_conf}"
 
