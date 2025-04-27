@@ -103,12 +103,14 @@ function Invoke-PsFzfRipgrep() {
 
   if (!(Get-Command -Name 'fzf' -ErrorAction SilentlyContinue)) { FindFzf }
 
+  $RFV_RG_ARGS = if ($env:RFV_RG_ARGS) { $env:RFV_RG_ARGS } else { '' }
   $RG_PREFIX = if ($env:RFV_PREFIX_COMMAND) {
-    $env:RFV_PREFIX_COMMAND + ' '
+    $env:RFV_PREFIX_COMMAND
   } else {
     # "rg --column --line-number --no-heading --color=always --smart-case "
-    "rg --column --line-number --no-heading --color=always --smart-case --no-ignore --glob !.git --glob !node_modules --hidden "
+    "rg --column --line-number --no-heading --color=always --smart-case --no-ignore --glob !.git --glob !node_modules --hidden"
   }
+  $RG_PREFIX = "$RG_PREFIX $RFV_RG_ARGS "
   $INITIAL_QUERY = $SearchString
   $originalFzfDefaultCommand = $env:FZF_DEFAULT_COMMAND
   # $editor = if ($PREFERRED_EDITOR) { $PREFERRED_EDITOR } elseif ($EDITOR) { $EDITOR } else { nvim }

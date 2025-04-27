@@ -36,7 +36,9 @@
 # and will list the files on quickfix list
 
 editor="${PREFERRED_EDITOR:-${EDITOR:-vim}}"
-RG_PREFIX="${RFV_PREFIX_COMMAND:-rg --column --line-number --no-heading --color=always --smart-case --no-ignore --glob '!.git' --glob '!node_modules' --hidden} "
+RFV_RG_ARGS="${RFV_RG_ARGS:-}"
+RG_PREFIX="${RFV_PREFIX_COMMAND:-rg --column --line-number --no-heading --color=always --smart-case --no-ignore --glob '!.git' --glob '!node_modules' --hidden}"
+RG_PREFIX="$RG_PREFIX $RFV_RG_ARGS "
 RELOAD="reload:$RG_PREFIX {q} || :"
 
 editorOptions="${EDITOR_OPTS:-}"
