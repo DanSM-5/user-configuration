@@ -96,8 +96,8 @@ if (Test-Command fzf) {
 
   # temporary variables
   $fzf_preview_script = "$SCONF/utils/fzf-preview.ps1"
-  $ctrl_t_command = "$SCONF/fzf/ctrl_t_command.ps1"
-  $alt_c_command = "$SCONF/fzf/alt_c_command.ps1"
+  $ctrl_t_command = "$SCONF/fzf/ctrl_t_command.ps1 `$env:FZF_CTRL_T_FD "
+  $alt_c_command = "$SCONF/fzf/alt_c_command.ps1 `$env:FZF_ALT_C_FD "
   $fzf_copy_helper = "$SCONF/utils/copy-helper.ps1"
 
   if (!(Test-Path -PathType Container -Path $env:FZF_HIST_DIR -ErrorAction SilentlyContinue)) {
@@ -190,13 +190,13 @@ if (Test-Command fd) {
   if ($IsWindows) {
     # $env:FZF_CTRL_T_COMMAND = "With-UTF8 { fd $FD_OPTIONS --color=always }"
     # $env:FZF_ALT_C_COMMAND = "With-UTF8 { fd --type directory --color=always $FD_OPTIONS }"
-    $env:FZF_CTRL_T_COMMAND = "With-UTF8 { $user_conf_path/fzf/ctrl_t_command.ps1 }"
-    $env:FZF_ALT_C_COMMAND = "With-UTF8 { $user_conf_path/fzf/alt_c_command.ps1 }"
+    $env:FZF_CTRL_T_COMMAND = "With-UTF8 { $user_conf_path/fzf/ctrl_t_command.ps1 `$env:FZF_CTRL_T_FD }"
+    $env:FZF_ALT_C_COMMAND = "With-UTF8 { $user_conf_path/fzf/alt_c_command.ps1 `$env:FZF_ALT_C_FD }"
   } else {
     # $env:FZF_CTRL_T_COMMAND = "fd $FD_OPTIONS --color=always"
     # $env:FZF_ALT_C_COMMAND = "fd --type directory --color=always $FD_OPTIONS"
-    $env:FZF_CTRL_T_COMMAND = "$user_conf_path/fzf/ctrl_t_command.ps1"
-    $env:FZF_ALT_C_COMMAND = "$user_conf_path/fzf/alt_c_command.ps1"
+    $env:FZF_CTRL_T_COMMAND = "$user_conf_path/fzf/ctrl_t_command.ps1 `$env:FZF_CTRL_T_FD"
+    $env:FZF_ALT_C_COMMAND = "$user_conf_path/fzf/alt_c_command.ps1 `$env:FZF_ALT_C_FD"
   }
 }
 

@@ -296,8 +296,8 @@ set_general_after () {
     fi
 
     fzf_preview_script="$SCONF/utils/fzf-preview.sh"
-    ctrl_t_command="$SCONF/fzf/ctrl_t_command"
-    alt_c_command="$SCONF/fzf/alt_c_command"
+    ctrl_t_command="$SCONF/fzf/ctrl_t_command \$FZF_CTRL_T_FD "
+    alt_c_command="$SCONF/fzf/alt_c_command \$FZF_ALT_C_FD "
 
     export FZF_HIST_DIR="$SHOME/.cache/fzf-history"
 
@@ -401,8 +401,8 @@ set_general_after () {
   if command_exists fd; then
     # export FZF_CTRL_T_COMMAND="fd --color=always ${FD_SHOW_OPTIONS[*]} ${FD_EXCLUDE_OPTIONS[*]}"
     # export FZF_ALT_C_COMMAND="fd --color=always --type directory ${FD_SHOW_OPTIONS[*]} ${FD_EXCLUDE_OPTIONS[*]}"
-    export FZF_CTRL_T_COMMAND="$user_conf_path/fzf/ctrl_t_command"
-    export FZF_ALT_C_COMMAND="$user_conf_path/fzf/alt_c_command"
+    export FZF_CTRL_T_COMMAND="$user_conf_path/fzf/ctrl_t_command \$FZF_CTRL_T_FD"
+    export FZF_ALT_C_COMMAND="$user_conf_path/fzf/alt_c_command \$FZF_ALT_C_FD"
 
     # Use fd (https://github.com/sharkdp/fd) instead of the default find
     # command for listing path candidates.
