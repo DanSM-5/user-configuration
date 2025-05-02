@@ -732,7 +732,8 @@ fif () {
 }
 
 fdirs () {
-  local selection="$(dirs -v |
+  local selection
+  selection="$(dirs -v |
     fzf-defaults \
       --cycle \
       --preview-window '60%,wrap' \
@@ -805,7 +806,7 @@ fnr () {
   fi
 
   local runner="${1:-npm}"
-  local query="${@:2}"
+  local query="${*:2}"
 
   # Escope for local functions
   (
@@ -820,7 +821,8 @@ fnr () {
     "
     local copy_script="$value_script | clip-copy"
 
-    local selection="$(jq -r '.scripts | keys[]' < package.json |
+    local selection
+    selection="$(jq -r '.scripts | keys[]' < package.json |
       sort |
       fzf --no-multi --query "$query" \
         --preview-window 'up:3:hidden:wrap' \
@@ -865,7 +867,8 @@ qnv () {
   if [ -z "$quick_access" ]; then
     return
   fi
-  local selection=$(printf "%s\n" "${quick_access[@]}" |
+  local selection
+  selection=$(printf "%s\n" "${quick_access[@]}" |
     fzf-defaults \
       --preview-window '60%,wrap' \
       --preview "$fzf_preview_normal")
@@ -882,7 +885,8 @@ qed () {
     return
   fi
   local editor="$1"
-  local selection=$(printf "%s\n" "${quick_edit[@]}" |
+  local selection
+  selection=$(printf "%s\n" "${quick_edit[@]}" |
     fzf-defaults \
       --preview-window '60%,wrap' \
       --preview "$fzf_preview_normal")
@@ -1180,7 +1184,8 @@ mpvp () {
 }
 
 dwi () {
-  local img_url="$("$clipboard_paste" | trim)"
+  local img_url
+  img_url="$("$clipboard_paste" | trim)"
   if [ -z "$img_url" ]; then
     echo "No image url"
     return 1
@@ -1192,7 +1197,8 @@ dwi () {
 }
 
 dwv () {
-  local vid_url="$("$clipboard_paste" | trim)"
+  local vid_url
+  vid_url="$("$clipboard_paste" | trim)"
   if [ -z "$vid_url" ]; then
     echo "No video url"
     return 1
@@ -1213,7 +1219,8 @@ dyl () {
 
 # Wrapper for ytfzf to launch mpv player
 mpvl () {
-  local selection=$(ytfzf -L "$@")
+  local selection
+  selection="$(ytfzf -L "$@")"
   if [ -n "$selection" ]; then
     "$mpv_commd" "$selection"
   fi
@@ -1261,7 +1268,8 @@ yfd () {
 }
 
 play () {
-  local url="$("$clipboard_paste" | trim)"
+  local url
+  url="$("$clipboard_paste" | trim)"
   if [ -z "$url" ]; then
     echo "No url in clipboard"
     return 1
@@ -1290,7 +1298,8 @@ play () {
 }
 
 plpp () {
-  local url="$("$clipboard_paste")"
+  local url
+  url="$("$clipboard_paste")"
   if [ -z "$url" ]; then
     echo "No url in clipboard"
     return 1
@@ -1299,7 +1308,8 @@ plpp () {
 }
 
 tplay () {
-  local url="$("$clipboard_paste" | trim)"
+  local url
+  url="$("$clipboard_paste" | trim)"
   if [ -z "$url" ]; then
     echo "No url in clipboard"
     return 1
@@ -1325,7 +1335,8 @@ tplay () {
 
 getHostPath () {
   local input="$*"
-  local filepath="$(echo "$input" | tr -d "\r\n")"
+  local filepath
+  filepath="$(printf '%s' "$input" | tr -d "\r\n")"
 
   if [ -z "$filepath" ]; then
     echo ""
@@ -1341,7 +1352,7 @@ getHostPath () {
     return
   fi
 
-  echo "$(realpath "$filepath")"
+  realpath "$filepath"
 }
 
 getPath () {
@@ -1353,7 +1364,8 @@ getSystemClipboardPath () {
 }
 
 getClipboardPath () {
-  local filepath="$("$clipboard_paste" | tr -d "\r\n")"
+  local filepath
+  filepath="$("$clipboard_paste" | tr -d "\r\n")"
 
   if [ -z "$filepath" ]; then
     echo ""
@@ -1369,11 +1381,12 @@ getClipboardPath () {
     return
   fi
 
-  echo "$(realpath "$filepath")"
+  realpath "$filepath"
 }
 
 ccd () {
-  local filepath="$(getClipboardPath)"
+  local filepath
+  filepath="$(getClipboardPath)"
 
   if [[ -z "$filepath" ]]; then
     echo "None or wrong path provided"
@@ -1384,7 +1397,8 @@ ccd () {
 }
 
 ocd () {
-  local filepath="$(getClipboardPath)"
+  local filepath
+  filepath="$(getClipboardPath)"
 
   if [[ -z "$filepath" ]]; then
     echo "None or wrong path provided"
@@ -1400,7 +1414,7 @@ getTempDir () {
 
 ptc () {
   local location="${1:-.}" # Current location
-  local query="${@:2}"
+  local query="${*:2}"
   local pattern="."
   local selection=""
 
@@ -1502,7 +1516,7 @@ fi
 if [ "$IS_WINDOWS" = true ]; then
   ptc () {
     local location="${1:-.}" # Current location
-    local query="${@:2}"
+    local query="${*:2}"
     local pattern="."
     local selection=""
 
@@ -1566,10 +1580,12 @@ if [ "$IS_WSL" = true ]; then
 
     # file_explorer_open "$filepath"
 
-    local item="$(printf "%s" "$@" | sed -E 's/^[[:space:]]*//' | sed -E 's/[[:space:]]*$//')"
+    local item
+    item="$(printf '%s' "$@" | sed -E 's/^[[:space:]]*//' | sed -E 's/[[:space:]]*$//')"
 
     if [ -f "$item" ] || [ -d "$item" ]; then
-      item="$(sed "s|wslpath: ||g" <<< "$(wslpath -aw "$item" 2>&1)")"
+      item="$(wslpath -aw "$item" 2>&1)"
+      item="${item//wslpath: /}"
     fi
 
     pwsh.exe -NoLogo -NonInteractive -NoProfile -Command "Start-Process $item"
@@ -1646,7 +1662,8 @@ if [ "$IS_WSL" = true ]; then
       set -- "$@" "$arg"
     done
 
-    local selection="$(pages_start="$startpage" ytfzf -L "$@")"
+    local selection
+    selection="$(pages_start="$startpage" ytfzf -L "$@")"
 
     if [ -z "$selection" ]; then
       return 1
@@ -1672,7 +1689,8 @@ if [ "$IS_WSL" = true ]; then
 
   getHostPath () {
     local input="$*"
-    local filepath="$(trim <<< "$input" | tr -d "\r\n")"
+    local filepath
+    filepath="$(trim <<< "$input" | tr -d "\r\n")"
 
     if [ -z "$filepath" ]; then
       echo ""
@@ -1702,7 +1720,8 @@ if [ "$IS_WSL" = true ]; then
 
   getPath () {
     local input="$*"
-    local win_path="$(getHostPath "$input")"
+    local win_path
+    win_path="$(getHostPath "$input")"
 
     printf "%q" "$(wslpath -ua "$win_path")"
   }
@@ -1716,7 +1735,8 @@ if [ "$IS_WSL" = true ]; then
   }
 
   ccd () {
-    local filepath="$(getClipboardPath)"
+    local filepath
+    filepath="$(getClipboardPath)"
 
     if [[ -z "$filepath" ]]; then
       echo "None or wrong path provided"
@@ -1755,7 +1775,8 @@ if [ "$IS_WSL" = true ]; then
 
   getTempDir () {
     pushd "$WIN_HOME" &> /dev/null || return
-    local dir_path="$(cmd.exe /c "echo %TEMP%" | sed 's/\\ / /g' | sed -e 's/[[:space:]]*$//')"
+    local dir_path
+    dir_path="$(cmd.exe /c "echo %TEMP%" | sed 's/\\ / /g' | sed -e 's/[[:space:]]*$//')"
     popd &> /dev/null || return
     printf "%q" "$(wslpath -au "$dir_path")"
   }
@@ -1864,7 +1885,11 @@ else
     # Show scoop packages on gitbash
     show_packages () {
       local selection
-      local packages=($(scoop list | awk 'NR>4 {print $1}'))
+      local packages=()
+
+      while IFS= read -r line; do
+        packages+=("$line")
+      done < <(scoop list 2>/dev/null | awk 'NR>4 {print $1}')
 
       while true; do
         selection="$(printf "%s\n" "${packages[@]}" | fzf-defaults \
@@ -1884,7 +1909,8 @@ else
 
     file_explorer_open () {
       # Special parsing for windows paths
-      local location_path="$(printf "%q" "$@" |
+      local location_path
+      location_path="$(printf "%q" "$@" |
         trim |
         sed -re "s|^/([a-zA-Z])/(.*$)|\u\1:/\2|g" |
         tr '/' '\\')"
@@ -1900,7 +1926,8 @@ else
 
     getPath () {
       local input="$*"
-      local filepath="$(echo "$input" | tr -d "\r\n")"
+      local filepath
+      filepath="$(echo "$input" | tr -d "\r\n")"
 
       if [ -z "$filepath" ]; then
         echo ""
@@ -1917,7 +1944,8 @@ else
       fi
 
       if [[ "$filepath" =~ : ]]; then
-        local drive_letter="$(sed -rn 's#^([A-Za-z]):.*#\1#p' <<< "$filepath" | tr '[:upper:]' '[:lower:]')"
+        local drive_letter
+        drive_letter="$(sed -rn 's#^([A-Za-z]):.*#\1#p' <<< "$filepath" | tr '[:upper:]' '[:lower:]')"
         filepath="/${drive_letter}/${filepath:3}"
       fi
 
@@ -1925,7 +1953,8 @@ else
     }
 
     getHostPath () {
-      local filepath="$(getPath "$@")"
+      local filepath
+      filepath="$(getPath "$@")"
 
       if [ -z "$filepath" ]; then
         echo ""
@@ -1946,7 +1975,7 @@ else
       fi
 
       # Return escaped string to allow \f \n \t directories
-      echo "$(printf "%q" "$windowspath" | sed 's/\\ / /g')"
+      printf "%q" "$windowspath" | sed 's/\\ / /g'
     }
 
     cmd () {
@@ -1954,7 +1983,8 @@ else
     }
 
     getClipboardPath () {
-      local filepath="$("$clipboard_paste" | tr -d "\r\n")"
+      local filepath
+      filepath="$("$clipboard_paste" | tr -d "\r\n")"
 
       if [ -z "$filepath" ]; then
         echo ""
@@ -2004,11 +2034,32 @@ fmpv () {
       --border))
   IFS="$ifsog"
 
+  # NOTE: Waiting for zsh fix to arrive to linux
+  # Ref: https://github.com/junegunn/fzf/issues/3947
+  # Test: while read file; do; echo ${file}; done < <(ls -1 | fzf --multi)
+  #
+  # while IFS= read -r line; do
+  #   selection+=("$line")
+  # done < <(
+  #   fd -tf --color=always |
+  #   fzf --multi --ansi --cycle \
+  #     --info=inline \
+  #     --height 80% --min-height 20 \
+  #     --preview-window '60%,wrap' \
+  #     --preview "$fzf_preview_normal" \
+  #     --bind "ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort" \
+  #     --bind 'alt-f:first' \
+  #     --bind 'alt-l:last' \
+  #     --bind 'alt-c:clear-query' \
+  #     --border \
+  # )
+
   if [ -z "${selection[*]}" ]; then
     return
   fi
 
-  local quoted=$(printf '%s\n' "${selection[@]}" |
+  local quoted
+  quoted=$(printf '%s\n' "${selection[@]}" |
     awk '{ printf "\"""%s""\""" ", $0 }')
   bash -c "$mpv_commd $mpv_args -- $quoted"
 }
@@ -2061,8 +2112,10 @@ getShellAliasAndFunctions () {
 }
 
 fcmd () {
-  local available_commands=($(getShellAliasAndFunctions | sort))
-  local tmpfile="$(mktemp)"
+  local available_commands
+  available_commands=($(getShellAliasAndFunctions | sort))
+  local tmpfile
+  tmpfile="$(mktemp)"
   # Cleanup file on exit
   trap "rm -- '$tmpfile'" EXIT
 
@@ -2096,7 +2149,8 @@ pfn () {
 }
 
 fnvm () {
-  local nvm_version=$(nvm list | fzf --ansi | awk '{ if ($1 == "->") print $2; else print $1; }')
+  local nvm_version
+  nvm_version=$(nvm list | fzf --ansi --no-multi | awk '{ if ($1 == "->") print $2; else print $1; }')
 
   if [ -n "$nvm_version" ]; then
     nvm use "$nvm_version"
@@ -2108,7 +2162,7 @@ fnvm () {
 # Investigate if fixin the issue is faster
 countFiles () {
   local searchSize="$1"
-  local fdArgs=(${@:2})
+  local fdArgs=("${@:2}")
 
   (
     printSimple () {
@@ -2116,7 +2170,8 @@ countFiles () {
     }
 
     printWithFileSize () {
-      local count="$(fd --hidden "${fdArgs[@]}" . "$1" | wc -l)"
+      local count
+      count="$(fd --hidden "${fdArgs[@]}" . "$1" | wc -l)"
       printf "$(du -sh "$1" 2> /dev/null)\t$count\n"
     }
 
@@ -2140,7 +2195,7 @@ countFiles () {
 }
 
 cdirs () {
-  printf '%s' "Counting directories in $(pwd):"
+  printf '%s\n\n' "Counting directories in $(pwd):"
   local size=false
   [ "$1" = -s ] && size=true
   countFiles "$size" -td
@@ -2172,7 +2227,8 @@ publicip () {
 lfcd () {
   if command -v lf &> /dev/null; then
     # `command` is needed in case `lfcd` is aliased to `lf`
-    local path_on_exit="$(command lf -print-last-dir "$@")"
+    local path_on_exit
+    path_on_exit="$(command lf -print-last-dir "$@")"
     if [ -d "$path_on_exit" ]; then
       cd "$path_on_exit" || return
     fi
@@ -2188,11 +2244,12 @@ makeSymLink () {
 
   # Check if pathLink is relative
   if ! [[ "$pathLink" = /* ]]; then
-    local symlinkDir="$(dirname "$pathLink")"
-    local targetBaseName="$(basename "$target")"
-    local targetDirName="$(dirname "$target")"
+    local symlinkDir targetBaseName targetDirName targetRelativePath
+    symlinkDir="$(dirname "$pathLink")"
+    targetBaseName="$(basename "$target")"
+    targetDirName="$(dirname "$target")"
 
-    local targetRelativePath="$(realpath --relative-to="$symlinkDir" "$targetDirName")"
+    targetRelativePath="$(realpath --relative-to="$symlinkDir" "$targetDirName")"
 
     \ln -s "$targetRelativePath/$targetBaseName" "$pathLink"
 
