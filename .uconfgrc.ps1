@@ -462,7 +462,7 @@ Remove-Variable addlast
 Remove-Variable pathlist
 
 # Add tab completions
-foreach ($file in (Get-ChildItem "$env:user_conf_path${dirsep}completions${dirsep}pwsh")) {
-  . $file
+foreach ($file in (Get-ChildItem "$env:user_config_cache${dirsep}completions${dirsep}pwsh" -ErrorAction SilentlyContinue)) {
+  . $file.FullName
 }
 
