@@ -1846,3 +1846,5 @@ function config () {
   }
 }
 
+# remove alias for man
+if (Test-Path Alias:man) { Remove-Item Alias:man }
