@@ -2013,6 +2013,8 @@ else
       alias refrenv="source '$user_conf_path/utils/refrenv.sh'"
     fi
 
+    alias man="$user_scripts_path/bash/gitbash_man.sh"
+    alias mn="$user_scripts_path/bash/gitbash_mn.sh"
   fi
 fi
 
