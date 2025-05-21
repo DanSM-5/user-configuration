@@ -652,8 +652,8 @@ function npm-list {
 
 function nlg { npm list -g --dept=0 }
 
-function nr { npm run $args }
-function mr { npm run $args }
+function nr () { npm run @args }
+function mr () { pnpm run @args }
 
 function fnr {
   if ( -not (Test-Path package.json) ) {
