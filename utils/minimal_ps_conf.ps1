@@ -35,24 +35,11 @@ function gvc { Set-Location "$HOME\vim-config" }
 function goh { Set-Location "$HOME"}
 function ecf () { & $env:PREFERRED_EDITOR $PROFILE }
 function egc () { & $env:PREFERRED_EDITOR "$env:user_conf_path/utils/minimal_ps_conf.ps1" }
+function sgcf () { . "$env:user_conf_path/utils/minimal_ps_conf.ps1" }
+function spf () { . $PROFILE }
 
 function ccd () {
-  $filepath = Get-Clipboard
-  $filepath = $filepath.Trim()
-
-  if (-not "$filepath") {
-    Write-Error "No path"
-    return
-  }
-
-  if (Test-Path -Path $filepath -PathType Leaf -ErrorAction SilentlyContinue) {
-    $filepath = [system.IO.Path]::GetDirectoryName($filepath)
-  } elseif (!(Test-Path -Path $filepath -PathType Container -ErrorAction SilentlyContinue)) {
-    Write-Error "Invalid path '$filepath'"
-    return
-  }
-
-  Set-Location "$filepath"
+  Get-Clipboard | Set-Location
 }
 
 if (Get-Command -Name 'Set-PsFzfOption' -ErrorAction SilentlyContinue) {
