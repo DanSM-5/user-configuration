@@ -78,7 +78,8 @@ function fgf () {
   try {
     [string[]]$selected = git -c color.status=always status --short |
       fzf @down_options @cmd_options | ForEach-Object {
-        $_ -replace '.* -> ', '' # Remove old name when renaming
+        $file_name = $_ -replace '.* -> ', '' # Remove old name when renaming
+        $file_name.Trim().Trim('"').Trim("'")
       }
 
     return $selected
