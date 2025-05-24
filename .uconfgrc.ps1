@@ -249,8 +249,11 @@ Set-PSReadLineKeyHandler -Chord 'ctrl+o,ctrl+l' -ScriptBlock {
 
 # Windows only config
 if ($IsWindows) {
-  # Allow to execute python scripts directly
+  # Allow to execute scripts directly
   $env:PATHEXT += ";.py"
+  $env:PATHEXT += ";.js;.ts" # javascript (ts when node strips type hints)
+  $env:PATHEXT += ";.cs" # Requires setting dotnetrun.bat in windows
+  $env:PATHEXT += ";.go" # Requires setting gorun.bat in windows
 
   # Delete word behind cursor
   Set-PSReadLineKeyHandler -Chord ctrl-backspace -Function BackwardDeleteWord
