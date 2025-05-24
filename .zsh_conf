@@ -41,6 +41,7 @@ export ZSHGENCOMP_SAVE_LOCATION="$user_conf_path/completions/zsh"
 # fpath changes must happen before compinit
 fpath=(
   ~/.zsh
+  ~/.zfunc
   # "$user_conf_path/zsh"
   "$user_config_cache/completions/zsh"
   "$user_config_cache/plugins"
