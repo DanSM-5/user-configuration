@@ -112,8 +112,8 @@ function show_image ([string] $thumbnail, [string] $ErrorMessage) {
 
   # Windows terminal support sixel from v1.22
   if ($env:TERM_PROGRAM -eq 'vscode' -or $IsWindows -or $env:IS_WINDOWS -eq 'true') {
-    chafa -f sixels --colors=full --polite=on --animate=off -s "$IMAGE_SIZE" "$thumbnail" ||
-      chafa -s "$IMAGE_SIZE" --animate=off "$thumbnail" ||
+    chafa -f sixels --colors=full --polite=on --animate=off -s "$IMAGE_SIZE" "$thumbnail" 2>$null ||
+      chafa -s "$IMAGE_SIZE" --animate=off "$thumbnail" 2>$null ||
       Write-Host $ErrorMessage
     return
   }
@@ -124,8 +124,11 @@ function show_image ([string] $thumbnail, [string] $ErrorMessage) {
 
 function show_pdf ([string] $path, [string] $thumbnail) {
   New-Item $script:TEMP_DIR -ItemType Directory -ea 0
-  # Using Ghostscript for image preview
-  gs -o "$thumbnail" -sDEVICE=pngalpha -dLastPage=1 "$path" *> $null
+  if (Test-Path -LiteralPath $thumbnail -PathType Leaf -ErrorAction SilentlyContinue) {
+    Remove-Item -LiteralPath $thumbnail -Force -ErrorAction SilentlyContinue
+  }
+
+  gs -o "$thumbnail" -sDEVICE=pngalpha -dLastPage=1 $path *> $null
   show_image "$thumbnail" 'Error previewing the PDF'
 
   Write-Output "File: $path"

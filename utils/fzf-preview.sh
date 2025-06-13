@@ -160,6 +160,7 @@ show_pdf () {
   thumbnail="$2"
 
   mkdir -p "$TEMP_DIR"
+  test -f "$thumbnail" && rm -f "$thumbnail" &>/dev/null
   # Using Ghostscript for image preview
   gs -o "$thumbnail" -sDEVICE=pngalpha -dLastPage=1 "$path" &>/dev/null
   show_image "$thumbnail" || printf '%s\n' 'Error previewing the PDF'
