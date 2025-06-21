@@ -98,12 +98,13 @@ if [ "$VSCODE_NVIM" = true ]; then
 fi
 
 if [ "$VSCODE_DEBUG" = true ]; then
-  source "$user_conf_path/utils/vscode_debug_conf.sh"
+  \. "$user_conf_path/utils/vscode_debug_conf.sh"
   return 0
 fi
 
 # Handle Find it faster vscode extension
 if [ "$FIND_IT_FASTER_ACTIVE" = 1 ]; then
+  \. "$user_conf_path/fzf/findItFaster.sh"
   return 0
 fi
 

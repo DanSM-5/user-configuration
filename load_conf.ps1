@@ -38,7 +38,7 @@ function Test-Command {
 
 # Handle Find it faster vscode extension
 if ($env:FIND_IT_FASTER_ACTIVE) {
-  Write-Output "No need to source from here"
+  . "${env:user_conf_path}${dirsep}fzf${dirsep}findItFaster.ps1"
   exit
 }
 
