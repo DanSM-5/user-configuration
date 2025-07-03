@@ -366,7 +366,7 @@ fadd () {
   #   selection+=("$pathspec")
   # done < <(fgf "${*:-}" | sed 's/^\"//' | sed 's/\"$//')
 
-  echo "${selection[@]}"
+  printf "%s\n" "${selection[@]}"
   # shellcheck disable=SC2128
   if [ -n "$selection" ]; then
     git add "${selection[@]}"
@@ -385,7 +385,7 @@ fpad () {
   #   selection+=("$pathspec")
   # done < <(fgf "${*:-}" | sed 's/^\"//' | sed 's/\"$//')
 
-  echo "${selection[@]}"
+  printf "%s\n" "${selection[@]}"
   # shellcheck disable=SC2128
   if [ -n "$selection" ]; then
     git add -p "${selection[@]}"
@@ -404,7 +404,7 @@ fpre () {
   #   selection+=("$pathspec")
   # done < <(fgf "${*:-}" | sed 's/^\"//' | sed 's/\"$//')
 
-  echo "${selection[@]}"
+  printf "%s\n" "${selection[@]}"
   # shellcheck disable=SC2128
   if [ -n "$selection" ]; then
     git reset -p "${selection[@]}"
