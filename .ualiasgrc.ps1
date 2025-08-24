@@ -973,7 +973,10 @@ if (Test-Path Alias:ln-s) { Remove-Item Alias:ln-s }
 Set-Alias -Name ln-s -Value makeSymLink
 
 function makeShortCut ([string] $target, [string] $path, [string] $arguments = '') {
-  if (-not ($path -match '\.lnk')) { $path = "$path.lnk" }
+  if (-not ($path -match '\.lnk')) {
+    $path = [System.IO.Path]::GetFileNameWithoutExtension($path)
+    $path = "$path.lnk"
+  }
   $shell = New-Object -ComObject WScript.Shell
   $shortcut = $shell.CreateShortcut("$path")
 
