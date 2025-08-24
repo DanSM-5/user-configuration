@@ -849,7 +849,7 @@ function fcmd () {
       `$cmdResults = Get-Command `$PreviewItem -ErrorAction SilentlyContinue;
       if (`$cmdResults) {
         `$RunningInWindowsTerminal = [bool](`$env:WT_Session);
-        `$IsWindowsCheck = (`$PSVersionTable.PSVersion.Major -le 5) -or `$IsWindows;
+        `$IsWindowsCheck = (`$PSVersionTable.PSVersion -le [version]'6.0.0') -or `$IsWindows;
         `$ansiCompatible = `$RunningInWindowsTerminal -or (-not `$IsWindowsCheck);
         if (`$cmdResults.CommandType -ne 'Application') {
           if (`$ansiCompatible -and (Get-Command bat -ErrorAction SilentlyContinue)) {

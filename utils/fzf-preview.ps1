@@ -18,7 +18,7 @@ $Item = ($ItemName -Join ' ').Trim('"').Trim("'").Trim('/').Trim('\').Trim()
 # $PreviewScript = $PreviewScript.Trim("'").Trim('"')
 
 $RunningInWindowsTerminal = [bool]($env:WT_Session)
-$IsWindowsCheck = ($PSVersionTable.PSVersion.Major -le 5) -or $IsWindows
+$IsWindowsCheck = ($PSVersionTable.PSVersion -le [version]'5.0.0') -or $IsWindows
 $ansiCompatible = $script:RunningInWindowsTerminal -or (-not $script:IsWindowsCheck)
 $TEMP_DIR = "$env:TEMP/preview_files_script"
 
