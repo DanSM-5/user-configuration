@@ -354,6 +354,21 @@ gprevr () {
   fi
 }
 
+gcompare () {
+  # Compare against 'ref'
+  # Uses HEAD as base if not provided
+  # Sample:
+  # gcompare master # Compares against master branch
+  if [ -z "$1" ]; then
+    return
+  fi
+
+  ref="$1"
+  base="${2:-HEAD}"
+
+  git diff "$ref...$base"
+}
+
 fadd () {
   local selection
   local ifsog="$IFS"

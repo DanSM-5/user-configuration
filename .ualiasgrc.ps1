@@ -165,7 +165,7 @@ function grebase { git grebase @args }
 function gmerge { git merge @args }
 function gco { git checkout @args }
 function gck { git checkout @args }
-function grm { git checkout @args -- . }
+function grm { git checkout @args -- '.' }
 function egt { git config -e @args }
 function egtg { git config --global -e @args }
 
@@ -209,11 +209,26 @@ function gsd { git stash drop $args }
 function gprev { git diff HEAD^..HEAD }
 
 function gprevd ([int] $num = 1) {
-  git diff HEAD~"$num"..HEAD
+  git diff "HEAD~$num..HEAD"
 }
 
 function gprevr ([int] $first = 1, [int] $second = 0) {
-  git diff HEAD~"$first"..HEAD~"$second"
+  git diff "HEAD~$first..HEAD~$second"
+}
+
+function gcompare {
+  # Compare against 'ref'
+  # Uses HEAD as base if not provided
+  # Sample:
+  # gcompare master # Compares against master branch
+  if (!$args[0]) {
+    return
+  }
+
+  $ref = $args[0]
+  $base = if($args[1]) { $args[1] } else { 'HEAD' }
+
+  git diff "$ref...$base"
 }
 
 function fadd () {
@@ -244,11 +259,19 @@ function fpre () {
 }
 
 function fco () {
-  fgb @args | ForEach-Object { git checkout "$($_ -replace 'origin/', '')" }
+  fgb @args | ForEach-Object {
+    if ($_) {
+      git checkout "$($_ -replace 'origin/', '')"
+    }
+  }
 }
 
 function fck () {
-  fgb @args | ForEach-Object { git checkout "$($_ -replace 'origin/', '')" }
+  fgb @args | ForEach-Object {
+    if ($_) {
+      git checkout "$($_ -replace 'origin/', '')"
+    }
+  }
 }
 
 function fgrm () {
