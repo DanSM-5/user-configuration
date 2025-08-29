@@ -844,12 +844,16 @@ function fcmd () {
   $definitionsFile = New-TemporaryFile
 
   try {
-    # Get all function and alias definitions in a file for later reuse
-    foreach ($cmd in [System.IO.File]::ReadLines($commandFile.FullName)) {
-      $definition = (Get-Command -Name "$cmd").Definition
+    $sw = new-object system.IO.StreamWriter($definitionsFile.FullName)
 
-      "`n$cmd`n $definition`n" >> $definitionsFile.FullName
+    # Get all function and alias definitions in a file for later reuse
+    Get-Content $commandFile.FullName | ForEach-Object {
+      $cmd = $_
+      $definition = (Get-Command -Name "$cmd").Definition
+      $sw.write("`n$cmd`n $definition`n")
     }
+
+    $sw.close()
 
     # Create a script body pointing to the temporary file with the commands definitions
     $preview = @"
@@ -888,12 +892,12 @@ function fcmd () {
   } finally {
     # Remove Commands file
     if (Test-Path -Path $commandFile.FullName -PathType leaf -ErrorAction SilentlyContinue) {
-      Remove-Item -Force -Path $commandFile.FullName
+      # Remove-Item -Force -Path $commandFile.FullName
     }
 
     # Remove Definitions file
     if (Test-Path -Path $definitionsFile.FullName -PathType leaf -ErrorAction SilentlyContinue) {
-      Remove-Item -Force -Path $definitionsFile.FullName
+      # Remove-Item -Force -Path $definitionsFile.FullName
     }
   }
 }
