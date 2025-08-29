@@ -446,7 +446,12 @@ fgrm () {
   #   selection+=("$pathspec")
   # done < <(fgf "${*:-}")
 
-  echo "Reverting: ${selection[*]}"
+  if [ -z "$selection" ]; then
+    return
+  fi
+
+  echo "Reverting:"
+  printf '%s\n' "${selection[@]}"
 
   # shellcheck disable=SC2128
   if [ -n "$selection" ]; then

@@ -252,7 +252,16 @@ function fck () {
 }
 
 function fgrm () {
-  fgf @args | ForEach-Object { git checkout -- "$_" }
+  [string[]] $selection = fgf @args
+
+  if ($selection.Length -eq 0) {
+    return
+  }
+  
+  Write-Output 'Reverting:'
+  Write-Output $selection
+
+  git checkout -- @selection
 }
 
 function fsa () {
