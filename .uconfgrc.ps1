@@ -231,6 +231,9 @@ if ((Get-Module PSReadLine).Version -ge '2.2') {
   Set-PSReadLineKeyHandler -Chord "Ctrl+p" -Function HistorySearchBackward
 }
 
+# Remove previous word (like ctrl-w)
+Set-PSReadLineKeyHandler -Chord "Ctrl+backspace" -Function BackwardKillWord
+
 # Set colors as if gnu utils for consistency
 # LS_COLORS string generated with vivid
 $env:LS_COLORS = Get-Content "${env:user_conf_path}${dirsep}.ls_colors"
