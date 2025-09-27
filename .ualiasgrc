@@ -312,61 +312,73 @@ fwr () {
   done
 }
 
-if command_exists delta; then
-  alias gprev="git diff HEAD^..HEAD | delta"
-else
-  alias gprev="git diff HEAD^..HEAD | bat"
-fi
 
-gprevd () {
-  local limit="$1"
+# TODO: Remember difference between ".." and "..." in both git log and git diff
+# https://stackoverflow.com/questions/462974/what-are-the-differences-between-double-dot-and-triple-dot-in-git-com
+# https://stackoverflow.com/questions/7251477/what-are-the-differences-between-double-dot-and-triple-dot-in-git-dif
 
-  # Default limit: 1
-  if [ -z "$limit" ] || [ "$limit" -le 0 ]; then
-    limit=1
+# Show diff against previous commits
+# With no arguments, it will always show the previous commit contents
+# > gprev
+# With a single argument, it will show the changes until the number of commits back
+# > gprev 5
+# With two argument, it will show the changes from first to second commit
+# > gprev 2 5
+# You can use branch names or hashes instead of numbers but you should prefer
+# using `git diff` directly in such a case
+gprev () {
+  local base ref expr
+
+  if [ "$#" -eq 0 ]; then
+    base=HEAD^
+    ref=HEAD
+  elif [ "$#" -eq 1 ]; then
+    if [[ "$*" =~ ^[^.]+[.][.]{1,2}[^.]+$ ]]; then 
+      expr="$*"
+    else
+      base="${1:-HEAD~1}"
+      ref="HEAD"
+    fi
+
+  elif [ "$#" -gt 1 ]; then
+    ref="$1"
+    base="$2"
   fi
+
+  if [ -z "$expr" ] && [ -z "$base" ] && [ -z "$ref" ]; then
+    printf 'Invalid arguments: %s' "$*"
+    return
+  fi
+
+  if [[ "$base" =~ ^[0-9]+$ ]]; then
+    base="HEAD~$base"
+  fi
+  if [[ "$ref" =~ ^[0-9]+$ ]]; then
+    ref="HEAD~$ref"
+  fi
+
+  expr="${expr:-"$base...$ref"}"
 
   if command_exists delta; then
-    git diff HEAD~"$limit"..HEAD | delta
+    git diff "$expr" | delta
   else
-    git diff HEAD~"$limit"..HEAD | bat
-  fi
-}
-
-gprevr () {
-  local first="$1"
-  local second="$2"
-
-  # Default first: 1
-  if [ -z "$first" ] || [ "$first" -le 0 ]; then
-    first=1
-  fi
-
-  # Default second: 0
-  if [ -z "$second" ] || [ "$second" -le 0 ]; then
-    second=0
-  fi
-
-  if command_exists delta; then
-    git diff HEAD~"$first"..HEAD~"$second" | delta
-  else
-    git diff HEAD~"$first"..HEAD~"$second" | bat
+    git diff "$expr"
   fi
 }
 
 gcompare () {
-  # Compare against 'ref'
-  # Uses HEAD as base if not provided
+  # Compare ref against 'base'
+  # Uses HEAD as ref if not provided
   # Sample:
   # gcompare master # Compares against master branch
   if [ -z "$1" ]; then
     return
   fi
 
-  ref="$1"
-  base="${2:-HEAD}"
+  base="$1"
+  ref="${2:-HEAD}"
 
-  git diff "$ref...$base"
+  git diff "$base...$ref"
 }
 
 fadd () {
