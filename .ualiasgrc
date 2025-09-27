@@ -333,7 +333,7 @@ gprev () {
     base=HEAD^
     ref=HEAD
   elif [ "$#" -eq 1 ]; then
-    if [[ "$*" =~ ^[^.]+[.][.]{1,2}[^.]+$ ]]; then 
+    if [[ "$*" =~ ^[^.]+[.][.]{1,2}[^.]+$ ]]; then
       expr="$*"
     else
       base="${1:-HEAD~1}"

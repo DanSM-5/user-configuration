@@ -218,7 +218,7 @@ function gprev {
     if ($args[0] -match '^[^.]+\.\.{1,2}[^.]+$') {
       $expr = "$args"
     } else {
-      $base = $args[0] 
+      $base = $args[0]
       $ref = 'HEAD'
     }
   } elseif ($args.Length -gt 1) {
@@ -312,7 +312,7 @@ function fgrm () {
   if ($selection.Length -eq 0) {
     return
   }
-  
+
   Write-Output 'Reverting:'
   Write-Output $selection
 
