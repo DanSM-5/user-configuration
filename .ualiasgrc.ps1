@@ -915,12 +915,12 @@ function fcmd () {
   } finally {
     # Remove Commands file
     if (Test-Path -Path $commandFile.FullName -PathType leaf -ErrorAction SilentlyContinue) {
-      # Remove-Item -Force -Path $commandFile.FullName
+      Remove-Item -Force -Path $commandFile.FullName
     }
 
     # Remove Definitions file
     if (Test-Path -Path $definitionsFile.FullName -PathType leaf -ErrorAction SilentlyContinue) {
-      # Remove-Item -Force -Path $definitionsFile.FullName
+      Remove-Item -Force -Path $definitionsFile.FullName
     }
   }
 }
