@@ -206,47 +206,9 @@ function gspop { git stash pop $args }
 function gsp { git stash push -m $args }
 function gss { git stash show $args }
 function gsd { git stash drop $args }
-function gprev {
-  $base = ''
-  $ref = ''
-  $expr = ''
 
-  if ($args.Length -eq 0) {
-    $base = 'HEAD^'
-    $ref = 'HEAD'
-  } elseif ($args.Length -eq 1) {
-    if ($args[0] -match '^[^.]+\.\.{1,2}[^.]+$') {
-      $expr = "$args"
-    } else {
-      $base = $args[0]
-      $ref = 'HEAD'
-    }
-  } elseif ($args.Length -gt 1) {
-    $ref = $args[0]
-    $base = $args[1]
-  }
-
-
-  if ((-not $expr) -and (-not $base) -and (-not $ref)) {
-    Write-Error "Invalid arguments: $args"
-    return
-  }
-
-  if ($base -match '^[0-9]+$') {
-    $base = "HEAD~$base"
-  }
-  if ($ref -match '^[0-9]+$') {
-    $ref = "HEAD~$ref"
-  }
-
-  $expr = if ($expr) { $expr } else { "$base...$ref" }
-
-  if (Get-Command delta -All -ErrorAction SilentlyContinue) {
-    git diff "$expr" | delta
-  } else {
-    git diff "$expr"
-  }
-}
+if (Test-Path Alias:gprev) { Remove-Item Alias:gprev }
+Set-Alias -Name gprev -Value git-prev.ps1
 
 function gcompare {
   # Compare against 'ref'
