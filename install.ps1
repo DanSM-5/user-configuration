@@ -2,8 +2,9 @@
 
 $env:dirsep = if ($IsWindows) { '\' } else { '/' }
 # Set if not already
-$env:user_conf_path = if ($env:user_conf_path) { $env:user_conf_path } else { "$HOME${env:dirsep}.usr_conf" }
-$config_dir = $env:user_conf_path
+$user_conf_path = if ($env:user_conf_path) { $env:user_conf_path } else { "$HOME${env:dirsep}.usr_conf" }
+$env:user_conf_path = $user_conf_path
+$config_dir = $user_conf_path
 $config_dir = if ($config_dir.StartsWith("$HOME")) { $config_dir.Replace("$HOME", '$HOME') } else { $config_dir }
 # Do not expand HOME variable
 $config_path = "$config_dir${env:dirsep}load_conf.ps1"

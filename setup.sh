@@ -17,6 +17,14 @@ export SETUP_TERMINAL="${SETUP_TERMINAL:-true}"
 export USE_SSH_REMOTE="${USE_SSH_REMOTE:-true}"
 export SETUP_VIM_CONFIG="${SETUP_VIM_CONFIG:-true}"
 
+
+if [ "$USE_SSH_REMOTE" = 'true' ] && command -v 'ssh' &> /dev/null && ssh -T github-personal; then
+  :
+else
+  printf '%s\n' 'SSH config not found. Reverting to install without ssh remote profile'
+  export USE_SSH_REMOTE='false'
+fi
+
 if [ "$USE_SSH_REMOTE" = 'true' ]; then
   config_repo="git@github-personal:DanSM-5/user-configuration"
 fi

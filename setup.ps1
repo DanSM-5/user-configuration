@@ -21,6 +21,11 @@ $env:USE_SSH_REMOTE = if ($env:USE_SSH_REMOTE) { $env:USE_SSH_REMOTE } else { 't
 $config_repo = if ($env:USE_SSH_REMOTE -eq 'true') { 'git@github-personal:DanSM-5/user-configuration' } else { 'https://github.com/DanSM-5/user-configuration' }
 $env:SETUP_VIM_CONFIG = if ($env:SETUP_VIM_CONFIG) { $env:SETUP_VIM_CONFIG } else { 'true' }
 
+if (!(($env:USE_SSH_REMOTE -eq 'true') -and (Get-Command -Name 'ssh' -All -ErrorAction SilentlyContinue) -and (ssh -T github-personal))) {
+  Write-Error 'SSH config not found. Reverting to install without ssh remote profile'
+  $env:USE_SSH_REMOTE = 'false'
+}
+
 # Start from HOME
 Set-Location $HOME
 
