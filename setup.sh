@@ -21,8 +21,9 @@ export SETUP_VIM_CONFIG="${SETUP_VIM_CONFIG:-true}"
 if [ "$USE_SSH_REMOTE" = 'true' ] && command -v 'ssh' &> /dev/null && ssh -T github-personal &> /dev/null; then
   :
 else
-  printf '%s\n' 'SSH config not found. Reverting to install without ssh remote profile'
-  export USE_SSH_REMOTE='false'
+  printf '%s\n' 'SSH config not found. Set USE_SSH_REMOTE=false and run again to continue.'
+  # export USE_SSH_REMOTE='false'
+  exit 1
 fi
 
 if [ "$USE_SSH_REMOTE" = 'true' ]; then

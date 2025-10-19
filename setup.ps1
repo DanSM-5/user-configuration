@@ -24,8 +24,9 @@ $env:SETUP_VIM_CONFIG = if ($env:SETUP_VIM_CONFIG) { $env:SETUP_VIM_CONFIG } els
 if (!(($env:USE_SSH_REMOTE -eq 'true') -and (Get-Command -Name 'ssh' -All -ErrorAction SilentlyContinue))) {
   ssh -T github-personal *> $null
   if (!$?) {
-    Write-Error 'SSH config not found. Reverting to install without ssh remote profile'
-    $env:USE_SSH_REMOTE = 'false'
+    Write-Error 'SSH config not found. Set USE_SSH_REMOTE=false and run again to continue.'
+    # $env:USE_SSH_REMOTE = 'false'
+    exit 1
   }
 }
 
