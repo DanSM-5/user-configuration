@@ -58,7 +58,7 @@ foreach ($script in $scripts_to_run) {
     chmod +x "$script"
   }
   # Run script
-  "$script"
+  & "$script"
 }
 
 Write-Output "Setup completed. Please run"
