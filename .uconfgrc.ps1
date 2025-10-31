@@ -43,9 +43,21 @@ if ((Test-Command oh-my-posh) -and (Test-Path "${HOME}${dirsep}omp-theme")) {
   $env:POSH_THEMES_PATH = "${HOME}${dirsep}omp-theme"
   # $global:POSH_TRANSIENT=$false
 
-  # oh-my-posh --init --shell pwsh --config $env:POSH_THEMES_PATH/jandedobbeleer.omp.json | Invoke-Expression
-  oh-my-posh init pwsh --config "${env:POSH_THEMES_PATH}${dirsep}jandedobbeleer.omp.v3.json" | Invoke-Expression
-  # oh-my-posh --init --shell pwsh --config "$(scoop prefix oh-my-posh)/themes/jandedobbeleer.omp.json" | Invoke-Expression
+  try {
+    # oh-my-posh --init --shell pwsh --config $env:POSH_THEMES_PATH/jandedobbeleer.omp.json | Invoke-Expression
+    oh-my-posh init pwsh --config "${env:POSH_THEMES_PATH}${dirsep}jandedobbeleer.omp.v3.json" | Invoke-Expression
+    # oh-my-posh --init --shell pwsh --config "$(scoop prefix oh-my-posh)/themes/jandedobbeleer.omp.json" | Invoke-Expression
+  } catch {
+    # Inherited gitbash variables is VSCode launched from gitbash
+    # Unset and try again
+    # echo "*{$_.Exception.Message}*"
+    if ($_.Exception.Message -Match ".+/c/Users.*") {
+      $env:MSYS = ''
+      $env:MSYSTEM = ''
+      $env:OSTYPE = ''
+      oh-my-posh init pwsh --config "${env:POSH_THEMES_PATH}${dirsep}jandedobbeleer.omp.v3.json" | Invoke-Expression
+    }
+  }
 }
 
 if (Test-Command Set-PsFzfOption) {
