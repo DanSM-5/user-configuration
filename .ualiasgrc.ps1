@@ -282,11 +282,21 @@ function fgrm () {
 }
 
 function fsa () {
-  fgs @args | ForEach-Object { git stash apply $_ }
+  fgs @args | ForEach-Object {
+    $selection = $_.Trim()
+    if ($selection) {
+      git stash apply "$selection"
+    }
+  }
 }
 
 function fmerge () {
-  fgb @args | ForEach-Object { git merge "$_" }
+  fgb @args | ForEach-Object {
+    $selection = $_.Trim()
+    if ($selection) {
+      git merge "$selection"
+    }
+  }
 }
 
 function gun () {
