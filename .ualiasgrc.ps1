@@ -177,13 +177,24 @@ function grepo {
     return
   }
 
-  git @args
+  $gitargs = $args
+  With-UTF8 {
+    git @gitargs
+  }
 }
 
-function g { git @args }
+function g {
+  $gitargs = $args
+  With-UTF8 {
+    git @gitargs
+  }
+}
 
 function gstatus {
-  grepo status @args
+  $gitargs = $args
+  With-UTF8 {
+    grepo status @gitargs
+  }
 }
 
 if (Test-Path Alias:gs) { Remove-Item Alias:gs }
@@ -197,15 +208,15 @@ function gdc { grepo diff --cached }
 
 # Shadowed by alias Get-Service
 # function gsv { gstatus -v @args }
-function gamend { git commit --amend }
-function gdif { git diff $args }
-function gstash { git stash $args }
-function gsl { git stash list $args }
-function gsa { git stash apply $args }
-function gspop { git stash pop $args }
-function gsp { git stash push -m $args }
-function gss { git stash show $args }
-function gsd { git stash drop $args }
+function gamend { g commit --amend @args }
+function gdif { g diff @args }
+function gstash { g stash @args }
+function gsl { g stash list @args }
+function gsa { g stash apply @args }
+function gspop { g stash pop @args }
+function gsp { g stash push -m @args }
+function gss { g stash show @args }
+function gsd { g stash drop @args }
 
 if (Test-Path Alias:gprev) { Remove-Item Alias:gprev }
 Set-Alias -Name gprev -Value git-prev.ps1
@@ -226,81 +237,108 @@ function gcompare {
 }
 
 function fadd () {
-  [string[]]$files = fgf @args
+  $gitargs = $args
+  With-UTF8 {
+    [string[]]$files = fgf @gitargs
 
-  if ($files.Length -gt 0) {
-    Write-Output @files
-    git add @files
+    if ($files.Length -gt 0) {
+      Write-Output @files
+      git add @files
+    }
   }
 }
 
 function fpad () {
-  [string[]]$files = fgf @args
+  $gitargs = $args
+  With-UTF8 {
+    [string[]]$files = fgf @gitargs
 
-  if ($files.Length -gt 0) {
-    Write-Output @files
-    git add -p @files
+    if ($files.Length -gt 0) {
+      Write-Output @files
+      git add -p @files
+    }
   }
 }
 
 function fpre () {
-  [string[]]$files = fgf @args
+  $gitargs = $args
+  With-UTF8 {
+    [string[]]$files = fgf @gitargs
 
-  if ($files.Length -gt 0) {
-    Write-Output @files
-    git reset -p @files
+    if ($files.Length -gt 0) {
+      Write-Output @files
+      git reset -p @files
+    }
   }
 }
 
 function fco () {
-  fgb @args | ForEach-Object {
-    if ($_) {
-      git checkout "$($_ -replace 'origin/', '')"
+  $gitargs = $args
+  With-UTF8 {
+    fgb @gitargs | ForEach-Object {
+      if ($_) {
+        git checkout "$($_ -replace 'origin/', '')"
+      }
     }
   }
 }
 
 function fck () {
-  fgb @args | ForEach-Object {
-    if ($_) {
-      git checkout "$($_ -replace 'origin/', '')"
+  $gitargs = $args
+  With-UTF8 {
+    fgb @gitargs | ForEach-Object {
+      if ($_) {
+        git checkout "$($_ -replace 'origin/', '')"
+      }
     }
   }
 }
 
 function fgrm () {
-  [string[]] $selection = fgf @args
+  $gitargs = $args
+  With-UTF8 {
+    [string[]] $selection = fgf @gitargs
 
-  if ($selection.Length -eq 0) {
-    return
+    if ($selection.Length -eq 0) {
+      return
+    }
+
+    Write-Output 'Reverting:'
+    Write-Output $selection
+
+    git checkout -- @selection
   }
-
-  Write-Output 'Reverting:'
-  Write-Output $selection
-
-  git checkout -- @selection
 }
 
 function fsa () {
-  fgs @args | ForEach-Object {
-    $selection = $_.Trim()
-    if ($selection) {
-      git stash apply "$selection"
+  $gitargs = $args
+  With-UTF8 {
+    fgs @gitargs | ForEach-Object {
+      $selection = $_.Trim()
+      if ($selection) {
+        git stash apply "$selection"
+      }
     }
   }
 }
 
 function fmerge () {
-  fgb @args | ForEach-Object {
-    $selection = $_.Trim()
-    if ($selection) {
-      git merge "$selection"
+  $gitargs = $args
+  With-UTF8 {
+    fgb @gitargs | ForEach-Object {
+      $selection = $_.Trim()
+      if ($selection) {
+        git merge "$selection"
+      }
     }
   }
 }
 
 function gun () {
-  git unpushed --oneline @args
+  $gitargs = $args
+  With-UTF8 {
+    git unpushed --oneline @gitargs
+  }
 }
 
 function get_bare_repository () {
@@ -417,17 +455,20 @@ function gwc () {
 }
 
 function fwc () {
-  $branch_name = fgb @args | ForEach-Object {
-    # Clean branch name
-    $_ -replace 'origin/', ''
-  }
-  $branch_name = "$branch_name"
+  $gitargs = $args
+  With-UTF8 {
+    $branch_name = fgb @gitargs | ForEach-Object {
+      # Clean branch name
+      $_ -replace 'origin/', ''
+    }
+    $branch_name = "$branch_name"
 
-  if (!$branch_name) {
-    return
-  }
+    if (!$branch_name) {
+      return
+    }
 
-  gwc "$branch_name"
+    gwc "$branch_name"
+  }
 }
 
 function fwr () {
@@ -439,12 +480,16 @@ function fwr () {
     return
   }
 
-  fgb @args | ForEach-Object {
-    # Clean branch name
-    $_ -replace 'origin/', ''
-  } | ForEach-Object {
-    if (!$_) {
-      git worktree remove "$_"
+
+  With-UTF8 {
+    $gitargs = $args
+    fgb @gitargs | ForEach-Object {
+      # Clean branch name
+      $_ -replace 'origin/', ''
+    } | ForEach-Object {
+      if (!$_) {
+        git worktree remove "$_"
+      }
     }
   }
 }
