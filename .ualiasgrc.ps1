@@ -62,7 +62,7 @@ function getPsFzfOptions {
     MinHeight = 20
     Border = $true
     Info = 'inline'
-    PreviewWindow = '60%,wrap'
+    PreviewWindow = '60%,wrap-word'
   }
   return $psFzfOptions
 }
@@ -81,7 +81,7 @@ function getFzfOptions () {
     '--bind', 'alt-f:first',
     '--bind', 'alt-l:last',
     '--bind', 'alt-c:clear-query',
-    '--preview-window', '60%,wrap',
+    '--preview-window', '60%,wrap-word',
     # '--preview', $preview,
     '--preview', $fzf_preview_normal,
     '--height', '80%',
@@ -1857,7 +1857,7 @@ function themes_vivid () {
   $selected_theme = vivid themes |
     fzf @fzf_options `
       --cycle `
-      --preview-window 'right:70%,wrap' `
+      --preview-window 'right:70%,wrap-word' `
       --with-shell 'pwsh --NoLogo -NoProfile -NonInteractive -Command'`
       --preview '
       Write-Output "Theme: {}";

@@ -33,10 +33,10 @@ cmd () {
 
 fzf-defaults () {
   # --bind ctrl-/:toggle-preview \
-  # --preview-window '~4,+{2}+4/3,<80(up),wrap'
+  # --preview-window '~4,+{2}+4/3,<80(up),wrap-word'
   fzf --height 80% --min-height 20 --border \
     --input-border \
-    --preview-window '60%,wrap' \
+    --preview-window '60%,wrap-word' \
     --bind 'alt-f:first' \
     --bind 'alt-l:last' \
     --bind 'alt-c:clear-query' \
@@ -474,7 +474,7 @@ fi
 
 # General commands
 alias mkdr="mkdir -pv"
-alias fzfp="fzf-defaults --preview-window '60%,wrap' --preview '$fzf_preview_normal'"
+alias fzfp="fzf-defaults --preview-window '60%,wrap-word' --preview '$fzf_preview_normal'"
 alias pvim="vim --clean"
 alias pnvim="nvim --clean"
 
@@ -482,14 +482,14 @@ frm () {
   local selection
   selection=($(fd-defaults --color=always -tf -tl |
     fzf-defaults --ansi --cycle --multi \
-      --preview-window '60%,wrap' \
+      --preview-window '60%,wrap-word' \
       --preview "$fzf_preview_normal"))
 
   # while IFS='' read -r to_rm_file; do
   #   selection+=("$to_rm_file")
   # done < <(fd-defaults --color=always -tf -tl |
   #   fzf-defaults --ansi --cycle --multi \
-  #     --preview-window '60%,wrap' \
+  #     --preview-window '60%,wrap-word' \
   #     --preview "$fzf_preview_normal")
 
   # shellcheck disable=SC2128
@@ -504,14 +504,14 @@ frdr () {
   local selection
   selection=($(fd-defaults --color=always -td -d 1 |
     fzf-defaults --ansi --cycle \
-      --preview-window '60%,wrap' \
+      --preview-window '60%,wrap-word' \
       --preview "$fzf_preview_normal"))
 
   # while IFS='' read -r dir_to_rm; do
   #   selection+=("$dir_to_rm")
   # done < <(fd-defaults --color=always -td -d 1 |
   #   fzf-defaults --ansi --cycle \
-  #     --preview-window '60%,wrap' \
+  #     --preview-window '60%,wrap-word' \
   #     --preview "$fzf_preview_normal")
 
   # shellcheck disable=SC2128
@@ -530,7 +530,7 @@ fll () {
   local selection
   selection=$(fd-defaults --color=always -td |
     fzf-defaults --ansi --cycle \
-      --preview-window '60%,wrap' \
+      --preview-window '60%,wrap-word' \
       --preview "$fzf_preview_normal")
   if [ -n "$selection" ]; then
     \ls -alhF  --color=always "$selection"
@@ -540,7 +540,7 @@ fll () {
 lfd () {
   fd-defaults --color=always |
     fzf-defaults --ansi --cycle \
-      --preview-window '60%,wrap' \
+      --preview-window '60%,wrap-word' \
       --preview "$fzf_preview_normal"
 }
 
@@ -549,7 +549,7 @@ lfa () {
   local selection
   selection=$(cd "/" && fd-defaults --color=always |
     fzf-defaults --ansi --cycle \
-      --preview-window '60%,wrap' \
+      --preview-window '60%,wrap-word' \
       --preview "$fzf_preview_normal")
   echo "$selection"
 }
@@ -569,7 +569,7 @@ fcd () {
   selection=$(fd-defaults --color=always -tl -td "$pattern" "$location" |
     fzf-defaults --ansi --cycle --query "$query" \
       --header "(ctrl-/) Search in: $location" \
-      --preview-window '60%,wrap' \
+      --preview-window '60%,wrap-word' \
       --preview "$fzf_preview_normal")
   if [ -z "$selection" ]; then
     return 1
@@ -586,7 +586,7 @@ fcd () {
 #   selection=$(fd-defaults --color=always -tl -td |
 #     fzf-defaults --ansi --cycle \
 #       --query "$query" \
-#       --preview-window '60%,wrap' \
+#       --preview-window '60%,wrap-word' \
 #       --preview "$fzf_preview_normal")
 
 #   if [ -z "$selection" ]; then
@@ -612,7 +612,7 @@ fcd () {
 #       -x dirname {} |
 #     sort -u |
 #     fzf-defaults \
-#       --preview-window '60%,wrap' \
+#       --preview-window '60%,wrap-word' \
 #       --preview "$fzf_preview_normal" \
 #       --header "(ctrl-/) Search in: $location" \
 #       --query "$query")
@@ -628,7 +628,7 @@ fcd () {
 
 #   selection=$(cd / && fd-defaults -tl -td |
 #     fzf-defaults \
-#       --preview-window '60%,wrap' \
+#       --preview-window '60%,wrap-word' \
 #       --preview "$fzf_preview_normal")
 #   if [ -n "$selection" ]; then
 #     cd "$selection" || return
@@ -652,7 +652,7 @@ fcd () {
 #       --ansi \
 #       --cycle \
 #       --multi \
-#       --preview-window '60%,wrap' \
+#       --preview-window '60%,wrap-word' \
 #       --preview "$fzf_preview_normal" \
 #       --header "(ctrl-/) Search in: $location" \
 #       --query "$query"))
@@ -664,7 +664,7 @@ fcd () {
 #   #     --ansi \
 #   #     --cycle \
 #   #     --multi \
-#   #     --preview-window '60%,wrap' \
+#   #     --preview-window '60%,wrap-word' \
 #   #     --preview "$fzf_preview_normal" \
 #   #     --header "(ctrl-/) Search in: $location" \
 #   #     --query "$query")
@@ -685,7 +685,7 @@ fcd () {
 #   local editor="${PREFERRED_EDITOR:-vim}"
 #   local selection=$(fd-defaults --color=always -L -tf |
 #     fzf-defaults --multi --ansi --cycle \
-#       --preview-window '60%,wrap' \
+#       --preview-window '60%,wrap-word' \
 #       --preview "$fzf_preview_normal" --query "$query")
 #   if [ -z "$selection" ]; then
 #     return
@@ -705,7 +705,7 @@ fif () {
   rg --color=always --files-with-matches --no-messages "$*" |
     fzf-defaults \
       --ansi --cycle \
-      --preview-window '60%,wrap' \
+      --preview-window '60%,wrap-word' \
       --preview "
         highlight -O ansi -l {} 2> /dev/null |
         rg --colors 'match:bg:yellow' --ignore-case --pretty --context 10 '$*' || rg --ignore-case --pretty --context 10 '$*' {}"
@@ -716,7 +716,7 @@ fdirs () {
   selection="$(dirs -v |
     fzf-defaults \
       --cycle \
-      --preview-window '60%,wrap' \
+      --preview-window '60%,wrap-word' \
       --preview "$fzf_preview_normal {2..}" |
     awk '{print $1}')"
 
@@ -850,7 +850,7 @@ qnv () {
   local selection
   selection=$(printf "%s\n" "${quick_access[@]}" |
     fzf-defaults \
-      --preview-window '60%,wrap' \
+      --preview-window '60%,wrap-word' \
       --preview "$fzf_preview_normal")
 
   if [ -n "$selection" ]; then
@@ -868,7 +868,7 @@ qed () {
   local selection
   selection=$(printf "%s\n" "${quick_edit[@]}" |
     fzf-defaults \
-      --preview-window '60%,wrap' \
+      --preview-window '60%,wrap-word' \
       --preview "$fzf_preview_normal")
 
   if ! [ -f "$selection" ]; then
@@ -923,7 +923,7 @@ cprj () {
   #     --bind 'alt-f:first' \
   #     --bind 'alt-l:last' \
   #     --bind 'alt-c:clear-query' \
-  #     --preview-window '60%,wrap' \
+  #     --preview-window '60%,wrap-word' \
   #     --preview "$fzf_preview_normal" \
   # ))
 
@@ -1408,7 +1408,7 @@ ptc () {
     fzf-defaults --query "$query" \
       --ansi --cycle \
       --header "(ctrl-/) Search in: $location" \
-      --preview-window '60%,wrap' \
+      --preview-window '60%,wrap-word' \
       --preview "$fzf_preview_normal")
   if [ -z "$selection" ]; then
     return 1
@@ -1464,7 +1464,7 @@ if command -v apt &>/dev/null; then
   show_packages () {
     dpkg-query -W -f='${Package}\n' |
       fzf-defaults \
-        --preview-window '60%,wrap' \
+        --preview-window '60%,wrap-word' \
         --preview 'apt-cache show {} | bat --style=plain --color=always --language yml' \
         --layout=reverse \
         --cycle \
@@ -1486,7 +1486,7 @@ elif command -v pacman &>/dev/null; then
 
     pacman -Qq | fzf-defaults \
       --layout=reverse \
-      --preview-window '60%,wrap' \
+      --preview-window '60%,wrap-word' \
       --preview 'pacman -Qil {} | bat --style=plain --color=always' \
       --cycle \
       --bind 'enter:execute(pacman -Qil {} | bat --style=plain --color=always)'
@@ -1509,7 +1509,7 @@ if [ "$IS_WINDOWS" = true ]; then
     selection=$({ echo '.'; fd-defaults --color=always -tl -td -tf -L "$pattern" "$location"; } |
       fzf-defaults --ansi --cycle --query "$query" \
         --header "(ctrl-/) Search in: $location" \
-        --preview-window '60%,wrap' \
+        --preview-window '60%,wrap-word' \
         --preview "$fzf_preview_normal")
 
     if [ -z "$selection" ]; then
@@ -1874,7 +1874,7 @@ else
       while true; do
         selection="$(printf "%s\n" "${packages[@]}" | fzf-defaults \
           --cycle \
-          --preview-window '60%,wrap' \
+          --preview-window '60%,wrap-word' \
           --preview 'scoop info {}' \
         )"
 
@@ -2007,7 +2007,7 @@ fmpv () {
     fzf --multi --ansi --cycle \
       --info=inline \
       --height 80% --min-height 20 \
-      --preview-window '60%,wrap' \
+      --preview-window '60%,wrap-word' \
       --preview "$fzf_preview_normal" \
       --bind "ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort" \
       --bind 'alt-f:first' \
@@ -2027,7 +2027,7 @@ fmpv () {
   #   fzf --multi --ansi --cycle \
   #     --info=inline \
   #     --height 80% --min-height 20 \
-  #     --preview-window '60%,wrap' \
+  #     --preview-window '60%,wrap-word' \
   #     --preview "$fzf_preview_normal" \
   #     --bind "ctrl-/:change-preview-window(down|hidden|),alt-up:preview-page-up,alt-down:preview-page-down,ctrl-s:toggle-sort" \
   #     --bind 'alt-f:first' \

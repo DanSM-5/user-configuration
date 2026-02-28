@@ -43,7 +43,7 @@ $env:FZF_DEFAULT_OPTS = "
   --bind 'alt-up:preview-page-up,alt-down:preview-page-down'
   --bind 'ctrl-s:toggle-sort'
   --bind 'ctrl-y:execute-silent($copy)+bell'
-  --preview-window 'right,50%,wrap,border-left'
+  --preview-window 'right,50%,wrap-word,border-left'
   --color 'header:italic'
   --ansi '--cycle'
   --height '99%'

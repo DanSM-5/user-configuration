@@ -157,7 +157,7 @@ if (Test-Command fzf) {
     --bind 'alt-f:first'
     --bind 'alt-l:last'
     --bind 'alt-c:clear-query'
-    --preview-window '60%,wrap'
+    --preview-window '60%,wrap-word'
     --preview '$fzf_preview_script {}'
     --with-shell 'pwsh -NoLogo -NonInteractive -NoProfile -Command'
     --bind 'ctrl-^:toggle-preview'
@@ -170,7 +170,7 @@ if (Test-Command fzf) {
     --prompt 'CD> '
     --color header:italic
     --header 'ctrl-a: CD | ctrl-d: Up | ctrl-e: Config | ctrl-r: Scripts | ctrl-t: CWD | ctrl-w: Projects'
-    --preview-window '60%,wrap'
+    --preview-window '60%,wrap-word'
     --preview '$fzf_preview_script {}'
     --bind 'alt-a:select-all'
     --bind 'alt-d:deselect-all'

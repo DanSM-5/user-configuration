@@ -118,7 +118,7 @@ mapfile -t selected < <(
     --prompt '1. 🔎 ripgrep> ' \
     --delimiter : \
     --preview 'bat --style=full --color=always --highlight-line {2} {1}' \
-    --preview-window '~4,+{2}+4/3,<80(up),wrap' \
+    --preview-window '~4,+{2}+4/3,<80(up),wrap-word' \
     --query "$*"
 )
 

@@ -26,7 +26,7 @@ function get_fzf_down_options() {
     '--layout=reverse',
     '--multi',
     '--border',
-    '--preview-window', 'right,50%,wrap',
+    '--preview-window', 'right,50%,wrap-word',
     '--bind', 'alt-f:first',
     '--bind', 'alt-l:last',
     '--bind', 'alt-c:clear-query',
@@ -68,7 +68,7 @@ function fgf () {
     "--query=$query",
     '--prompt', 'Files> ',
     "--history=$env:FZF_HIST_DIR/fzf-git_file",
-    '--preview-window', '60%,wrap',
+    '--preview-window', '60%,wrap-word',
     '--ansi',
     '--nth', '2..,..',
     '--accept-nth', '2..',
@@ -118,7 +118,7 @@ function fgb () {
     "--history=$env:FZF_HIST_DIR/fzf-git_branch",
     '--ansi',
     '--tac',
-    '--preview-window', 'right,70%,wrap',
+    '--preview-window', 'right,70%,wrap-word',
     '--preview', $preview
   )
 
@@ -166,7 +166,7 @@ function fgt () {
     "--query=$query",
     '--prompt', 'Tags> ',
     "--history=$env:FZF_HIST_DIR/fzf-git_tag",
-    '--preview-window', 'right,70%,wrap',
+    '--preview-window', 'right,70%,wrap-word',
     '--preview', $preview
   )
 
@@ -408,7 +408,7 @@ function fshow () {
     '--bind', "ctrl-f:reload:$git_current_cmd",
     '--bind', "ctrl-a:reload:$git_all_cmd",
     '--preview', $preview,
-    '--preview-window', 'right,50%,wrap',
+    '--preview-window', 'right,50%,wrap-word',
     '--expect=ctrl-d'
   )
 
