@@ -420,6 +420,34 @@ function get_bare_repository () {
 if (Test-Path Alias:gbr) { Remove-Item Alias:gbr }
 Set-Alias -Name gbr -Value get_bare_repository
 
+# Magic variable to set the prefix path for nested worktree folders
+# It should end in `/` unless empty
+$__git_worktree_prefix = ''
+
+# Bare repo add worktree
+function gwa () {
+  if ( $args[0] -eq "-b" ) {
+    $branch_name = $args[1]
+    $worktree_path = "${__git_worktree_prefix}$branch_name"
+    if (!(Test-Path -LiteralPath "$worktree_path" -PathType Container -ErrorAction SilentlyContinue)) {
+      $git_args = $args[2..$args.Count]
+      git worktree add -b "$worktree_path" "$branch_name" @git_args
+    }
+  } else {
+    $branch_name = $args[0]
+    $worktree_path = "${__git_worktree_prefix}$branch_name"
+    if (!(Test-Path -LiteralPath "$worktree_path" -PathType Container -ErrorAction SilentlyContinue)) {
+      $git_args = $args[1..$args.Count]
+      git worktree add "$worktree_path" "$branch_name" @git_args
+    }
+  }
+}
+
+# Bare repo remove worktree
+function gwr () {
+  git worktree remove @args
+}
+
 # Bare repo checkout
 function gwc () {
   $bare_root = ''
@@ -431,19 +459,23 @@ function gwc () {
     return
   }
 
+  # Go to bare root
   Push-Location -LiteralPath "$bare_root" *> $null
 
+  # Add worktree
   if ( $args[0] -eq "-b" ) {
     $branch_name = $args[1]
-    if (!(Test-Path -LiteralPath "$branch_name" -PathType Container -ErrorAction SilentlyContinue)) {
+    $worktree_path = "${__git_worktree_prefix}$branch_name"
+    if (!(Test-Path -LiteralPath "$worktree_path" -PathType Container -ErrorAction SilentlyContinue)) {
       $git_args = $args[2..$args.Count]
-      git worktree add -b "$branch_name" "$branch_name" @git_args
+      git worktree add -b "$worktree_path" "$branch_name" @git_args
     }
   } else {
     $branch_name = $args[0]
-    if (!(Test-Path -LiteralPath "$branch_name" -PathType Container -ErrorAction SilentlyContinue)) {
+    $worktree_path = "${__git_worktree_prefix}$branch_name"
+    if (!(Test-Path -LiteralPath "$worktree_path" -PathType Container -ErrorAction SilentlyContinue)) {
       $git_args = $args[1..$args.Count]
-      git worktree add "$branch_name" "$branch_name" @git_args
+      git worktree add "$worktree_path" "$branch_name" @git_args
     }
   }
 
@@ -451,11 +483,7 @@ function gwc () {
   Pop-Location *> $null
 
   # Attempt to cd into new worktree
-  Set-Location -LiteralPath "$bare_root/$branch_name" *> $null
-}
-
-function gwr () {
-  git worktree remove @args
+  Set-Location -LiteralPath "$bare_root/$worktree_path" *> $null
 }
 
 function fwc () {
