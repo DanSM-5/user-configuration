@@ -265,6 +265,10 @@ gwc () {
   cd "$bare_root/$branch_name" 2>/dev/null || return
 }
 
+gwr () {
+  git worktree remove "$@"
+}
+
 fwc () {
   local selection branch_name
 

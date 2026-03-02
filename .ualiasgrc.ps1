@@ -454,6 +454,10 @@ function gwc () {
   Set-Location -LiteralPath "$bare_root/$branch_name" *> $null
 }
 
+function gwr () {
+  git worktree remove @args
+}
+
 function fwc () {
   $gitargs = $args
   With-UTF8 {
