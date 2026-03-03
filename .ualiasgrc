@@ -2389,3 +2389,27 @@ config () {
   fi
 }
 
+# Check: https://api.github.com/emojis
+def () {
+  if [ -z "$1" ]; then
+    return
+  fi
+
+  query="$(printf 'https://api.dictionaryapi.dev/api/v2/entries/en/%s' "$1")"
+  # --fail --silent --location
+  result=$(curl -fsL "$query")
+
+  if [ -z "$result" ]; then
+    return
+  fi
+
+  definitions="$(printf '%s\n' "$result" |
+    jq -r '[.[] | .meanings[] | .definitions[] | .definition] | map("- " + .) | join("\n")' \
+  )"
+
+  if command_exists gum; then
+    printf '# 📖 Definition: "%s"\n\n%s' "$1" "$definitions" | gum format
+  else
+    printf 'Definition: "%s"\n\n%s\n' "$1" "$definitions"
+  fi
+}

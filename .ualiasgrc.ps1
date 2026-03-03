@@ -1968,3 +1968,39 @@ function config () {
 
 # remove alias for man
 if (Test-Path Alias:man) { Remove-Item Alias:man }
+
+function def () {
+  if (!$args[0]) {
+    return
+  }
+
+  $word = $args[0]
+
+  $query = 'https://api.dictionaryapi.dev/api/v2/entries/en/{0}' -f "$word"
+  $curl_cmd = 'curl'
+
+  if ($IsWindows -or ($env:OS -eq 'Windows_NT')) {
+    $curl_cmd = 'curl.exe'
+  }
+
+  With-UTF8 {
+    # --fail --silent --location
+    $result = & $curl_cmd -fsL "$query"
+
+    if (!$result) {
+      return
+    }
+
+    $definitions = $result | jq -r '[.[] | .meanings[] | .definitions[] | .definition] | map("- " + .) | join("\n")'
+
+    if (Get-Command -Name 'gum' -ErrorAction 'SilentlyContinue') {
+      &{
+        Write-Output "# 📖 Definition `"$word`"`n`n"
+        Write-Output $definitions
+      } | gum format
+    } else {
+      Write-Output "# Definition `"$word`"`n`n"
+      Write-Output $definitions
+    }
+  }
+}
