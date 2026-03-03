@@ -2404,7 +2404,7 @@ def () {
   fi
 
   definitions="$(printf '%s\n' "$result" |
-    jq -r '[.[] | .meanings[] | .definitions[] | .definition] | map("- " + .) | join("\n")' \
+    jq -r '[.[] | .meanings[] | ("## " + .partOfSpeech), ("- " + .definitions[].definition)] | join("\n")' \
   )"
 
   if command_exists gum; then

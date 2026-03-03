@@ -1991,7 +1991,7 @@ function def () {
       return
     }
 
-    $definitions = $result | jq -r '[.[] | .meanings[] | .definitions[] | .definition] | map("- " + .) | join("\n")'
+    $definitions = $result | jq -r '[.[] | .meanings[] | ("## " + .partOfSpeech), ("- " + .definitions[].definition)] | join("\n")'
 
     if (Get-Command -Name 'gum' -ErrorAction 'SilentlyContinue') {
       &{
