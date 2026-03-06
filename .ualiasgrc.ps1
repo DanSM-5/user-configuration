@@ -625,10 +625,6 @@ function cprj ([Switch] $Raw) {
   Set-Location -LiteralPath $selection[0]
 }
 
-function rfv {
-  & "${env:user_conf_path}${dirsep}utils${dirsep}rgfzf.ps1" @args
-}
-
 function fcd () {
   $location = if ($args[0]) { $args[0] } else { "." }
   $query = $args[1..$args.length]
@@ -1812,13 +1808,13 @@ Set-Alias -Name pmu -Value Print-MemoryUsage
 
 function grc () {
   Push-Location $env:user_conf_path
-  & "${env:user_conf_path}${dirsep}utils${dirsep}rgfzf.ps1" @args
+  rfv @args
   Pop-Location
 }
 
 function grs () {
   Push-Location $env:user_scripts_path
-  & "${env:user_conf_path}${dirsep}utils${dirsep}rgfzf.ps1" @args
+  rfv @args
   Pop-Location
 }
 

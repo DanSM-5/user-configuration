@@ -549,10 +549,6 @@ frdr () {
   \rm -rf "${selection[@]}"
 }
 
-rfv () {
-  "$user_conf_path/utils/rgfzf.sh" "$@"
-}
-
 fll () {
   local selection
   selection=$(fd-defaults --color=always -td |
@@ -2284,13 +2280,13 @@ qrcode () {
 
 grc () {
   pushd "$user_conf_path" || return
-  "$user_conf_path/utils/rgfzf.sh" "$@"
+  rfv "$@"
   popd || return
 }
 
 grs () {
   pushd "$user_scripts_path" || return
-  "$user_conf_path/utils/rgfzf.sh" "$@"
+  rfv "$@"
   popd || return
 }
 

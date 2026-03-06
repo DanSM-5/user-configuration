@@ -91,7 +91,6 @@ if (Test-Command Set-PsFzfOption) {
   # Set-Alias -Name fcd -Value Invoke-FuzzySetLocation
 
   Import-module "$env:user_conf_path\utils\fzf-git.psm1"
-  # Import-module "$env:user_conf_path\utils\rgfzf.psm1"
 
   # Remove alias fgs from PSFzf
   if (Test-Path Alias:fgs) {

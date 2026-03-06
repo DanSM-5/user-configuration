@@ -71,10 +71,6 @@ if (Get-Command -Name 'Set-PsFzfOption' -ErrorAction SilentlyContinue) {
     Remove-Item Alias:fgs
     Set-Alias -Name fgst -Value Invoke-FuzzyGitStatus
   }
-
-  function rfv () {
-    & "${user_conf_path}\utils\rgfzf.ps1" @args
-  }
 }
 
 if (-not (Test-Path env:OutputEncodingBackupSet)) {
