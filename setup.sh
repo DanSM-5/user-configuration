@@ -10,15 +10,19 @@
 # - USE_SSH_REMOTE: Use ssh key from config
 # - SETUP_VIM_CONFIG: Run install script in vim-config
 
+repository='DanSM-5/user-configuration'
+
 # Config repo + default location
 export user_conf_path="${user_conf_path:-$HOME/.usr_conf}"
-config_repo="https://github.com/DanSM-5/user-configuration"
+config_repo="https://github.com/$repository"
 export SETUP_TERMINAL="${SETUP_TERMINAL:-true}"
 export USE_SSH_REMOTE="${USE_SSH_REMOTE:-true}"
 export SETUP_VIM_CONFIG="${SETUP_VIM_CONFIG:-true}"
 
 
-if [ "$USE_SSH_REMOTE" = 'true' ] && command -v 'ssh' &> /dev/null; then
+if [ "$USE_SSH_REMOTE" = 'false' ]; then
+  echo 'Fetching using https protocol'
+elif [ "$USE_SSH_REMOTE" = 'true' ] && command -v 'ssh' &> /dev/null; then
   :
 else
   printf '%s\n' 'SSH config not found. Set USE_SSH_REMOTE=false and run again to continue.'
@@ -27,7 +31,7 @@ else
 fi
 
 if [ "$USE_SSH_REMOTE" = 'true' ]; then
-  config_repo="git@github-personal:DanSM-5/user-configuration"
+  config_repo="git@github-personal:$repository"
 fi
 
 # Start from HOME

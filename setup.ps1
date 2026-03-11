@@ -10,6 +10,9 @@
 # - USE_SSH_REMOTE: Use ssh key from config
 # - SETUP_VIM_CONFIG: Run install script in vim-config
 
+
+$repository = 'DanSM-5/user-configuration'
+
 # Platform specific
 $dirsep = if ($IsWindows) { '\' } else { '/' }
 $env:dirsep = $dirsep
@@ -18,10 +21,12 @@ $user_conf_path = if ($env:user_conf_path) { $env:user_conf_path } else { "$HOME
 $env:user_conf_path = $user_conf_path
 $env:SETUP_TERMINAL = if ($env:SETUP_TERMINAL) { $env:SETUP_TERMINAL } else { 'true' }
 $env:USE_SSH_REMOTE = if ($env:USE_SSH_REMOTE) { $env:USE_SSH_REMOTE } else { 'true' }
-$config_repo = if ($env:USE_SSH_REMOTE -eq 'true') { 'git@github-personal:DanSM-5/user-configuration' } else { 'https://github.com/DanSM-5/user-configuration' }
+$config_repo = if ($env:USE_SSH_REMOTE -eq 'true') { "git@github-personal:$repository" } else { 'https://github.com/$repository' }
 $env:SETUP_VIM_CONFIG = if ($env:SETUP_VIM_CONFIG) { $env:SETUP_VIM_CONFIG } else { 'true' }
 
-if (!(($env:USE_SSH_REMOTE -eq 'true') -and (Get-Command -Name 'ssh' -All -ErrorAction SilentlyContinue))) {
+if ($env:USE_SSH_REMOTE -eq 'false') {
+  Write-Verbose 'Fetching using https protocol'
+} elseif (!(($env:USE_SSH_REMOTE -eq 'true') -and (Get-Command -Name 'ssh' -All -ErrorAction SilentlyContinue))) {
   Write-Error 'SSH config not found. Set USE_SSH_REMOTE=false and run again to continue.'
   exit 1
 }
