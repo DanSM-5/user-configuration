@@ -60,6 +60,21 @@ if ((Test-Command oh-my-posh) -and (Test-Path "${HOME}${dirsep}omp-theme")) {
   }
 }
 
+# New release of neovim breaks cursor shape on exit
+# This is a workaround to wrap existing prompt function defined by oh-my-posh
+# The idea is to use prompt to also emit the cursor shape escape sequence
+# for a blinking vertical pipe cursor
+if ($IsWindows) {
+  # Register reset cursor hook
+  # Prompt is likely defined by oh-my-posh, store to use reference later
+  Copy-Item function:\prompt function:\global:CursorResetOrigPrompt -Force
+  $global:CursorResetPromptScriptBlock = {
+    Write-Host "`e[5 q" -NoNewline
+    CursorResetOrigPrompt
+  }
+  Set-Content -Path function:\prompt -Value $global:CursorResetPromptScriptBlock -Force
+}
+
 if (Test-Command Set-PsFzfOption) {
   # fzf
   # $color_gruvbox = '--colot="bg+:#3c3836,bg:#32302f,spinner:#fb4934,hl:#928374,fg:#ebdbb2,header:#928374,info:#8ec07c,pointer:#fb4934,marker:#fb4934,fg+:#ebdbb2,prompt:#fb4934,hl+:#fb4934"'
