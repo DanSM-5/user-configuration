@@ -60,19 +60,52 @@ if ((Test-Command oh-my-posh) -and (Test-Path "${HOME}${dirsep}omp-theme")) {
   }
 }
 
-# New release of neovim breaks cursor shape on exit
-# This is a workaround to wrap existing prompt function defined by oh-my-posh
-# The idea is to use prompt to also emit the cursor shape escape sequence
-# for a blinking vertical pipe cursor
+# TODO: Add check for windows terminal
 if ($IsWindows) {
   # Register reset cursor hook
   # Prompt is likely defined by oh-my-posh, store to use reference later
   Copy-Item function:\prompt function:\global:CursorResetOrigPrompt -Force
-  $global:CursorResetPromptScriptBlock = {
-    Write-Host "`e[5 q" -NoNewline
-    CursorResetOrigPrompt
+
+  function Global:__Terminal-Get-LastExitCode {
+    if ($? -eq $True) { return 0 }
+    $LastHistoryEntry = $(Get-History -Count 1)
+    $IsPowerShellError = $Error[0].InvocationInfo.HistoryId -eq $LastHistoryEntry.Id
+    if ($IsPowerShellError) { return -1 }
+    return $LastExitCode
   }
-  Set-Content -Path function:\prompt -Value $global:CursorResetPromptScriptBlock -Force
+
+  $global:CustomPromptScriptBlock = {
+    # Nvim fix
+    # New release of neovim breaks cursor shape on exit
+    # This is a workaround to wrap existing prompt function defined by oh-my-posh
+    # The idea is to use prompt to also emit the cursor shape escape sequence
+    # for a blinking vertical pipe cursor
+    Write-Host "`e[5 q" -NoNewline
+
+    # WT integration
+    # Ref: https://learn.microsoft.com/en-us/windows/terminal/tutorials/shell-integration
+    $gle = $(__Terminal-Get-LastExitCode)
+    $LastHistoryEntry = $(Get-History -Count 1)
+    if ($Global:__LastHistoryId -ne -1) {
+      if ($LastHistoryEntry.Id -eq $Global:__LastHistoryId) {
+        $out += "`e]133;D`a"
+      } else {
+        $out += "`e]133;D;$gle`a"
+      }
+    }
+    $loc = $($executionContext.SessionState.Path.CurrentLocation);
+    $out += "`e]133;A$([char]07)";
+    $out += "`e]9;9;`"$loc`"$([char]07)";
+
+    # $out += $global:CursorResetOrigPrompt.Invoke() # Add original prompt back
+    $out += CursorResetOrigPrompt # Add original prompt back
+
+    $out += "`e]133;B$([char]07)";
+    $Global:__LastHistoryId = $LastHistoryEntry.Id
+    return $out
+  }
+
+  Set-Content -Path function:\prompt -Value $global:CustomPromptScriptBlock -Force
 }
 
 if (Test-Command Set-PsFzfOption) {
