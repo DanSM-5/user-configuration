@@ -75,7 +75,8 @@ $base_dir = if ($Source) { $Source }
   else { $HOME }
 
 function expand_path ([string] $string_path) {
-  $expanded = Invoke-Expression "Write-Output $string_path"
+  $expanded = Invoke-Expression "Write-Output `"$string_path`""
+  $expanded = $expanded.Trim('"').Trim("'")
   $expanded = $expanded.Replace('~', $HOME)
   $expanded = $expanded.Replace('/', $dirsep)
   return $expanded.Replace('\', $dirsep).Trim()

@@ -71,7 +71,7 @@ get_locations () {
   if [ -f "$locations_file" ]; then
     while IFS="" read -r dir || [ -n "$dir" ]; do
       [[ "$dir" =~ ^# ]] && continue
-      dir_path=$(eval "printf '%s' $dir 2>/dev/null" | sed -E 's/^[[:space:]]*//' | sed -E 's/[[:space:]]*$//')
+      dir_path=$(eval "printf '%s' \"$dir\" 2>/dev/null" | sed -E 's/^[[:space:]]*//' | sed -E 's/[[:space:]]*$//')
       # Resolving paths takes around 300ms in gitbash
       # TODO: Investigate if this line can be safely removed
       # [ "$is_gitbash" = false ] &&
