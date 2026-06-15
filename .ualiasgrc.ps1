@@ -168,6 +168,12 @@ function gck { git checkout @args }
 function grm { git checkout @args -- '.' }
 function egt { git config -e @args }
 function egtg { git config --global -e @args }
+function gshow {
+  $gitargs = $args
+  With-UTF8 {
+    git show @gitargs
+  }
+}
 
 function grepo {
   git rev-parse HEAD *> $null
