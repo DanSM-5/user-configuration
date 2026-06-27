@@ -432,26 +432,53 @@ $__git_worktree_prefix = ''
 
 # Bare repo add worktree
 function gwa () {
+  $bare_root = get_bare_repository
+
+  if (!$bare_root -or !(Test-Path -LiteralPath $bare_root -PathType Container -ErrorAction SilentlyContinue)) {
+    return
+  }
+
+  # Go to bare root so worktrees are created relative to it from anywhere
+  Push-Location -LiteralPath "$bare_root" *> $null
+
   if ( $args[0] -eq "-b" ) {
     $branch_name = $args[1]
     $worktree_path = "${__git_worktree_prefix}$branch_name"
     if (!(Test-Path -LiteralPath "$worktree_path" -PathType Container -ErrorAction SilentlyContinue)) {
-      $git_args = $args[2..$args.Count]
-      git worktree add -b "$worktree_path" "$branch_name" @git_args
+      $git_args = if ($args.Count -gt 2) { $args[2..($args.Count - 1)] } else { @() }
+      git worktree add -b "$branch_name" "$worktree_path" @git_args
     }
   } else {
     $branch_name = $args[0]
     $worktree_path = "${__git_worktree_prefix}$branch_name"
     if (!(Test-Path -LiteralPath "$worktree_path" -PathType Container -ErrorAction SilentlyContinue)) {
-      $git_args = $args[1..$args.Count]
+      $git_args = if ($args.Count -gt 1) { $args[1..($args.Count - 1)] } else { @() }
       git worktree add "$worktree_path" "$branch_name" @git_args
     }
   }
+
+  # Recover previous location
+  Pop-Location *> $null
 }
 
 # Bare repo remove worktree
 function gwr () {
-  git worktree remove @args
+  $bare_root = get_bare_repository
+
+  if (!$bare_root -or !(Test-Path -LiteralPath $bare_root -PathType Container -ErrorAction SilentlyContinue)) {
+    return
+  }
+
+  # Go to bare root so the prefixed worktree path resolves correctly
+  Push-Location -LiteralPath "$bare_root" *> $null
+
+  $branch_name = $args[0]
+  $worktree_path = "${__git_worktree_prefix}$branch_name"
+  $git_args = if ($args.Count -gt 1) { $args[1..($args.Count - 1)] } else { @() }
+  git worktree remove "$worktree_path" @git_args
+
+  # Recover previous location
+  Pop-Location *> $null
 }
 
 # Bare repo checkout
@@ -473,14 +500,14 @@ function gwc () {
     $branch_name = $args[1]
     $worktree_path = "${__git_worktree_prefix}$branch_name"
     if (!(Test-Path -LiteralPath "$worktree_path" -PathType Container -ErrorAction SilentlyContinue)) {
-      $git_args = $args[2..$args.Count]
-      git worktree add -b "$worktree_path" "$branch_name" @git_args
+      $git_args = if ($args.Count -gt 2) { $args[2..($args.Count - 1)] } else { @() }
+      git worktree add -b "$branch_name" "$worktree_path" @git_args
     }
   } else {
     $branch_name = $args[0]
     $worktree_path = "${__git_worktree_prefix}$branch_name"
     if (!(Test-Path -LiteralPath "$worktree_path" -PathType Container -ErrorAction SilentlyContinue)) {
-      $git_args = $args[1..$args.Count]
+      $git_args = if ($args.Count -gt 1) { $args[1..($args.Count - 1)] } else { @() }
       git worktree add "$worktree_path" "$branch_name" @git_args
     }
   }
@@ -514,10 +541,12 @@ function fwr () {
 
   $bare_root = get_bare_repository
 
-  if (!$bare_root) {
+  if (!$bare_root -or !(Test-Path -LiteralPath $bare_root -PathType Container -ErrorAction SilentlyContinue)) {
     return
   }
 
+  # Go to bare root so the prefixed worktree path resolves correctly
+  Push-Location -LiteralPath "$bare_root" *> $null
 
   With-UTF8 {
     $gitargs = $args
@@ -525,11 +554,15 @@ function fwr () {
       # Clean branch name
       $_ -replace 'origin/', ''
     } | ForEach-Object {
-      if (!$_) {
-        git worktree remove "$_"
+      if ($_) {
+        $worktree_path = "${__git_worktree_prefix}$_"
+        git worktree remove "$worktree_path"
       }
     }
   }
+
+  # Recover previous location
+  Pop-Location *> $null
 }
 
 # Example
