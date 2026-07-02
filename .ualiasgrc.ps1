@@ -428,7 +428,7 @@ Set-Alias -Name gbr -Value get_bare_repository
 
 # Magic variable to set the prefix path for nested worktree folders
 # It should end in `/` unless empty
-$__git_worktree_prefix = '.wt'
+$__git_worktree_prefix = '.wt/'
 
 # Bare repo add worktree
 function gwa () {
