@@ -1868,7 +1868,7 @@ function padb () {
   mkdr "$HOME/projects"
   Push-Location "$HOME/projects"
   try {
-    clone-bare @args
+    git-clone-bare @args
   } finally {
     Pop-Location
   }

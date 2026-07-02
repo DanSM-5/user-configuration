@@ -2341,7 +2341,7 @@ padd () {
 padb () {
   mkdr "$HOME/projects"
   pushd "$HOME/projects" || return
-  clone-bare "$@"
+  git-clone-bare "$@"
   local ret=$?
   popd || return
   return $ret
