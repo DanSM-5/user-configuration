@@ -1872,9 +1872,9 @@ else
           (exit 1) && true
         fi
 
-        am start --user 0 -a android.intent.action.VIEW -d "$url" is.xyz.mpv/.MPVActivity
+        am start --user 0 -a android.intent.action.VIEW -d "$url" is.xyz.mpv.ytdl/is.xyz.mpv.MPVActivity
       elif [ -n "$1" ]; then
-        am start --user 0 -a android.intent.action.VIEW -d "$@" is.xyz.mpv/.MPVActivity
+        am start --user 0 -a android.intent.action.VIEW -d "$@" is.xyz.mpv.ytdl/is.xyz.mpv.MPVActivity
       else
         echo "No url provided"
         (exit 1) && true
