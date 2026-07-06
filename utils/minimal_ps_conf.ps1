@@ -377,6 +377,6 @@ if (Get-Command -name 'coreutils-manager.exe' -ErrorAction SilentlyContinue) {
   # Remove aliases that shadow coreutils
   $coreutilsAliases = @('ls', 'cat', 'pwd', 'cp', 'mv', 'rm', 'mkdir', 'sleep', 'sort', 'tee', 'type', 'dir', 'echo')
   foreach ($a in $coreutilsAliases) {
-    Remove-Alias -Name $a -Force -ErrorAction SilentlyContinue
+    Remove-Item Alias:$a -Force -ErrorAction SilentlyContinue
   }
 }
