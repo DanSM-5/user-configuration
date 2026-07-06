@@ -800,7 +800,9 @@ function npm-list {
 
 function nlg { npm list -g --dept=0 }
 
-function nr () { npm run @args }
+# Weird bug with latest node versions. Using `@args` directly gets ignored by npm run.
+# Other weirdness, `$npm_args` also fails as a variable name
+function nr () { $n_args = $args ; npm run @n_args }
 function mr () { pnpm run @args }
 
 function fnr {
