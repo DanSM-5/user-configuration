@@ -105,21 +105,31 @@ function get_locations ([String] $FilePath, [Switch] $RquiredPath) {
 function get_directories ([String] $FilePath, [Switch] $RquiredPath) {
   if ($RquiredPath -and (-not $FilePath)) { return }
   $directories_file = if ($FilePath) { $FilePath } else { "$base_dir/directories" }
-  if (Test-Path -PathType Leaf -Path "$directories_file" -ErrorAction SilentlyContinue) {
-    Get-Content "$directories_file" | % {
-      if ($_) {
-        if ($_.StartsWith('#')) { return }
-        $dir_path = expand_path $_
-        if (-not (Test-Path -PathType Container -Path $dir_path -ErrorAction SilentlyContinue)) { return }
-        $locations = @( fd --type 'directory' --type 'symlink' --max-depth 1 . "$dir_path" )
-        foreach ($lock in $locations) {
-          if (Test-Path -PathType Container -Path $lock -ErrorAction SilentlyContinue) {
-            $lock = $lock -Replace '\\$', ''
-            $lock = $lock -Replace '/$', ''
-            $null = $script:all_directories.Add($lock)
-          }
-        }
+  if (-not (Test-Path -PathType Leaf -Path "$directories_file" -ErrorAction SilentlyContinue)) { return }
+
+  # Collect every valid base directory first so `fd` can be invoked once for
+  # all of them below, instead of once per line. Spawning a native process
+  # (fd.exe) is the expensive part here; each extra invocation costs
+  # ~100ms+, so batching them is the biggest win available in this script.
+  $valid_dirs = @()
+  Get-Content "$directories_file" | % {
+    if ($_) {
+      if ($_.StartsWith('#')) { return }
+      $dir_path = expand_path $_
+      if (Test-Path -PathType Container -Path $dir_path -ErrorAction SilentlyContinue) {
+        $valid_dirs += $dir_path
       }
+    }
+  }
+
+  if ($valid_dirs.Count -eq 0) { return }
+
+  $locations = @( fd --type 'directory' --type 'symlink' --max-depth 1 . @valid_dirs )
+  foreach ($lock in $locations) {
+    if (Test-Path -PathType Container -Path $lock -ErrorAction SilentlyContinue) {
+      $lock = $lock -Replace '\\$', ''
+      $lock = $lock -Replace '/$', ''
+      $null = $script:all_directories.Add($lock)
     }
   }
 }

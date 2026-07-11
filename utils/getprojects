@@ -16,16 +16,6 @@ fi
 
 # all_directories=()
 
-is_gitbash=false
-if [ "$OS" = "Windows_NT" ]; then
-  is_gitbash=true
-fi
-# case "$(uname -a)" in
-#   MINGW*|MSYS*|CYGWIN*|*NT*)
-#     is_gitbash=true
-#     ;;
-# esac
-
 help () {
   while IFS= read -r line; do
 		printf "  %s\n" "$line"
@@ -64,42 +54,71 @@ help () {
 EOF
 }
 
+# Expands variables/tilde in a raw line (via eval, a builtin) and trims
+# leading/trailing whitespace using pure parameter expansion. This avoids
+# forking external processes (printf/sed) per line, which is the single
+# biggest cost on gitbash: each external process spawn there costs roughly
+# 25-65ms (measured), so doing this per-line across a handful of external
+# commands adds up to the majority of this script's runtime.
+expand_and_trim () {
+  local -n __out="$1"
+  eval "__out=\"$2\"" 2>/dev/null || { __out=""; return 1; }
+  __out="${__out#"${__out%%[![:space:]]*}"}"
+  __out="${__out%"${__out##*[![:space:]]}"}"
+}
+
+# Reads a "locations"/"directories"-style file into an array of expanded,
+# trimmed, non-empty, non-comment paths. Shared by get_locations and
+# get_directories so both benefit from the same fork-free line processing.
+read_path_list () {
+  local -n __result="$1"
+  local file="$2"
+  local raw entry
+  while IFS="" read -r raw || [ -n "$raw" ]; do
+    [[ -z "$raw" || "$raw" =~ ^# ]] && continue
+    expand_and_trim entry "$raw" || continue
+    [ -n "$entry" ] && __result+=("$entry")
+  done < "$file"
+}
+
 get_locations () {
   [ -z "$1" ] && [ "$2" = true ] && return
   local locations_file="${1:-"$base_dir/locations"}"
-  # Get single directories
-  if [ -f "$locations_file" ]; then
-    while IFS="" read -r dir || [ -n "$dir" ]; do
-      [[ "$dir" =~ ^# ]] && continue
-      dir_path=$(eval "printf '%s' \"$dir\" 2>/dev/null" | sed -E 's/^[[:space:]]*//' | sed -E 's/[[:space:]]*$//')
-      # Resolving paths takes around 300ms in gitbash
-      # TODO: Investigate if this line can be safely removed
-      # [ "$is_gitbash" = false ] &&
-        dir_path=$(realpath "$dir_path" 2>/dev/null)
-      [ -d "$dir_path" ] && printf "%s\n" "${dir_path%/}"
-      # [ -d "$dir_path" ] && all_directories+=("${dir_path%/}")
-    done < "$locations_file"
-  fi
+  [ -f "$locations_file" ] || return
+
+  local paths=()
+  read_path_list paths "$locations_file"
+  [ "${#paths[@]}" -eq 0 ] && return
+
+  # Resolve every path in a single realpath call instead of once per line.
+  local dir_path
+  while IFS="" read -r dir_path; do
+    [ -d "$dir_path" ] && printf "%s\n" "${dir_path%/}"
+  done < <(realpath -- "${paths[@]}" 2>/dev/null)
 }
 
 get_directories () {
   [ -z "$1" ] && [ "$2" = true ] && return
   local directories_file="${1:-"$base_dir/directories"}"
-  # Get content from listed directories
-  if [ -f "$directories_file" ]; then
-    while IFS="" read -r dir || [ -n "$dir" ]; do
-      [[ "$dir" =~ ^# ]] && continue
-      dir_path=$(eval "printf '%s' $dir 2>/dev/null" | sed -E 's/^[[:space:]]*//' | sed -E 's/[[:space:]]*$//')
-      dir_path=$(realpath "$dir_path" 2>/dev/null)
-      if [ -d "$dir_path" ]; then
-        mapfile -t locations < <(fd --type 'directory' --type 'symlink' --max-depth 1 . "$dir_path")
-        for lock in "${locations[@]}"; do
-          [ -d "$lock" ] && printf "%s\n" "${lock%/}"
-          # [ -d "$lock" ] && all_directories+=("${lock%/}")
-        done
-      fi
-    done < "$directories_file"
-  fi
+  [ -f "$directories_file" ] || return
+
+  local paths=()
+  read_path_list paths "$directories_file"
+  [ "${#paths[@]}" -eq 0 ] && return
+
+  # Resolve every path in a single realpath call instead of once per line.
+  local resolved=() dir_path
+  while IFS="" read -r dir_path; do
+    [ -d "$dir_path" ] && resolved+=("$dir_path")
+  done < <(realpath -- "${paths[@]}" 2>/dev/null)
+  [ "${#resolved[@]}" -eq 0 ] && return
+
+  # Query all base directories in a single fd call instead of once per line.
+  local lock
+  while IFS="" read -r lock; do
+    [ -d "$lock" ] && printf "%s\n" "${lock%/}"
+    # [ -d "$lock" ] && all_directories+=("${lock%/}")
+  done < <(fd --type 'directory' --type 'symlink' --max-depth 1 . "${resolved[@]}" 2>/dev/null)
 }
 
 get_directories_from_path () {
