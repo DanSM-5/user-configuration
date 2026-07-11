@@ -54,7 +54,7 @@ function help () {
     -f | --file-locations         Get "locations" from the specific file provided
     -b | --file-directories       Get "directories" from the specific file provided
     -i | --include                Return "location" in the list
-    -p | --path                   Get "directories" from specific path (using fd internally)
+    -p | --path                   Get "directories" from specific path
     -s | --source                 Use source path as base directory to search for "locations" and "directories" files
     -u | --unique                 Get a list of unique items
 
@@ -82,6 +82,19 @@ function expand_path ([string] $string_path) {
   return $expanded.Replace('\', $dirsep).Trim()
 }
 
+# Resolves a directory entry returned by Get-ChildItem to its real target
+# when it is a symlink/junction
+function resolve_symlink ($item) {
+  if ($item.LinkTarget) {
+    try {
+      return $item.ResolveLinkTarget($true).FullName
+    } catch {
+      return $item.FullName
+    }
+  }
+  return $item.FullName
+}
+
 # Get single directories
 function get_locations ([String] $FilePath, [Switch] $RquiredPath) {
   if ($RquiredPath -and (-not $FilePath)) { return }
@@ -107,10 +120,6 @@ function get_directories ([String] $FilePath, [Switch] $RquiredPath) {
   $directories_file = if ($FilePath) { $FilePath } else { "$base_dir/directories" }
   if (-not (Test-Path -PathType Leaf -Path "$directories_file" -ErrorAction SilentlyContinue)) { return }
 
-  # Collect every valid base directory first so `fd` can be invoked once for
-  # all of them below, instead of once per line. Spawning a native process
-  # (fd.exe) is the expensive part here; each extra invocation costs
-  # ~100ms+, so batching them is the biggest win available in this script.
   $valid_dirs = @()
   Get-Content "$directories_file" | % {
     if ($_) {
@@ -124,8 +133,9 @@ function get_directories ([String] $FilePath, [Switch] $RquiredPath) {
 
   if ($valid_dirs.Count -eq 0) { return }
 
-  $locations = @( fd --type 'directory' --type 'symlink' --max-depth 1 . @valid_dirs )
-  foreach ($lock in $locations) {
+  # List immediate subdirectories
+  Get-ChildItem -Path $valid_dirs -Directory -ErrorAction SilentlyContinue | % {
+    $lock = resolve_symlink $_
     if (Test-Path -PathType Container -Path $lock -ErrorAction SilentlyContinue) {
       $lock = $lock -Replace '\\$', ''
       $lock = $lock -Replace '/$', ''
@@ -137,8 +147,8 @@ function get_directories ([String] $FilePath, [Switch] $RquiredPath) {
 function get_directories_from_path ([String] $DirPath) {
   $target_path = $DirPath.Replace('~', $HOME).Replace('\\', $dirsep).Replace('/', $dirsep).Trim()
   if (-not (Test-Path -PathType Container -Path $target_path -ErrorAction SilentlyContinue)) { return }
-  $locations = @( fd --type 'directory' --type 'symlink' --max-depth 1 . "$target_path" )
-  foreach ($lock in $locations) {
+  Get-ChildItem -Path $target_path -Directory -ErrorAction SilentlyContinue | % {
+    $lock = resolve_symlink $_
     if (Test-Path -PathType Container -Path $lock -ErrorAction SilentlyContinue) {
       $lock = $lock -Replace '\\$', ''
       $lock = $lock -Replace '/$', ''
