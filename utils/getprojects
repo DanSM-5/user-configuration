@@ -81,6 +81,27 @@ read_path_list () {
   done < "$file"
 }
 
+# Normalizes a Windows drive-letter path (C:/... or C:\...) to MSYS/POSIX
+# style (/c/...); anything else passes through unchanged. On gitbash,
+# `realpath` canonicalizes segments but preserves whichever notation its
+# input had -- it does not unify styles. $HOME and $WIN_HOME are meant to be
+# interchangeable (some entries intentionally use one or the other for
+# cross-shell compatibility), but a subprocess spawned by a native Windows
+# program (e.g. fzf reloading this script) can see one of them in a
+# different notation than the interactive shell does, even though both
+# still point at the same directory. Without normalizing, that produces the
+# same directory twice under two different-looking strings, which `sort -u`
+# cannot catch since the text genuinely differs.
+to_posix_path () {
+  local -n __out="$1"
+  local p="$2"
+  if [[ "$p" =~ ^([A-Za-z]):[/\\](.*)$ ]]; then
+    __out="/${BASH_REMATCH[1],,}/${BASH_REMATCH[2]//\\//}"
+  else
+    __out="$p"
+  fi
+}
+
 get_locations () {
   [ -z "$1" ] && [ "$2" = true ] && return
   local locations_file="${1:-"$base_dir/locations"}"
@@ -91,9 +112,12 @@ get_locations () {
   [ "${#paths[@]}" -eq 0 ] && return
 
   # Resolve every path in a single realpath call instead of once per line.
-  local dir_path
+  local dir_path norm
   while IFS="" read -r dir_path; do
-    [ -d "$dir_path" ] && printf "%s\n" "${dir_path%/}"
+    if [ -d "$dir_path" ]; then
+      to_posix_path norm "${dir_path%/}"
+      printf "%s\n" "$norm"
+    fi
   done < <(realpath -- "${paths[@]}" 2>/dev/null)
 }
 
@@ -119,10 +143,21 @@ get_directories () {
   read_path_list paths "$directories_file"
   [ "${#paths[@]}" -eq 0 ] && return
 
-  # Resolve every path in a single realpath call instead of once per line.
-  local resolved=() dir_path
+  # Resolve every path in a single realpath call instead of once per line,
+  # normalizing notation so e.g. $HOME/projects and $WIN_HOME/projects don't
+  # end up as two differently-styled duplicates of the same base directory
+  # (see to_posix_path above) -- also dedupes them so we don't glob the same
+  # directory twice.
+  local -A seen=()
+  local resolved=() dir_path norm
   while IFS="" read -r dir_path; do
-    [ -d "$dir_path" ] && resolved+=("$dir_path")
+    if [ -d "$dir_path" ]; then
+      to_posix_path norm "$dir_path"
+      if [ -z "${seen[$norm]+x}" ]; then
+        seen[$norm]=1
+        resolved+=("$norm")
+      fi
+    fi
   done < <(realpath -- "${paths[@]}" 2>/dev/null)
   [ "${#resolved[@]}" -eq 0 ] && return
 
@@ -135,7 +170,10 @@ get_directories () {
   # target, or two symlinks to the same place) dedupe under `sort -u`.
   local lock
   while IFS="" read -r lock; do
-    [ -d "$lock" ] && printf "%s\n" "${lock%/}"
+    if [ -d "$lock" ]; then
+      to_posix_path norm "${lock%/}"
+      printf "%s\n" "$norm"
+    fi
     # [ -d "$lock" ] && all_directories+=("${lock%/}")
   done < <(realpath -- "${subdirs[@]}" 2>/dev/null)
 }
@@ -147,9 +185,12 @@ get_directories_from_path () {
   glob_subdirs subdirs "$1"
   [ "${#subdirs[@]}" -eq 0 ] && return
 
-  local lock
+  local lock norm
   while IFS="" read -r lock; do
-    [ -d "$lock" ] && printf "%s\n" "${lock%/}"
+    if [ -d "$lock" ]; then
+      to_posix_path norm "${lock%/}"
+      printf "%s\n" "$norm"
+    fi
     # [ -d "$lock" ] && all_directories+=("${lock%/}")
   done < <(realpath -- "${subdirs[@]}" 2>/dev/null)
 }
