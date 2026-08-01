@@ -1305,7 +1305,7 @@ function plpp () {
 
   $url = $url.Trim()
 
-  mpvp "$url"
+  mpvp "$url" @args
 }
 
 function play () {
