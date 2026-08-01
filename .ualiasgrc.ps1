@@ -22,9 +22,6 @@ $env:PREFERRED_EDITOR = if ($env:PREFERRED_EDITOR) { $env:PREFERRED_EDITOR } els
 if (Test-Path Alias:wenv) { Remove-Item Alias:wenv }
 Set-Alias -Name wenv -Value With-Env
 
-# Script called from function
-function pimg () { & "${env:user_conf_path}${dirsep}utils${dirsep}paste-image.ps1" @args }
-
 function gpr { Set-Location $env:prj }
 function gus { Set-Location $env:user_scripts_path }
 function guc { Set-Location $env:user_conf_path }
