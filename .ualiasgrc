@@ -142,12 +142,13 @@ gsb () {
 gdc () {
   grepo diff --cached
 }
-gdf () {
-  grepo diff
-}
 
 gun () {
   git unpushed --oneline "$@"
+}
+
+gcommprev () {
+  grepo commit -eF "$(git rev-parse --git-dir)/COMMIT_EDITMSG" --cleanup=strip "$@"
 }
 
 get_bare_repository () {

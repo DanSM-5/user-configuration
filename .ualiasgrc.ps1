@@ -146,10 +146,10 @@ function glg {
 function glga {
   git log --all --oneline --decorate --graph
 }
-function gcommit { git commit -m $args }
-function gcomm { git commit $args }
-function gfetch { git fetch $args }
-function gpull { git pull $args }
+function gcommit { git commit -m @args }
+function gcomm { git commit @args }
+function gfetch { git fetch @args }
+function gpull { git pull @args }
 function gupdate {
   git fetch
   git pull
@@ -206,8 +206,7 @@ Set-Alias -Name gs -Value gstatus
 # Git status short version
 function gsb { gstatus -sb @args }
 # Show cache
-function gdf { grepo diff }
-function gdc { grepo diff --cached }
+function gdc { grepo diff --cached @args }
 
 # Shadowed by alias Get-Service
 # function gsv { gstatus -v @args }
@@ -342,6 +341,11 @@ function gun () {
   With-UTF8 {
     git unpushed --oneline @gitargs
   }
+}
+
+function gcommprev () {
+  $gitargs = $args
+  grepo commit -eF "$(git rev-parse --git-dir)/COMMIT_EDITMSG" --cleanup=strip @gitargs
 }
 
 function get_bare_repository () {
