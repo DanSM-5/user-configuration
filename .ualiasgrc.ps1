@@ -1988,6 +1988,18 @@ if ($IsWindows) {
   }
 }
 
+function cprev () {
+  $img_path = ("$(pbpaste)").Trim()
+
+  if ( -not "$img_path" ) {
+    Write-Output 'No file provided'
+    return
+  }
+
+  chafa -f sixels --colors=full --polite=on --animate=off $img_path
+  copy-file "$img_path"
+}
+
 function config () {
   $first = $args[0]
 

@@ -2413,6 +2413,38 @@ themes_vivid () {
   export LS_COLORS
 }
 
+cprev () {
+  local img_path="$("$clipboard_paste" | trim)"
+
+  if [ -z "$img_path" ]; then
+    printf '%s\n' 'No file provided'
+    return
+  fi
+
+  if [[ -v KITTY_WINDOW_ID ]]; then
+    kitty icat --clear --transfer-mode=stream \
+      --unicode-placeholder --stdin=no \
+      "$img_path" |
+        sed '$d' | sed $'$s/$/\e[m/'
+  else
+    chafa -f sixels --colors=full --polite=on --animate=off "$img_path"
+  fi
+
+  copy-file "$img_path"
+
+  # if [ "$IS_BASH" = true ]; then
+  #   # Remove leading whitespace
+  #   url="${url#"${url%%[![:space:]]*}"}"
+  #   # Remove trailing whitespace
+  #   url="${url%"${url##*[![:space:]]}"}"
+  # else
+  #   # Remove leading whitespace
+  #   url="${url#"${url%%[\![:space:]]*}"}"
+  #   # Remove trailing whitespace
+  #   url="${url%"${url##*[\![:space:]]}"}"
+  # fi
+}
+
 config () {
   if [ -z "$*" ]; then
     pushd "$HOME/.config" || return
