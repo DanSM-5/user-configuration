@@ -2421,6 +2421,8 @@ cprev () {
     return
   fi
 
+  printf '%s\n' "$img_path"
+
   if [[ -v KITTY_WINDOW_ID ]]; then
     kitty icat --clear --transfer-mode=stream \
       --unicode-placeholder --stdin=no \

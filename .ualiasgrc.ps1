@@ -1996,6 +1996,7 @@ function cprev () {
     return
   }
 
+  Write-Output $img_path
   chafa -f sixels --colors=full --polite=on --animate=off $img_path
   copy-file "$img_path"
 }
