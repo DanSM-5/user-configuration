@@ -11,10 +11,14 @@ HISTSIZE=10000
 SAVEHIST=10000
 HISTFILE=~/.zsh_history
 HISTDUP=erase
+
 # zsh history options
-setopt histignorealldups sharehistory appendhistory
-setopt hist_ignore_all_dups hist_save_no_dups hist_ignore_dups hist_find_no_dups
-setopt HIST_IGNORE_SPACE
+# Ref: https://zsh.sourceforge.io/Doc/Release/Options.html#History
+setopt SHARE_HISTORY APPEND_HISTORY \
+  HIST_IGNORE_ALL_DUPS HIST_SAVE_NO_DUPS \
+  HIST_IGNORE_DUPS HIST_FIND_NO_DUPS \
+  HIST_IGNORE_SPACE
+
 # History search keybindings
 bindkey '^p' history-search-backward
 bindkey '^n' history-search-forward
