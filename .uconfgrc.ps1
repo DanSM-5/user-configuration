@@ -302,12 +302,33 @@ if (Get-Module DirColors -ErrorAction SilentlyContinue) {
   $null = ConvertFrom-LSColors -LSColors "$env:LS_COLORS"
 }
 
-# Keybinding for lfcd
+# Keybinding for yzcd
 Set-PSReadLineKeyHandler -Chord 'ctrl+o,ctrl+l' -ScriptBlock {
   [Microsoft.PowerShell.PSConsoleReadLine]::RevertLine()
-  [Microsoft.PowerShell.PSConsoleReadLine]::Insert('lfcd')
+  [Microsoft.PowerShell.PSConsoleReadLine]::Insert('yzcd')
   [Microsoft.PowerShell.PSConsoleReadLine]::AcceptLine()
 }
+
+if (Test-Command 'yazi') {
+  function yzcd () {
+    $temporary_file = New-Temporaryfile
+    try {
+      $temporary_file = (New-TemporaryFile).FullName
+    } catch {
+      $temporary_file = [System.IO.Path]::GetTempFilename()
+    }
+
+    yazi --cwd-file "$temporary_file" @args
+    $cdpath = Get-Content "$temporary_file"
+
+    if (Test-Path -Path $cdpath -PathType Container -ErrorAction SilentlyContinue) {
+      Set-Location $cdpath
+    } else {
+      $cdpath
+    }
+  }
+}
+
 
 # Windows only config
 if ($IsWindows) {

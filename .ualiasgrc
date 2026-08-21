@@ -2285,6 +2285,26 @@ lfcd () {
   fi
 }
 
+# cd when exit yazi
+yzcd () {
+  if command -v yazi &> /dev/null; then
+    local temporary_file="$(mktemp)"
+    trap "rm -rf -- '$temporary_file' &>/dev/null" EXIT
+    # `command` is needed in case `lfcd` is aliased to `lf`
+    local path_on_exit
+    command yazi --cwd-file "$temporary_file" "$@"
+    path_on_exit="$(cat "$temporary_file")"
+    if [ -d "$path_on_exit" ]; then
+      cd "$path_on_exit" || return
+    else
+      echo 'no path'
+    fi
+  else
+    printf "%s" "Command lf not found. Please intall lf first.\n"
+    (exit 1) && true
+  fi
+}
+
 makeSymLink () {
   local target="$1"
   local pathLink="$2"

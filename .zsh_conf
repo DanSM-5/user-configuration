@@ -206,20 +206,20 @@ bindkey '^oe' edit-command-line
 # Add bash bindkey as well
 bindkey '^x^e' edit-command-line
 
-# Add ctrl+o keybinding for lfcd
+# Add ctrl+o keybinding for yzcd
 # Add alternative for nix store
 if command -v lf &> /dev/null || command -v ~/.nix-profile/bin/lf &> /dev/null; then
-  __lfcd__ () {
-    lfcd
+  __yzcd__ () {
+    yzcd
     # Release prompt
     zle accept-line
     zle reset-prompt
   }
-  autoload -U __lfcd__
-  zle -N __lfcd__
-  bindkey '^o^l' __lfcd__
+  autoload -U __yzcd__
+  zle -N __yzcd__
+  bindkey '^o^l' __yzcd__
 
-  # bindkey -s '^o' 'lfcd\n'
+  # bindkey -s '^o' 'yzcd\n'
 fi
 
 # Load fzf support
