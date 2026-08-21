@@ -502,7 +502,7 @@ function fgw () {
   $preview = @'
 git -c color.status=always -C {1} status --short --branch
 Write-Output ''
-git log --oneline --graph --date=short --color=always --pretty=format:%C(auto)%cd%x20%h%d%x20%s {2} --
+git log --oneline --graph --date=short --color=always '--pretty=format:%C(auto)%cd%x20%h%d%x20%s' {2} --
 '@
   $down_options = get_fzf_down_options
   $cmd_options = @(
@@ -538,7 +538,7 @@ __git_refs @args
 
   $escaped_refs_script = $refs_script.Replace("'", "''")
   $reload_refs = "& '$escaped_refs_script'"
-  $preview = 'git log --oneline --graph --date=short --color=always --pretty=format:%C(auto)%cd%x20%h%d%x20%s {2} --'
+  $preview = "git log --oneline --graph --date=short --color=always '--pretty=format:%C(auto)%cd%x20%h%d%x20%s' {2} --"
   $down_options = get_fzf_down_options
   $cmd_options = @(
     '--ansi',
