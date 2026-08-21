@@ -17,6 +17,37 @@ $__pager__ = if (Get-Command -Name delta -All -ErrorAction 0) { 'delta | ' } els
 $user_conf_path = if ($env:user_conf_path) { $env:user_conf_path } else { "$HOME/.usr_conf" }
 $path_preview_script = Join-Path $user_conf_path "utils/fzf-preview.ps1"
 
+function __git_refs () {
+  $format = "%(if:equals=refs/remotes)%(refname:rstrip=-2)%(then)%(color:magenta)remote-branch%(else)%(if:equals=refs/heads)%(refname:rstrip=-2)%(then)%(color:brightgreen)branch%(else)%(if:equals=refs/tags)%(refname:rstrip=-2)%(then)%(color:brightcyan)tag%(else)%(if:equals=refs/stash)%(refname:rstrip=-2)%(then)%(color:brightred)stash%(else)%(color:white)%(refname:rstrip=-2)%(end)%(end)%(end)%(end)`t%(color:yellow)%(refname:short) %(color:green)(%(creatordate:relative))`t%(color:blue)%(subject)%(color:reset)"
+  $lines = @(git for-each-ref @args `
+    --sort=-creatordate --sort=-HEAD --color=always `
+    "--format=$format")
+
+  if (-not $lines) { return }
+
+  # Match `column -t` without requiring Unix utilities on Windows.
+  $ansi_pattern = '\x1B\[[0-?]*[ -/]*[@-~]'
+  $rows = @($lines | ForEach-Object {
+    $fields = $_ -split "`t", 3
+    [PSCustomObject]@{
+      First = $fields[0]
+      FirstLength = ($fields[0] -replace $ansi_pattern, '').Length
+      Second = $fields[1]
+      SecondLength = ($fields[1] -replace $ansi_pattern, '').Length
+      Third = $fields[2]
+    }
+  })
+
+  $first_width = ($rows | Measure-Object -Property FirstLength -Maximum).Maximum
+  $second_width = ($rows | Measure-Object -Property SecondLength -Maximum).Maximum
+
+  $rows | ForEach-Object {
+    $first_padding = [string]::new([char]' ', $first_width - $_.FirstLength + 2)
+    $second_padding = [string]::new([char]' ', $second_width - $_.SecondLength + 2)
+    "$($_.First)$first_padding$($_.Second)$second_padding$($_.Third)"
+  }
+}
+
 function get_fzf_down_options() {
   $options = @(
     '--height', '80%',
@@ -446,5 +477,99 @@ function fshow () {
   }
 }
 
-# Export-ModuleMember -Function fgb
+function fgl () {
+  if (-not (is_in_git_repo)) { return }
 
+  $down_options = get_fzf_down_options
+  $cmd_options = @(
+    '--ansi',
+    '--prompt', 'Reflogs> ',
+    '--bind', 'alt-r:toggle-raw',
+    '--with-shell', 'pwsh -NoLogo -NoProfile -NonInteractive -Command',
+    '--preview', 'git show --color=always {1} | delta',
+    '--accept-nth', '1'
+  )
+
+  [string[]]$selected = git reflog --color=always --format='%C(blue)%gD %C(yellow)%h%C(auto)%d %gs' |
+    fzf @down_options @cmd_options @args
+
+  return $selected
+}
+
+function fgw () {
+  if (-not (is_in_git_repo)) { return }
+
+  $preview = @'
+git -c color.status=always -C {1} status --short --branch
+Write-Output ''
+git log --oneline --graph --date=short --color=always --pretty=format:%C(auto)%cd%x20%h%d%x20%s {2} --
+'@
+  $down_options = get_fzf_down_options
+  $cmd_options = @(
+    '--prompt', 'Worktrees> ',
+    '--header', 'CTRL-X (remove worktree) | ALT-T ',
+    '--with-shell', 'pwsh -NoLogo -NoProfile -NonInteractive -Command',
+    '--bind', 'ctrl-x:reload(git worktree remove {1} > $null; git worktree list)',
+    '--preview', $preview,
+    '--accept-nth', '1',
+    '--with-nth', '2..',
+    '--bind', 'alt-t:change-with-nth(..|2..)'
+  )
+
+  [string[]]$selected = git worktree list |
+    fzf @down_options @cmd_options @args
+
+  return $selected
+}
+
+function fge () {
+  if (-not (is_in_git_repo)) { return }
+
+  # Reload actions run in a child shell, so give them a self-contained helper.
+  $refs_file = New-TemporaryFile
+  $refs_script = $refs_file.FullName.Replace('.tmp', '.ps1')
+  $refs_function = (Get-Command __git_refs -CommandType Function).Definition
+  @"
+function __git_refs () {
+$refs_function
+}
+__git_refs @args
+"@ | Set-Content -Path $refs_script -Encoding utf8
+
+  $escaped_refs_script = $refs_script.Replace("'", "''")
+  $reload_refs = "& '$escaped_refs_script'"
+  $preview = 'git log --oneline --graph --date=short --color=always --pretty=format:%C(auto)%cd%x20%h%d%x20%s {2} --'
+  $down_options = get_fzf_down_options
+  $cmd_options = @(
+    '--ansi',
+    '--nth', '2,2..',
+    '--tiebreak', 'begin',
+    '--prompt', 'Each ref> ',
+    '--header-lines', '1',
+    '--preview-window', 'down,border-top,40%',
+    '--color', 'hl:underline,hl+:underline',
+    '--no-hscroll',
+    '--with-shell', 'pwsh -NoLogo -NoProfile -NonInteractive -Command',
+    '--bind', 'ctrl-/:change-preview-window(down,70%|hidden|)',
+    '--bind', "ctrl-f:change-prompt(Every ref> )+reload:$reload_refs",
+    '--bind', "ctrl-r:change-prompt(Each ref> )+reload:$reload_refs '--exclude=refs/remotes'",
+    '--preview', $preview,
+    '--accept-nth', '2'
+  )
+
+  try {
+    [string[]]$selected = __git_refs '--exclude=refs/remotes' |
+      fzf @down_options @cmd_options @args
+
+    return $selected
+  } finally {
+    if (Test-Path -Path $refs_file.FullName -PathType Leaf -ErrorAction SilentlyContinue) {
+      Remove-Item -Force $refs_file.FullName
+    }
+    if (Test-Path -Path $refs_script -PathType Leaf -ErrorAction SilentlyContinue) {
+      Remove-Item -Force $refs_script
+    }
+  }
+}
+
+# Export-ModuleMember -Function fgb
