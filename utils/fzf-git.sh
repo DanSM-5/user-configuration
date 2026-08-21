@@ -2,7 +2,26 @@
 # GIT heart FZF
 # -------------
 
+# shellcheck disable=SC2039
+[[ $0 == - ]] && return
+
 # Ref: https://gist.github.com/junegunn/8b572b8d4b5eddd8b85e5f4d40f17236
+
+# Fallback trick: Bash uses BASH_SOURCE, Zsh uses %x expansion
+SCRIPT_PATH="${BASH_SOURCE[0]:-${(%):-%x}}"
+# SCRIPT_DIR="$( cd "$( dirname "$SCRIPT_PATH" )" && pwd )"
+
+__git-refs () {
+  git for-each-ref "$@" \
+    --sort=-creatordate --sort=-HEAD --color=always \
+    --format=$'%(if:equals=refs/remotes)%(refname:rstrip=-2)%(then)%(color:magenta)remote-branch%(else)%(if:equals=refs/heads)%(refname:rstrip=-2)%(then)%(color:brightgreen)branch%(else)%(if:equals=refs/tags)%(refname:rstrip=-2)%(then)%(color:brightcyan)tag%(else)%(if:equals=refs/stash)%(refname:rstrip=-2)%(then)%(color:brightred)stash%(else)%(color:white)%(refname:rstrip=-2)%(end)%(end)%(end)%(end)\t%(color:yellow)%(refname:short) %(color:green)(%(creatordate:relative))\t%(color:blue)%(subject)%(color:reset)' |
+  column -ts$'\t'
+}
+
+if [[ $1 == --refs ]]; then
+  shift
+  __git-refs "$@"
+fi
 
 is_in_git_repo () {
   git rev-parse HEAD > /dev/null 2>&1
@@ -145,8 +164,8 @@ fgs () {
       --preview '
         git show --color=always {1}'"$__page_command__"' |
           bat -p --color=always' \
-    --query "$INITIAL_QUERY" |
-  cut -d: -f1
+    --query "$INITIAL_QUERY" \
+    --accept-nth '1'
   # git stash list | fzf-down --reverse -d: --preview 'git show --color=always {1}' |
 }
 
@@ -227,3 +246,48 @@ fshow () {
   done
 }
 
+fgl () {
+  git reflog --color=always --format="%C(blue)%gD %C(yellow)%h%C(auto)%d %gs" | fzf-down --ansi \
+    --prompt 'Reflogs> ' \
+    --bind 'alt-r:toggle-raw' \
+    --preview "git show --color=always {1} | delta" \
+    --accept-nth '1' "$@"
+}
+
+fgw () {
+  # --border-label '🌴 Worktrees ' \
+  git worktree list |
+    fzf-down \
+    --prompt 'Worktrees> ' \
+    --header 'CTRL-X (remove worktree) | ALT-T ' \
+    --bind 'ctrl-x:reload(git worktree remove {1} > /dev/null; git worktree list)' \
+    --preview "
+      git -c color.status=always -C {1} status --short --branch
+      echo
+      git log --oneline --graph --date=short --color=always --pretty='format:%C(auto)%cd %h%d %s' {2} --
+    " \
+    --accept-nth '1'\
+    --with-nth 2.. --bind 'alt-t:change-with-nth(..|2..)' \
+    "$@"
+}
+
+fge () {
+  __git-refs --exclude=refs/remotes |
+    fzf-down \
+      --ansi \
+      --nth 2,2.. \
+      --tiebreak begin \
+      --prompt 'Each ref> ' \
+      --header-lines 1 \
+      --preview-window down,border-top,40% \
+      --color hl:underline,hl+:underline \
+      --no-hscroll \
+      --bind 'ctrl-/:change-preview-window(down,70%|hidden|)' \
+      --bind "ctrl-f:change-prompt(Every ref> )+reload:bash \"$SCRIPT_PATH\" --refs" \
+      --bind "ctrl-r:change-prompt(Each ref> )+reload:bash \"$SCRIPT_PATH\" --refs --exclude=refs/remotes" \
+      --preview "git log --oneline --graph --date=short --color=always --pretty='format:%C(auto)%cd %h%d %s' {2} --" \
+      --accept-nth 2 \
+      "$@"
+      # --bind "ctrl-o:execute-silent:bash \"$__fzf_git\" --list {1} {2}" \
+      # --bind "alt-enter:become:printf '%s\n' {+2} | sed 's@[^/]*/@@'" \
+}
