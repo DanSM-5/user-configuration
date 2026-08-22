@@ -18,34 +18,10 @@ $user_conf_path = if ($env:user_conf_path) { $env:user_conf_path } else { "$HOME
 $path_preview_script = Join-Path $user_conf_path "utils/fzf-preview.ps1"
 
 function __git_refs () {
-  $format = "%(if:equals=refs/remotes)%(refname:rstrip=-2)%(then)%(color:magenta)remote-branch%(else)%(if:equals=refs/heads)%(refname:rstrip=-2)%(then)%(color:brightgreen)branch%(else)%(if:equals=refs/tags)%(refname:rstrip=-2)%(then)%(color:brightcyan)tag%(else)%(if:equals=refs/stash)%(refname:rstrip=-2)%(then)%(color:brightred)stash%(else)%(color:white)%(refname:rstrip=-2)%(end)%(end)%(end)%(end)`t%(color:yellow)%(refname:short) %(color:green)(%(creatordate:relative))`t%(color:blue)%(subject)%(color:reset)"
-  $lines = @(git for-each-ref @args `
+  $format = '%(if:equals=refs/remotes)%(refname:rstrip=-2)%(then)%(color:magenta)remote-branch%(else)%(if:equals=refs/heads)%(refname:rstrip=-2)%(then)%(color:brightgreen)branch%(else)%(if:equals=refs/tags)%(refname:rstrip=-2)%(then)%(color:brightcyan)tag%(else)%(if:equals=refs/stash)%(refname:rstrip=-2)%(then)%(color:brightred)stash%(else)%(color:white)%(refname:rstrip=-2)%(end)%(end)%(end)%(end)%(color:reset)%09%(color:yellow)%(refname:short)%(color:reset)%09%(color:green)(%(creatordate:relative))%(color:reset)%09%(color:blue)%(subject)%(color:reset)'
+  git for-each-ref @args `
     --sort=-creatordate --sort=-HEAD --color=always `
-    "--format=$format")
-
-  if (-not $lines) { return }
-
-  # Match `column -t` without requiring Unix utilities on Windows.
-  $ansi_pattern = '\x1B\[[0-?]*[ -/]*[@-~]'
-  $rows = @($lines | ForEach-Object {
-    $fields = $_ -split "`t", 3
-    [PSCustomObject]@{
-      First = $fields[0]
-      FirstLength = ($fields[0] -replace $ansi_pattern, '').Length
-      Second = $fields[1]
-      SecondLength = ($fields[1] -replace $ansi_pattern, '').Length
-      Third = $fields[2]
-    }
-  })
-
-  $first_width = ($rows | Measure-Object -Property FirstLength -Maximum).Maximum
-  $second_width = ($rows | Measure-Object -Property SecondLength -Maximum).Maximum
-
-  $rows | ForEach-Object {
-    $first_padding = [string]::new([char]' ', $first_width - $_.FirstLength + 2)
-    $second_padding = [string]::new([char]' ', $second_width - $_.SecondLength + 2)
-    "$($_.First)$first_padding$($_.Second)$second_padding$($_.Third)"
-  }
+    "--format=$format"
 }
 
 function get_fzf_down_options() {
@@ -125,23 +101,8 @@ function fgb () {
   if (-not (is_in_git_repo)) { return }
 
   $query = "$args"
-  $preview_file = New-TemporaryFile
-  @"
-    try {
-      `$clean_content = `$args | ForEach-Object {
-        `$branch = `$_ -replace '^..',''
-        `$branch = (`$branch -split ' ')[0]
-        return `$branch
-      }
-      git log --oneline --graph --date=short --color=always --pretty="format:%C(auto)%cd %h%d %s" `$clean_content
-    } catch {
-      Write-Error 'Cannot preview'
-    }
-"@ > $preview_file.FullName
-  $preview_script = $preview_file.FullName.Replace('.tmp', '.ps1')
-  Copy-Item $preview_file.FullName $preview_script
-
-  $preview = "pwsh -NoProfile -NoLogo -NonInteractive -File `"$preview_script`" {}"
+  $branch_format = '%(if)%(symref)%(then)%(else)%(if)%(HEAD)%(then)%(color:green)%(else)%(if:equals=refs/remotes)%(refname:rstrip=-2)%(then)%(color:red)%(end)%(end)%(HEAD) %(if:equals=refs/remotes)%(refname:rstrip=-2)%(then)remotes/%(refname:short)%(else)%(refname:short)%(end)%(color:reset)%09%(refname:short)%(end)'
+  $preview = "git log --oneline --graph --date=short --color=always '--pretty=format:%C(auto)%cd%x20%h%d%x20%s' {2}"
   $down_options = get_fzf_down_options
   $cmd_options = @(
     "--query=$query",
@@ -149,94 +110,46 @@ function fgb () {
     "--history=$env:FZF_HIST_DIR/fzf-git_branch",
     '--ansi',
     '--tac',
+    '--delimiter', "`t",
+    '--with-nth', '1',
+    '--accept-nth', '2',
+    '--with-shell', 'pwsh -NoLogo -NoProfile -NonInteractive -Command',
     '--preview-window', 'right,70%,wrap-word',
     '--preview', $preview
   )
 
+  [string[]]$selected = git branch -a --color=always --omit-empty --sort=refname "--format=$branch_format" |
+    fzf @down_options @cmd_options
 
-  try {
-    [string[]]$selected = git branch -a --color=always | ForEach-Object {
-        if ($_ -NotMatch '/HEAD\s') {
-          return $_
-        }
-      } | Sort-Object |
-      fzf @down_options @cmd_options | ForEach-Object {
-        $branch = $_ -replace '^..',''
-        $branch = ($branch -split ' ')[0]
-        $branch -replace '^remotes\/', ''
-      }
-
-    return $selected
-  } finally {
-    if (Test-Path -Path $preview_file.FullName -PathType Leaf -ErrorAction SilentlyContinue) {
-      Remove-Item -Force $preview_file.FullName
-    }
-    if (Test-Path -Path $preview_script -PathType Leaf -ErrorAction SilentlyContinue) {
-      Remove-Item -Force $preview_script
-    }
-  }
+  return $selected
 }
 
 function fgt () {
   if (-not (is_in_git_repo)) { return }
 
   $query = "$args"
-  $preview_file = New-TemporaryFile
-  @"
-    git show --color=always `$args |
-    $script:__pager__ bat -p --color=always
-"@ > $preview_file.FullName
-
-  $preview = if ($IsWindows) {
-    "pwsh -NoProfile -NoLogo -NonInteractive -Command Invoke-Command -ScriptBlock ([scriptblock]::Create((Get-Content `""+ $preview_file.FullName + "`"))) -ArgumentList {}"
-  } else {
-    "pwsh -NoProfile -NoLogo -NonInteractive -Command 'Invoke-Command -ScriptBlock ([scriptblock]::Create((Get-Content `""+ $preview_file.FullName + "`"))) -ArgumentList {}'"
-  }
+  $preview = "git show --color=always {} | $($script:__pager__)bat -p --color=always"
   $down_options = get_fzf_down_options
   $cmd_options = @(
     "--query=$query",
     '--prompt', 'Tags> ',
     "--history=$env:FZF_HIST_DIR/fzf-git_tag",
     '--preview-window', 'right,70%,wrap-word',
+    '--with-shell', 'pwsh -NoLogo -NoProfile -NonInteractive -Command',
     '--preview', $preview
   )
 
-  try {
-    $selected = git tag --sort -version:refname |
-      fzf @down_options @cmd_options
+  $selected = git tag --sort -version:refname |
+    fzf @down_options @cmd_options
 
-    return $selected
-  } finally {
-    if (Test-Path -Path $preview_file.FullName -PathType Leaf -ErrorAction SilentlyContinue) {
-      Remove-Item -Force $preview_file.FullName
-    }
-  }
+  return $selected
 }
 
 function fgh () {
   if (-not (is_in_git_repo)) { return }
 
-  $placeholder = if ($IsWindows) {
-    "'{}'"
-  } else {
-    '{}'
-  }
-
   $query = "$args"
-  $content_file = New-Temporaryfile
-  $preview_file = New-Temporaryfile
-  @"
-    `$args > $($content_file.FullName);
-    `$hash = if (`$`(Get-Content $($content_file.FullName)`) -match "[a-f0-9]{7,}") {
-      `$matches[0]
-    } else { @() }
-    git show --color=always `$hash |
-      $script:__pager__ bat -p --color=always
-"@ > $preview_file.FullName
-  $preview_script = $preview_file.FullName.Replace('.tmp', '.ps1')
-  Copy-Item $preview_file.FullName $preview_script
-
-  $preview = "pwsh -NoProfile -NoLogo -NonInteractive -File `"$preview_script`" $placeholder"
+  $preview = "git show --color=always {2} | $($script:__pager__)bat -p --color=always"
   $down_options = get_fzf_down_options
   $cmd_options = @(
     "--query=$query",
@@ -245,56 +158,24 @@ function fgh () {
     '--ansi',
     '--no-sort',
     '--reverse',
+    '--delimiter', "`t",
+    '--with-nth', '1',
+    '--accept-nth', '2',
+    '--with-shell', 'pwsh -NoLogo -NoProfile -NonInteractive -Command',
     '--preview', $preview
   )
 
-  try {
-    [string[]]$selected = git log --date=short --format='%C(green)%C(bold)%cd %C(auto)%h%d %s (%an)' --graph --color=always |
-      fzf @down_options @cmd_options | ForEach-Object {
-        if ($_ -match "[a-f0-9]{7,}") {
-          return $matches[0]
-        }
-      }
+  [string[]]$selected = git log --date=short --format='%C(green)%C(bold)%cd %C(auto)%h%d %s (%an)%C(reset)%x09%h' --graph --color=always |
+    fzf @down_options @cmd_options
 
-    # grep -o "[a-f0-9]\{7,\}"
-    return $selected
-  } finally {
-    if (Test-Path -Path $preview_file.FullName -PathType Leaf -ErrorAction SilentlyContinue) {
-      Remove-Item -Force $preview_file.FullName
-    }
-    if (Test-Path -Path $preview_script -PathType Leaf -ErrorAction SilentlyContinue) {
-      Remove-Item -Force $preview_script
-    }
-    if (Test-Path -Path $content_file.FullName -PathType Leaf -ErrorAction SilentlyContinue) {
-      Remove-Item -Force $content_file.FullName
-    }
-  }
+  return $selected
 }
 
 function fgha () {
   if (-not (is_in_git_repo)) { return }
 
-  $placeholder = if ($IsWindows) {
-    "'{}'"
-  } else {
-    '{}'
-  }
-
   $query = "$args"
-  $content_file = New-Temporaryfile
-  $preview_file = New-Temporaryfile
-  @"
-    `$args > $($content_file.FullName);
-    `$hash = if (`$`(Get-Content $($content_file.FullName)`) -match "[a-f0-9]{7,}") {
-      `$matches[0]
-    } else { @() }
-    git show --color=always `$hash |
-      $script:__pager__ bat -p --color=always
-"@ > $preview_file.FullName
-  $preview_script = $preview_file.FullName.Replace('.tmp', '.ps1')
-  Copy-Item $preview_file.FullName $preview_script
-
-  $preview = "pwsh -NoProfile -NoLogo -NonInteractive -File `"$preview_script`" $placeholder"
+  $preview = "git show --color=always {2} | $($script:__pager__)bat -p --color=always"
   $down_options = get_fzf_down_options
   $cmd_options = @(
     "--query=$query",
@@ -303,30 +184,17 @@ function fgha () {
     '--ansi',
     '--no-sort',
     '--reverse',
+    '--delimiter', "`t",
+    '--with-nth', '1',
+    '--accept-nth', '2',
+    '--with-shell', 'pwsh -NoLogo -NoProfile -NonInteractive -Command',
     '--preview', $preview
   )
 
-  try {
-    [string[]]$selected = git log --all --date=short --format='%C(green)%C(bold)%cd %C(auto)%h%d %s (%an)' --graph --color=always |
-      fzf @down_options @cmd_options | ForEach-Object {
-        if ($_ -match "[a-f0-9]{7,}") {
-          return $matches[0]
-        }
-      }
-      # grep -o "[a-f0-9]\{7,\}"
+  [string[]]$selected = git log --all --date=short --format='%C(green)%C(bold)%cd %C(auto)%h%d %s (%an)%C(reset)%x09%h' --graph --color=always |
+    fzf @down_options @cmd_options
 
-    return $selected
-  } finally {
-    if (Test-Path -Path $preview_file.FullName -PathType Leaf -ErrorAction SilentlyContinue) {
-      Remove-Item -Force $preview_file.FullName
-    }
-    if (Test-Path -Path $preview_script -PathType Leaf -ErrorAction SilentlyContinue) {
-      Remove-Item -Force $preview_script
-    }
-    if (Test-Path -Path $content_file.FullName -PathType Leaf -ErrorAction SilentlyContinue) {
-      Remove-Item -Force $content_file.FullName
-    }
-  }
+  return $selected
 }
 
 function fgr () {
@@ -356,15 +224,7 @@ function fgs () {
   if (-not (is_in_git_repo)) { return }
 
   $query = "$args"
-  $preview_file = New-Temporaryfile
-  @"
-    git show --color=always `$args |
-      $script:__pager__ bat -p --color=always
-"@ > $preview_file.FullName
-  $preview_script = $preview_file.FullName.Replace('.tmp', '.ps1')
-  Copy-Item $preview_file.FullName $preview_script
-
-  $preview = "pwsh -NoProfile -NoLogo -NonInteractive -File `"$preview_script`" {1}"
+  $preview = "git show --color=always {1} | $($script:__pager__)bat -p --color=always"
   $down_options = get_fzf_down_options
   $cmd_options = @(
     "--query=$query",
@@ -373,22 +233,14 @@ function fgs () {
     '--reverse',
     '--delimiter', ':',
     '--accept-nth', '1',
+    '--with-shell', 'pwsh -NoLogo -NoProfile -NonInteractive -Command',
     '--preview', $preview
   )
 
-  try {
-    [string[]]$selected = git stash list |
-      fzf @down_options @cmd_options
+  [string[]]$selected = git stash list |
+    fzf @down_options @cmd_options
 
-    return $selected
-  } finally {
-    if (Test-Path -Path $preview_file.FullName -PathType Leaf -ErrorAction SilentlyContinue) {
-      Remove-Item -Force $preview_file.FullName
-    }
-    if (Test-Path -Path $preview_script -PathType Leaf -ErrorAction SilentlyContinue) {
-      Remove-Item -Force $preview_script
-    }
-  }
+  return $selected
 }
 
 function fshow () {
@@ -401,27 +253,19 @@ function fshow () {
     $pager = 'less -R'
     $preview_pager = ''
   }
-  $content_file = New-Temporaryfile
-  $out = ''
-  $shas = ''
+  [string[]]$out = @()
+  [string[]]$shas = @()
   $q = ''
   $k = ''
   $preview = "
-  `$var = @'
-{}
-'@
-  `$var = `$var.Trim().Trim(`"'`").Trim('`"')
-  `$hash = if (`$var -match `"[a-f0-9]{7,}`") {
-    `$matches[0]
-  } else { @() }
-  git show --color=always `$hash $preview_pager |
+  git show --color=always {2} $preview_pager |
     bat -p --color=always
 "
 
   # Clipboard command
-  $copy = 'Get-Content {+f} | ForEach-Object { ($_ -Split "\s+")[1] } | Set-Clipboard'
+  $copy = 'Get-Content {+f2} | Set-Clipboard'
 
-  $git_base_cmd = "git log --graph --color=always --format='%C(auto)%h%d %s %C(black)%C(bold)%cr'"
+  $git_base_cmd = "git log --graph --color=always --format='%C(auto)%h%d %s %C(black)%C(bold)%cr%C(reset)%x09%h'"
   $git_current_cmd = "$git_base_cmd $args"
   $git_all_cmd = "$git_base_cmd --all $args"
   $down_options = get_fzf_down_options
@@ -432,6 +276,9 @@ function fshow () {
     '--ansi',
     '--no-sort',
     '--reverse',
+    '--delimiter', "`t",
+    '--with-nth', '1',
+    '--accept-nth', '2',
     '--print-query',
     '--bind', "ctrl-y:execute-silent($copy)+bell",
     '--header', 'ctrl-d: Diff | ctrl-a: All | ctrl-f: HEAD | ctrl-y: Copy',
@@ -445,19 +292,18 @@ function fshow () {
 
   try {
     while ($true) {
-      $out = git log --graph --color=always `
-        --format="%C(auto)%h%d %s %C(black)%C(bold)%cr" @args |
-          fzf @down_options @cmd_options
+      [string[]]$out = @(git log --graph --color=always `
+        --format="%C(auto)%h%d %s %C(black)%C(bold)%cr%C(reset)%x09%h" @args |
+          fzf @down_options @cmd_options)
 
       if (-not $out) { break; }
 
-      $out > $content_file.FullName
-      $q = Get-Content $content_file.FullName | Select-Object -Index 0
-      $k = Get-Content $content_file.FullName | Select-Object -Index 1
-      $shas = Get-Content $content_file.FullName | Select-Object -Skip 2 | ForEach-Object {
-        if ($_ -match "[a-f0-9]{7,}") {
-          return $matches[0]
-        }
+      $q = $out[0]
+      $k = if ($out.Count -gt 1) { $out[1] } else { '' }
+      [string[]]$shas = if ($out.Count -gt 2) {
+        @($out | Select-Object -Skip 2 | Where-Object { $_ })
+      } else {
+        @()
       }
 
       if (-not $shas) { continue; }
@@ -470,11 +316,7 @@ function fshow () {
         }
       }
     }
-  } catch {
-    if (Test-Path -Path $content_file.FullName -PathType Leaf -ErrorAction SilentlyContinue) {
-      Remove-Item -Force $content_file.FullName
-    }
-  }
+  } catch { return }
 }
 
 function fgl () {
@@ -542,6 +384,7 @@ __git_refs @args
   $down_options = get_fzf_down_options
   $cmd_options = @(
     '--ansi',
+    '--delimiter', "`t",
     '--nth', '2,2..',
     '--tiebreak', 'begin',
     '--prompt', 'Each ref> ',

@@ -14,8 +14,7 @@ SCRIPT_PATH="${BASH_SOURCE[0]:-${(%):-%x}}"
 __git-refs () {
   git for-each-ref "$@" \
     --sort=-creatordate --sort=-HEAD --color=always \
-    --format=$'%(if:equals=refs/remotes)%(refname:rstrip=-2)%(then)%(color:magenta)remote-branch%(else)%(if:equals=refs/heads)%(refname:rstrip=-2)%(then)%(color:brightgreen)branch%(else)%(if:equals=refs/tags)%(refname:rstrip=-2)%(then)%(color:brightcyan)tag%(else)%(if:equals=refs/stash)%(refname:rstrip=-2)%(then)%(color:brightred)stash%(else)%(color:white)%(refname:rstrip=-2)%(end)%(end)%(end)%(end)\t%(color:yellow)%(refname:short) %(color:green)(%(creatordate:relative))\t%(color:blue)%(subject)%(color:reset)' |
-  column -ts$'\t'
+    --format='%(if:equals=refs/remotes)%(refname:rstrip=-2)%(then)%(color:magenta)remote-branch%(else)%(if:equals=refs/heads)%(refname:rstrip=-2)%(then)%(color:brightgreen)branch%(else)%(if:equals=refs/tags)%(refname:rstrip=-2)%(then)%(color:brightcyan)tag%(else)%(if:equals=refs/stash)%(refname:rstrip=-2)%(then)%(color:brightred)stash%(else)%(color:white)%(refname:rstrip=-2)%(end)%(end)%(end)%(end)%(color:reset)%09%(color:yellow)%(refname:short)%(color:reset)%09%(color:green)(%(creatordate:relative))%(color:reset)%09%(color:blue)%(subject)%(color:reset)'
 }
 
 if [[ $1 == --refs ]]; then
@@ -60,6 +59,7 @@ fgf () {
   local path_preview_script="${user_conf_path:-"$HOME/.usr_conf"}/utils/fzf-preview.sh"
   git -c color.status=always status --short |
   fzf-down --ansi --nth 2..,.. \
+    --accept-nth '2..' \
     --query "$INITIAL_QUERY" \
     "--history=$FZF_HIST_DIR/fzf-git_file" \
     --preview-window '60%,wrap-word' \
@@ -72,23 +72,25 @@ fgf () {
         printf "\n" ;
       fi
       '"$path_preview_script"' "$selected"' |
-  cut -c4- | sed 's/.* -> //'
+  sed 's/.* -> //'
   # --preview '(git diff --color=always -- {-1} | sed 1,4d | bat -p --color=always; cat {-1})' |
 }
 
 fgb () {
   is_in_git_repo || return
   local INITIAL_QUERY="${*:-}"
-  git branch -a --color=always | grep -v '/HEAD\s' | sort |
+  local branch_format='%(if)%(symref)%(then)%(else)%(if)%(HEAD)%(then)%(color:green)%(else)%(if:equals=refs/remotes)%(refname:rstrip=-2)%(then)%(color:red)%(end)%(end)%(HEAD) %(if:equals=refs/remotes)%(refname:rstrip=-2)%(then)remotes/%(refname:short)%(else)%(refname:short)%(end)%(color:reset)%09%(refname:short)%(end)'
+  git branch -a --color=always --omit-empty --sort=refname "--format=$branch_format" |
   fzf-down --ansi --tac \
+    --delimiter=$'\t' \
+    --with-nth 1 \
+    --accept-nth 2 \
     --preview-window 'right,70%,wrap-word' \
     --prompt 'Branches> ' \
     --query "$INITIAL_QUERY" \
     "--history=$FZF_HIST_DIR/fzf-git_branch" \
     --preview '
-      git log --oneline --graph --date=short --color=always --pretty="format:%C(auto)%cd %h%d %s" $(sed s/^..// <<< {} | cut -d" " -f1)' |
-  sed 's/^..//' | cut -d' ' -f1 |
-  sed 's#^remotes/##'
+      git log --oneline --graph --date=short --color=always --pretty="format:%C(auto)%cd %h%d %s" {2}'
 }
 
 fgt () {
@@ -108,37 +110,38 @@ fgh () {
   is_in_git_repo || return
   local INITIAL_QUERY="${*:-}"
   git log --date=short \
-    --format="%C(green)%C(bold)%cd %C(auto)%h%d %s (%an)" \
+    --format="%C(green)%C(bold)%cd %C(auto)%h%d %s (%an)%C(reset)%x09%h" \
     --graph --color=always |
   fzf-down --ansi --no-sort --reverse \
+    --delimiter=$'\t' \
+    --with-nth 1 \
+    --accept-nth 2 \
     --prompt 'Hashes> ' \
     --query "$INITIAL_QUERY" \
     "--history=$FZF_HIST_DIR/fzf-git_hash" \
     --header 'Press CTRL-S to toggle sort' \
     --preview '
-      grep -o "[a-f0-9]\{7,\}" <<< {} |
-        LS_COLORS= xargs git show --color=always'"$__page_command__"' |
-        bat -p --color=always' |
-  grep -o "[a-f0-9]\{7,\}"
-  # --preview 'grep -o "[a-f0-9]\{7,\}" <<< {} | xargs git show --color=always' |
+      git show --color=always {2}'"$__page_command__"' |
+        bat -p --color=always'
 }
 
 fgha () {
   is_in_git_repo || return
   local INITIAL_QUERY="${*:-}"
   git log --all --date=short \
-    --format="%C(green)%C(bold)%cd %C(auto)%h%d %s (%an)" \
+    --format="%C(green)%C(bold)%cd %C(auto)%h%d %s (%an)%C(reset)%x09%h" \
     --graph --color=always |
   fzf-down --ansi --no-sort --reverse \
+    --delimiter=$'\t' \
+    --with-nth 1 \
+    --accept-nth 2 \
     --prompt 'All Hashes> ' \
     --query "$INITIAL_QUERY" \
     "--history=$FZF_HIST_DIR/fzf-git_hash-all" \
     --header 'Press CTRL-S to toggle sort' \
     --preview '
-      grep -o "[a-f0-9]\{7,\}" <<< {} |
-        LS_COLORS= xargs git show --color=always'"$__page_command__"' |
-        bat -p --color=always' |
-  grep -o "[a-f0-9]\{7,\}"
+      git show --color=always {2}'"$__page_command__"' |
+        bat -p --color=always'
 }
 
 fgr () {
@@ -146,12 +149,13 @@ fgr () {
   local INITIAL_QUERY="${*:-}"
   git remote -v | awk '{print $1 "\t" $2}' | uniq |
   fzf-down --tac \
+    --delimiter=$'\t' \
+    --accept-nth 1 \
     --prompt 'Remotes> ' \
     --query "$INITIAL_QUERY" \
     "--history=$FZF_HIST_DIR/fzf-git_remote" \
     --preview '
-      git log --color=always --oneline --graph --date=short --pretty="format:%C(auto)%cd %h%d %s" {1}' |
-  cut -d$'\t' -f1
+      git log --color=always --oneline --graph --date=short --pretty="format:%C(auto)%cd %h%d %s" {1}'
 }
 
 fgs () {
@@ -185,12 +189,11 @@ fshow () {
   fi
   local out shas sha q k
   local preview="
-    grep -o \"[a-f0-9]\{7,\}\" <<< {} |
-      LS_COLORS= xargs git show --color=always $preview_pager |
-        bat -p --color=always
+    git show --color=always {2} $preview_pager |
+      bat -p --color=always
   "
 
-  git_base_cmd="git log --graph --color=always --format='%C(auto)%h%d %s %C(black)%C(bold)%cr'"
+  git_base_cmd="git log --graph --color=always --format='%C(auto)%h%d %s %C(black)%C(bold)%cr%C(reset)%x09%h'"
   git_current_cmd="$git_base_cmd $*"
   git_all_cmd="$git_base_cmd --all $*"
 
@@ -200,20 +203,23 @@ fshow () {
   # better safe than sorry
   if [ "$OS" = 'Windows_NT' ]; then
     # Gitbash
-    copy="awk '{ print \$2 }' '{+f}' | pbcopy.exe"
+    copy="cat {+f2} | pbcopy.exe"
   elif [ "$OSTYPE" = 'darwin' ] || command -v 'pbcopy' &>/dev/null; then
-    copy="awk '{ print \$2 }' {+f} | pbcopy"
+    copy="cat {+f2} | pbcopy"
   # Assume linux if above didn't match
   elif [ -n "$WAYLAND_DISPLAY" ] && command -v 'wl-copy' &>/dev/null; then
-    copy="awk '{ print \$2 }' {+f} | wl-copy --foreground --type text/plain"
+    copy="cat {+f2} | wl-copy --foreground --type text/plain"
   elif [ -n "$DISPLAY" ] && command -v 'xsel' &>/dev/null; then
-    copy="awk '{ print \$2 }' {+f} | xsel -i -b"
+    copy="cat {+f2} | xsel -i -b"
   elif [ -n "$DISPLAY" ] && command -v 'xclip' &>/dev/null; then
-    copy="awk '{ print \$2 }' {+f} | xclip -i -selection clipboard"
+    copy="cat {+f2} | xclip -i -selection clipboard"
   fi
 
   while out=$(
       fzf-down --ansi --no-sort --reverse --query="$q" \
+          --delimiter=$'\t' \
+          --with-nth 1 \
+          --accept-nth 2 \
           --preview "$preview" \
 	  --preview-window 'right,50%,wrap-word' \
           --bind "start:reload:$git_current_cmd" \
@@ -227,12 +233,10 @@ fshow () {
       ); do
     q=$(head -1 <<< "$out")
     k=$(head -2 <<< "$out" | tail -1)
-    # shas=($(sed '1,2d;s/^[^a-z0-9]*//;/^$/d' <<< "$out" | awk '{print $1}'))
-
     shas=()
     while IFS='' read -r new_sha; do
       shas+=("$new_sha")
-    done < <(sed '1,2d;s/^[^a-z0-9]*//;/^$/d' <<< "$out" | awk '{print $1}')
+    done < <(sed '1,2d;/^$/d' <<< "$out")
 
     # shellcheck disable=SC2128
     [ -z "$shas" ] && continue
@@ -275,6 +279,7 @@ fge () {
   __git-refs --exclude=refs/remotes |
     fzf-down \
       --ansi \
+      --delimiter=$'\t' \
       --nth 2,2.. \
       --tiebreak begin \
       --prompt 'Each ref> ' \
