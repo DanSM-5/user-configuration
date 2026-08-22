@@ -8,6 +8,99 @@
 # TODO: Update fzf commands to use `--with-shell` rather
 # than generating temporary powershell scripts
 
+function __fzfgit_env_args ([AllowEmptyString()][string]$value = '') {
+  if ([string]::IsNullOrEmpty($value)) { return }
+
+  $parsed = [System.Collections.Generic.List[string]]::new()
+  $current = [System.Text.StringBuilder]::new()
+  [char]$quote = [char]0
+  $started = $false
+  $single_quote = [char]39
+  $double_quote = [char]34
+  $backslash = [char]92
+
+  for ($index = 0; $index -lt $value.Length; $index++) {
+    [char]$character = $value[$index]
+
+    if ($quote -ne [char]0) {
+      if ($character -eq $quote) {
+        $quote = [char]0
+        $started = $true
+      } elseif ($quote -eq $double_quote -and $character -eq $backslash) {
+        if ($index + 1 -lt $value.Length) {
+          [char]$next_character = $value[$index + 1]
+          if (
+            [char]::IsWhiteSpace($next_character) -or
+            $next_character -eq $single_quote -or
+            $next_character -eq $double_quote -or
+            $next_character -eq $backslash
+          ) {
+            $null = $current.Append($next_character)
+            $index++
+          } else {
+            $null = $current.Append($character)
+          }
+        } else {
+          $null = $current.Append($character)
+        }
+        $started = $true
+      } else {
+        $null = $current.Append($character)
+        $started = $true
+      }
+    } elseif ($character -eq $single_quote -or $character -eq $double_quote) {
+      $quote = $character
+      $started = $true
+    } elseif ($character -eq $backslash) {
+      if ($index + 1 -lt $value.Length) {
+        [char]$next_character = $value[$index + 1]
+        if (
+          [char]::IsWhiteSpace($next_character) -or
+          $next_character -eq $single_quote -or
+          $next_character -eq $double_quote -or
+          $next_character -eq $backslash
+        ) {
+          $null = $current.Append($next_character)
+          $index++
+        } else {
+          $null = $current.Append($character)
+        }
+      } else {
+        $null = $current.Append($character)
+      }
+      $started = $true
+    } elseif ([char]::IsWhiteSpace($character)) {
+      if ($started) {
+        $parsed.Add($current.ToString())
+        $null = $current.Clear()
+        $started = $false
+      }
+    } else {
+      $null = $current.Append($character)
+      $started = $true
+    }
+  }
+
+  if ($quote -ne [char]0) {
+    throw 'fzf-git: unmatched quote in Git option environment variable'
+  }
+
+  if ($started) {
+    $parsed.Add($current.ToString())
+  }
+
+  return $parsed.ToArray()
+}
+
+function __fzfgit_pwsh_join ([string[]]$values = @()) {
+  if (-not $values -or $values.Count -eq 0) { return '' }
+
+  [string[]]$quoted = @($values | ForEach-Object {
+    "'$($_.Replace("'", "''"))'"
+  })
+  return ' ' + ($quoted -join ' ')
+}
+
 function is_in_git_repo () {
   if (git rev-parse HEAD 2> $null) { return $true } else { return $false }
 }
@@ -20,9 +113,10 @@ $script:fzf_git_module_path = $PSCommandPath
 
 function __git_refs () {
   $format = '%(if:equals=refs/remotes)%(refname:rstrip=-2)%(then)%(color:magenta)remote-branch%(else)%(if:equals=refs/heads)%(refname:rstrip=-2)%(then)%(color:brightgreen)branch%(else)%(if:equals=refs/tags)%(refname:rstrip=-2)%(then)%(color:brightcyan)tag%(else)%(if:equals=refs/stash)%(refname:rstrip=-2)%(then)%(color:brightred)stash%(else)%(color:white)%(refname:rstrip=-2)%(end)%(end)%(end)%(end)%(color:reset)%09%(color:yellow)%(refname:short)%(color:reset)%09%(color:green)(%(creatordate:relative))%(color:reset)%09%(color:blue)%(subject)%(color:reset)'
-  git for-each-ref @args `
+  [string[]]$git_for_each_ref_args = @(__fzfgit_env_args $env:FZFGIT_GIT_FOR_EACH_REF)
+  git for-each-ref `
     --sort=-creatordate --sort=-HEAD --color=always `
-    "--format=$format"
+    "--format=$format" @git_for_each_ref_args @args
 }
 
 function __git_status_path ([string]$line) {
@@ -46,7 +140,8 @@ function __git_status_path ([string]$line) {
 }
 
 function __git_status_entries ([string[]]$pathspec = @()) {
-  $status_options = @('status', '--short', '--no-branch', '--untracked-files=all') + $pathspec
+  [string[]]$git_status_args = @(__fzfgit_env_args $env:FZFGIT_GIT_STATUS)
+  $status_options = @('status', '--short', '--no-branch', '--untracked-files=all') + $git_status_args + $pathspec
   [string[]]$plain_lines = @(git -c core.quotePath=false -c status.relativePaths=true -c color.status=never @status_options)
   [string[]]$colored_lines = @(git -c core.quotePath=false -c status.relativePaths=true -c color.status=always @status_options)
 
@@ -83,7 +178,8 @@ function __git_files (
     @('--', [string](git rev-parse --show-toplevel))
   }
 
-  [string[]]$tracked_files = @(git -c core.quotePath=false ls-files @tracked_pathspec)
+  [string[]]$git_ls_files_args = @(__fzfgit_env_args $env:FZFGIT_GIT_LS_FILES)
+  [string[]]$tracked_files = @(git -c core.quotePath=false ls-files @git_ls_files_args @tracked_pathspec)
   foreach ($path in $tracked_files) {
     if (-not $changed_paths.Contains($path)) {
       "   $path`t$path"
@@ -119,7 +215,8 @@ function get_fzf_down_options() {
 function fgf () {
   if (-not (is_in_git_repo)) { return }
 
-  $query = "$args"
+  [string[]]$git_diff_args = @(__fzfgit_env_args $env:FZFGIT_GIT_DIFF)
+  $git_diff_options = __fzfgit_pwsh_join $git_diff_args
   $repo_prefix = [string](git rev-parse --show-prefix)
   $escaped_module_path = $script:fzf_git_module_path.Replace("'", "''")
   $escaped_preview_script = $path_preview_script.Replace("'", "''")
@@ -128,11 +225,10 @@ function fgf () {
   if ($repo_prefix) {
     $header += ' | CTRL-D: Current directory files'
   }
-  $preview = "if (Test-Path -LiteralPath {2} -PathType Leaf -ErrorAction SilentlyContinue) { git -c core.quotePath=false diff --color=always -- {2} | Select-Object -Skip 4 | $($script:__pager__)bat -p --color=always; Write-Output ''; }; & '$escaped_preview_script' {2}"
+  $preview = "if (Test-Path -LiteralPath {2} -PathType Leaf -ErrorAction SilentlyContinue) { git -c core.quotePath=false diff --color=always$git_diff_options -- {2} | Select-Object -Skip 4 | $($script:__pager__)bat -p --color=always; Write-Output ''; }; & '$escaped_preview_script' {2}"
 
   $down_options = get_fzf_down_options
   $cmd_options = @(
-    "--query=$query",
     '--prompt', 'Files> ',
     "--history=$env:FZF_HIST_DIR/fzf-git_file",
     '--preview-window', '60%,wrap-word',
@@ -154,7 +250,7 @@ function fgf () {
   }
 
   [string[]]$selected = __git_files status |
-    fzf @down_options @cmd_options
+    fzf @down_options @cmd_options @args
 
   return $selected
 }
@@ -162,12 +258,13 @@ function fgf () {
 function fgb () {
   if (-not (is_in_git_repo)) { return }
 
-  $query = "$args"
+  [string[]]$git_branch_args = @(__fzfgit_env_args $env:FZFGIT_GIT_BRANCH)
+  [string[]]$git_log_args = @(__fzfgit_env_args $env:FZFGIT_GIT_LOG)
+  $git_log_options = __fzfgit_pwsh_join $git_log_args
   $branch_format = '%(if)%(symref)%(then)%(else)%(if)%(HEAD)%(then)%(color:green)%(else)%(if:equals=refs/remotes)%(refname:rstrip=-2)%(then)%(color:red)%(end)%(end)%(HEAD) %(if:equals=refs/remotes)%(refname:rstrip=-2)%(then)remotes/%(refname:short)%(else)%(refname:short)%(end)%(color:reset)%09%(refname:short)%(end)'
-  $preview = "git log --oneline --graph --date=short --color=always '--pretty=format:%C(auto)%cd%x20%h%d%x20%s' {2}"
+  $preview = "git log --oneline --graph --date=short --color=always '--pretty=format:%C(auto)%cd%x20%h%d%x20%s'$git_log_options {2}"
   $down_options = get_fzf_down_options
   $cmd_options = @(
-    "--query=$query",
     '--prompt', 'Branches> ',
     "--history=$env:FZF_HIST_DIR/fzf-git_branch",
     '--ansi',
@@ -180,8 +277,8 @@ function fgb () {
     '--preview', $preview
   )
 
-  [string[]]$selected = git branch -a --color=always --omit-empty --sort=refname "--format=$branch_format" |
-    fzf @down_options @cmd_options
+  [string[]]$selected = git branch -a --color=always --omit-empty --sort=refname "--format=$branch_format" @git_branch_args |
+    fzf @down_options @cmd_options @args
 
   return $selected
 }
@@ -189,11 +286,12 @@ function fgb () {
 function fgt () {
   if (-not (is_in_git_repo)) { return }
 
-  $query = "$args"
-  $preview = "git show --color=always {} | $($script:__pager__)bat -p --color=always"
+  [string[]]$git_tag_args = @(__fzfgit_env_args $env:FZFGIT_GIT_TAG)
+  [string[]]$git_show_args = @(__fzfgit_env_args $env:FZFGIT_GIT_SHOW)
+  $git_show_options = __fzfgit_pwsh_join $git_show_args
+  $preview = "git show --color=always$git_show_options {} | $($script:__pager__)bat -p --color=always"
   $down_options = get_fzf_down_options
   $cmd_options = @(
-    "--query=$query",
     '--prompt', 'Tags> ',
     "--history=$env:FZF_HIST_DIR/fzf-git_tag",
     '--preview-window', 'right,70%,wrap-word',
@@ -201,8 +299,8 @@ function fgt () {
     '--preview', $preview
   )
 
-  $selected = git tag --sort -version:refname |
-    fzf @down_options @cmd_options
+  $selected = git tag '--sort=-version:refname' @git_tag_args |
+    fzf @down_options @cmd_options @args
 
   return $selected
 }
@@ -210,11 +308,12 @@ function fgt () {
 function fgh () {
   if (-not (is_in_git_repo)) { return }
 
-  $query = "$args"
-  $preview = "git show --color=always {2} | $($script:__pager__)bat -p --color=always"
+  [string[]]$git_log_args = @(__fzfgit_env_args $env:FZFGIT_GIT_LOG)
+  [string[]]$git_show_args = @(__fzfgit_env_args $env:FZFGIT_GIT_SHOW)
+  $git_show_options = __fzfgit_pwsh_join $git_show_args
+  $preview = "git show --color=always$git_show_options {2} | $($script:__pager__)bat -p --color=always"
   $down_options = get_fzf_down_options
   $cmd_options = @(
-    "--query=$query",
     '--prompt', 'Hashes> ',
     "--history=$env:FZF_HIST_DIR/fzf-git_hash",
     '--ansi',
@@ -227,8 +326,8 @@ function fgh () {
     '--preview', $preview
   )
 
-  [string[]]$selected = git log --date=short --format='%C(green)%C(bold)%cd %C(auto)%h%d %s (%an)%C(reset)%x09%h' --graph --color=always |
-    fzf @down_options @cmd_options
+  [string[]]$selected = git log --date=short --format='%C(green)%C(bold)%cd %C(auto)%h%d %s (%an)%C(reset)%x09%h' --graph --color=always @git_log_args |
+    fzf @down_options @cmd_options @args
 
   return $selected
 }
@@ -236,11 +335,12 @@ function fgh () {
 function fgha () {
   if (-not (is_in_git_repo)) { return }
 
-  $query = "$args"
-  $preview = "git show --color=always {2} | $($script:__pager__)bat -p --color=always"
+  [string[]]$git_log_args = @(__fzfgit_env_args $env:FZFGIT_GIT_LOG)
+  [string[]]$git_show_args = @(__fzfgit_env_args $env:FZFGIT_GIT_SHOW)
+  $git_show_options = __fzfgit_pwsh_join $git_show_args
+  $preview = "git show --color=always$git_show_options {2} | $($script:__pager__)bat -p --color=always"
   $down_options = get_fzf_down_options
   $cmd_options = @(
-    "--query=$query",
     '--prompt', 'All Hashes> ',
     "--history=$env:FZF_HIST_DIR/fzf-git_hash-all",
     '--ansi',
@@ -253,8 +353,8 @@ function fgha () {
     '--preview', $preview
   )
 
-  [string[]]$selected = git log --all --date=short --format='%C(green)%C(bold)%cd %C(auto)%h%d %s (%an)%C(reset)%x09%h' --graph --color=always |
-    fzf @down_options @cmd_options
+  [string[]]$selected = git log --all --date=short --format='%C(green)%C(bold)%cd %C(auto)%h%d %s (%an)%C(reset)%x09%h' --graph --color=always @git_log_args |
+    fzf @down_options @cmd_options @args
 
   return $selected
 }
@@ -262,10 +362,12 @@ function fgha () {
 function fgr () {
   if (-not (is_in_git_repo)) { return }
 
-  $preview = 'git log --color=always --oneline --graph --date=short --pretty="format:%C(auto)%cd %h%d %s" {1}'
+  [string[]]$git_remote_args = @(__fzfgit_env_args $env:FZFGIT_GIT_REMOTE)
+  [string[]]$git_log_args = @(__fzfgit_env_args $env:FZFGIT_GIT_LOG)
+  $git_log_options = __fzfgit_pwsh_join $git_log_args
+  $preview = "git log --color=always --oneline --graph --date=short '--pretty=format:%C(auto)%cd%x20%h%d%x20%s'$git_log_options {1}"
   $down_options = get_fzf_down_options
   $cmd_options = @(
-    "--query=$query",
     '--prompt', 'Remotes> ',
     "--history=$env:FZF_HIST_DIR/fzf-git_remotes",
     '--tac',
@@ -273,11 +375,11 @@ function fgr () {
     '--preview', $preview
   )
 
-  $selected = git remote -v | ForEach-Object {
+  $selected = git remote -v @git_remote_args | ForEach-Object {
     $remote_info = $_ -split "[`t ]"
     return $remote_info[0] + "`t" + $remote_info[1]
   } | Get-Unique |
-    fzf @down_options @cmd_options
+    fzf @down_options @cmd_options @args
 
   return $selected
 }
@@ -285,11 +387,12 @@ function fgr () {
 function fgs () {
   if (-not (is_in_git_repo)) { return }
 
-  $query = "$args"
-  $preview = "git show --color=always {1} | $($script:__pager__)bat -p --color=always"
+  [string[]]$git_stash_args = @(__fzfgit_env_args $env:FZFGIT_GIT_STASH)
+  [string[]]$git_show_args = @(__fzfgit_env_args $env:FZFGIT_GIT_SHOW)
+  $git_show_options = __fzfgit_pwsh_join $git_show_args
+  $preview = "git show --color=always$git_show_options {1} | $($script:__pager__)bat -p --color=always"
   $down_options = get_fzf_down_options
   $cmd_options = @(
-    "--query=$query",
     '--prompt', 'Stashes> ',
     "--history=$env:FZF_HIST_DIR/fzf-git_stash",
     '--reverse',
@@ -299,14 +402,21 @@ function fgs () {
     '--preview', $preview
   )
 
-  [string[]]$selected = git stash list |
-    fzf @down_options @cmd_options
+  [string[]]$selected = git stash list @git_stash_args |
+    fzf @down_options @cmd_options @args
 
   return $selected
 }
 
 function fshow () {
   if (-not (is_in_git_repo)) { return }
+
+  [string[]]$git_log_args = @(__fzfgit_env_args $env:FZFGIT_GIT_LOG)
+  [string[]]$git_show_args = @(__fzfgit_env_args $env:FZFGIT_GIT_SHOW)
+  [string[]]$git_diff_args = @(__fzfgit_env_args $env:FZFGIT_GIT_DIFF)
+  $git_log_options = __fzfgit_pwsh_join $git_log_args
+  $git_show_options = __fzfgit_pwsh_join $git_show_args
+  $git_diff_options = __fzfgit_pwsh_join $git_diff_args
 
   if (Get-Command delta -ErrorAction SilentlyContinue) {
     $pager = 'delta --paging=always'
@@ -320,7 +430,7 @@ function fshow () {
   $q = ''
   $k = ''
   $preview = "
-  git show --color=always {2} $preview_pager |
+  git show --color=always$git_show_options {2} $preview_pager |
     bat -p --color=always
 "
 
@@ -328,8 +438,8 @@ function fshow () {
   $copy = 'Get-Content {+f2} | Set-Clipboard'
 
   $git_base_cmd = "git log --graph --color=always --format='%C(auto)%h%d %s %C(black)%C(bold)%cr%C(reset)%x09%h'"
-  $git_current_cmd = "$git_base_cmd $args"
-  $git_all_cmd = "$git_base_cmd --all $args"
+  $git_current_cmd = "$git_base_cmd$git_log_options"
+  $git_all_cmd = "$git_base_cmd --all$git_log_options"
   $down_options = get_fzf_down_options
   $cmd_options = @(
     '--query=',
@@ -355,8 +465,8 @@ function fshow () {
   try {
     while ($true) {
       [string[]]$out = @(git log --graph --color=always `
-        --format="%C(auto)%h%d %s %C(black)%C(bold)%cr%C(reset)%x09%h" @args |
-          fzf @down_options @cmd_options)
+        --format="%C(auto)%h%d %s %C(black)%C(bold)%cr%C(reset)%x09%h" @git_log_args |
+          fzf @down_options @cmd_options @args)
 
       if (-not $out) { break; }
 
@@ -371,10 +481,10 @@ function fshow () {
       if (-not $shas) { continue; }
       if ($q) { $cmd_options[0] = "--query=$q" }
       if ($k -eq 'ctrl-d') {
-        pwsh -NoLogo -NonInteractive -NoProfile -Command "git diff --color=always $shas | $pager"
+        pwsh -NoLogo -NonInteractive -NoProfile -Command "git diff --color=always$git_diff_options $shas | $pager"
       } else {
         foreach ($sha in $shas) {
-          pwsh -NoLogo -NonInteractive -NoProfile -Command "git show --color=always $sha | $pager"
+          pwsh -NoLogo -NonInteractive -NoProfile -Command "git show --color=always$git_show_options $sha | $pager"
         }
       }
     }
@@ -384,17 +494,20 @@ function fshow () {
 function fgl () {
   if (-not (is_in_git_repo)) { return }
 
+  [string[]]$git_reflog_args = @(__fzfgit_env_args $env:FZFGIT_GIT_REFLOG)
+  [string[]]$git_show_args = @(__fzfgit_env_args $env:FZFGIT_GIT_SHOW)
+  $git_show_options = __fzfgit_pwsh_join $git_show_args
   $down_options = get_fzf_down_options
   $cmd_options = @(
     '--ansi',
     '--prompt', 'Reflogs> ',
     '--bind', 'alt-r:toggle-raw',
     '--with-shell', 'pwsh -NoLogo -NoProfile -NonInteractive -Command',
-    '--preview', 'git show --color=always {1} | delta',
+    '--preview', "git show --color=always$git_show_options {1} | delta",
     '--accept-nth', '1'
   )
 
-  [string[]]$selected = git reflog --color=always --format='%C(blue)%gD %C(yellow)%h%C(auto)%d %gs' |
+  [string[]]$selected = git reflog --color=always --format='%C(blue)%gD %C(yellow)%h%C(auto)%d %gs' @git_reflog_args |
     fzf @down_options @cmd_options @args
 
   return $selected
@@ -403,24 +516,30 @@ function fgl () {
 function fgw () {
   if (-not (is_in_git_repo)) { return }
 
-  $preview = @'
-git -c color.status=always -C {1} status --short --branch
+  [string[]]$git_worktree_args = @(__fzfgit_env_args $env:FZFGIT_GIT_WORKTREE)
+  [string[]]$git_status_args = @(__fzfgit_env_args $env:FZFGIT_GIT_STATUS)
+  [string[]]$git_log_args = @(__fzfgit_env_args $env:FZFGIT_GIT_LOG)
+  $git_worktree_options = __fzfgit_pwsh_join $git_worktree_args
+  $git_status_options = __fzfgit_pwsh_join $git_status_args
+  $git_log_options = __fzfgit_pwsh_join $git_log_args
+  $preview = @"
+git -c color.status=always -C {1} status --short --branch$git_status_options
 Write-Output ''
-git log --oneline --graph --date=short --color=always '--pretty=format:%C(auto)%cd%x20%h%d%x20%s' {2} --
-'@
+git log --oneline --graph --date=short --color=always '--pretty=format:%C(auto)%cd%x20%h%d%x20%s'$git_log_options {2} --
+"@
   $down_options = get_fzf_down_options
   $cmd_options = @(
     '--prompt', 'Worktrees> ',
     '--header', 'CTRL-X (remove worktree) | ALT-T ',
     '--with-shell', 'pwsh -NoLogo -NoProfile -NonInteractive -Command',
-    '--bind', 'ctrl-x:reload(git worktree remove {1} > $null; git worktree list)',
+    '--bind', "ctrl-x:reload(git worktree remove {1} > `$null; git worktree list$git_worktree_options)",
     '--preview', $preview,
     '--accept-nth', '1',
     '--with-nth', '2..',
     '--bind', 'alt-t:change-with-nth(..|2..)'
   )
 
-  [string[]]$selected = git worktree list |
+  [string[]]$selected = git worktree list @git_worktree_args |
     fzf @down_options @cmd_options @args
 
   return $selected
@@ -429,11 +548,18 @@ git log --oneline --graph --date=short --color=always '--pretty=format:%C(auto)%
 function fge () {
   if (-not (is_in_git_repo)) { return }
 
+  [string[]]$git_log_args = @(__fzfgit_env_args $env:FZFGIT_GIT_LOG)
+  $git_log_options = __fzfgit_pwsh_join $git_log_args
+
   # Reload actions run in a child shell, so give them a self-contained helper.
   $refs_file = New-TemporaryFile
   $refs_script = $refs_file.FullName.Replace('.tmp', '.ps1')
+  $env_args_function = (Get-Command __fzfgit_env_args -CommandType Function).Definition
   $refs_function = (Get-Command __git_refs -CommandType Function).Definition
   @"
+function __fzfgit_env_args () {
+$env_args_function
+}
 function __git_refs () {
 $refs_function
 }
@@ -442,7 +568,7 @@ __git_refs @args
 
   $escaped_refs_script = $refs_script.Replace("'", "''")
   $reload_refs = "& '$escaped_refs_script'"
-  $preview = "git log --oneline --graph --date=short --color=always '--pretty=format:%C(auto)%cd%x20%h%d%x20%s' {2} --"
+  $preview = "git log --oneline --graph --date=short --color=always '--pretty=format:%C(auto)%cd%x20%h%d%x20%s'$git_log_options {2} --"
   $down_options = get_fzf_down_options
   $cmd_options = @(
     '--ansi',
