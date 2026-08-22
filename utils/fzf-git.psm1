@@ -426,11 +426,42 @@ function fshow () {
     $preview_pager = ''
   }
   $preview = "
-  git show --color=always$git_show_options {2} $preview_pager |
-    bat -p --color=always
+  `$sha = {2}
+  if (`$sha) {
+    git show --color=always$git_show_options `$sha $preview_pager |
+      bat -p --color=always
+  } else {
+    `$root = git rev-parse --show-toplevel 2> `$null
+    if (-not `$root) { `$root = git rev-parse --absolute-git-dir 2> `$null }
+    `$branch = git symbolic-ref --quiet --short HEAD 2> `$null
+    `$head = git rev-parse --short HEAD 2> `$null
+    `$upstream = git rev-parse --abbrev-ref --symbolic-full-name '@{upstream}' 2> `$null
+
+    Write-Output ('Repository: ' + `$root)
+    if (`$branch) {
+      Write-Output ('HEAD:       ' + `$branch + ' (' + `$head + ')')
+    } else {
+      Write-Output ('HEAD:       detached at ' + `$head)
+    }
+    if (`$upstream) { Write-Output ('Upstream:   ' + `$upstream) }
+
+    [string[]]`$remotes = @(git remote -v)
+    if (`$remotes.Count -gt 0) {
+      Write-Output ''
+      Write-Output 'Remotes:'
+      `$remotes
+    } else {
+      Write-Output ''
+      Write-Output 'Remotes:    (none)'
+    }
+
+    Write-Output ''
+    Write-Output 'Last commit:'
+    git log -1 --color=always --date=relative '--format=%C(auto)%h%d %s%nAuthor: %an <%ae>%nDate:   %ad'
+  }
 "
-  $show_action = "git show --color=always$git_show_options {+2} | $pager"
-  $diff_action = "git diff --color=always$git_diff_options {+2} | $pager"
+  $show_action = "`$shas = @(Write-Output {+2} | Where-Object { `$_ }); if (`$shas) { git show --color=always$git_show_options `$shas | $pager }"
+  $diff_action = "`$shas = @(Write-Output {+2} | Where-Object { `$_ }); if (`$shas) { git diff --color=always$git_diff_options `$shas | $pager }"
 
   # Clipboard command
   $copy = 'Get-Content {+f2} | Set-Clipboard'
@@ -458,7 +489,7 @@ function fshow () {
     '--preview-window', 'right,50%,wrap-word'
   )
 
-  $null = git log --graph --color=always `
+  git log --graph --color=always `
     --format="%C(auto)%h%d %s %C(black)%C(bold)%cr%C(reset)%x09%h" @git_log_args |
       fzf @down_options @cmd_options @args
 }

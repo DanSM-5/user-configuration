@@ -456,11 +456,39 @@ fshow () {
     preview_pager=''
   fi
   local preview="
-    git show --color=always$git_show_options {2} $preview_pager |
-      bat -p --color=always
+    sha={2}
+    if [ -n \"\$sha\" ]; then
+      git show --color=always$git_show_options \"\$sha\" $preview_pager |
+        bat -p --color=always
+    else
+      root=\$(git rev-parse --show-toplevel 2>/dev/null || git rev-parse --absolute-git-dir 2>/dev/null)
+      branch=\$(git symbolic-ref --quiet --short HEAD 2>/dev/null || true)
+      head=\$(git rev-parse --short HEAD 2>/dev/null)
+      upstream=\$(git rev-parse --abbrev-ref --symbolic-full-name '@{upstream}' 2>/dev/null || true)
+
+      printf 'Repository: %s\\n' \"\$root\"
+      if [ -n \"\$branch\" ]; then
+        printf 'HEAD:       %s (%s)\\n' \"\$branch\" \"\$head\"
+      else
+        printf 'HEAD:       detached at %s\\n' \"\$head\"
+      fi
+      [ -z \"\$upstream\" ] || printf 'Upstream:   %s\\n' \"\$upstream\"
+
+      remotes=\$(git remote -v)
+      if [ -n \"\$remotes\" ]; then
+        printf '\\nRemotes:\\n%s\\n' \"\$remotes\"
+      else
+        printf '\\nRemotes:    (none)\\n'
+      fi
+
+      printf '\\nLast commit:\\n'
+      git log -1 --color=always --date=relative \\
+        --format='%C(auto)%h%d %s%nAuthor: %an <%ae>%nDate:   %ad'
+    fi
   "
-  local show_action="git show --color=always$git_show_options {+2} | $pager"
-  local diff_action="git diff --color=always$git_diff_options {+2} | $pager"
+  local action_shas="shas=; for sha in {+2}; do [ -z \"\$sha\" ] || shas=\"\$shas \$sha\"; done; [ -z \"\$shas\" ] ||"
+  local show_action="$action_shas git show --color=always$git_show_options \$shas | $pager"
+  local diff_action="$action_shas git diff --color=always$git_diff_options \$shas | $pager"
 
   local git_base_cmd="git log --graph --color=always --format='%C(auto)%h%d %s %C(black)%C(bold)%cr%C(reset)%x09%h'"
   local git_current_cmd="$git_base_cmd$git_log_options"
@@ -498,7 +526,7 @@ fshow () {
     --header 'ctrl-d: Diff | ctrl-a: All | ctrl-f: HEAD | ctrl-y: Copy' \
     --prompt 'Commits> ' \
     "--history=$FZF_HIST_DIR/fzf-git_show" \
-    "$@" > /dev/null
+    "$@"
 }
 
 fgl () {
