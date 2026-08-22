@@ -455,11 +455,12 @@ fshow () {
     pager="$def_pager"
     preview_pager=''
   fi
-  local out shas sha q k
   local preview="
     git show --color=always$git_show_options {2} $preview_pager |
       bat -p --color=always
   "
+  local show_action="git show --color=always$git_show_options {+2} | $pager"
+  local diff_action="git diff --color=always$git_diff_options {+2} | $pager"
 
   local git_base_cmd="git log --graph --color=always --format='%C(auto)%h%d %s %C(black)%C(bold)%cr%C(reset)%x09%h'"
   local git_current_cmd="$git_base_cmd$git_log_options"
@@ -483,40 +484,21 @@ fshow () {
     copy="cat {+f2} | xclip -i -selection clipboard"
   fi
 
-  while out=$(
-      fzf-down --ansi --no-sort --reverse --query="$q" \
-          --delimiter=$'\t' \
-          --with-nth 1 \
-          --accept-nth 2 \
-          --preview "$preview" \
-	  --preview-window 'right,50%,wrap-word' \
-          --bind "start:reload:$git_current_cmd" \
-          --bind "ctrl-f:reload:$git_current_cmd" \
-          --bind "ctrl-a:reload:$git_all_cmd" \
-          --bind "ctrl-y:execute-silent($copy)+bell" \
-          --header 'ctrl-d: Diff | ctrl-a: All | ctrl-f: HEAD | ctrl-y: Copy' \
-          --prompt 'Commits> ' \
-          "--history=$FZF_HIST_DIR/fzf-git_show" \
-          --print-query --expect=ctrl-d \
-          "$@"
-      ); do
-    q=$(head -1 <<< "$out")
-    k=$(head -2 <<< "$out" | tail -1)
-    shas=()
-    while IFS='' read -r new_sha; do
-      shas+=("$new_sha")
-    done < <(sed '1,2d;/^$/d' <<< "$out")
-
-    # shellcheck disable=SC2128
-    [ -z "$shas" ] && continue
-    if [ "$k" = ctrl-d ]; then
-      bash -c "git diff --color=always$git_diff_options ${shas[*]} | $pager"
-    else
-      for sha in "${shas[@]}"; do
-        bash -c "git show --color=always$git_show_options $sha | $pager"
-      done
-    fi
-  done
+  fzf-down --ansi --no-sort --reverse \
+    --delimiter=$'\t' \
+    --with-nth 1 \
+    --preview "$preview" \
+    --preview-window 'right,50%,wrap-word' \
+    --bind "start:reload:$git_current_cmd" \
+    --bind "ctrl-f:reload:$git_current_cmd" \
+    --bind "ctrl-a:reload:$git_all_cmd" \
+    --bind "enter:execute:$show_action" \
+    --bind "ctrl-d:execute:$diff_action" \
+    --bind "ctrl-y:execute-silent($copy)+bell" \
+    --header 'ctrl-d: Diff | ctrl-a: All | ctrl-f: HEAD | ctrl-y: Copy' \
+    --prompt 'Commits> ' \
+    "--history=$FZF_HIST_DIR/fzf-git_show" \
+    "$@" > /dev/null
 }
 
 fgl () {

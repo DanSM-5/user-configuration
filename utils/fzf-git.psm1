@@ -425,14 +425,12 @@ function fshow () {
     $pager = 'less -R'
     $preview_pager = ''
   }
-  [string[]]$out = @()
-  [string[]]$shas = @()
-  $q = ''
-  $k = ''
   $preview = "
   git show --color=always$git_show_options {2} $preview_pager |
     bat -p --color=always
 "
+  $show_action = "git show --color=always$git_show_options {+2} | $pager"
+  $diff_action = "git diff --color=always$git_diff_options {+2} | $pager"
 
   # Clipboard command
   $copy = 'Get-Content {+f2} | Set-Clipboard'
@@ -442,7 +440,6 @@ function fshow () {
   $git_all_cmd = "$git_base_cmd --all$git_log_options"
   $down_options = get_fzf_down_options
   $cmd_options = @(
-    '--query=',
     "--history=$env:FZF_HIST_DIR/fzf-git_show",
     '--prompt', 'Commits> ',
     '--ansi',
@@ -450,45 +447,20 @@ function fshow () {
     '--reverse',
     '--delimiter', "`t",
     '--with-nth', '1',
-    '--accept-nth', '2',
-    '--print-query',
     '--bind', "ctrl-y:execute-silent($copy)+bell",
     '--header', 'ctrl-d: Diff | ctrl-a: All | ctrl-f: HEAD | ctrl-y: Copy',
-    '--with-shell', 'pwsh -NoLogo -NonInteractive -NoProfile -Command'
+    '--with-shell', 'pwsh -NoLogo -NonInteractive -NoProfile -Command',
     '--bind', "ctrl-f:reload:$git_current_cmd",
     '--bind', "ctrl-a:reload:$git_all_cmd",
+    '--bind', "enter:execute:$show_action",
+    '--bind', "ctrl-d:execute:$diff_action",
     '--preview', $preview,
-    '--preview-window', 'right,50%,wrap-word',
-    '--expect=ctrl-d'
+    '--preview-window', 'right,50%,wrap-word'
   )
 
-  try {
-    while ($true) {
-      [string[]]$out = @(git log --graph --color=always `
-        --format="%C(auto)%h%d %s %C(black)%C(bold)%cr%C(reset)%x09%h" @git_log_args |
-          fzf @down_options @cmd_options @args)
-
-      if (-not $out) { break; }
-
-      $q = $out[0]
-      $k = if ($out.Count -gt 1) { $out[1] } else { '' }
-      [string[]]$shas = if ($out.Count -gt 2) {
-        @($out | Select-Object -Skip 2 | Where-Object { $_ })
-      } else {
-        @()
-      }
-
-      if (-not $shas) { continue; }
-      if ($q) { $cmd_options[0] = "--query=$q" }
-      if ($k -eq 'ctrl-d') {
-        pwsh -NoLogo -NonInteractive -NoProfile -Command "git diff --color=always$git_diff_options $shas | $pager"
-      } else {
-        foreach ($sha in $shas) {
-          pwsh -NoLogo -NonInteractive -NoProfile -Command "git show --color=always$git_show_options $sha | $pager"
-        }
-      }
-    }
-  } catch { return }
+  $null = git log --graph --color=always `
+    --format="%C(auto)%h%d %s %C(black)%C(bold)%cr%C(reset)%x09%h" @git_log_args |
+      fzf @down_options @cmd_options @args
 }
 
 function fgl () {
