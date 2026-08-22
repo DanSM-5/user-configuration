@@ -121,12 +121,13 @@ __cprj__ () {
 # Alt+o to launch quick project cd
 # bind '"\eo":"cprj\C-m"'
 
-# Use bind -x to execute commands but it won't happen on the same
-# context, so cd won't work
-# bind -x '"\C-op":__prjc__'
+# A bind -x callback can change directory in the current shell, but it leaves
+# the already-rendered prompt stale. Execute the generated command through
+# Readline so the prompt refreshes and the current input line is preserved.
+bind -m emacs-standard '"\C-\e(": redraw-current-line'
 
 # Ctrl-o p to run cprj command
-bind -m emacs-standard '"\C-op": " \C-b\C-k \C-u`__cprj__`\e\C-e\er\C-m\C-y\C-h\e \C-y\ey\C-x\C-x\C-d"'
+bind -m emacs-standard '"\C-op": " \C-b\C-k \C-u`__cprj__`\e\C-e\C-\e(\C-m\C-y\C-h\e \C-y\ey\C-x\C-x\C-d\C-y\ey\C-_"'
 bind -m vi-command '"\C-op": "\C-z\C-op\C-z"'
 bind -m vi-insert '"\C-op": "\C-z\C-op\C-z"'
 
@@ -217,4 +218,3 @@ if command -v carapace &>/dev/null && [ "$IS_GITBASH" = false ]; then
   export CARAPACE_BRIDGES='zsh,fish,bash,inshellisense' # optional
   source <(carapace _carapace)
 fi
-
