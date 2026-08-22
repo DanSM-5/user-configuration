@@ -241,7 +241,7 @@ function gcompare {
 function fadd () {
   $gitargs = $args
   With-UTF8 {
-    [string[]]$files = fgf @gitargs
+    [string[]]$files = fgf "--query=$gitargs"
 
     if ($files.Length -gt 0) {
       Write-Output @files
@@ -253,7 +253,7 @@ function fadd () {
 function fpad () {
   $gitargs = $args
   With-UTF8 {
-    [string[]]$files = fgf @gitargs
+    [string[]]$files = fgf "--query=$gitargs"
 
     if ($files.Length -gt 0) {
       Write-Output @files
@@ -265,7 +265,7 @@ function fpad () {
 function fpre () {
   $gitargs = $args
   With-UTF8 {
-    [string[]]$files = fgf @gitargs
+    [string[]]$files = fgf "--query=$gitargs"
 
     if ($files.Length -gt 0) {
       Write-Output @files
@@ -277,7 +277,7 @@ function fpre () {
 function fco () {
   $gitargs = $args
   With-UTF8 {
-    fgb @gitargs | ForEach-Object {
+    fgb "--query=$gitargs" | ForEach-Object {
       if ($_) {
         git checkout "$($_ -replace 'origin/', '')"
       }
@@ -288,7 +288,7 @@ function fco () {
 function fck () {
   $gitargs = $args
   With-UTF8 {
-    fgb @gitargs | ForEach-Object {
+    fgb "--query=$gitargs" | ForEach-Object {
       if ($_) {
         git checkout "$($_ -replace 'origin/', '')"
       }
@@ -299,7 +299,7 @@ function fck () {
 function fgrm () {
   $gitargs = $args
   With-UTF8 {
-    [string[]] $selection = fgf @gitargs
+    [string[]] $selection = fgf "--query=$gitargs"
 
     if ($selection.Length -eq 0) {
       return
@@ -315,7 +315,7 @@ function fgrm () {
 function fsa () {
   $gitargs = $args
   With-UTF8 {
-    fgs @gitargs | ForEach-Object {
+    fgs "--query=$gitargs" | ForEach-Object {
       $selection = $_.Trim()
       if ($selection) {
         git stash apply "$selection"
@@ -327,7 +327,7 @@ function fsa () {
 function fmerge () {
   $gitargs = $args
   With-UTF8 {
-    fgb @gitargs | ForEach-Object {
+    fgb "--query=$gitargs" | ForEach-Object {
       $selection = $_.Trim()
       if ($selection) {
         git merge "$selection"
@@ -523,7 +523,7 @@ function gwc () {
 function fwc () {
   $gitargs = $args
   With-UTF8 {
-    $branch_name = fgb @gitargs | ForEach-Object {
+    $branch_name = fgb "--query=$gitargs" | ForEach-Object {
       # Clean branch name
       $_ -replace 'origin/', ''
     }
@@ -539,6 +539,7 @@ function fwc () {
 
 function fwr () {
   $bare_root = ''
+  $gitargs = $args
 
   $bare_root = get_bare_repository
 
@@ -550,8 +551,7 @@ function fwr () {
   Push-Location -LiteralPath "$bare_root" *> $null
 
   With-UTF8 {
-    $gitargs = $args
-    fgb @gitargs | ForEach-Object {
+    fgb "--query=$gitargs" | ForEach-Object {
       # Clean branch name
       $_ -replace 'origin/', ''
     } | ForEach-Object {

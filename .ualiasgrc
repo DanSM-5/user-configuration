@@ -329,11 +329,11 @@ gwc () {
 fwc () {
   local selection branch_name
 
-  selection=$(fgb "${*:-}")
+  selection=$(fgb "--query=${*:-}")
 
   # while IFS='' read -r branch; do
   #   selection="$branch"
-  # done < <(fgb "${*:-}")
+  # done < <(fgb "--query=${*:-}")
 
   if [ -z "$selection" ]; then
     return
@@ -361,7 +361,7 @@ fwr () {
     return 1
   fi
 
-  selection=($(fgb "${*:-}"))
+  selection=($(fgb "--query=${*:-}"))
 
   if [ -z "${selection[*]}" ]; then
     return
@@ -402,13 +402,13 @@ fadd () {
   local selection
   local ifsog="$IFS"
   IFS="
-" selection=( $(fgf "${*:-}" | sed 's/^\"//' | sed 's/\"$//') )
+" selection=( $(fgf "--query=${*:-}" | sed 's/^\"//' | sed 's/\"$//') )
   IFS="$ifsog"
 
   # selection=()
   # while IFS='' read -r pathspec; do
   #   selection+=("$pathspec")
-  # done < <(fgf "${*:-}" | sed 's/^\"//' | sed 's/\"$//')
+  # done < <(fgf "--query=${*:-}" | sed 's/^\"//' | sed 's/\"$//')
 
   printf "%s\n" "${selection[@]}"
   # shellcheck disable=SC2128
@@ -421,13 +421,13 @@ fpad () {
   local selection
   local ifsog="$IFS"
   IFS="
-" selection=( $(fgf "${*:-}" | sed 's/^\"//' | sed 's/\"$//') )
+" selection=( $(fgf "--query=${*:-}" | sed 's/^\"//' | sed 's/\"$//') )
   IFS="$ifsog"
 
   # selection=()
   # while IFS='' read -r pathspec; do
   #   selection+=("$pathspec")
-  # done < <(fgf "${*:-}" | sed 's/^\"//' | sed 's/\"$//')
+  # done < <(fgf "--query=${*:-}" | sed 's/^\"//' | sed 's/\"$//')
 
   printf "%s\n" "${selection[@]}"
   # shellcheck disable=SC2128
@@ -440,13 +440,13 @@ fpre () {
   local selection
   local ifsog="$IFS"
   IFS="
-" selection=( $(fgf "${*:-}" | sed 's/^\"//' | sed 's/\"$//') )
+" selection=( $(fgf "--query=${*:-}" | sed 's/^\"//' | sed 's/\"$//') )
   IFS="$ifsog"
 
   # selection=()
   # while IFS='' read -r pathspec; do
   #   selection+=("$pathspec")
-  # done < <(fgf "${*:-}" | sed 's/^\"//' | sed 's/\"$//')
+  # done < <(fgf "--query=${*:-}" | sed 's/^\"//' | sed 's/\"$//')
 
   printf "%s\n" "${selection[@]}"
   # shellcheck disable=SC2128
@@ -457,11 +457,11 @@ fpre () {
 
 fco () {
   local selection
-  selection=$(fgb "${*:-}")
+  selection=$(fgb "--query=${*:-}")
 
   # while IFS='' read -r branch_name; do
   #   selection="$branch_name"
-  # done < <(fgb "${*:-}")
+  # done < <(fgb "--query=${*:-}")
 
   if [ -n "$selection" ]; then
     git checkout "${selection//origin\//}"
@@ -470,11 +470,11 @@ fco () {
 
 fck () {
   local selection
-  selection=$(fgb "${*:-}")
+  selection=$(fgb "--query=${*:-}")
 
   # while IFS='' read -r branch_name; do
   #   selection="$branch_name"
-  # done < <(fgb "${*:-}")
+  # done < <(fgb "--query=${*:-}")
 
   if [ -n "$selection" ]; then
     git checkout "${selection//origin\//}"
@@ -483,12 +483,12 @@ fck () {
 
 fgrm () {
   local selection
-  selection=($(fgf "${*:-}"))
+  selection=($(fgf "--query=${*:-}"))
 
   # local selection=()
   # while IFS='' read -r pathspec; do
   #   selection+=("$pathspec")
-  # done < <(fgf "${*:-}")
+  # done < <(fgf "--query=${*:-}")
 
   if [ -z "$selection" ]; then
     return
@@ -505,11 +505,11 @@ fgrm () {
 
 fmerge () {
   local selection
-  selection=$(fgb "${*:-}")
+  selection=$(fgb "--query=${*:-}")
 
   # while IFS='' read -r branch_name; do
   #   selection="$branch_name"
-  # done < <(fgb "${*:-}")
+  # done < <(fgb "--query=${*:-}")
 
   echo "$selection"
 
@@ -520,11 +520,11 @@ fmerge () {
 
 fsa () {
   local selection
-  selection=$(fgs "${*:-}")
+  selection=$(fgs "--query=${*:-}")
 
   # while IFS='' read -r stash_ref; do
   #   selection="$stash_ref"
-  # done < <(fgb "${*:-}")
+  # done < <(fgs "--query=${*:-}")
 
   if [ -n "$selection" ]; then
     git stash apply "$selection"
