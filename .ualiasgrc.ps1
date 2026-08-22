@@ -522,8 +522,45 @@ function gwc () {
 
 function fwc () {
   $gitargs = $args
+  $bare_root = try {
+    & {
+      $ErrorActionPreference = 'SilentlyContinue'
+      get_bare_repository 2> $null
+    }
+  } catch {
+    ''
+  }
+  $bare_root = [string]$bare_root
+
+  # Regular repositories can only switch to worktrees that already exist.
+  if (!$bare_root -or !(Test-Path -LiteralPath $bare_root -PathType Container -ErrorAction SilentlyContinue)) {
+    try {
+      $null = git rev-parse --git-dir 2> $null
+    } catch {
+      return
+    }
+    if ($LASTEXITCODE -ne 0) { return }
+    With-UTF8 {
+      $worktree = [string](fgw '--no-multi' "--query=$gitargs")
+      if ($worktree) {
+        Set-Location -LiteralPath $worktree
+      }
+    }
+    return
+  }
+
+  $escaped_bare_root = $bare_root.Replace("'", "''")
+  $escaped_worktree_prefix = $__git_worktree_prefix.Replace('`', '``').Replace('"', '`"').Replace('$', '`$')
+  $remove_worktree = "`$branch = {2}; `$branch = `$branch -replace '^origin/', ''; `$worktree_path = Join-Path -Path '$escaped_bare_root' -ChildPath `"$escaped_worktree_prefix`$branch`"; git -C '$escaped_bare_root' worktree remove `$worktree_path > `$null 2>&1"
+  $fzf_args = @(
+    '--no-multi',
+    "--query=$gitargs",
+    '--header', 'CTRL-X (remove worktree)',
+    '--bind', "ctrl-x:execute-silent:$remove_worktree"
+  )
+
   With-UTF8 {
-    $branch_name = fgb "--query=$gitargs" | ForEach-Object {
+    $branch_name = fgb @fzf_args | ForEach-Object {
       # Clean branch name
       $_ -replace 'origin/', ''
     }

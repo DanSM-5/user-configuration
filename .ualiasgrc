@@ -327,13 +327,34 @@ gwc () {
 }
 
 fwc () {
-  local selection branch_name
+  local bare_root selection branch_name
+  local quoted_bare_root quoted_worktree_prefix remove_worktree
 
-  selection=$(fgb "--query=${*:-}")
+  bare_root="$(get_bare_repository 2>/dev/null)"
+
+  # Regular repositories can only switch to worktrees that already exist.
+  if [ -z "$bare_root" ] || [ ! -d "$bare_root" ]; then
+    git rev-parse --git-dir >/dev/null 2>&1 || return
+    selection=$(fgw --no-multi "--query=${*:-}")
+
+    if [ -n "$selection" ]; then
+      cd -- "$selection" || return
+    fi
+    return
+  fi
+
+  printf -v quoted_bare_root '%q' "$bare_root"
+  printf -v quoted_worktree_prefix '%q' "$__git_worktree_prefix"
+  remove_worktree="branch={2}; branch=\${branch#origin/}; git -C $quoted_bare_root worktree remove $quoted_worktree_prefix\"\$branch\" > /dev/null 2>&1"
+
+  selection=$(fgb --no-multi \
+    "--query=${*:-}" \
+    --header 'CTRL-X (remove worktree)' \
+    --bind "ctrl-x:execute-silent:$remove_worktree")
 
   # while IFS='' read -r branch; do
   #   selection="$branch"
-  # done < <(fgb "--query=${*:-}")
+  # done < <(fgb --no-multi "--query=${*:-}")
 
   if [ -z "$selection" ]; then
     return
