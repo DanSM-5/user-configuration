@@ -16,12 +16,79 @@ $__pager__ = if (Get-Command -Name delta -All -ErrorAction 0) { 'delta | ' } els
 
 $user_conf_path = if ($env:user_conf_path) { $env:user_conf_path } else { "$HOME/.usr_conf" }
 $path_preview_script = Join-Path $user_conf_path "utils/fzf-preview.ps1"
+$script:fzf_git_module_path = $PSCommandPath
 
 function __git_refs () {
   $format = '%(if:equals=refs/remotes)%(refname:rstrip=-2)%(then)%(color:magenta)remote-branch%(else)%(if:equals=refs/heads)%(refname:rstrip=-2)%(then)%(color:brightgreen)branch%(else)%(if:equals=refs/tags)%(refname:rstrip=-2)%(then)%(color:brightcyan)tag%(else)%(if:equals=refs/stash)%(refname:rstrip=-2)%(then)%(color:brightred)stash%(else)%(color:white)%(refname:rstrip=-2)%(end)%(end)%(end)%(end)%(color:reset)%09%(color:yellow)%(refname:short)%(color:reset)%09%(color:green)(%(creatordate:relative))%(color:reset)%09%(color:blue)%(subject)%(color:reset)'
   git for-each-ref @args `
     --sort=-creatordate --sort=-HEAD --color=always `
     "--format=$format"
+}
+
+function __git_status_path ([string]$line) {
+  if ($line.Length -le 3) { return '' }
+
+  $status = $line.Substring(0, 2)
+  $path = $line.Substring(3)
+  if ($status.Contains('R') -or $status.Contains('C')) {
+    $rename_index = $path.LastIndexOf(' -> ', [System.StringComparison]::Ordinal)
+    if ($rename_index -ge 0) {
+      $path = $path.Substring($rename_index + 4)
+    }
+  }
+
+  if ($path.Length -ge 2 -and $path[0] -eq '"' -and $path[$path.Length - 1] -eq '"') {
+    $path = $path.Substring(1, $path.Length - 2)
+    $path = $path -replace '\\(["\\])', '$1'
+  }
+
+  return $path
+}
+
+function __git_status_entries ([string[]]$pathspec = @()) {
+  $status_options = @('status', '--short', '--no-branch', '--untracked-files=all') + $pathspec
+  [string[]]$plain_lines = @(git -c core.quotePath=false -c status.relativePaths=true -c color.status=never @status_options)
+  [string[]]$colored_lines = @(git -c core.quotePath=false -c status.relativePaths=true -c color.status=always @status_options)
+
+  for ($index = 0; $index -lt $plain_lines.Count; $index++) {
+    $display = if ($index -lt $colored_lines.Count) { $colored_lines[$index] } else { $plain_lines[$index] }
+    [PSCustomObject]@{
+      Display = $display
+      Path = __git_status_path $plain_lines[$index]
+    }
+  }
+}
+
+function __git_files (
+  [ValidateSet('status', 'all', 'cwd')]
+  [string]$mode = 'status'
+) {
+  $pathspec = if ($mode -eq 'cwd') { @('--', '.') } else { @() }
+  $entries = @(__git_status_entries $pathspec)
+
+  foreach ($entry in $entries) {
+    "$($entry.Display)`t$($entry.Path)"
+  }
+
+  if ($mode -eq 'status') { return }
+
+  $changed_paths = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
+  foreach ($entry in $entries) {
+    $null = $changed_paths.Add($entry.Path)
+  }
+
+  $tracked_pathspec = if ($mode -eq 'cwd') {
+    @('--', '.')
+  } else {
+    @('--', [string](git rev-parse --show-toplevel))
+  }
+
+  [string[]]$tracked_files = @(git -c core.quotePath=false ls-files @tracked_pathspec)
+  foreach ($path in $tracked_files) {
+    if (-not $changed_paths.Contains($path)) {
+      "   $path`t$path"
+    }
+  }
 }
 
 function get_fzf_down_options() {
@@ -53,22 +120,15 @@ function fgf () {
   if (-not (is_in_git_repo)) { return }
 
   $query = "$args"
-  $preview_file = New-TemporaryFile
-  @"
-    if (Test-Path -Path `$args -PathType Leaf -ErrorAction SilentlyContinue) {
-      git diff --color=always -- `$args |
-        Select-Object -Skip 4 | $script:__pager__
-        bat -p --color=always;
-      Write-Output "";
-    }
-    $path_preview_script `$args;
-"@ > $preview_file.FullName
-
-  $preview = if ($IsWindows) {
-    "pwsh -NoProfile -NoLogo -NonInteractive -Command Invoke-Command -ScriptBlock ([scriptblock]::Create((Get-Content `""+ $preview_file.FullName + "`"))) -ArgumentList '{2..}'"
-  } else {
-    "pwsh -NoProfile -NoLogo -NonInteractive -Command 'Invoke-Command -ScriptBlock ([scriptblock]::Create((Get-Content `""+ $preview_file.FullName + "`"))) -ArgumentList {2..}'"
+  $repo_prefix = [string](git rev-parse --show-prefix)
+  $escaped_module_path = $script:fzf_git_module_path.Replace("'", "''")
+  $escaped_preview_script = $path_preview_script.Replace("'", "''")
+  $reload_files = "Import-Module '$escaped_module_path' -Force; __git_files"
+  $header = 'CTRL-F: All repository files | CTRL-R: Changed files'
+  if ($repo_prefix) {
+    $header += ' | CTRL-D: Current directory files'
   }
+  $preview = "if (Test-Path -LiteralPath {2} -PathType Leaf -ErrorAction SilentlyContinue) { git -c core.quotePath=false diff --color=always -- {2} | Select-Object -Skip 4 | $($script:__pager__)bat -p --color=always; Write-Output ''; }; & '$escaped_preview_script' {2}"
 
   $down_options = get_fzf_down_options
   $cmd_options = @(
@@ -77,24 +137,26 @@ function fgf () {
     "--history=$env:FZF_HIST_DIR/fzf-git_file",
     '--preview-window', '60%,wrap-word',
     '--ansi',
-    '--nth', '2..,..',
-    '--accept-nth', '2..',
+    '--delimiter', "`t",
+    '--with-nth', '1',
+    '--accept-nth', '2',
+    '--header', $header,
+    '--with-shell', 'pwsh -NoLogo -NoProfile -NonInteractive -Command',
+    '--bind', "ctrl-f:change-prompt(All Files> )+change-border-label()+reload:$reload_files all",
+    '--bind', "ctrl-r:change-prompt(Files> )+change-border-label()+reload:$reload_files status",
     '--preview', $preview
   )
 
-  try {
-    [string[]]$selected = git -c color.status=always status --short |
-      fzf @down_options @cmd_options | ForEach-Object {
-        $file_name = $_ -replace '.* -> ', '' # Remove old name when renaming
-        $file_name.Trim().Trim('"').Trim("'")
-      }
-
-    return $selected
-  } finally {
-    if (Test-Path -Path $preview_file.FullName -PathType Leaf -ErrorAction SilentlyContinue) {
-      Remove-Item -Force $preview_file.FullName
-    }
+  if ($repo_prefix) {
+    $cmd_options += @(
+      '--bind', "ctrl-d:change-prompt(Dir Files> )+transform-border-label(`$PWD.Path)+reload:$reload_files cwd"
+    )
   }
+
+  [string[]]$selected = __git_files status |
+    fzf @down_options @cmd_options
+
+  return $selected
 }
 
 function fgb () {

@@ -17,10 +17,83 @@ __git-refs () {
     --format='%(if:equals=refs/remotes)%(refname:rstrip=-2)%(then)%(color:magenta)remote-branch%(else)%(if:equals=refs/heads)%(refname:rstrip=-2)%(then)%(color:brightgreen)branch%(else)%(if:equals=refs/tags)%(refname:rstrip=-2)%(then)%(color:brightcyan)tag%(else)%(if:equals=refs/stash)%(refname:rstrip=-2)%(then)%(color:brightred)stash%(else)%(color:white)%(refname:rstrip=-2)%(end)%(end)%(end)%(end)%(color:reset)%09%(color:yellow)%(refname:short)%(color:reset)%09%(color:green)(%(creatordate:relative))%(color:reset)%09%(color:blue)%(subject)%(color:reset)'
 }
 
-if [[ $1 == --refs ]]; then
-  shift
-  __git-refs "$@"
-fi
+__git-status-path () {
+  local file_status="${1:0:2}"
+  local file_path="${1:3}"
+  case "$file_status" in
+    *R*|*C*) file_path="${file_path##* -> }" ;;
+  esac
+
+  if [[ $file_path == \"*\" ]]; then
+    file_path="${file_path#\"}"
+    file_path="${file_path%\"}"
+    printf '%b' "$file_path"
+  else
+    printf '%s' "$file_path"
+  fi
+}
+
+__git-files () {
+  local mode="${1:-status}"
+  local plain colored file_path root
+  local status_paths=''
+  local -a pathspec=()
+  local -a tracked_pathspec=()
+
+  case "$mode" in
+    status)
+      ;;
+    all)
+      root=$(git rev-parse --show-toplevel) || return
+      tracked_pathspec=(-- "$root")
+      ;;
+    cwd)
+      pathspec=(-- .)
+      tracked_pathspec=(-- .)
+      ;;
+    *)
+      return 2
+      ;;
+  esac
+
+  exec 3< <(
+    git -c core.quotePath=false -c status.relativePaths=true \
+      -c color.status=always status \
+      --short --no-branch --untracked-files=all "${pathspec[@]}"
+  )
+  while IFS= read -r plain; do
+    if ! IFS= read -r colored <&3; then
+      colored="$plain"
+    fi
+    file_path=$(__git-status-path "$plain")
+    status_paths+="$file_path"$'\n'
+    printf '%s\t%s\n' "$colored" "$file_path"
+  done < <(
+    git -c core.quotePath=false -c status.relativePaths=true \
+      -c color.status=never status \
+      --short --no-branch --untracked-files=all "${pathspec[@]}"
+  )
+  exec 3<&-
+
+  [[ $mode == status ]] && return
+
+  git -c core.quotePath=false ls-files "${tracked_pathspec[@]}" |
+    grep -vxFf <(printf '%s' "$status_paths") |
+    while IFS= read -r file_path; do
+      printf '   %s\t%s\n' "$file_path" "$file_path"
+    done
+}
+
+case "${1:-}" in
+  --refs)
+    shift
+    __git-refs "$@"
+    ;;
+  --files)
+    shift
+    __git-files "$@"
+    ;;
+esac
 
 is_in_git_repo () {
   git rev-parse HEAD > /dev/null 2>&1
@@ -57,23 +130,41 @@ fgf () {
   is_in_git_repo || return
   local INITIAL_QUERY="${*:-}"
   local path_preview_script="${user_conf_path:-"$HOME/.usr_conf"}/utils/fzf-preview.sh"
-  git -c color.status=always status --short |
-  fzf-down --ansi --nth 2..,.. \
-    --accept-nth '2..' \
+  local repo_prefix header
+  local reload_base="bash \"$SCRIPT_PATH\" --files status"
+  local reload_all="bash \"$SCRIPT_PATH\" --files all"
+  local reload_cwd="bash \"$SCRIPT_PATH\" --files cwd"
+  local -a directory_options=()
+
+  repo_prefix=$(git rev-parse --show-prefix) || return
+  header='CTRL-F: All repository files | CTRL-R: Changed files'
+  if [[ -n $repo_prefix ]]; then
+    header+=' | CTRL-D: Current directory files'
+    directory_options=(
+      --bind "ctrl-d:change-prompt(Dir Files> )+transform-border-label(pwd)+reload:$reload_cwd"
+    )
+  fi
+
+  __git-files status |
+  fzf-down --ansi \
+    --delimiter=$'\t' \
+    --with-nth 1 \
+    --accept-nth 2 \
     --query "$INITIAL_QUERY" \
     "--history=$FZF_HIST_DIR/fzf-git_file" \
     --preview-window '60%,wrap-word' \
     --prompt 'Files> ' \
-    --preview "selected=\$(printf '%s' {2..} | sed 's/^\"//' | sed 's/\"$//') ;
-      if [ -f \"\$selected\" ]; then
-        git diff --color=always -- \"\$selected\"""$__page_command__"' |
+    --header "$header" \
+    --bind "ctrl-f:change-prompt(All Files> )+change-border-label()+reload:$reload_all" \
+    --bind "ctrl-r:change-prompt(Files> )+change-border-label()+reload:$reload_base" \
+    "${directory_options[@]}" \
+    --preview "if [ -f {2} ]; then
+        git diff --color=always -- {2}$__page_command__ |
           sed 1,4d |
           bat -p --color=always
         printf "\n" ;
       fi
-      '"$path_preview_script"' "$selected"' |
-  sed 's/.* -> //'
-  # --preview '(git diff --color=always -- {-1} | sed 1,4d | bat -p --color=always; cat {-1})' |
+      \"$path_preview_script\" {2}"
 }
 
 fgb () {
