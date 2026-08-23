@@ -597,16 +597,17 @@ fge () {
       --nth 2,2.. \
       --tiebreak begin \
       --prompt 'Each ref> ' \
+      --header 'CTRL-O (open in browser)' \
       --header-lines 1 \
       --preview-window down,border-top,40% \
       --color hl:underline,hl+:underline \
       --no-hscroll \
       --bind 'ctrl-/:change-preview-window(down,70%|hidden|)' \
+      --bind 'ctrl-o:execute-silent(git-resolve-ref --open {1} {2})' \
       --bind "ctrl-f:change-prompt(Every ref> )+reload:bash \"$SCRIPT_PATH\" --refs" \
       --bind "ctrl-r:change-prompt(Each ref> )+reload:bash \"$SCRIPT_PATH\" --refs --exclude=refs/remotes" \
       --preview "git log --oneline --graph --date=short --color=always --pretty='format:%C(auto)%cd %h%d %s'$git_log_options {2} --" \
       --accept-nth 2 \
       "$@"
-      # --bind "ctrl-o:execute-silent:bash \"$__fzf_git\" --list {1} {2}" \
       # --bind "alt-enter:become:printf '%s\n' {+2} | sed 's@[^/]*/@@'" \
 }
