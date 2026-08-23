@@ -201,7 +201,29 @@ is_in_git_repo () {
   git rev-parse HEAD > /dev/null 2>&1
 }
 
+__fzfgit-help-command () {
+  local function_bindings="${1:-}"
+  local help_cat_cmd='cat'
+  local help_text quoted_help
+
+  if command -v bat &>/dev/null; then
+    help_cat_cmd='bat --color=always --language help --style=plain'
+  fi
+
+  help_text=$'\n  Preview window keys:\n    alt-h: Show this help\n    ctrl-^: Toggle preview\n    ctrl-/: Toggle preview position\n    ctrl-s: Toggle sort\n    shift-up: Preview up\n    shift-down: Preview down\n    alt-up: Preview page up\n    alt-down: Preview page down\n\n  Cursor keys:\n    alt-a: Select all\n    alt-d: Deselect all\n    alt-f: Go to first item\n    alt-l: Go to last item\n    alt-c: Clear query'
+  if [[ -n $function_bindings ]]; then
+    help_text+=$'\n\n  Function keys:\n'
+    help_text+="$function_bindings"
+  fi
+
+  printf -v quoted_help '%q' "$help_text"
+  printf '%s <<< %s' "$help_cat_cmd" "$quoted_help"
+}
+
 fzf-down () {
+  local help_cmd
+  help_cmd=$(__fzfgit-help-command "${FZFGIT_HELP:-}")
+
   fzf --height 80% \
     --min-height 20 \
     --input-border \
@@ -219,6 +241,7 @@ fzf-down () {
     --bind 'alt-up:preview-page-up' \
     --bind 'alt-down:preview-page-down' \
     --bind 'ctrl-s:toggle-sort' \
+    --bind "alt-h:preview:$help_cmd" \
     --border "$@"
 }
 
@@ -231,7 +254,7 @@ fi
 fgf () {
   is_in_git_repo || return
   local path_preview_script="${user_conf_path:-"$HOME/.usr_conf"}/utils/fzf-preview.sh"
-  local repo_prefix header git_diff_options
+  local repo_prefix header git_diff_options FZFGIT_HELP
   local reload_base="bash \"$SCRIPT_PATH\" --files status"
   local reload_all="bash \"$SCRIPT_PATH\" --files all"
   local reload_cwd="bash \"$SCRIPT_PATH\" --files cwd"
@@ -244,8 +267,10 @@ fgf () {
 
   repo_prefix=$(git rev-parse --show-prefix) || return
   header='CTRL-F: All repository files | CTRL-R: Changed files'
+  FZFGIT_HELP=$'    ctrl-f: Show all repository files\n    ctrl-r: Show changed files'
   if [[ -n $repo_prefix ]]; then
     header+=' | CTRL-D: Current directory files'
+    FZFGIT_HELP+=$'\n    ctrl-d: Show files in the current directory'
     directory_options=(
       --bind "ctrl-d:change-prompt(Dir Files> )+transform-border-label(pwd)+reload:$reload_cwd"
     )
@@ -429,7 +454,7 @@ fgs () {
 fshow () {
   git rev-parse HEAD > /dev/null 2>&1 || return
 
-  local git_log_options git_show_options git_diff_options
+  local git_log_options git_show_options git_diff_options FZFGIT_HELP
   local -a git_log_args=()
   local -a git_show_args=()
   local -a git_diff_args=()
@@ -493,6 +518,7 @@ fshow () {
   local git_base_cmd="git log --graph --color=always --format='%C(auto)%h%d %s %C(black)%C(bold)%cr%C(reset)%x09%h'"
   local git_current_cmd="$git_base_cmd$git_log_options"
   local git_all_cmd="$git_base_cmd --all$git_log_options"
+  FZFGIT_HELP=$'    enter: Show selected commit patches\n    ctrl-d: Diff selected commits\n    ctrl-a: Show commits from all refs\n    ctrl-f: Show commits from HEAD\n    ctrl-y: Copy selected commit hashes'
 
   # Find clipboard utility
   local copy='true'
@@ -530,7 +556,7 @@ fshow () {
 }
 
 fgl () {
-  local git_show_options
+  local git_show_options FZFGIT_HELP
   local -a git_reflog_args=()
   local -a git_show_args=()
 
@@ -539,6 +565,7 @@ fgl () {
   __fzfgit-parse-env "${FZFGIT_GIT_SHOW:-}" || return
   git_show_args=("${__fzfgit_parsed_args[@]}")
   git_show_options=$(__fzfgit-shell-join "${git_show_args[@]}")
+  FZFGIT_HELP=$'    alt-r: Toggle raw reflog display'
 
   git reflog --color=always \
     --format="%C(blue)%gD %C(yellow)%h%C(auto)%d %gs" \
@@ -551,7 +578,7 @@ fgl () {
 }
 
 fgw () {
-  local git_worktree_options git_status_options git_log_options
+  local git_worktree_options git_status_options git_log_options FZFGIT_HELP
   local -a git_worktree_args=()
   local -a git_status_args=()
   local -a git_log_args=()
@@ -565,6 +592,7 @@ fgw () {
   __fzfgit-parse-env "${FZFGIT_GIT_LOG:-}" || return
   git_log_args=("${__fzfgit_parsed_args[@]}")
   git_log_options=$(__fzfgit-shell-join "${git_log_args[@]}")
+  FZFGIT_HELP=$'    ctrl-x: Remove selected worktree\n    alt-t: Toggle displayed columns'
 
   # --border-label '🌴 Worktrees ' \
   git worktree list "${git_worktree_args[@]}" |
@@ -583,12 +611,13 @@ fgw () {
 }
 
 fge () {
-  local git_log_options
+  local git_log_options FZFGIT_HELP
   local -a git_log_args=()
 
   __fzfgit-parse-env "${FZFGIT_GIT_LOG:-}" || return
   git_log_args=("${__fzfgit_parsed_args[@]}")
   git_log_options=$(__fzfgit-shell-join "${git_log_args[@]}")
+  FZFGIT_HELP=$'    ctrl-o: Open selected ref in browser\n    ctrl-f: Show every ref\n    ctrl-r: Hide remote branches'
 
   __git-refs --exclude=refs/remotes |
     fzf-down \

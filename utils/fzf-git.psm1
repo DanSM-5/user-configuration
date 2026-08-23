@@ -187,7 +187,42 @@ function __git_files (
   }
 }
 
-function get_fzf_down_options() {
+function __fzfgit_help_command ([string[]]$FunctionBindings = @()) {
+  [string[]]$help_lines = @(
+    '',
+    '  Preview window keys:',
+    '    alt-h: Show this help',
+    '    ctrl-^: Toggle preview',
+    '    ctrl-/: Toggle preview position',
+    '    ctrl-s: Toggle sort',
+    '    shift-up: Preview up',
+    '    shift-down: Preview down',
+    '    alt-up: Preview page up',
+    '    alt-down: Preview page down',
+    '',
+    '  Cursor keys:',
+    '    alt-a: Select all',
+    '    alt-d: Deselect all',
+    '    alt-f: Go to first item',
+    '    alt-l: Go to last item',
+    '    alt-c: Clear query'
+  )
+  if ($FunctionBindings.Count -gt 0) {
+    $help_lines += @('', '  Function keys:')
+    $help_lines += @($FunctionBindings | ForEach-Object { "    $_" })
+  }
+
+  $help_text = ($help_lines -join "`n").Replace("'", "''")
+  $help_cat_cmd = if (Get-Command -Name bat -ErrorAction SilentlyContinue) {
+    ' | bat --color=always --language help --style=plain'
+  } else {
+    ''
+  }
+  return "Write-Output '$help_text'$help_cat_cmd"
+}
+
+function get_fzf_down_options([string[]]$FunctionBindings = @()) {
+  $help_cmd = __fzfgit_help_command $FunctionBindings
   $options = @(
     '--height', '80%',
     '--min-height', '20',
@@ -206,7 +241,9 @@ function get_fzf_down_options() {
     '--bind', 'ctrl-^:toggle-preview',
     '--bind', 'alt-up:preview-page-up',
     '--bind', 'alt-down:preview-page-down',
-    '--bind', 'ctrl-s:toggle-sort'
+    '--bind', 'ctrl-s:toggle-sort',
+    '--bind', "alt-h:preview:$help_cmd",
+    '--with-shell', 'pwsh -NoLogo -NoProfile -NonInteractive -Command'
   )
 
   return $options
@@ -225,9 +262,16 @@ function fgf () {
   if ($repo_prefix) {
     $header += ' | CTRL-D: Current directory files'
   }
+  [string[]]$help_bindings = @(
+    'ctrl-f: Show all repository files',
+    'ctrl-r: Show changed files'
+  )
+  if ($repo_prefix) {
+    $help_bindings += 'ctrl-d: Show files in the current directory'
+  }
   $preview = "if (Test-Path -LiteralPath {2} -PathType Leaf -ErrorAction SilentlyContinue) { git -c core.quotePath=false diff --color=always$git_diff_options -- {2} | Select-Object -Skip 4 | $($script:__pager__)bat -p --color=always; Write-Output ''; }; & '$escaped_preview_script' {2}"
 
-  $down_options = get_fzf_down_options
+  $down_options = get_fzf_down_options -FunctionBindings $help_bindings
   $cmd_options = @(
     '--prompt', 'Files> ',
     "--history=$env:FZF_HIST_DIR/fzf-git_file",
@@ -471,7 +515,13 @@ function fshow () {
   $git_base_cmd = "git log --graph --color=always --format='%C(auto)%h%d %s %C(black)%C(bold)%cr%C(reset)%x09%h'"
   $git_current_cmd = "$git_base_cmd$git_log_options"
   $git_all_cmd = "$git_base_cmd --all$git_log_options"
-  $down_options = get_fzf_down_options
+  $down_options = get_fzf_down_options -FunctionBindings @(
+    'enter: Show selected commit patches',
+    'ctrl-d: Diff selected commits',
+    'ctrl-a: Show commits from all refs',
+    'ctrl-f: Show commits from HEAD',
+    'ctrl-y: Copy selected commit hashes'
+  )
   $cmd_options = @(
     "--history=$env:FZF_HIST_DIR/fzf-git_show",
     '--prompt', 'Commits> ',
@@ -502,7 +552,9 @@ function fgl () {
   [string[]]$git_reflog_args = @(__fzfgit_env_args $env:FZFGIT_GIT_REFLOG)
   [string[]]$git_show_args = @(__fzfgit_env_args $env:FZFGIT_GIT_SHOW)
   $git_show_options = __fzfgit_pwsh_join $git_show_args
-  $down_options = get_fzf_down_options
+  $down_options = get_fzf_down_options -FunctionBindings @(
+    'alt-r: Toggle raw reflog display'
+  )
   $cmd_options = @(
     '--ansi',
     '--prompt', 'Reflogs> ',
@@ -532,7 +584,10 @@ git -c color.status=always -C {1} status --short --branch$git_status_options
 Write-Output ''
 git log --oneline --graph --date=short --color=always '--pretty=format:%C(auto)%cd%x20%h%d%x20%s'$git_log_options {2} --
 "@
-  $down_options = get_fzf_down_options
+  $down_options = get_fzf_down_options -FunctionBindings @(
+    'ctrl-x: Remove selected worktree',
+    'alt-t: Toggle displayed columns'
+  )
   $cmd_options = @(
     '--prompt', 'Worktrees> ',
     '--header', 'CTRL-X (remove worktree) | ALT-T ',
@@ -574,7 +629,11 @@ __git_refs @args
   $escaped_refs_script = $refs_script.Replace("'", "''")
   $reload_refs = "& '$escaped_refs_script'"
   $preview = "git log --oneline --graph --date=short --color=always '--pretty=format:%C(auto)%cd%x20%h%d%x20%s'$git_log_options {2} --"
-  $down_options = get_fzf_down_options
+  $down_options = get_fzf_down_options -FunctionBindings @(
+    'ctrl-o: Open selected ref in browser',
+    'ctrl-f: Show every ref',
+    'ctrl-r: Hide remote branches'
+  )
   $cmd_options = @(
     '--ansi',
     '--delimiter', "`t",
