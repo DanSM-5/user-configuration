@@ -2400,7 +2400,7 @@ rupdate () {
     printf "%s\n" "Repo: $repo"
     printf "%s\n" "Remote: $(git -C "$repo" remote -v | awk 'NR == 1 {print $2}')"
     git -C "$repo" fetch
-    git -C "$repo" pull --rebase
+    git -C "$repo" pull --rebase || git -C "$repo" pull
     git -C "$repo" submodule update --init --recursive
 
   done < <(

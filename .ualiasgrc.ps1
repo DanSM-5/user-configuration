@@ -1931,7 +1931,7 @@ function rupdate () {
     $remote = (((git -C $repo remote -v)[0]).Split())[1]
     Write-Output "Remote: $remote"
     git -C $repo fetch
-    git -C $repo pull --rebase
+    git -C $repo pull --rebase || git -C $repo pull
     git -C $repo submodule update --init --recursive
   }
 }
