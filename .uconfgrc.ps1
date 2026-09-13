@@ -37,6 +37,7 @@ $VISUAL = $env:VISUAL
 $PREFERRED_EDITOR = $env:PREFERRED_EDITOR
 # Sets theme to use in bat
 $env:BAT_THEME = 'OneHalfDark'
+$env:MCAT_THEME = 'one-dark'
 
 if ((Test-Command oh-my-posh) -and (Test-Path "${HOME}${dirsep}omp-theme")) {
   # Import-Module oh-my-posh
