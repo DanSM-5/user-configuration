@@ -338,6 +338,7 @@ if ($IsWindows) {
   $env:PATHEXT += ";.js;.ts" # javascript (ts when node strips type hints)
   $env:PATHEXT += ";.cs" # Requires setting dotnetrun.bat in windows
   $env:PATHEXT += ";.go" # Requires setting gorun.bat in windows
+  $env:PATHEXT += ";.ps1" # If powershell does not do that already
 
   # Delete word behind cursor
   Set-PSReadLineKeyHandler -Chord ctrl-backspace -Function BackwardDeleteWord
