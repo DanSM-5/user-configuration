@@ -2026,16 +2026,19 @@ if ($IsWindows) {
 }
 
 function cprev () {
-  $img_path = ("$(pbpaste)").Trim()
+  With-UTF8 {
+    $img_path = Get-Clipboard
+    $img_path = $img_path.Trim()
 
-  if ( -not "$img_path" ) {
-    Write-Output 'No file provided'
-    return
+    if ( -not $img_path ) {
+      Write-Output 'No file provided'
+      return
+    }
+
+    Write-Output $img_path
+    chafa -f sixels --colors=full --polite=on --animate=off $img_path
+    copy-file "$img_path"
   }
-
-  Write-Output $img_path
-  chafa -f sixels --colors=full --polite=on --animate=off $img_path
-  copy-file "$img_path"
 }
 
 function config () {
