@@ -398,7 +398,7 @@ Set-PSReadLineKeyHandler -Chord 'ctrl+o,p' -ScriptBlock {
   # Add gsudo !! command
   $gsudoPrefix = scoop prefix gsudo 2> $null
   $script:gsudoModule = "$gsudoPrefix/gsudoModule.psd1"
-  if ($gsudoPrefix -and (Test-Path "$script:gsudoModule")) {
+  if ($gsudoPrefix -and (Test-Path "$script:gsudoModule" -ErrorAction SilentlyContinue)) {
     Import-Module "$script:gsudoModule"
     if (Test-Path Alias:sudo) { Remove-Item Alias:sudo }
     Set-Alias -Name sudo -Value gsudo
