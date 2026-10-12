@@ -396,7 +396,7 @@ Set-PSReadLineKeyHandler -Chord 'ctrl+o,p' -ScriptBlock {
 # Commented test for scoop as it is unlikely to not be installed on windows
 # if (Test-Command scoop) {
   # Add gsudo !! command
-  $gsudoPrefix = scoop prefix gsudo 2> $null
+  $gsudoPrefix = scoop prefix gsudo 6> $null
   $script:gsudoModule = "$gsudoPrefix/gsudoModule.psd1"
   if ($gsudoPrefix -and (Test-Path "$script:gsudoModule" -ErrorAction SilentlyContinue)) {
     Import-Module "$script:gsudoModule"
