@@ -396,12 +396,14 @@ Set-PSReadLineKeyHandler -Chord 'ctrl+o,p' -ScriptBlock {
 # Commented test for scoop as it is unlikely to not be installed on windows
 # if (Test-Command scoop) {
   # Add gsudo !! command
-  $script:gsudoModule = "$(scoop prefix gsudo)/gsudoModule.psd1"
-  if (Test-Path "$script:gsudoModule") {
+  $gsudoPrefix = scoop prefix gsudo 2> $null
+  $script:gsudoModule = "$gsudoPrefix/gsudoModule.psd1"
+  if ($gsudoPrefix -and (Test-Path "$script:gsudoModule")) {
     Import-Module "$script:gsudoModule"
     if (Test-Path Alias:sudo) { Remove-Item Alias:sudo }
     Set-Alias -Name sudo -Value gsudo
   }
+  Remove-Variable gsudoPrefix
 # }
 } elseif ($IsMacOS) {
   # Polifyl for some functions
