@@ -2309,7 +2309,8 @@ lfcd () {
 # cd when exit yazi
 yzcd () {
   if command -v yazi &> /dev/null; then
-    local temporary_file="$(mktemp)"
+    local temporary_file
+    temporary_file="$(mktemp)"
     trap "rm -rf -- '$temporary_file' &>/dev/null" EXIT
     # `command` is needed in case `lfcd` is aliased to `lf`
     local path_on_exit

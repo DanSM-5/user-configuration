@@ -322,8 +322,8 @@ if (Test-Command 'yazi') {
     yazi --cwd-file "$temporary_file" @args
     $cdpath = Get-Content "$temporary_file"
 
-    if (Test-Path -Path $cdpath -PathType Container -ErrorAction SilentlyContinue) {
-      Set-Location $cdpath
+    if (Test-Path -LiteralPath $cdpath -PathType Container -ErrorAction SilentlyContinue) {
+      Set-Location -LiteralPath $cdpath
     } else {
       $cdpath
     }
