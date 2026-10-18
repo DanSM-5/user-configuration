@@ -2376,9 +2376,9 @@ grs () {
 
 padd () {
   mkdr "$HOME/projects"
-  pushd "$HOME/projects" || return
+  pushd "$HOME/projects" &>/dev/null || return
   git clone "$@"
-  popd || return
+  popd &>/dev/null || return
 }
 
 padb () {

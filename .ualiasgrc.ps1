@@ -1899,9 +1899,9 @@ function grs () {
 
 function padd () {
   mkdr "$HOME/projects"
-  Push-Location "$HOME/projects"
+  Push-Location "$HOME/projects" *> $null
   git clone @args
-  Pop-Location
+  Pop-Location *> $null
 }
 
 function padb () {
