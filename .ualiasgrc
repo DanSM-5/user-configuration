@@ -1335,7 +1335,7 @@ yfd () {
 
 play () {
   local url
-  url="$("$clipboard_paste" | trim)"
+  url="$(clip-paste | trim)"
   if [ -z "$url" ]; then
     echo "No url in clipboard"
     return 1
@@ -1365,7 +1365,7 @@ play () {
 
 plpp () {
   local url
-  url="$("$clipboard_paste")"
+  url="$(clip-paste)"
   if [ -z "$url" ]; then
     echo "No url in clipboard"
     return 1
@@ -1375,7 +1375,7 @@ plpp () {
 
 tplay () {
   local url
-  url="$("$clipboard_paste" | trim)"
+  url="$(clip-paste | trim)"
   if [ -z "$url" ]; then
     echo "No url in clipboard"
     return 1

@@ -1337,102 +1337,108 @@ function mpvp () {
 }
 
 function plpp () {
-  $url = "$(pbpaste)"
+  With-UTF8 {
+    $url = clip-paste
 
-  if ( -not "$url" ) {
-    Write-Output "Invalid url"
-    return
+    if ( -not "$url" ) {
+      Write-Output "Invalid url"
+      return
+    }
+
+    $url = $url.Trim()
+
+    mpvp "$url" @args
   }
-
-  $url = $url.Trim()
-
-  mpvp "$url" @args
 }
 
 function play () {
-  $url = "$(pbpaste)"
+  With-UTF8 {
+    $url = clip-paste
 
-  if ( -not "$url" ) {
-    Write-Output "Invalid url"
-    return
-  }
-
-  $url = $url.Trim()
-  Write-Output "Playing: $url"
-
-  if (
-    "$url".contains('.torrent')
-  ) {
-    toru stream --torrent "$url" @args
-    return
-  }
-
-  if (
-    "$url".contains('magnet:')
-  ) {
-    toru stream --magnet "$url" @args
-    return
-  }
-
-  if (
-    # "$url".contains('.torrent') -or
-    # "$url".contains('magnet:') -or
-    "$url".contains('webtorrent://') -or
-    "$url".contains('peerflix://')
-  ) {
-    if ($args) {
-      webtorrent --mpv "$url" @args
-    } else {
-      webtorrent --mpv "$url"
+    if ( -not "$url" ) {
+      Write-Output "Invalid url"
+      return
     }
-    return
-  }
 
-  # Let mpv handle the url
-  mpv "$url" @args
+    $url = $url.Trim()
+    Write-Output "Playing: $url"
+
+    if (
+      "$url".contains('.torrent')
+    ) {
+      toru stream --torrent "$url" @args
+      return
+    }
+
+    if (
+      "$url".contains('magnet:')
+    ) {
+      toru stream --magnet "$url" @args
+      return
+    }
+
+    if (
+      # "$url".contains('.torrent') -or
+      # "$url".contains('magnet:') -or
+      "$url".contains('webtorrent://') -or
+      "$url".contains('peerflix://')
+    ) {
+      if ($args) {
+        webtorrent --mpv "$url" @args
+      } else {
+        webtorrent --mpv "$url"
+      }
+      return
+    }
+
+    # Let mpv handle the url
+    mpv "$url" @args
+  }
 }
 
 function tplay ([Switch] $limit) {
-  $url = "$(pbpaste)"
+  With-UTF8 {
+    $url = clip-paste
 
-  if (-not $url) {
-    Write-Output "No url"
-    return
-  }
+    if (-not $url) {
+      Write-Output "No url"
+      return
+    }
 
-  $url = $url.Trim()
-  Write-Output "Playing: $url"
+    $url = $url.Trim()
+    Write-Output "Playing: $url"
 
-  if (
-    "$url".contains('.torrent')
-  ) {
-    toru stream --torrent "$url" @args
-    return
-  }
+    if (
+      "$url".contains('.torrent')
+    ) {
+      toru stream --torrent "$url" @args
+      return
+    }
 
-  if (
-    "$url".contains('magnet:')
-  ) {
-    toru stream --magnet "$url" @args
-    return
-  }
+    if (
+      "$url".contains('magnet:')
+    ) {
+      toru stream --magnet "$url" @args
+      return
+    }
 
-  # For webtorrent only
-  $webtorrent_args = @()
+    # For webtorrent only
+    $webtorrent_args = @()
 
-  if ($limit) {
-    $webtorrent_args += '-u'
-    $webtorrent_args += 1
-  }
+    if ($limit) {
+      $webtorrent_args += '-u'
+      $webtorrent_args += 1
+    }
 
-  foreach ($wa in $args) {
-    $webtorrent_args += $wa
-  }
+    foreach ($wa in $args) {
+      $webtorrent_args += $wa
+    }
 
-  if ($webtorrent_args) {
-    webtorrent --mpv "$url" @webtorrent_args
-  } else {
-    webtorrent --mpv "$url"
+    if ($webtorrent_args) {
+      webtorrent --mpv "$url" @webtorrent_args
+    } else {
+      webtorrent --mpv "$url"
+    }
   }
 }
 
