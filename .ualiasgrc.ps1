@@ -1391,6 +1391,25 @@ function play () {
       return
     }
 
+    if ("$url".Contains('tiktok')) {
+      $TempDir = New-TemporaryFile
+      Remove-Item $TempDir -Force
+      New-Item -ItemType Directory -Path $TempDir.FullName *> $null
+      try {
+        Write-Output "Temp: $TempDir"
+        
+        yt-dlp --paths $TempDir.FullName @args "$url"
+
+        [string[]] $files = Get-ChildItem -LiteralPath $TempDir.FullName | ForEach-Object {
+          if ($_) { return $_.FullName }
+        }
+
+        mpv @files
+      } finally {
+        Remove-Item -LiteralPath $TempDir -Force -Recurse -ErrorAction SilentlyContinue
+      }
+    }
+
     # Let mpv handle the url
     mpv "$url" @args
   }

@@ -1360,6 +1360,29 @@ play () {
     return 0
   fi
 
+  if [[ "$url" =~ .*tiktok.* ]]; then
+
+    temp_dir="$(mktemp --directory)"
+    mkdir -pv "$temp_dir"
+    trap "rm -rf '$temp_dir'" EXIT
+    printf 'Temp: %s\n' "$temp_dir"
+
+    yt-dlpw --paths "$temp_dir" "$@" "$url" 
+
+    files=()
+    while IFS= read -r -d '' file; do
+        files+=("$file")
+    done < <(fd -tf -d 1 -0 '.' "$temp_dir")
+
+    if [ -z "${files[*]}" ]; then
+      return 0
+    fi
+
+    mpvw "${files[@]}"
+
+    return 0
+  fi
+
   mpvw "$url" "$@"
 }
 
