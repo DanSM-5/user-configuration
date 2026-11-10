@@ -299,17 +299,97 @@ function fgf () {
   return $selected
 }
 
+# Fields: <display> TAB <short refname> TAB <full refname>
+function __git_branches (
+  [ValidateSet('all', 'local')]
+  [string]$mode = 'all'
+) {
+  [string[]]$git_branch_args = @(__fzfgit_env_args $env:FZFGIT_GIT_BRANCH)
+  [string[]]$scope = if ($mode -eq 'local') { @() } else { @('-a') }
+  $branch_format = '%(if)%(symref)%(then)%(else)%(if)%(HEAD)%(then)%(color:green)%(else)%(if:equals=refs/remotes)%(refname:rstrip=-2)%(then)%(color:red)%(end)%(end)%(HEAD) %(if:equals=refs/remotes)%(refname:rstrip=-2)%(then)remotes/%(refname:short)%(else)%(refname:short)%(end)%(color:reset)%09%(refname:short)%09%(refname)%(end)'
+
+  git branch @scope --color=always --omit-empty --sort=refname "--format=$branch_format" @git_branch_args
+}
+
+# The current fgb mode is tracked through the prompt (FZF_PROMPT)
+function __git_branches_mode () {
+  if ("$env:FZF_PROMPT" -like 'Local*') { return 'local' } else { return 'all' }
+}
+
+function __git_branches_reload_action ([string]$mode) {
+  $escaped_module_path = $script:fzf_git_module_path.Replace("'", "''")
+  return "reload:Import-Module '$escaped_module_path' -Force; __git_branches $mode"
+}
+
+# Prints the fzf actions for the remote branches toggle
+function __git_branches_toggle () {
+  if ((__git_branches_mode) -eq 'local') {
+    return "change-footer()+change-prompt(Branches> )+$(__git_branches_reload_action all)"
+  }
+  return "change-footer()+change-prompt(Local branches> )+$(__git_branches_reload_action local)"
+}
+
+# Force deletes the given local branches (full refnames) and prints the fzf
+# actions to report the result. Refuses when the working tree is dirty.
+function __git_branches_delete () {
+  [string[]]$refs = @($args)
+
+  if (git status --porcelain --untracked-files=no 2> $null) {
+    return 'bell+change-footer~Working tree is dirty, refusing to delete branches~'
+  }
+
+  $current = [string](git symbolic-ref --quiet --short HEAD 2> $null)
+  $deleted = [System.Collections.Generic.List[string]]::new()
+  $skipped = [System.Collections.Generic.List[string]]::new()
+  $failed = [System.Collections.Generic.List[string]]::new()
+
+  foreach ($ref in $refs) {
+    if (-not $ref.StartsWith('refs/heads/')) {
+      $skipped.Add("$($ref -replace '^refs/remotes/', '') (remote)")
+      continue
+    }
+    $branch = $ref.Substring('refs/heads/'.Length)
+    if ($branch -eq $current) {
+      $skipped.Add("$branch (current)")
+      continue
+    }
+    git branch -D $branch *> $null
+    if ($LASTEXITCODE -eq 0) { $deleted.Add($branch) } else { $failed.Add($branch) }
+  }
+
+  [string[]]$parts = @()
+  if ($deleted.Count) { $parts += "Deleted: $($deleted -join ', ')" }
+  if ($failed.Count) { $parts += "Failed: $($failed -join ', ')" }
+  if ($skipped.Count) { $parts += "Skipped: $($skipped -join ', ')" }
+  $message = ($parts -join '  ').Replace('~', '')
+
+  $action = "change-footer~$message~"
+  if ($deleted.Count) {
+    return "$action+$(__git_branches_reload_action (__git_branches_mode))"
+  }
+  return "bell+$action"
+}
+
 function fgb () {
   if (-not (is_in_git_repo)) { return }
 
-  [string[]]$git_branch_args = @(__fzfgit_env_args $env:FZFGIT_GIT_BRANCH)
+  # Validate early so a bad value aborts before opening fzf
+  $null = __fzfgit_env_args $env:FZFGIT_GIT_BRANCH
   [string[]]$git_log_args = @(__fzfgit_env_args $env:FZFGIT_GIT_LOG)
   $git_log_options = __fzfgit_pwsh_join $git_log_args
-  $branch_format = '%(if)%(symref)%(then)%(else)%(if)%(HEAD)%(then)%(color:green)%(else)%(if:equals=refs/remotes)%(refname:rstrip=-2)%(then)%(color:red)%(end)%(end)%(HEAD) %(if:equals=refs/remotes)%(refname:rstrip=-2)%(then)remotes/%(refname:short)%(else)%(refname:short)%(end)%(color:reset)%09%(refname:short)%(end)'
+  $escaped_module_path = $script:fzf_git_module_path.Replace("'", "''")
+  $import_module = "Import-Module '$escaped_module_path' -Force"
   $preview = "git log --oneline --graph --date=short --color=always '--pretty=format:%C(auto)%cd%x20%h%d%x20%s'$git_log_options {2}"
-  $down_options = get_fzf_down_options
+  [string[]]$help_bindings = @(
+    'ctrl-r: Toggle remote branches',
+    'ctrl-x: Delete selected local branches (git branch -D, clean worktree only)'
+  )
+  $down_options = get_fzf_down_options -FunctionBindings $help_bindings
   $cmd_options = @(
     '--prompt', 'Branches> ',
+    '--header', 'CTRL-R: Toggle remotes | CTRL-X: Delete branch',
+    '--bind', "ctrl-r:transform:$import_module; __git_branches_toggle",
+    '--bind', "ctrl-x:transform:$import_module; __git_branches_delete {+3}",
     "--history=$env:FZF_HIST_DIR/fzf-git_branch",
     '--ansi',
     '--tac',
@@ -321,7 +401,7 @@ function fgb () {
     '--preview', $preview
   )
 
-  [string[]]$selected = git branch -a --color=always --omit-empty --sort=refname "--format=$branch_format" @git_branch_args |
+  [string[]]$selected = __git_branches all |
     fzf @down_options @cmd_options @args
 
   return $selected

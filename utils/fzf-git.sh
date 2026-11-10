@@ -186,6 +186,83 @@ __git-files () {
     done
 }
 
+# Fields: <display> TAB <short refname> TAB <full refname>
+__git-branches () {
+  local mode="${1:-all}"
+  local branch_format='%(if)%(symref)%(then)%(else)%(if)%(HEAD)%(then)%(color:green)%(else)%(if:equals=refs/remotes)%(refname:rstrip=-2)%(then)%(color:red)%(end)%(end)%(HEAD) %(if:equals=refs/remotes)%(refname:rstrip=-2)%(then)remotes/%(refname:short)%(else)%(refname:short)%(end)%(color:reset)%09%(refname:short)%09%(refname)%(end)'
+  local -a scope=(-a)
+  local -a git_branch_args=()
+
+  [[ $mode == local ]] && scope=()
+  __fzfgit-parse-env "${FZFGIT_GIT_BRANCH:-}" || return
+  git_branch_args=("${__fzfgit_parsed_args[@]}")
+
+  git branch "${scope[@]}" --color=always --omit-empty --sort=refname \
+    "--format=$branch_format" "${git_branch_args[@]}"
+}
+
+# The current fgb mode is tracked through the prompt (FZF_PROMPT)
+__git-branches-mode () {
+  if [[ ${FZF_PROMPT:-} == Local* ]]; then echo local; else echo all; fi
+}
+
+__git-branches-reload-action () {
+  printf 'reload:bash %q --branches %s' "$SCRIPT_PATH" "$1"
+}
+
+# Prints the fzf actions for the remote branches toggle
+__git-branches-toggle () {
+  if [[ $(__git-branches-mode) == local ]]; then
+    printf 'change-footer()+change-prompt(Branches> )+%s' "$(__git-branches-reload-action all)"
+  else
+    printf 'change-footer()+change-prompt(Local branches> )+%s' "$(__git-branches-reload-action local)"
+  fi
+}
+
+__fzfgit-list-join () {
+  local joined
+  joined=$(printf '%s, ' "$@")
+  printf '%s' "${joined%, }"
+}
+
+# Force deletes the given local branches (full refnames) and prints the fzf
+# actions to report the result. Refuses when the working tree is dirty.
+__git-branches-delete () {
+  local ref branch current message=''
+  local -a deleted=() skipped=() failed=()
+
+  if [[ -n $(git status --porcelain --untracked-files=no 2>/dev/null) ]]; then
+    printf 'bell+change-footer~Working tree is dirty, refusing to delete branches~'
+    return
+  fi
+
+  current=$(git symbolic-ref --quiet --short HEAD 2>/dev/null)
+  for ref in "$@"; do
+    if [[ $ref != refs/heads/* ]]; then
+      skipped+=("${ref#refs/remotes/} (remote)")
+      continue
+    fi
+    branch="${ref#refs/heads/}"
+    if [[ $branch == "$current" ]]; then
+      skipped+=("$branch (current)")
+    elif git branch -D "$branch" >/dev/null 2>&1; then
+      deleted+=("$branch")
+    else
+      failed+=("$branch")
+    fi
+  done
+
+  (( ${#deleted[@]} )) && message+="Deleted: $(__fzfgit-list-join "${deleted[@]}")  "
+  (( ${#failed[@]} )) && message+="Failed: $(__fzfgit-list-join "${failed[@]}")  "
+  (( ${#skipped[@]} )) && message+="Skipped: $(__fzfgit-list-join "${skipped[@]}")"
+  message="${message//\~/}"
+
+  (( ${#deleted[@]} )) || printf 'bell+'
+  printf 'change-footer~%s~' "${message%  }"
+  (( ${#deleted[@]} )) && printf '+%s' "$(__git-branches-reload-action "$(__git-branches-mode)")"
+  return 0
+}
+
 case "${1:-}" in
   --refs)
     shift
@@ -194,6 +271,17 @@ case "${1:-}" in
   --files)
     shift
     __git-files "$@"
+    ;;
+  --branches)
+    shift
+    __git-branches "$@"
+    ;;
+  --branches-toggle)
+    __git-branches-toggle
+    ;;
+  --branches-delete)
+    shift
+    __git-branches-delete "$@"
     ;;
 esac
 
@@ -300,25 +388,26 @@ fgf () {
 
 fgb () {
   is_in_git_repo || return
-  local branch_format='%(if)%(symref)%(then)%(else)%(if)%(HEAD)%(then)%(color:green)%(else)%(if:equals=refs/remotes)%(refname:rstrip=-2)%(then)%(color:red)%(end)%(end)%(HEAD) %(if:equals=refs/remotes)%(refname:rstrip=-2)%(then)remotes/%(refname:short)%(else)%(refname:short)%(end)%(color:reset)%09%(refname:short)%(end)'
-  local git_log_options
-  local -a git_branch_args=()
+  local git_log_options FZFGIT_HELP
   local -a git_log_args=()
 
+  # Validate early so a bad value aborts before opening fzf
   __fzfgit-parse-env "${FZFGIT_GIT_BRANCH:-}" || return
-  git_branch_args=("${__fzfgit_parsed_args[@]}")
   __fzfgit-parse-env "${FZFGIT_GIT_LOG:-}" || return
   git_log_args=("${__fzfgit_parsed_args[@]}")
   git_log_options=$(__fzfgit-shell-join "${git_log_args[@]}")
+  FZFGIT_HELP=$'    ctrl-r: Toggle remote branches\n    ctrl-x: Delete selected local branches (git branch -D, clean worktree only)'
 
-  git branch -a --color=always --omit-empty --sort=refname \
-    "--format=$branch_format" "${git_branch_args[@]}" |
+  __git-branches all |
   fzf-down --ansi --tac \
     --delimiter=$'\t' \
     --with-nth 1 \
     --accept-nth 2 \
     --preview-window 'right,70%,wrap-word' \
     --prompt 'Branches> ' \
+    --header 'CTRL-R: Toggle remotes | CTRL-X: Delete branch' \
+    --bind "ctrl-r:transform:bash \"$SCRIPT_PATH\" --branches-toggle" \
+    --bind "ctrl-x:transform:bash \"$SCRIPT_PATH\" --branches-delete {+3}" \
     "--history=$FZF_HIST_DIR/fzf-git_branch" \
     --preview "
       git log --oneline --graph --date=short --color=always --pretty='format:%C(auto)%cd %h%d %s'$git_log_options {2}" \
