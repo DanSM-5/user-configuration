@@ -221,6 +221,12 @@ function __fzfgit_help_command ([string[]]$FunctionBindings = @()) {
   return "Write-Output '$help_text'$help_cat_cmd"
 }
 
+# Returns an fzf action that copies the given field of the selected items
+# (or the focused one when nothing is selected) into the clipboard.
+function __fzfgit_copy_action ([string]$field = '') {
+  return "execute-silent(Get-Content {+f$field} | Set-Clipboard)+bell"
+}
+
 function get_fzf_down_options([string[]]$FunctionBindings = @()) {
   $help_cmd = __fzfgit_help_command $FunctionBindings
   $options = @(
@@ -264,7 +270,8 @@ function fgf () {
   }
   [string[]]$help_bindings = @(
     'ctrl-f: Show all repository files',
-    'ctrl-r: Show changed files'
+    'ctrl-r: Show changed files',
+    'ctrl-y: Copy selected file paths'
   )
   if ($repo_prefix) {
     $help_bindings += 'ctrl-d: Show files in the current directory'
@@ -281,6 +288,7 @@ function fgf () {
     '--with-nth', '1',
     '--accept-nth', '2',
     '--header', $header,
+    '--bind', "ctrl-y:$(__fzfgit_copy_action 2)",
     '--with-shell', 'pwsh -NoLogo -NoProfile -NonInteractive -Command',
     '--bind', "ctrl-f:change-prompt(All Files> )+change-border-label()+reload:$reload_files all",
     '--bind', "ctrl-r:change-prompt(Files> )+change-border-label()+reload:$reload_files status",
@@ -382,12 +390,14 @@ function fgb () {
   $preview = "git log --oneline --graph --date=short --color=always '--pretty=format:%C(auto)%cd%x20%h%d%x20%s'$git_log_options {2}"
   [string[]]$help_bindings = @(
     'ctrl-r: Toggle remote branches',
-    'ctrl-x: Delete selected local branches (git branch -D, clean worktree only)'
+    'ctrl-x: Delete selected local branches (git branch -D, clean worktree only)',
+    'ctrl-y: Copy selected branch names'
   )
   $down_options = get_fzf_down_options -FunctionBindings $help_bindings
   $cmd_options = @(
     '--prompt', 'Branches> ',
-    '--header', 'CTRL-R: Toggle remotes | CTRL-X: Delete branch',
+    '--header', 'CTRL-R: Remotes | CTRL-X: Delete | CTRL-Y: Copy',
+    '--bind', "ctrl-y:$(__fzfgit_copy_action 2)",
     '--bind', "ctrl-r:transform:$import_module; __git_branches_toggle",
     '--bind', "ctrl-x:transform:$import_module; __git_branches_delete {+3}",
     "--history=$env:FZF_HIST_DIR/fzf-git_branch",
@@ -414,9 +424,10 @@ function fgt () {
   [string[]]$git_show_args = @(__fzfgit_env_args $env:FZFGIT_GIT_SHOW)
   $git_show_options = __fzfgit_pwsh_join $git_show_args
   $preview = "git show --color=always$git_show_options {} | $($script:__pager__)bat -p --color=always"
-  $down_options = get_fzf_down_options
+  $down_options = get_fzf_down_options -FunctionBindings @('ctrl-y: Copy selected tag names')
   $cmd_options = @(
     '--prompt', 'Tags> ',
+    '--bind', "ctrl-y:$(__fzfgit_copy_action)",
     "--history=$env:FZF_HIST_DIR/fzf-git_tag",
     '--preview-window', 'right,70%,wrap-word',
     '--with-shell', 'pwsh -NoLogo -NoProfile -NonInteractive -Command',
@@ -436,9 +447,10 @@ function fgh () {
   [string[]]$git_show_args = @(__fzfgit_env_args $env:FZFGIT_GIT_SHOW)
   $git_show_options = __fzfgit_pwsh_join $git_show_args
   $preview = "git show --color=always$git_show_options {2} | $($script:__pager__)bat -p --color=always"
-  $down_options = get_fzf_down_options
+  $down_options = get_fzf_down_options -FunctionBindings @('ctrl-y: Copy selected commit hashes')
   $cmd_options = @(
     '--prompt', 'Hashes> ',
+    '--bind', "ctrl-y:$(__fzfgit_copy_action 2)",
     "--history=$env:FZF_HIST_DIR/fzf-git_hash",
     '--ansi',
     '--no-sort',
@@ -463,9 +475,10 @@ function fgha () {
   [string[]]$git_show_args = @(__fzfgit_env_args $env:FZFGIT_GIT_SHOW)
   $git_show_options = __fzfgit_pwsh_join $git_show_args
   $preview = "git show --color=always$git_show_options {2} | $($script:__pager__)bat -p --color=always"
-  $down_options = get_fzf_down_options
+  $down_options = get_fzf_down_options -FunctionBindings @('ctrl-y: Copy selected commit hashes')
   $cmd_options = @(
     '--prompt', 'All Hashes> ',
+    '--bind', "ctrl-y:$(__fzfgit_copy_action 2)",
     "--history=$env:FZF_HIST_DIR/fzf-git_hash-all",
     '--ansi',
     '--no-sort',
@@ -490,9 +503,10 @@ function fgr () {
   [string[]]$git_log_args = @(__fzfgit_env_args $env:FZFGIT_GIT_LOG)
   $git_log_options = __fzfgit_pwsh_join $git_log_args
   $preview = "git log --color=always --oneline --graph --date=short '--pretty=format:%C(auto)%cd%x20%h%d%x20%s'$git_log_options {1}"
-  $down_options = get_fzf_down_options
+  $down_options = get_fzf_down_options -FunctionBindings @('ctrl-y: Copy selected remote names')
   $cmd_options = @(
     '--prompt', 'Remotes> ',
+    '--bind', "ctrl-y:$(__fzfgit_copy_action 1)",
     "--history=$env:FZF_HIST_DIR/fzf-git_remotes",
     '--tac',
     '--accept-nth', '1',
@@ -515,9 +529,10 @@ function fgs () {
   [string[]]$git_show_args = @(__fzfgit_env_args $env:FZFGIT_GIT_SHOW)
   $git_show_options = __fzfgit_pwsh_join $git_show_args
   $preview = "git show --color=always$git_show_options {1} | $($script:__pager__)bat -p --color=always"
-  $down_options = get_fzf_down_options
+  $down_options = get_fzf_down_options -FunctionBindings @('ctrl-y: Copy selected stash refs')
   $cmd_options = @(
     '--prompt', 'Stashes> ',
+    '--bind', "ctrl-y:$(__fzfgit_copy_action 1)",
     "--history=$env:FZF_HIST_DIR/fzf-git_stash",
     '--reverse',
     '--delimiter', ':',
@@ -589,8 +604,7 @@ function fshow () {
   $show_action = "`$shas = @(Write-Output {+2} | Where-Object { `$_ }); if (`$shas) { git show --color=always$git_show_options `$shas | $pager }"
   $diff_action = "`$shas = @(Write-Output {+2} | Where-Object { `$_ }); if (`$shas) { git diff --color=always$git_diff_options `$shas | $pager }"
 
-  # Clipboard command
-  $copy = 'Get-Content {+f2} | Set-Clipboard'
+  $copy_action = __fzfgit_copy_action 2
 
   $git_base_cmd = "git log --graph --color=always --format='%C(auto)%h%d %s %C(black)%C(bold)%cr%C(reset)%x09%h'"
   $git_current_cmd = "$git_base_cmd$git_log_options"
@@ -610,7 +624,7 @@ function fshow () {
     '--reverse',
     '--delimiter', "`t",
     '--with-nth', '1',
-    '--bind', "ctrl-y:execute-silent($copy)+bell",
+    '--bind', "ctrl-y:$copy_action",
     '--header', 'ctrl-d: Diff | ctrl-a: All | ctrl-f: HEAD | ctrl-y: Copy',
     '--with-shell', 'pwsh -NoLogo -NonInteractive -NoProfile -Command',
     '--bind', "ctrl-f:reload:$git_current_cmd",
@@ -633,12 +647,14 @@ function fgl () {
   [string[]]$git_show_args = @(__fzfgit_env_args $env:FZFGIT_GIT_SHOW)
   $git_show_options = __fzfgit_pwsh_join $git_show_args
   $down_options = get_fzf_down_options -FunctionBindings @(
-    'alt-r: Toggle raw reflog display'
+    'alt-r: Toggle raw reflog display',
+    'ctrl-y: Copy selected reflog entries'
   )
   $cmd_options = @(
     '--ansi',
     '--prompt', 'Reflogs> ',
     '--bind', 'alt-r:toggle-raw',
+    '--bind', "ctrl-y:$(__fzfgit_copy_action 1)",
     '--with-shell', 'pwsh -NoLogo -NoProfile -NonInteractive -Command',
     '--preview', "git show --color=always$git_show_options {1} | delta",
     '--accept-nth', '1'
@@ -666,11 +682,13 @@ git log --oneline --graph --date=short --color=always '--pretty=format:%C(auto)%
 "@
   $down_options = get_fzf_down_options -FunctionBindings @(
     'ctrl-x: Remove selected worktree',
-    'alt-t: Toggle displayed columns'
+    'alt-t: Toggle displayed columns',
+    'ctrl-y: Copy selected worktree paths'
   )
   $cmd_options = @(
     '--prompt', 'Worktrees> ',
     '--header', 'CTRL-X (remove worktree) | ALT-T ',
+    '--bind', "ctrl-y:$(__fzfgit_copy_action 1)",
     '--with-shell', 'pwsh -NoLogo -NoProfile -NonInteractive -Command',
     '--bind', "ctrl-x:reload(git worktree remove {1} > `$null; git worktree list$git_worktree_options)",
     '--preview', $preview,
@@ -712,7 +730,8 @@ __git_refs @args
   $down_options = get_fzf_down_options -FunctionBindings @(
     'ctrl-o: Open selected ref in browser',
     'ctrl-f: Show every ref',
-    'ctrl-r: Hide remote branches'
+    'ctrl-r: Hide remote branches',
+    'ctrl-y: Copy selected ref names'
   )
   $cmd_options = @(
     '--ansi',
@@ -728,6 +747,7 @@ __git_refs @args
     '--with-shell', 'pwsh -NoLogo -NoProfile -NonInteractive -Command',
     '--bind', 'ctrl-/:change-preview-window(down,70%|hidden|)',
     '--bind', 'ctrl-o:execute-silent(git-resolve-ref.ps1 --open {1} {2})',
+    '--bind', "ctrl-y:$(__fzfgit_copy_action 2)",
     '--bind', "ctrl-f:change-prompt(Every ref> )+reload:$reload_refs",
     '--bind', "ctrl-r:change-prompt(Each ref> )+reload:$reload_refs '--exclude=refs/remotes'",
     '--preview', $preview,

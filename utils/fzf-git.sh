@@ -308,6 +308,38 @@ __fzfgit-help-command () {
   printf '%s <<< %s' "$help_cat_cmd" "$quoted_help"
 }
 
+# Prints an fzf command that copies the given field of the selected items
+# (or the focused one when nothing is selected) into the clipboard.
+# Trailing newlines are stripped so a single item can be pasted safely.
+__fzfgit-copy-command () {
+  local field="${1:-}"
+  local clipboard=''
+
+  if [ "${OS:-}" = 'Windows_NT' ] || [ -n "${WSL_DISTRO_NAME:-}" ] || [ -n "${WSL_INTEROP:-}" ]; then
+    # Git Bash / MSYS / WSL
+    if command -v win32yank.exe &>/dev/null; then
+      clipboard='win32yank.exe -i'
+    elif command -v clip.exe &>/dev/null; then
+      clipboard='clip.exe'
+    fi
+  elif [[ ${OSTYPE:-} == darwin* ]]; then
+    command -v pbcopy &>/dev/null && clipboard='pbcopy'
+  elif [ -n "${WAYLAND_DISPLAY:-}" ] && command -v wl-copy &>/dev/null; then
+    clipboard='wl-copy --type text/plain'
+  elif [ -n "${DISPLAY:-}" ] && command -v xsel &>/dev/null; then
+    clipboard='xsel -i -b'
+  elif [ -n "${DISPLAY:-}" ] && command -v xclip &>/dev/null; then
+    clipboard='xclip -i -selection clipboard'
+  fi
+
+  if [ -z "$clipboard" ]; then
+    printf '%s' 'bell+change-footer(No clipboard utility found)'
+    return
+  fi
+
+  printf 'execute-silent(printf %%s "$(cat {+f%s})" | %s)+bell' "$field" "$clipboard"
+}
+
 fzf-down () {
   local help_cmd
   help_cmd=$(__fzfgit-help-command "${FZFGIT_HELP:-}")
@@ -355,7 +387,7 @@ fgf () {
 
   repo_prefix=$(git rev-parse --show-prefix) || return
   header='CTRL-F: All repository files | CTRL-R: Changed files'
-  FZFGIT_HELP=$'    ctrl-f: Show all repository files\n    ctrl-r: Show changed files'
+  FZFGIT_HELP=$'    ctrl-f: Show all repository files\n    ctrl-r: Show changed files\n    ctrl-y: Copy selected file paths'
   if [[ -n $repo_prefix ]]; then
     header+=' | CTRL-D: Current directory files'
     FZFGIT_HELP+=$'\n    ctrl-d: Show files in the current directory'
@@ -373,6 +405,7 @@ fgf () {
     --preview-window '60%,wrap-word' \
     --prompt 'Files> ' \
     --header "$header" \
+    --bind "ctrl-y:$(__fzfgit-copy-command 2)" \
     --bind "ctrl-f:change-prompt(All Files> )+change-border-label()+reload:$reload_all" \
     --bind "ctrl-r:change-prompt(Files> )+change-border-label()+reload:$reload_base" \
     "${directory_options[@]}" \
@@ -388,15 +421,17 @@ fgf () {
 
 fgb () {
   is_in_git_repo || return
-  local git_log_options FZFGIT_HELP
+  local git_log_options copy_action FZFGIT_HELP
   local -a git_log_args=()
+
+  copy_action=$(__fzfgit-copy-command 2)
 
   # Validate early so a bad value aborts before opening fzf
   __fzfgit-parse-env "${FZFGIT_GIT_BRANCH:-}" || return
   __fzfgit-parse-env "${FZFGIT_GIT_LOG:-}" || return
   git_log_args=("${__fzfgit_parsed_args[@]}")
   git_log_options=$(__fzfgit-shell-join "${git_log_args[@]}")
-  FZFGIT_HELP=$'    ctrl-r: Toggle remote branches\n    ctrl-x: Delete selected local branches (git branch -D, clean worktree only)'
+  FZFGIT_HELP=$'    ctrl-r: Toggle remote branches\n    ctrl-x: Delete selected local branches (git branch -D, clean worktree only)\n    ctrl-y: Copy selected branch names'
 
   __git-branches all |
   fzf-down --ansi --tac \
@@ -405,7 +440,8 @@ fgb () {
     --accept-nth 2 \
     --preview-window 'right,70%,wrap-word' \
     --prompt 'Branches> ' \
-    --header 'CTRL-R: Toggle remotes | CTRL-X: Delete branch' \
+    --header 'CTRL-R: Remotes | CTRL-X: Delete | CTRL-Y: Copy' \
+    --bind "ctrl-y:$copy_action" \
     --bind "ctrl-r:transform:bash \"$SCRIPT_PATH\" --branches-toggle" \
     --bind "ctrl-x:transform:bash \"$SCRIPT_PATH\" --branches-delete {+3}" \
     "--history=$FZF_HIST_DIR/fzf-git_branch" \
@@ -416,7 +452,7 @@ fgb () {
 
 fgt () {
   is_in_git_repo || return
-  local git_show_options
+  local git_show_options FZFGIT_HELP
   local -a git_tag_args=()
   local -a git_show_args=()
 
@@ -426,9 +462,12 @@ fgt () {
   git_show_args=("${__fzfgit_parsed_args[@]}")
   git_show_options=$(__fzfgit-shell-join "${git_show_args[@]}")
 
+  FZFGIT_HELP=$'    ctrl-y: Copy selected tag names'
+
   git tag --sort -version:refname "${git_tag_args[@]}" |
   fzf-down --preview-window 'right,70%,wrap-word' \
     --prompt 'Tags> ' \
+    --bind "ctrl-y:$(__fzfgit-copy-command)" \
     --preview "
       git show --color=always$git_show_options {}$__page_command__ |
       bat --color=always" \
@@ -438,7 +477,7 @@ fgt () {
 
 fgh () {
   is_in_git_repo || return
-  local git_show_options
+  local git_show_options FZFGIT_HELP
   local -a git_log_args=()
   local -a git_show_args=()
 
@@ -447,6 +486,8 @@ fgh () {
   __fzfgit-parse-env "${FZFGIT_GIT_SHOW:-}" || return
   git_show_args=("${__fzfgit_parsed_args[@]}")
   git_show_options=$(__fzfgit-shell-join "${git_show_args[@]}")
+
+  FZFGIT_HELP=$'    ctrl-y: Copy selected commit hashes'
 
   git log --date=short \
     --format="%C(green)%C(bold)%cd %C(auto)%h%d %s (%an)%C(reset)%x09%h" \
@@ -457,6 +498,7 @@ fgh () {
     --accept-nth 2 \
     --prompt 'Hashes> ' \
     "--history=$FZF_HIST_DIR/fzf-git_hash" \
+    --bind "ctrl-y:$(__fzfgit-copy-command 2)" \
     --header 'Press CTRL-S to toggle sort' \
     --preview "
       git show --color=always$git_show_options {2}$__page_command__ |
@@ -466,7 +508,7 @@ fgh () {
 
 fgha () {
   is_in_git_repo || return
-  local git_show_options
+  local git_show_options FZFGIT_HELP
   local -a git_log_args=()
   local -a git_show_args=()
 
@@ -475,6 +517,8 @@ fgha () {
   __fzfgit-parse-env "${FZFGIT_GIT_SHOW:-}" || return
   git_show_args=("${__fzfgit_parsed_args[@]}")
   git_show_options=$(__fzfgit-shell-join "${git_show_args[@]}")
+
+  FZFGIT_HELP=$'    ctrl-y: Copy selected commit hashes'
 
   git log --all --date=short \
     --format="%C(green)%C(bold)%cd %C(auto)%h%d %s (%an)%C(reset)%x09%h" \
@@ -485,6 +529,7 @@ fgha () {
     --accept-nth 2 \
     --prompt 'All Hashes> ' \
     "--history=$FZF_HIST_DIR/fzf-git_hash-all" \
+    --bind "ctrl-y:$(__fzfgit-copy-command 2)" \
     --header 'Press CTRL-S to toggle sort' \
     --preview "
       git show --color=always$git_show_options {2}$__page_command__ |
@@ -494,7 +539,7 @@ fgha () {
 
 fgr () {
   is_in_git_repo || return
-  local git_log_options
+  local git_log_options FZFGIT_HELP
   local -a git_remote_args=()
   local -a git_log_args=()
 
@@ -504,11 +549,14 @@ fgr () {
   git_log_args=("${__fzfgit_parsed_args[@]}")
   git_log_options=$(__fzfgit-shell-join "${git_log_args[@]}")
 
+  FZFGIT_HELP=$'    ctrl-y: Copy selected remote names'
+
   git remote -v "${git_remote_args[@]}" | awk '{print $1 "\t" $2}' | uniq |
   fzf-down --tac \
     --delimiter=$'\t' \
     --accept-nth 1 \
     --prompt 'Remotes> ' \
+    --bind "ctrl-y:$(__fzfgit-copy-command 1)" \
     "--history=$FZF_HIST_DIR/fzf-git_remote" \
     --preview "
       git log --color=always --oneline --graph --date=short --pretty='format:%C(auto)%cd %h%d %s'$git_log_options {1}" \
@@ -517,7 +565,7 @@ fgr () {
 
 fgs () {
   is_in_git_repo || return
-  local git_show_options
+  local git_show_options FZFGIT_HELP
   local -a git_stash_args=()
   local -a git_show_args=()
 
@@ -527,9 +575,12 @@ fgs () {
   git_show_args=("${__fzfgit_parsed_args[@]}")
   git_show_options=$(__fzfgit-shell-join "${git_show_args[@]}")
 
+  FZFGIT_HELP=$'    ctrl-y: Copy selected stash refs'
+
   git stash list "${git_stash_args[@]}" |
     fzf-down --reverse -d: \
       --prompt 'Stashes> ' \
+      --bind "ctrl-y:$(__fzfgit-copy-command 1)" \
       "--history=$FZF_HIST_DIR/fzf-git_stash" \
       --preview "
         git show --color=always$git_show_options {1}$__page_command__ |
@@ -609,23 +660,8 @@ fshow () {
   local git_all_cmd="$git_base_cmd --all$git_log_options"
   FZFGIT_HELP=$'    enter: Show selected commit patches\n    ctrl-d: Diff selected commits\n    ctrl-a: Show commits from all refs\n    ctrl-f: Show commits from HEAD\n    ctrl-y: Copy selected commit hashes'
 
-  # Find clipboard utility
-  local copy='true'
-  # NOTE: Will probably will never run on windows but
-  # better safe than sorry
-  if [ "$OS" = 'Windows_NT' ]; then
-    # Gitbash
-    copy="cat {+f2} | pbcopy.exe"
-  elif [ "$OSTYPE" = 'darwin' ] || command -v 'pbcopy' &>/dev/null; then
-    copy="cat {+f2} | pbcopy"
-  # Assume linux if above didn't match
-  elif [ -n "$WAYLAND_DISPLAY" ] && command -v 'wl-copy' &>/dev/null; then
-    copy="cat {+f2} | wl-copy --foreground --type text/plain"
-  elif [ -n "$DISPLAY" ] && command -v 'xsel' &>/dev/null; then
-    copy="cat {+f2} | xsel -i -b"
-  elif [ -n "$DISPLAY" ] && command -v 'xclip' &>/dev/null; then
-    copy="cat {+f2} | xclip -i -selection clipboard"
-  fi
+  local copy_action
+  copy_action=$(__fzfgit-copy-command 2)
 
   fzf-down --ansi --no-sort --reverse \
     --delimiter=$'\t' \
@@ -637,7 +673,7 @@ fshow () {
     --bind "ctrl-a:reload:$git_all_cmd" \
     --bind "enter:execute:$show_action" \
     --bind "ctrl-d:execute:$diff_action" \
-    --bind "ctrl-y:execute-silent($copy)+bell" \
+    --bind "ctrl-y:$copy_action" \
     --header 'ctrl-d: Diff | ctrl-a: All | ctrl-f: HEAD | ctrl-y: Copy' \
     --prompt 'Commits> ' \
     "--history=$FZF_HIST_DIR/fzf-git_show" \
@@ -654,7 +690,7 @@ fgl () {
   __fzfgit-parse-env "${FZFGIT_GIT_SHOW:-}" || return
   git_show_args=("${__fzfgit_parsed_args[@]}")
   git_show_options=$(__fzfgit-shell-join "${git_show_args[@]}")
-  FZFGIT_HELP=$'    alt-r: Toggle raw reflog display'
+  FZFGIT_HELP=$'    alt-r: Toggle raw reflog display\n    ctrl-y: Copy selected reflog entries'
 
   git reflog --color=always \
     --format="%C(blue)%gD %C(yellow)%h%C(auto)%d %gs" \
@@ -662,6 +698,7 @@ fgl () {
   fzf-down --ansi \
     --prompt 'Reflogs> ' \
     --bind 'alt-r:toggle-raw' \
+    --bind "ctrl-y:$(__fzfgit-copy-command 1)" \
     --preview "git show --color=always$git_show_options {1} | delta" \
     --accept-nth '1' "$@"
 }
@@ -681,13 +718,14 @@ fgw () {
   __fzfgit-parse-env "${FZFGIT_GIT_LOG:-}" || return
   git_log_args=("${__fzfgit_parsed_args[@]}")
   git_log_options=$(__fzfgit-shell-join "${git_log_args[@]}")
-  FZFGIT_HELP=$'    ctrl-x: Remove selected worktree\n    alt-t: Toggle displayed columns'
+  FZFGIT_HELP=$'    ctrl-x: Remove selected worktree\n    alt-t: Toggle displayed columns\n    ctrl-y: Copy selected worktree paths'
 
   # --border-label '🌴 Worktrees ' \
   git worktree list "${git_worktree_args[@]}" |
     fzf-down \
     --prompt 'Worktrees> ' \
     --header 'CTRL-X (remove worktree) | ALT-T ' \
+    --bind "ctrl-y:$(__fzfgit-copy-command 1)" \
     --bind "ctrl-x:reload(git worktree remove {1} > /dev/null; git worktree list$git_worktree_options)" \
     --preview "
       git -c color.status=always -C {1} status --short --branch$git_status_options
@@ -706,7 +744,7 @@ fge () {
   __fzfgit-parse-env "${FZFGIT_GIT_LOG:-}" || return
   git_log_args=("${__fzfgit_parsed_args[@]}")
   git_log_options=$(__fzfgit-shell-join "${git_log_args[@]}")
-  FZFGIT_HELP=$'    ctrl-o: Open selected ref in browser\n    ctrl-f: Show every ref\n    ctrl-r: Hide remote branches'
+  FZFGIT_HELP=$'    ctrl-o: Open selected ref in browser\n    ctrl-f: Show every ref\n    ctrl-r: Hide remote branches\n    ctrl-y: Copy selected ref names'
 
   __git-refs --exclude=refs/remotes |
     fzf-down \
@@ -722,6 +760,7 @@ fge () {
       --no-hscroll \
       --bind 'ctrl-/:change-preview-window(down,70%|hidden|)' \
       --bind 'ctrl-o:execute-silent(git-resolve-ref --open {1} {2})' \
+      --bind "ctrl-y:$(__fzfgit-copy-command 2)" \
       --bind "ctrl-f:change-prompt(Every ref> )+reload:bash \"$SCRIPT_PATH\" --refs" \
       --bind "ctrl-r:change-prompt(Each ref> )+reload:bash \"$SCRIPT_PATH\" --refs --exclude=refs/remotes" \
       --preview "git log --oneline --graph --date=short --color=always --pretty='format:%C(auto)%cd %h%d %s'$git_log_options {2} --" \
