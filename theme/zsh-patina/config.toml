@@ -1,0 +1,5 @@
+# zsh-patina config (loaded via $ZSH_PATINA_CONFIG_PATH, set in .zsh_conf)
+# After editing this file or the theme run: zsh-patina restart
+
+[highlighting]
+theme = "file:$user_conf_path/theme/zsh-patina/clean.toml"

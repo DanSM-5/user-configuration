@@ -1,0 +1,98 @@
+# "clean" theme for zsh-patina
+# Port of ../clean.ini (fast-syntax-highlighting).
+# Colors: integers = 256-color codes, names = terminal ANSI colors.
+# A more specific scope fully replaces a less specific one (no inheritance).
+# Anything not listed falls back to the terminal default (like `none` in FSH).
+# List all scopes:  zsh-patina list-scopes
+# Inspect a line:   echo 'ls -la ~' | zsh-patina tokenize
+
+# [base] comment = 102
+"comment" = 102
+
+# [base] exec-descriptor = yellow,bold   (e.g. the `2` in `2>&1`)
+"constant.numeric.integer.decimal.file-descriptor" = { foreground = "yellow", bold = true }
+
+# [base] here-string-tri = yellow   (`<<<`)
+"keyword.operator.herestring" = "yellow"
+
+# [base] commandseparator/redirection = none  -> keep terminal default
+"keyword.operator.logical" = {}
+"keyword.operator.assignment.redirection" = {}
+"punctuation.separator" = {}
+
+# [command-point] reserved-word = 146   (if/then/for/do/done/case/...)
+"keyword.control" = 146
+# case items `(` `)`  -> [case] case-parentheses = 116
+"keyword.control.case.item" = 116
+
+# [command-point] command/builtin/function/alias/precommand = 109
+"variable.function" = 109
+"keyword.builtin" = 109          # command, builtin, exec, noglob, -
+"support.function.alias" = 109
+"support.function.let" = 109
+
+# [command-point] single-sq-bracket / double-sq-bracket = 109   ([ ] / [[ ]])
+"support.function.test" = 109
+"support.function.double-brace" = 109
+
+# [command-point] double-paren = 146   (`((` `))`)
+"punctuation.section.arithmetic" = 146
+
+# [arguments] single/double-hyphen-option = 185
+"variable.parameter" = 185
+"punctuation.definition.parameter" = 185
+
+# [arguments] single/double/dollar-quoted-argument = 147
+"string" = 147
+# `$(...)` is tokenized as an unquoted string; reset it (back-quoted = none)
+"meta.group.expansion.command" = {}
+
+# [in-string] back-dollar-quoted-argument = 185   (`\t` in $'...')
+"constant.character.escape" = 185
+
+# [other] variable = 113
+"variable.other" = 113
+"punctuation.definition.variable" = 113
+"punctuation.section.expansion.parameter" = 113
+# [in-string] back-or-dollar-double-quoted-argument = 185   ($var inside "...")
+"string variable.other" = 185
+"string punctuation.definition.variable" = 185
+"string punctuation.section.expansion.parameter" = 185
+
+# [other] assign = none
+"variable.other.readwrite.assignment" = {}
+"keyword.operator.assignment" = {}
+# [other] assign-array-bracket = 109   (`arr=( ... )`)
+"punctuation.section.parens" = 109
+
+# [other] history-expansion = blue,bold   (`!!`, `!$`)
+"meta.group.expansion.history" = { foreground = "blue", bold = true }
+
+# [math] mathvar = blue,bold, mathnum = 208   (inside (( ... )))
+"meta.group.arithmetic variable" = { foreground = "blue", bold = true }
+"constant.numeric" = 208
+# [for-loop] foroper = 147, forsep = 109
+"meta.group.arithmetic keyword.operator" = 147
+"meta.group.arithmetic keyword.operator.logical" = 147
+"meta.group.arithmetic punctuation.separator" = 109
+
+# [paths] globbing = 220   (`*`, `**`, `?`)
+"keyword.operator.regexp" = 220
+
+# [brackets] bracket-level-1 = 115   (no nesting levels in zsh-patina)
+"punctuation.section.braces" = 115
+"punctuation.section.group" = 115
+"punctuation.section.expansion.brace" = 115
+"punctuation.section.brackets" = 115
+
+# [paths] path = 208 ; ~ is part of a path in FSH
+"variable.language.tilde" = 208
+
+# ---- dynamic (resolved at runtime on your shell) ----
+# [command-point] alias/builtin/function/command = 109
+"dynamic.callable" = { foreground = 109 }
+# [base] unknown-token = red,bold
+"dynamic.callable.missing" = { foreground = "red", bold = true }
+# [paths] path = 208, path-to-dir = 208,underline
+"dynamic.path.file" = { foreground = 208 }
+"dynamic.path.directory" = { foreground = 208, underline = true }
