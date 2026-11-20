@@ -302,6 +302,7 @@ if [ -f "$user_config_cache/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh"
   export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#b3e5ff"
 fi
 
+# Must be the last block of this file
 if whence -p zsh-patina &> /dev/null; then
   # Config + "clean" theme (port of theme/clean.ini) live in this repo
   export ZSH_PATINA_CONFIG_PATH="$user_conf_path/theme/zsh-patina/config.toml"
@@ -310,16 +311,13 @@ elif whence -p "$HOME/.nix-profile/bin/zsh-patina" &> /dev/null; then
   # Config + "clean" theme (port of theme/clean.ini) live in this repo
   export ZSH_PATINA_CONFIG_PATH="$user_conf_path/theme/zsh-patina/config.toml"
   eval "$("$HOME/.nix-profile/bin/zsh-patina" activate)"
+elif [ -f "$user_config_cache/plugins/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh" ]; then
+  # fast-theme -t <THEME> # to test a theme
+  # fast-theme -l         # to list available themes
+  source "$user_config_cache/plugins/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh"
+elif [ -f "$user_config_cache/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]; then
+  source "$user_config_cache/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 fi
-
-# # Must be the last line of this file
-# if [ -f "$user_config_cache/plugins/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh" ]; then
-#   # fast-theme -t <THEME> # to test a theme
-#   # fast-theme -l         # to list available themes
-#   source "$user_config_cache/plugins/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh"
-# elif [ -f "$user_config_cache/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]; then
-#   source "$user_config_cache/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
-# fi
 
 # if [ "$IS_GITBASH" = false ] && whence -p carapace &>/dev/null; then
 #   # ~/.zshrc
